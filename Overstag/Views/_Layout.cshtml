@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <script src="~/js/jquery-3.3.1.min.js"></script>
+    <script src="~/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /*Add to materialize css*/
+        .blue-light{background-color: #3096D3 !important;}
+        .blue-middle{background-color: #0B86CF !important;}
+        .blue-dark{background-color: #04507D !important;}
+        .blue-light-text{color: #3096D3 !important;}
+        .blue-middle-text{color: #0B86CF !important;}
+        .blue-dark-text{color: #04507D !important;}
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper blue-light">
+            <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
+            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <!--Li a href-->
+                <li id="_home"><a href="/Home">Home</a></li>
+                <li id="_reg"><a href="/Register">Aanmelden</a></li>
+            </ul>
+        </div>
+    </nav>
+    <ul class="sidenav" id="mobile-demo">
+        <li id="_mhome"><a href="/Home">Home</a></li>
+        <li id="_reg"><a href="/Register">Aanmelden</a></li>
+    </ul>
+
+    @RenderBody()
+
+    <script>
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('.slider').slider();
+        });
+    </script>
+</body>
+</html>
+
+<!--
+licht:  #3096D3
+middel: #0B86CF
+donker: #04507D-->

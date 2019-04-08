@@ -1,0 +1,119 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<body>
+    <div class="row">
+        <div class="col s12 m6 offset-m3">
+            <h4 class="blue-light-text center-align"><b>Registreren</b></h4><br />
+            <div class="card-panel" style="display: block; margin-left: auto; margin-right: auto">
+                <form>
+                    <div class="input-field">
+                        <i class="material-icons prefix">account_circle</i>
+                        <input type="text" placeholder="Gebruikersnaam" id="Username" class="validate checki"/>
+                        <label class="active" for="Username">Gebruikersnaam</label>
+                    </div>
+                    <div class="input-field">
+                        <i class="material-icons prefix">lock</i>
+                        <input type="password" placeholder="Wachtwoord" id="Password" class="validate checki"/>
+                        <label for="Password">Wachtwoord</label>
+                    </div>
+                    <div class="input-field">
+                        <input type="password" placeholder="Wachtwoord herhalen" id="Passwordrep" class="checki"/>
+                        <label for="Passwordrep">Wachtwoord herhalen</label>
+                        <span id="pwhelper" style="color: red; visibility: hidden;">Wachtwoorden komen niet overeen</span>
+                    </div>
+                    <div class="input-field">
+                        <i class="material-icons prefix">email</i>
+                        <input id="Email" type="email" class="validate checki">
+                        <label for="Email">Email</label>
+                        <span class="helper-text" data-error="Vul een geldig email adres in" data-success=""></span>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12 m6">
+                            <i class="material-icons prefix">account_circle</i>
+                            <input placeholder="Voornaam" id="first_name" type="text" class="validate checki">
+                            <label for="first_name">Voornaam</label>
+                        </div>
+                        <div class="input-field col s12 m6">
+                            <input placeholder="Achternaam" id="last_name" type="text" class="validate checki">
+                            <label for="last_name">Achternaam</label>
+                        </div>
+                    </div>
+                    <a>
+                        @Html.ActionLink("Al een account? Log hier in", "Login", "Register")
+                    </a>
+                    <div class="card-action center-align">
+                        <br />
+                        <a class="btn btn-large blue-light waves-effect" id="register">Registreren</a><br />
+                        <span id="tbhelper" style="color: red; visibility: hidden;">Vul alle velden in</span>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    $("#_reg").addClass("active");
+    $("#reg").addClass("active");
+    //Detect & check if passwords matches
+    $('#Password').change( function() {
+        if ($('#Password').val() != $('#Passwordrep').val()) {
+        $('#pwhelper').css('visibility', 'visible');  } else { $('#pwhelper').css('visibility', 'hidden');}
+    });
+    $('#Passwordrep').change( function() {
+        if ($('#Password').val() != $('#Passwordrep').val()) {
+        $('#pwhelper').css('visibility', 'visible');  } else { $('#pwhelper').css('visibility', 'hidden');}
+    });
+
+    $('#register').click(function () {
+        var isValid = true;
+        $('.checki').each(function() {
+            if ($.trim($(this).val()) == '') {
+                isValid = false;
+            }
+        });
+
+        if (isValid) {
+            postForm();
+            $('#tbhelper').css('visibility', 'hidden');
+        }
+        else {
+           $('#tbhelper').css('visibility', 'visible');
+        }
+    });
+
+    var dataa;
+
+    function postForm() {
+        $.post("Register/postRegister", { Username: $("#Username").val(), Password: $("#Password").val(), Email: $('#Email').val(), Firstname: $('#first_name').val(), Lastname: $('#last_name').val() }, function (data) {
+            console.log(data.Username);
+        });
+        /*
+        var formdata = { Username: $("#Username").val(), Password: $("#Password").val(), Email: $('#Email').val(), Firstname: $('#first_name').val(), Lastname: $('#last_name').val() };
+        $.ajax({
+            url: 'Register/postRegister',
+            data: $.getJSON(formdata),
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                var res = JSON.parse(data);
+                console.log(data);
+                console.log(res);
+                alert("ok");
+            },
+            error: function (response) {
+                alert("error!");  // error
+                console.log(response);
+            }
+        });*/
+
+
+
+
+    }
+</script>
