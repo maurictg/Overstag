@@ -17,6 +17,8 @@ namespace Overstag
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddDistributedMemoryCache(); // Adds a default in-memory implementation of IDistributedCache
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -28,7 +30,9 @@ namespace Overstag
             }
 
             //Settings
+            app.UseSession();
             app.UseStaticFiles();
+            app.UseMiddleware<Overstag.Middleware.Authentication>();
 
             app.UseMvc(routes =>
             {
