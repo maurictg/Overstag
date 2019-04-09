@@ -13135,27 +13135,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\MaurICT\\.nuget\\packages\\": {},
-    "C:\\ProgramData\\Xamarin\\NuGet\\": {},
+    "C:\\Users\\mauri\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\MaurICT\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
+      "projectUniqueName": "C:\\Users\\mauri\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
       "projectName": "Overstag",
-      "projectPath": "C:\\Users\\MaurICT\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
-      "packagesPath": "C:\\Users\\MaurICT\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\MaurICT\\Documents\\GitHub\\Overstag\\Overstag\\obj\\",
+      "projectPath": "C:\\Users\\mauri\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
+      "packagesPath": "C:\\Users\\mauri\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\mauri\\source\\repos\\Overstag\\Overstag\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "C:\\ProgramData\\Xamarin\\NuGet\\",
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\MaurICT\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        "C:\\Users\\mauri\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.2"

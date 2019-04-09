@@ -21,7 +21,6 @@ C:\Users\mauri\source\repos\Overstag\Overstag\bin\Debug\netcoreapp2.2\Overstag.V
 C:\Users\mauri\source\repos\Overstag\Overstag\bin\Debug\netcoreapp2.2\Overstag.Views.pdb
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.Views.pdb
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.csproj.CopyComplete
-C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\_Layout.g.cshtml.cs
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\_ViewStart.g.cshtml.cs
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Register\Login.g.cshtml.cs
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Register\Register.g.cshtml.cs
@@ -52,3 +51,5 @@ C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Over
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.dll
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.pdb
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.csproj.CopyComplete
+C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Partial\HomeInfo.g.cshtml.cs
+C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\_Layout.g.cshtml.cs

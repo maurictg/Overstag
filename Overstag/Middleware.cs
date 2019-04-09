@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -11,32 +8,34 @@ namespace Overstag.Middleware
     public class Authentication
     {
         private readonly RequestDelegate _next;
+        //Paths that are allowed without login token
+        private readonly string[] allowedpaths = { "/Home", "/Register", "/Admin/init" };
 
         public Authentication(RequestDelegate next)
         {
             _next = next;
         }
 
+
         public Task Invoke(HttpContext httpContext)
         {
             var path = httpContext.Request.Path;
-            if (path.HasValue && !path.Value.StartsWith("/Home") && !path.Value.StartsWith("/Register"))
+            bool allowed = false;
+            if (path.HasValue)
             {
-                if (httpContext.Session.GetString("Token") == null)
+                foreach (string p in allowedpaths) { if (path.Value.ToString().StartsWith(p)) { allowed = true; } }
+                if (!allowed)
                 {
-                    httpContext.Response.Redirect("/Home");
+                    if (httpContext.Session.GetString("Token") == null)
+                    {
+                        httpContext.Response.Redirect("/Home");
+                    }
+                    else { return _next(httpContext); }
                 }
-                else
-                {
-                    
-                }
-
+                else {return _next(httpContext); }
             }
-            else
-            {
-
-            }
-            return _next(httpContext);
+            httpContext.Response.WriteAsync("Authentication error");
+            return null;
         }
     }
 

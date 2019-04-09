@@ -11,7 +11,7 @@
 <body>
     <div class="row">
         <div class="col s12 m6 offset-m3">
-            <h4 class="blue-light-text center-align"><b>Inloggen</b></h4>
+            <h4 class="blue-light-text center-align"><b>Inloggen</b></h4><br />
             <div class="card-panel" style="display: block; margin-left: auto; margin-right: auto">
                 @using (Html.BeginForm("postLogin", "Register", FormMethod.Post, new { @class = "login-form", id="frmlogin" }))
                 {
@@ -42,9 +42,20 @@
 </body>
 <script>
     $("#_reg").addClass("active");
-    $("#reg").addClass("active");
+    $("#_mreg").addClass("active");
+
+    $('#Password').keydown(function (e) {
+        if (e.which == 13) {
+            dologin();
+        }
+    })
 
     $('#btnlogin').click(function () {
+        dologin();
+    });
+
+
+    function dologin() {
         var isValid = true;
         $('.checki').each(function () {
             if ($.trim($(this).val()) == '') {
@@ -53,16 +64,12 @@
         });
 
         if (isValid) {
-            postForm();
+            $('#frmlogin').submit();
             $('#tbhelper').css('visibility', 'hidden');
         }
         else {
             $('#tbhelper').css('visibility', 'visible');
         }
-    });
-
-    function postForm() {
-        $('#frmlogin').submit();
     }
 
 </script>
