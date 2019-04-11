@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
-
 
 namespace Overstag.Controllers
 {
@@ -21,34 +21,48 @@ namespace Overstag.Controllers
             {
                 using (var context = new AccountContext())
                 {
-                    //context.Database.EnsureCreatedAsync();
+                    //Check if user already exists
                     string testun = "";
+                    string testem = "";
                     try { testun = context.Accounts.Where(a => a.Username == account.Username).FirstOrDefault().Username; } catch { testun = ""; }
+                    try { testem = context.Accounts.Where(a => a.Email == account.Email).FirstOrDefault().Email; } catch { testem = ""; }
                     if (!string.IsNullOrEmpty(testun))
                     {
-                        ViewBag.Message = "[Err]Gebruiker bestaat al!";
+                        return Json(new { status = "error", error = "Gebruikersnaam bestaat al!", code = 0 });
+                    }
+                    else if (!string.IsNullOrEmpty(testem))
+                    {
+                        return Json(new { status = "error", error = "Emailadres is al in gebruik!", code = 1 });
                     }
                     else
                     {
-                        account.Password = Overstag.Encryption.PBKDF2.Hash(account.Password); //Create hash of password
-                        account.Token = Overstag.Encryption.SHA.S256(Encryption.Random.rString(50));
-                        context.Add(account);
-                        await context.SaveChangesAsync();
-                        ViewBag.Message = "Registratie successvol!";
+                        try
+                        {
+                            account.Password = Encryption.PBKDF2.Hash(account.Password); //Create hash of password
+                            account.Token = Encryption.SHA.S256(Encryption.Random.rString(50));
+                            context.Add(account);
+                            await context.SaveChangesAsync();
+                            return Json(new { status = "success" });
+                        }
+                        catch(Exception e)
+                        {
+                            return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nProbeer het later opnieuw.", debuginfo = e, code = 2 });
+                        }
+
                     }
                 }
 
             }
-            else { ViewBag.Message = "[Err]Model is niet geldig!"; }
-            return View("Register");
+            else { return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" }); }
         }
 
+
         [HttpPost]
-        public IActionResult postLogin(Account a)
+        public JsonResult postLogin(Account a)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Message = "[Err]Model niet geldig";
+                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
             }
             else
             {
@@ -56,20 +70,18 @@ namespace Overstag.Controllers
                 {
                     try
                     {
-                        var account = context.Accounts.Where(e => e.Username == a.Username || e.Email == a.Email).FirstOrDefault();
-                        if (Overstag.Encryption.PBKDF2.Verify(account.Password, a.Password))
+                        var account = context.Accounts.Where(e => e.Username == a.Username || e.Email == a.Username).FirstOrDefault();
+                        if (Encryption.PBKDF2.Verify(account.Password, a.Password))
                         {
                             //Login is juist, redirect naar page
                             HttpContext.Session.SetString("Token", account.Token);
-                            ViewBag.Message = "OK";
+                            return Json(new { status = "success" });
                         }
-                        else { ViewBag.Message = "[Err]Gebruikersnaam of wachtwoord is onjuist"; }
+                        else { return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" }); }
                     }
-                    catch { ViewBag.Message = "[Err]Gebruiker bestaat niet"; }
+                    catch { return Json(new { status = "error", error = "Gebruiker bestaat niet" }); }
                 }
             }
-            return View("Login");
-
         }
     }
 }

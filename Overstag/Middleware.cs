@@ -16,14 +16,14 @@ namespace Overstag.Middleware
             _next = next;
         }
 
-
         public Task Invoke(HttpContext httpContext)
         {
             var path = httpContext.Request.Path;
             bool allowed = false;
             if (path.HasValue)
             {
-                foreach (string p in allowedpaths) { if (path.Value.ToString().StartsWith(p)) { allowed = true; } }
+
+                foreach (string p in allowedpaths) { if (path.Value.ToString().ToLower().StartsWith(p.ToLower())) { allowed = true; } }
                 if (!allowed)
                 {
                     if (httpContext.Session.GetString("Token") == null)
