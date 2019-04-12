@@ -15,12 +15,24 @@
                 </li>
             </ul>
         </div>
-        <!--Hier bijvoorbeeld informatie-->
-        
+        <!--Hier informatie-->
+        <div id="part_info"></div>
+
     </body>
 
 <script>
-    //Maak knopje active
-    $("#_home").addClass("active");
-    $("#_mhome").addClass("active");
+    Home = {
+        init: function () {
+            //Maak knopje active
+            $("#_home").addClass("active");
+            $("#_mhome").addClass("active");
+            Home.loadpartial();
+        },
+
+        loadpartial: function () {
+            $('#part_info').load('/html/home_info.html');
+        }
+    }
+    //call init function
+    Home.init();
 </script>

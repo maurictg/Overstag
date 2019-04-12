@@ -23,6 +23,7 @@
                     </a>
                     <div class="card-action center-align">
                         <br />
+                        <div class="progress" id="progbar"><div class="indeterminate"></div></div>
                         <a class="btn blue-light waves-effect" id="btnlogin">Inloggen</a><br />
                         <span id="tbhelper" style="color: red; visibility: hidden;">Vul alle velden in</span>
                     </div>
@@ -37,6 +38,7 @@
         init: function () {
             $("#_reg").addClass("active");
             $("#_mreg").addClass("active");
+            $('#progbar').hide();
             Login.mapEvents();
         },
 
@@ -70,6 +72,7 @@
         },
 
         post: function () {
+            $('#progbar').show();
             $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
                     Login.redirect();
@@ -80,7 +83,9 @@
                     $('.checki').val('');
                 }
                 }, 'json'
-            );
+            ).done(function(){
+                $('#progbar').hide();
+            });
         },
 
         redirect: function () {

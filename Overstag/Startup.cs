@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 
 namespace Overstag
 {
@@ -31,7 +33,16 @@ namespace Overstag
 
             //Settings
             app.UseSession();
+            //wwwroot folder
             app.UseStaticFiles();
+            //custom folder
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "HtmlPartials")),
+                RequestPath = "/html"
+            });
+
             app.UseMiddleware<Overstag.Middleware.Authentication>();
 
             app.UseMvc(routes =>
