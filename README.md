@@ -1,2 +1,2 @@
 # Stichting Overstag
-[myimage]: /wwwroot/img/logo.png "logo"
+[myimage]: "/wwwroot/img/logo.png" "logo"
