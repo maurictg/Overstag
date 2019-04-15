@@ -24,3 +24,4 @@ C:\Users\mauri\source\repos\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.dll
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.pdb
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.csproj.CopyComplete
+C:\Users\mauri\source\repos\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.csprojAssemblyReference.cache

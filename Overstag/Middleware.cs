@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -23,7 +24,7 @@ namespace Overstag.Middleware
             if (path.HasValue)
             {
 
-                foreach (string p in allowedpaths) { if (path.Value.ToString().ToLower().StartsWith(p.ToLower())) { allowed = true; } }
+                foreach (string p in allowedpaths) { if (path.Value.ToString().StartsWith(p,StringComparison.CurrentCultureIgnoreCase)) { allowed = true; } }
                 if (!allowed)
                 {
                     if (httpContext.Session.GetString("Token") == null)

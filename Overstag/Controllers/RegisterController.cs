@@ -22,7 +22,7 @@ namespace Overstag.Controllers
                 using (var context = new AccountContext())
                 {
                     //Check if user already exists
-                    string testun = "";
+                    string testun = string.Empty;
                     string testem = "";
                     try { testun = context.Accounts.Where(a => a.Username == account.Username).FirstOrDefault().Username; } catch { testun = ""; }
                     try { testem = context.Accounts.Where(a => a.Email == account.Email).FirstOrDefault().Email; } catch { testem = ""; }

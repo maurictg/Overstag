@@ -33,6 +33,7 @@ namespace Overstag.Encryption
     }
     public static class PBKDF2
     {
+        const string PEPPER = "ohgouhjkgukdftkfyjhjlG#*YJSJEIGE%UH(";
         const int DEFAULT_ITERATIONS = 50000;
         const int DEFAULT_LENGTH = 32;
 
@@ -54,7 +55,7 @@ namespace Overstag.Encryption
             new RNGCryptoServiceProvider().GetBytes(Salt);
 
             //Create hash of (Length) byte's.
-            byte[] Hash = new Rfc2898DeriveBytes(Input, Salt, Iterations).GetBytes(Length);
+            byte[] Hash = new Rfc2898DeriveBytes(PEPPER+Input, Salt, Iterations).GetBytes(Length);
 
             //Combine salt and hash.
             byte[] CombinedBytes = new byte[16 + Length];
@@ -119,7 +120,7 @@ namespace Overstag.Encryption
             Buffer.BlockCopy(HashedBytes, 0, Salt, 0, 16);
 
             //Generate hash of Input, to compare it with HashedInput
-            byte[] Hash = new Rfc2898DeriveBytes(Input, Salt, Iterations).GetBytes(Length);
+            byte[] Hash = new Rfc2898DeriveBytes(PEPPER + Input, Salt, Iterations).GetBytes(Length);
 
             //Compare the result's.
             for (int i = 0; i < Length; i++)
