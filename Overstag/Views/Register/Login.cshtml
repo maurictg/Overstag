@@ -90,6 +90,8 @@
 
         redirect: function () {
             //Redirect to home page
+            localStorage.setItem("login",true);
+            $(location).attr('href', '/')
         } 
 
     }

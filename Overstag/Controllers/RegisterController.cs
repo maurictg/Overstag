@@ -73,8 +73,9 @@ namespace Overstag.Controllers
                         var account = context.Accounts.Where(e => e.Username == a.Username || e.Email == a.Username).FirstOrDefault();
                         if (Encryption.PBKDF2.Verify(account.Password, a.Password))
                         {
-                            //Login is juist, redirect naar page
+                            //Login is juist, redirect naar page, zet sessie variablen
                             HttpContext.Session.SetString("Token", account.Token);
+                            HttpContext.Session.SetString("Name",account.Firstname);
                             return Json(new { status = "success" });
                         }
                         else { return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" }); }
