@@ -1,0 +1,85 @@
+﻿@model List<Overstag.Models.Event>
+@{
+    ViewData["Title"] = "Activiteiten";
+    Layout = "/Views/_AdminLayout.cshtml";
+}
+
+<br />
+<div id="eventsdiv">
+    <h3>Activiteiten</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Titel</th>
+                <th>Omschrijving</th>
+                <th>Datum</th>
+                <th>Tijd</th>
+                <th>Kosten</th>
+            </tr>
+        </thead>
+        <tbody>
+                @foreach (var e in Model)
+                {
+            <tr>
+                <td>@e.Title</td>
+                <td>@e.Description</td>
+                <td>@e.Date</td>
+                <td>@e.Time</td>
+                <td>@Math.Round((double)(e.Cost / 100))</td>
+            </tr>
+                }
+        </tbody>
+    </table>
+    <h3>Activiteiten toevoegen</h3>
+    <form class="center-align">
+        <div class="row">
+            <div class="col m8">
+                <input type="text" class="white-text" id="ttitle" placeholder="Titel" />
+                <input type="text" class="white-text" id="description" placeholder="Omschrijving" />
+                <input type="text" class="white-text grey darken-4 datepicker" id="date" placeholder="Datum">
+                <input type="text" class="white-text timepicker" id="time" placeholder="Tijd">
+                <input type="text" class="white-text" id="cost" placeholder="Kosten" />
+                <div class="progress" id="progbar"><div class="indeterminate"></div></div>
+                <a class="waves-effect waves-light btn" id="btnadd">Toevoegen</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    Events = {
+        init: function () {
+            $('#_events').addClass('active');
+            $('#progbar').hide();
+            Events.mapEvents();
+        },
+        mapEvents: function () {
+             $('#btnadd').click(function () {
+                 Events.post();
+            });
+        },
+        post: function () {
+            var data = {
+                Title : $('#ttitle').val(),
+                Description : $('#description').val(),
+                Date : $('#date').val(),
+                Time : $('#time').val(),
+                Cost : $('#cost').val()
+            };
+            $('#progbar').show();
+            $.post("/Admin/postEvent",data , function (response) {
+                if (response.status == 'success') {
+                    M.toast({ html: 'Event successvol toegevoegd!!', classes: 'green' });
+                }
+                else {
+                    //status = error
+                    M.toast({ html: response.error, classes: 'red' });
+                }
+                }, 'json'
+            ).done(function(){
+                $('#progbar').hide();
+            });
+        }
+    }
+
+    Events.init();
+</script>

@@ -52,3 +52,6 @@ C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Over
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.pdb
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.csproj.CopyComplete
 C:\Users\mauri\source\repos\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\_Layout.g.cshtml.cs
+C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Index.g.cshtml.cs
+C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\_AdminLayout.g.cshtml.cs
+C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Events.g.cshtml.cs
