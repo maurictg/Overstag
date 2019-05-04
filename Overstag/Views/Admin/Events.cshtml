@@ -34,11 +34,11 @@
     <form class="center-align">
         <div class="row">
             <div class="col m8">
-                <input type="text" class="white-text" id="ttitle" placeholder="Titel" />
-                <input type="text" class="white-text" id="description" placeholder="Omschrijving" />
-                <input type="text" class="white-text grey darken-4 datepicker" id="date" placeholder="Datum">
-                <input type="text" class="white-text timepicker" id="time" placeholder="Tijd">
-                <input type="text" class="white-text" id="cost" placeholder="Kosten" />
+                <input type="text" class="checki white-text" id="ttitle" placeholder="Titel" />
+                <input type="text" class="checki white-text" id="description" placeholder="Omschrijving" />
+                <input type="text" class="checki white-text grey darken-4 datepicker" id="date" placeholder="Datum">
+                <input type="text" class="checki white-text timepicker" id="time" placeholder="Tijd">
+                <input type="text" class="checki white-text" id="cost" placeholder="Kosten" />
                 <div class="progress" id="progbar"><div class="indeterminate"></div></div>
                 <a class="waves-effect waves-light btn" id="btnadd">Toevoegen</a>
             </div>
@@ -69,6 +69,7 @@
             $.post("/Admin/postEvent",data , function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Event successvol toegevoegd!!', classes: 'green' });
+                    $('.checki').val('');
                 }
                 else {
                     //status = error
