@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Overstag.Models.Event>
+@{
+    ViewBag.Title = "Activiteiten";
+}
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Wat</th>
+            <th>Wanneer</th>
+            <th>Omschrijving</th>
+            <th>Kosten</th>
+            <th>Meedoen?</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            double c = (double)e.Cost;
+        <tr>
+            <td>@e.Title</td>
+            <td>@e.Date om @e.Time</td>
+            <td>@e.Description</td>
+            <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+            <td><a onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>
+        </tr>
+        }
+    </tbody>
+</table>
+<script>
+    var Events = {
+        init: function () {
+
+        },
+        subscribe: async function (id) {
+            if (!Overstag.loggedin) {
+                localStorage.setItem("redirect", "/Home/Events");
+                $(location).attr('href', '/Register');
+            } else {
+                //Inschrijven
+                $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
+                        if (response.status == 'success') {
+                            M.toast({ html: 'OK', classes: 'green' });
+                            $('.checki').val('');
+                            M.Collapsible.getInstance($('.collapsible')).close(0);
+                        }
+                        else {
+                            //status = error
+                            M.toast({ html: response.error, classes: 'red' });
+                            $('.checki').val('');
+                        }
+                    }, 'json');
+            }
+        }
+    }
+
+    Events.init();
+</script>

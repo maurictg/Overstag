@@ -47,6 +47,12 @@
                     <div class="card-action center-align">
                         <br />
                         <div class="progress" id="progbar"><div class="indeterminate"></div></div>
+                        <p>
+                            <label>
+                                <input type="checkbox" class="filled-in" checked="checked" id="autologin"/>
+                                <span>Automatisch inloggen</span>
+                            </label>
+                        </p>
                         <a class="btn btn-large blue-light waves-effect" id="register">Registreren</a><br />
                         <span id="tbhelper" style="color: red; visibility: hidden;">Vul alle velden in</span>
                     </div>
@@ -116,7 +122,11 @@
             $.post("/Register/postRegister",data , function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Registratie successvol!!', classes: 'green' });
-                    $('.checki').val('');
+                    if ($('#autologin').prop('checked')) {
+                        Register.postlogin();
+                    } else {
+                        $('.checki').val('');
+                    }
                 }
                 else {
                     //status = error
@@ -127,6 +137,25 @@
                     else if (response.code == 1) {
                         $('#Email').val('');
                     }
+                }
+                }, 'json'
+            ).done(function(){
+                $('#progbar').hide();
+            });
+        },
+
+        postlogin: function () {
+            $('#progbar').show();
+            $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
+                if (response.status == 'success') {
+                    localStorage.setItem("login",true);
+                    $(location).attr('href', '/User');
+                    $('.checki').val('');
+                }
+                else {
+                    //status = error
+                    M.toast({ html: response.error, classes: 'red' });
+                    $('.checki').val('');
                 }
                 }, 'json'
             ).done(function(){

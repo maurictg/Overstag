@@ -14,13 +14,28 @@
         Overstag = {
             init: function(){
                 //Check if user is logged in
-                if(Overstag.loggedin){
+                if (Overstag.loggedin) {
                     $('#_reg a').attr('href', '/Register/Logoff');
                     $('#_reg a').text('Uitloggen');
                     $('#_mreg a').attr('href', '/Register/Logoff');
                     $('#_mreg a').text('Uitloggen');
+                } else {
+                    $('.hidden').hide();
+                }
+
+                Overstag.mapevents();
+            },
+            mapevents: function () {
+                if (Overstag.loggedin) {
+                    $('#_reg a').click(function () {
+                        localStorage.setItem("logout",true);
+                    });
+                    $('#_mreg a').click(function () {
+                        localStorage.setItem("logout",true);
+                    });
                 }
             },
+
             //IMPORTANT VARIABLES
             token: '@Context.Session.GetString("Token")',
             firstname: '@Context.Session.GetString("Name")',
@@ -62,13 +77,15 @@
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <!--Li a href-->
-                <li id="_home"><a href="/Home">Home</a></li>       
+                <li id="_home"><a href="/Home">Home</a></li>
+                <li id="_ainfo"><a href="/User" class="hidden">Mijn account</a></li>
                 <li id="_reg"><a href="/Register">Aanmelden</a></li>
             </ul>
         </div>
     </nav>
     <ul class="sidenav" id="mobile-demo">
         <li id="_mhome"><a href="/Home">Home</a></li>
+        <li id="_mainfo"><a href="/User" class="hidden">Mijn account</a></li>
         <li id="_mreg"><a href="/Register">Aanmelden</a></li>
     </ul>
 

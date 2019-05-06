@@ -19,7 +19,7 @@ namespace Overstag.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var context = new AccountContext())
+                using (var context = new OverstagContext())
                 {
                     //Check if user already exists
                     string testun = string.Empty;
@@ -66,7 +66,7 @@ namespace Overstag.Controllers
             }
             else
             {
-                using (var context = new AccountContext())
+                using (var context = new OverstagContext())
                 {
                     try
                     {

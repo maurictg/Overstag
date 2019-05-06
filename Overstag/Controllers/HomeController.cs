@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Overstag.Models;
 
 namespace Overstag.Controllers
 {
@@ -12,5 +13,14 @@ namespace Overstag.Controllers
         {
             return View();
         }
+
+        public IActionResult Events()
+        {
+            using (var context = new OverstagContext())
+            {
+                return View(context.Events.ToList());
+            }
+        }
+        
     }
 }

@@ -27,11 +27,15 @@ namespace Overstag.Middleware
                 foreach (string p in allowedpaths) { if (path.Value.ToString().StartsWith(p,StringComparison.CurrentCultureIgnoreCase)) { allowed = true; } }
                 if (!allowed)
                 {
-                    if (httpContext.Session.GetString("Token") == null)
+                    if (httpContext.Session.GetString("Token") == null || httpContext.Session.GetString("Name") == null) //not logged in
                     {
                         httpContext.Response.Redirect("/Home");
                     }
-                    else { return _next(httpContext); }
+                    else if(path.Value.ToString().StartsWith("/Admin", StringComparison.CurrentCultureIgnoreCase) && !httpContext.Session.GetString("Name").Equals("admin", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        httpContext.Response.Redirect("/Home");
+                    }
+                    else{ return _next(httpContext); }
                 }
                 else {return _next(httpContext); }
             }

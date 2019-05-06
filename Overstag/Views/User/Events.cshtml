@@ -1,0 +1,56 @@
+﻿@model Dictionary<Overstag.Models.Event, bool>
+@{
+    Layout = "/Views/_UserLayout.cshtml";
+    var context = new Overstag.Models.OverstagContext();
+    var model = context.Events.ToList();
+}
+<div>
+    <h3 class="center-align">Agenda</h3>
+    @await Html.PartialAsync("~/Views/Home/Events.cshtml", model);
+</div>
+<div>
+    <h3 class="center-align">Inschrijvingen</h3>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <td>Wat</td>
+                <td>Wanneer</td>
+                <td>Omschrijving</td>
+                <td>Kosten</td>
+                <td>Betaald</td>
+                <td>Acties</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evet in Model)
+            {
+                @foreach (var e in Model)
+                {
+                    double c = (double)e.Key.Cost;
+                    <tr>
+                        <td>@e.Key.Title</td>
+                        <td>@e.Key.Date om @e.Key.Time</td>
+                        <td>@e.Key.Description</td>
+                        <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                        <td>@(e.Value? "Ja" : "Nee")</td>
+                        <td>Geen</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    
+</div>
+
+<script>
+        var User = {
+        init: function () {
+                $('#_aevent').addClass('active');
+                $('#_maevent').addClass('active');
+            }
+        }
+
+    User.init();
+
+</script>
+

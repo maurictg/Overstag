@@ -1,0 +1,78 @@
+﻿@using Microsoft.AspNetCore.Http
+<!-- OVERSTAG (C) 2019 MaurICT (github.com/maurictg/Overstag) -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <script src="~/js/jquery-3.3.1.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="~/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script>
+        Overstag = {
+            init: function(){
+                Overstag.mapevents();
+            },
+            mapevents: function () {
+                if (Overstag.loggedin) {
+                    $('#_reg a').click(function () {
+                        localStorage.setItem("logout",true);
+                    });
+                    $('#_mreg a').click(function () {
+                        localStorage.setItem("logout",true);
+                    });
+                }
+            },
+            //IMPORTANT VARIABLES
+            token: '@Context.Session.GetString("Token")',
+            firstname: '@Context.Session.GetString("Name")',
+            loggedin: ('@Context.Session.GetString("Token")' != ''),
+            url: window.location.href.replace(window.location.origin,''),
+        }
+    </script>
+    <style>
+         /* Overwrite materialize.css */
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper cyan darken-4">
+            <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
+            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li id="_home"><a href="/Home">Home</a></li>
+                <li id="_ainfo"><a href="/User">Mijn account</a></li>
+                <li id="_asetting"><a href="/User/Settings">Instellingen</a></li>
+                <li id="_aevent"><a href="/User/Events">Activiteiten</a></li>
+                <li id="_reg"><a href="/Register/Logoff"><b>Uitloggen</b></a></li>
+            </ul>
+        </div>
+    </nav>
+    <ul class="sidenav" id="mobile-demo">
+        <li id="_mhome"><a href="/Home">Home</a></li>
+        <li id="_mainfo"><a href="/User">Mijn account</a></li>
+        <li id="_masetting"><a href="/User/Settings">Instellingen</a></li>
+        <li id="_maevent"><a href="/User/Events">Activiteiten</a></li>
+        <li id="_mreg"><a href="/Register/Logoff"><b>Afmelden</b></a></li>
+    </ul>
+
+    @RenderBody()
+
+    <script>
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('.collapsible').collapsible();
+        });
+
+        Overstag.init();
+    </script>
+
+</body>
+</html>
+
+<!-- COLOR SCHEME LOGO:
+licht:  #3096D3
+middel: #0B86CF
+donker: #04507D-->

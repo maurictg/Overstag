@@ -6,10 +6,12 @@ using Overstag.Models;
 namespace Overstag.Models
 {
     //Tabellen maken
-    public class AccountContext : DbContext
+    public class OverstagContext : DbContext
     {
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Participate> Participate { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,6 +40,7 @@ namespace Overstag.Models
             .HasOne(pt => pt.Event)
             .WithMany(t => t.Participants)
             .HasForeignKey(pt => pt.EventId);
+
         }
     }
 

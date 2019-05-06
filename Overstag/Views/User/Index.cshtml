@@ -1,0 +1,22 @@
+﻿@model Overstag.Models.Account
+@{
+    Layout = "/Views/_UserLayout.cshtml";
+    ViewBag.Title = "Mijn account";
+}
+    <div>
+        <h4>Welkom, <b>@Model.Firstname</b> <b>@Model.Lastname</b></h4><br />
+
+        <h6>Navigeer via het <b>menu</b></h6>
+        
+    </div>
+    <script>
+        var User = {
+            init: function () {
+                $('#_ainfo').addClass('active');
+                $('#_mainfo').addClass('active');
+            }
+        }
+
+        User.init();
+    </script>
+        

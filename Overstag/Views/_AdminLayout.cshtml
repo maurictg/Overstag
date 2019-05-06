@@ -25,7 +25,7 @@
         }
     </script>
     <style>
-        /*Add to materialize css*/
+        /*Overwrite materialize css*/
         .blue-light {
             background-color: #3096D3 !important;
         }
@@ -49,14 +49,18 @@
         .blue-dark-text {
             color: #04507D !important;
         }
+
+
     </style>
 </head>
-<body class="grey darken-4 white-text">
+<body class="grey darken-4">
     <nav>
         <div class="nav-wrapper green">
             <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag Admin</a>
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li id="_home"><a href="/Home">Home</a></li>
+                <li id="_ahome"><a href="/Admin/Index">Admin Home</a></li>
                 <li id="_users"><a href="/Admin/Users">Gebruikers</a></li>
                 <li id="_events"><a href="/Admin/Events">Activiteiten</a></li>
                 <li id="_paying"><a href="/Admin/Paying">Betalen</a></li>
@@ -71,7 +75,7 @@
         $(document).ready(function () {
             $('.datepicker').datepicker();
             $('.timepicker').timepicker();
-
+            $('.modal').modal();
         });
 
         Overstag.init();

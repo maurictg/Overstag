@@ -16,7 +16,7 @@ namespace Overstag.Controllers
 
         public string InitDB()
         {
-            using(var context = new Overstag.Models.AccountContext())
+            using(var context = new Overstag.Models.OverstagContext())
             {
                 try
                 {
@@ -31,7 +31,7 @@ namespace Overstag.Controllers
 
         public string DeleteDB()
         {
-            using (var context = new Overstag.Models.AccountContext())
+            using (var context = new Overstag.Models.OverstagContext())
             {
                 try
                 {
@@ -47,7 +47,7 @@ namespace Overstag.Controllers
 
         public IActionResult Events()
         {
-            using(var context = new AccountContext())
+            using(var context = new OverstagContext())
             {
                 List<Event> events = context.Events.ToList();
                 return View(events);
@@ -59,12 +59,12 @@ namespace Overstag.Controllers
         {
             if (ModelState.IsValid)
             {
-                using (var context = new AccountContext())
+                using (var context = new OverstagContext())
                 {
                      try
                      {
                          Event a = new Event();
-                         a.Title = e.Title; a.Description = e.Description; a.Date = e.Date; a.Time = e.Time; a.Cost = int.Parse(e.str_Cost); 
+                         a.Title = e.Title; a.Description = e.Description; a.Date = e.Date; a.Time = e.Time; a.Cost = e.Cost; 
                          context.Add(a);
                          await context.SaveChangesAsync();
                          return Json(new { status = "success" });
@@ -77,6 +77,25 @@ namespace Overstag.Controllers
 
             }
             else { return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" }); }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> deleteEvent(int Id)
+        {
+            using (var context = new OverstagContext())
+            {
+                try
+                {
+                    Event a = context.Events.Where(e => e.Id.Equals(Id)).FirstOrDefault();
+                    context.Remove(a);
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { status = "error", error = ex.ToString() });
+                }
+            }
         }
     }
 }

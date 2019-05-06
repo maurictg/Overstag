@@ -89,9 +89,15 @@
         },
 
         redirect: function () {
-            //Redirect to home page
-            localStorage.setItem("login",true);
-            $(location).attr('href', '/')
+            //Redirect to user page
+            localStorage.setItem("login", true);
+            if (localStorage.getItem("redirect")) {
+                $(location).attr('href', localStorage.getItem("redirect"));
+                localStorage.removeItem("redirect");
+            }
+            else {
+                $(location).attr('href', '/User');
+            }
         } 
 
     }

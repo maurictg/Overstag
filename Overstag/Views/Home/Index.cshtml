@@ -17,7 +17,6 @@
         </div>
         <!--Hier informatie-->
         <div id="part_info"></div>
-
     </body>
 
 <script>
@@ -29,9 +28,13 @@
             Home.loadpartial();
 
             //When user is redirected from login, toast message once
-            if(localStorage.getItem("login")){
+            /*if(localStorage.getItem("login")){
                 M.toast({ html: 'Successvol ingelogd!', classes: 'green' });
                 localStorage.removeItem("login");
+            }*/
+            if(localStorage.getItem("logout")){
+                M.toast({ html: 'Successvol uitgelogd!', classes: 'orange' });
+                localStorage.removeItem("logout");
             }
         },
 

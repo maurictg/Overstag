@@ -6,8 +6,8 @@
 
 <br />
 <div id="eventsdiv">
-    <h3>Activiteiten</h3>
-    <table>
+    <h3 class="white-text">Activiteiten</h3>
+    <table class="white-text">
         <thead>
             <tr>
                 <th>Titel</th>
@@ -20,36 +20,50 @@
         </thead>
         <tbody>
             @{ foreach (var e in Model)
-               {
-                 double c = (double)e.Cost;
+                {
+                    double c = (double)e.Cost;
                     <tr>
                         <td>@e.Title</td>
                         <td>@e.Description</td>
                         <td>@e.Date</td>
                         <td>@e.Time</td>
-                        <td>@Math.Round(c/100,2)</td>
-                        <td><a onclick="Events.delete(@e.Id)">delete</a></td>
+                        <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                        <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">delete</a></td>
                     </tr>
                 }
             }
         </tbody>
     </table>
-    <h3>Activiteiten toevoegen</h3>
+    <h3 class="white-text">Activiteiten toevoegen</h3>
     <form class="center-align">
         <div class="row">
             <div class="col m8">
                 <input type="text" class="checki white-text" id="ttitle" placeholder="Titel" />
                 <input type="text" class="checki white-text" id="description" placeholder="Omschrijving" />
-                <input type="text" class="checki white-text grey darken-4 datepicker" id="date" placeholder="Datum">
+                <input type="text" class="checki white-text datepicker" id="date" placeholder="Datum">
                 <input type="text" class="checki white-text timepicker" id="time" placeholder="Tijd">
-                <input type="text" class="checki white-text" id="cost" placeholder="Kosten" />
+                <input type="text" class="checki white-text" id="cost" placeholder="Kosten in eurocent" />
                 <div class="progress" id="progbar"><div class="indeterminate"></div></div>
-                <a class="waves-effect waves-light btn" id="btnadd">Toevoegen</a>
+                <a class="waves-effect waves-light btn white-text" id="btnadd">Toevoegen</a>
             </div>
         </div>
     </form>
+
+    <!-- Modal Structure -->
+    <div id="verwijdermodal" class="modal grey darken-4 white-text">
+        <div class="modal-content">
+            <h4>Weet u zeker dat u dit event wilt verwijderen?</h4>
+            <p>Deze actie kan niet ongedaan worden gemaakt!</p>
+        </div>
+        <div class="modal-footer grey darken-4 white-text">
+            <a class="modal-close waves-effect waves-red btn-flat white-text">Annuleren</a>
+            <a class="modal-close waves-effect waves-green btn-flat white-text" onclick="Events.delete(eventtodelete)">Verwijderen</a>
+        </div>
+    </div>
+
 </div>
 <script>
+    let eventtodelete = 0;
     Events = {
         init: function () {
             $('#_events').addClass('active');
@@ -67,12 +81,12 @@
                 Description : $('#description').val(),
                 Date : $('#date').val(),
                 Time : $('#time').val(),
-                str_Cost : $('#cost').val()
+                Cost : $('#cost').val()
             };
             $('#progbar').show();
             $.post("/Admin/postEvent",data , function (response) {
                 if (response.status == 'success') {
-                    M.toast({ html: 'Event successvol toegevoegd!!', classes: 'green' });
+                    location.reload();
                     $('.checki').val('');
                 }
                 else {
@@ -86,9 +100,19 @@
         },
         delete: function (id) {
             //Post delete
-            alert("Delete " + id);
+            $.post("/Admin/deleteEvent/" + id, function (response) {
+                if (response.status == 'success') {
+                    location.reload();
+                }
+                else {
+                    //status = error
+                    M.toast({ html: response.error, classes: 'red' });
+                }
+            }, 'json').done(function () {
+            });
         }
     }
 
     Events.init();
+    //Comment: Misschien datetime library uit calvijn.ga gebruiken?
 </script>

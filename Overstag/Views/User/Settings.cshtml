@@ -1,0 +1,151 @@
+﻿@model Overstag.Models.Account
+@{
+    Layout = "/Views/_UserLayout.cshtml";
+    ViewBag.Title = "Instellingen";
+}
+<div>
+    <h3 class="center-align">Accountinstellingen</h3><br />
+    <div>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">info</i>Persoonlijke informatie</div>
+                <div class="collapsible-body col s12 m6 center-align">
+                    <h5>Persoonlijke informatie</h5>
+                    <table class="center-align responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Voornaam</th>
+                                <th>Achternaam</th>
+                                <th>Emailadres</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="checkj" id="firstname" placeholder="Voornaam" value="@Model.Firstname" /></td>
+                                <td><input type="text" class="checkj" id="lastname" placeholder="Achternaam" value="@Model.Lastname" /></td>
+                                <td><input type="text" class="checkj" id="email" placeholder="Emailadres" value="@Model.Email" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br />
+                    <a class="waves-effect waves-light btn orange center" onclick="M.Collapsible.getInstance($('.collapsible')).close(0);">Annuleren</a>
+                    <a class="waves-effect waves-light btn green center" id="savechanges">Wijzigingen opslaan</a>
+                </div> 
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">lock</i>Wachtwoord wijzigen</div>
+                <div class="collapsible-body col s12 m6 center-align">
+                    <h5>Wachtwoord wijzigen</h5>
+                    <div class="input-field">
+                        <i class="material-icons prefix">lock</i>
+                        <input type="password" class="checki" id="tbpw1" placeholder="Huidig wachtwoord" />
+                        <label class="active" for="tbpw1">Huidig wachtword</label>
+                    </div>
+                    <br />
+                    <div class="input-field">
+                        <i class="material-icons prefix">lock</i>
+                        <input type="password" class="checki" id="tbpw2" placeholder="Nieuw wachtwoord" />
+                        <label class="active" for="tbpw2">Nieuw wachtwoord</label>
+                    </div>
+                    <div class="input-field">
+                        <i class="material-icons prefix">lock</i>
+                        <input type="password" class="checki" id="tbpw3" placeholder="Nieuw wachtwoord herhalen" />
+                        <label class="active" for="tbpw3">Wachtwoord herhalen</label>
+                    </div>
+                    <span id="pwhelper" style="color: red; visibility: hidden;">Wachtwoorden komen niet overeen</span>
+                    <br /><br />
+                    <a class="waves-effect waves-light btn orange center" onclick="M.Collapsible.getInstance($('.collapsible')).close(1); $('.checki').val('');">Annuleren</a>
+                    <a class="waves-effect waves-light btn green center" id="savepass">Opslaan</a>
+
+                </div>
+            </li>
+        </ul>
+
+    </div>
+    <script>
+            var User = {
+                init: function () {
+                    $('#_asetting').addClass('active');
+                    $('#_masetting').addClass('active');
+
+                    User.mapEvents();
+                },
+                mapEvents: function () {
+                    $('#savechanges').click(function () {
+                        var validate = true;
+                        $('.checkj').each(function () {
+                            if ($(this).val() == '') {
+                                validate = false;
+                                return;
+                            }
+                        });
+                        if (validate) {
+                            User.savechanges();
+                        } else {
+                           M.toast({html: 'Vul a.u.b. alle velden in', classes: 'orange'})
+                        }
+                    });
+                    $('#savepass').click(function () {
+                        var validate = true;
+                        validate = ($('#tbpw2').val() == $('#tbpw3').val());
+                        $('.checki').each(function () {
+                            if ($(this).val() == '') {
+                                validate = false;
+                                return;
+                            }
+                        });
+                        if (validate) {
+                            User.savepass();
+                        } else {
+                           M.toast({html: 'Vul a.u.b. alle velden correct in', classes: 'orange'})
+                        }
+                    });
+
+                    //Detect & check if passwords matches
+                    $('#tbpw2').on('keyup',function () {
+                        if ($('#tbpw2').val() != $('#tbpw3').val()) {
+                            $('#pwhelper').css('visibility', 'visible');
+                        } else { $('#pwhelper').css('visibility', 'hidden'); }
+                    });
+
+                    $('#tbpw3').on('keyup',function () {
+                        if ($('#tbpw3').val() != $('#tbpw2').val()) {
+                            $('#pwhelper').css('visibility', 'visible');
+                        } else { $('#pwhelper').css('visibility', 'hidden'); }
+                    });
+                },
+                savechanges: function () {
+                     $.post("/User/postInfoChange", { Firstname: $('#firstname').val(), Lastname: $('#lastname').val(), Email: $('#email').val() }, function (response) {
+                        if (response.status == 'success') {
+                            M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
+                            $('.checki').val('');
+                            M.Collapsible.getInstance($('.collapsible')).close(0);
+                        }
+                        else {
+                            //status = error
+                            M.toast({ html: response.error, classes: 'red' });
+                            $('.checki').val('');
+                        }
+                    }, 'json');
+                },
+                savepass: function () {
+                    $.post("/User/postPasswordChange", { Oldpass: $('#tbpw1').val(), Newpass: $('#tbpw2').val() }, function (response) {
+                        if (response.status == 'success') {
+                            M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
+                            $('.checki').val('');
+                            M.Collapsible.getInstance($('.collapsible')).close(1);
+                        }
+                        else {
+                            //status = error
+                            M.toast({ html: response.error, classes: 'red' });
+                            $('.checki').val('');
+                        }
+                    }, 'json');
+
+                }
+            }
+
+            User.init();
+    </script>
+</div>
+
