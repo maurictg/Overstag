@@ -10,7 +10,7 @@ namespace Overstag.Middleware
     {
         private readonly RequestDelegate _next;
         //Paths that are allowed without login token
-        private readonly string[] allowedpaths = { "/Home", "/Register", "/Admin/init" };
+        private readonly string[] allowedpaths = { "/Home", "/Register", "/Admin/initdb" };
 
         public Authentication(RequestDelegate next)
         {

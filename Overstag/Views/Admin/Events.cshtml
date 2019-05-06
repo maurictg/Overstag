@@ -15,19 +15,23 @@
                 <th>Datum</th>
                 <th>Tijd</th>
                 <th>Kosten</th>
+                <th>Actie</th>
             </tr>
         </thead>
         <tbody>
-                @foreach (var e in Model)
-                {
-            <tr>
-                <td>@e.Title</td>
-                <td>@e.Description</td>
-                <td>@e.Date</td>
-                <td>@e.Time</td>
-                <td>@Math.Round((double)(e.Cost / 100))</td>
-            </tr>
+            @{ foreach (var e in Model)
+               {
+                 double c = (double)e.Cost;
+                    <tr>
+                        <td>@e.Title</td>
+                        <td>@e.Description</td>
+                        <td>@e.Date</td>
+                        <td>@e.Time</td>
+                        <td>@Math.Round(c/100,2)</td>
+                        <td><a onclick="Events.delete(@e.Id)">delete</a></td>
+                    </tr>
                 }
+            }
         </tbody>
     </table>
     <h3>Activiteiten toevoegen</h3>
@@ -63,7 +67,7 @@
                 Description : $('#description').val(),
                 Date : $('#date').val(),
                 Time : $('#time').val(),
-                Cost : $('#cost').val()
+                str_Cost : $('#cost').val()
             };
             $('#progbar').show();
             $.post("/Admin/postEvent",data , function (response) {
@@ -79,6 +83,10 @@
             ).done(function(){
                 $('#progbar').hide();
             });
+        },
+        delete: function (id) {
+            //Post delete
+            alert("Delete " + id);
         }
     }
 

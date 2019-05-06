@@ -13,7 +13,7 @@ namespace Overstag.Models
         public string Time { get; set; }
 
         public int Cost { get; set; }
-
+        public string str_Cost { get; set; }
         public List<Participate> Participants { get; set; } = new List<Participate>();
     }
 
