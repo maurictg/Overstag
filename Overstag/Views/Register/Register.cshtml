@@ -19,6 +19,20 @@
                             <label for="Lastname">Achternaam</label>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="input-field col s12 m4">
+                            <input type="text" class="validate checki" id="Adress" placeholder="Adres + Huisnummer" />
+                            <label for="Adress">Adres</label>
+                        </div>
+                        <div class="input-field col s12 m4">
+                            <input type="text" class="validate checki" id="Postalcode" placeholder="Postcode" />
+                            <label for="Postalcode">Postcode</label>
+                        </div>
+                        <div class="input-field col s12 m4">
+                            <input type="text" class="validate checki" id="Residence" placeholder="Woonplaats" />
+                            <label for="Residence">Woonplaats</label>
+                        </div>
+                    </div>
                     <div class="input-field">
                         <i class="material-icons prefix">account_circle</i>
                         <input type="text" class="validate checki" id="Username" placeholder="Gebruikersnaam" />
@@ -49,7 +63,7 @@
                         <div class="progress" id="progbar"><div class="indeterminate"></div></div>
                         <p>
                             <label>
-                                <input type="checkbox" class="filled-in" checked="checked" id="autologin"/>
+                                <input type="checkbox" class="filled-in" checked="checked" id="autologin" />
                                 <span>Automatisch inloggen</span>
                             </label>
                         </p>
@@ -116,7 +130,10 @@
                 Password: $('#Password').val(),
                 Email: $('#Email').val(),
                 Firstname: $('#Firstname').val(),
-                Lastname: $('#Lastname').val()
+                Lastname: $('#Lastname').val(),
+                Adress: $('#Adress').val(),
+                Postalcode: $('#Postalcode').val(),
+                Residence: $('#Residence').val()
             };
             $('#progbar').show();
             $.post("/Register/postRegister",data , function (response) {

@@ -12,6 +12,9 @@ namespace Overstag.Models
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Token { get; set; }
+        public string Adress { get; set; }
+        public string Postalcode { get; set; }
+        public string Residence { get; set; }
 
         //public List<Participate> Participants { get; set; } = new List<Participate>();
     }
