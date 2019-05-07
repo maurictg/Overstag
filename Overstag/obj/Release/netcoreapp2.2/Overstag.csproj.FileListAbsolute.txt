@@ -55,3 +55,12 @@ C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\ne
 C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.dll
 C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.pdb
 C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Overstag.csproj.CopyComplete
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\Admin\Database.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\Admin\Participators.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\Admin\Users.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\Home\Events.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\User\Events.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\User\Index.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\User\Settings.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\User\Subscriptions.g.cshtml.cs
+C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Release\netcoreapp2.2\Razor\Views\_UserLayout.g.cshtml.cs
