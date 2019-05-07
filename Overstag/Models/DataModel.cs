@@ -28,7 +28,7 @@ namespace Overstag.Models
             .HasForeignKey(s => s.ParentId);*/
 
             //many2many
-            modelBuilder.Entity<Participate>()
+            /*modelBuilder.Entity<Participate>()
             .HasKey(t => new { t.UserId, t.EventId });
 
             modelBuilder.Entity<Participate>()
@@ -39,7 +39,8 @@ namespace Overstag.Models
             modelBuilder.Entity<Participate>()
             .HasOne(pt => pt.Event)
             .WithMany(t => t.Participants)
-            .HasForeignKey(pt => pt.EventId);
+            .HasForeignKey(pt => pt.EventId);*/
+            //Werkt niet handig
 
         }
     }

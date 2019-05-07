@@ -5,11 +5,12 @@
 }
 
 <br />
-<div id="eventsdiv">
+<div id="eventsdiv" class="center-align">
     <h3 class="white-text">Activiteiten</h3>
     <table class="white-text">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Titel</th>
                 <th>Omschrijving</th>
                 <th>Datum</th>
@@ -23,6 +24,7 @@
                 {
                     double c = (double)e.Cost;
                     <tr>
+                        <td>@e.Id</td>
                         <td>@e.Title</td>
                         <td>@e.Description</td>
                         <td>@e.Date</td>
@@ -49,6 +51,7 @@
         </div>
     </form>
 
+
     <!-- Modal Structure -->
     <div id="verwijdermodal" class="modal grey darken-4 white-text">
         <div class="modal-content">
@@ -60,6 +63,11 @@
             <a class="modal-close waves-effect waves-green btn-flat white-text" onclick="Events.delete(eventtodelete)">Verwijderen</a>
         </div>
     </div>
+    <br />
+    <h3 class="white-text">Ingeschreven deelnemers</h3>
+    <div id="participators" class="white-text">
+        <!--Render deelnemers hier-->
+    </div>
 
 </div>
 <script>
@@ -69,6 +77,7 @@
             $('#_events').addClass('active');
             $('#progbar').hide();
             Events.mapEvents();
+            $('#participators').load('/Admin/Participators');
         },
         mapEvents: function () {
              $('#btnadd').click(function () {

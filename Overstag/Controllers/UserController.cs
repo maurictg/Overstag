@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
+using Newtonsoft.Json;
 
 
 namespace Overstag.Controllers
@@ -17,35 +18,30 @@ namespace Overstag.Controllers
         public IActionResult Index() {return View(currentuser());}
 
         public IActionResult Settings(){return View(currentuser());}
+        public IActionResult Events() { return View(); }
 
-        [HttpGet]
-        public IActionResult Events()
+        //Partial view
+        public IActionResult Subscriptions()
         {
             using (var context = new OverstagContext())
             {
-                var parti = context.Participate.Where(p => p.User.Id == currentuser().Id).ToList();
+                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
                 Dictionary<Event, bool> events = new Dictionary<Event, bool>();
-               /* foreach(var part in parti)
+                events.Clear();
+
+                foreach(var part in parti)
                 {
-                    if(part != null)
+                    bool test = false;
+                    if(!events.TryGetValue(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault(),out test) && part != null)
                     {
-                        events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault(),(part.Payed == 0 ? false : true));
+                        events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault(), (part.Payed == 0 ? false : true));
                     }
-                }*/
-                //Bovenstaande werkt
-
-                //Onderstaande gaat alles fout
-                var eve = context.Events.Select(e => e.Participants.Where(a => a.User.Id == currentuser().Id).ToList());
-                //2x first or default???
-                foreach(var ele in eve)
-                {
-                    return Json(new { eve = ele.FirstOrDefault().EventId}); //Dit werkt wel
-                    events.Add(context.Events.Where(e => e.Id.Equals(ele.FirstOrDefault().Event.Id)).FirstOrDefault(), false);
                 }
-                return View(eve);
 
+                return View(events);
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> postSubscribeEvent(Participate p)
@@ -54,48 +50,64 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    /*var user = context.Accounts.Where(u => u.Id == currentuser().Id).FirstOrDefault();
-                    Event eve = context.Events.Where(e => e.Id == t.Id).FirstOrDefault();
-
-                    Participate p = new Participate();
-                    p.User = user;
-                    p.UserId = user.Id;
-                    p.Event = eve;
-                    p.EventId = eve.Id;
-                    eve.Participants.Add(p);
-
-                    //Werkt, maar niet relationeel??
-
-                    context.Update(eve);
-                    await context.SaveChangesAsync();*/
-                    p.UserId = currentuser().Id;
-
-                    var user = context.Accounts.Where(a => a.Id == p.UserId).FirstOrDefault();
-                    //add 1 event to one subscription
-                    var eve = context.Events.Where(a => a.Id == p.EventId).FirstOrDefault();
-                    if (user == null)
+                    var user = context.Accounts.First(a => a.Id == currentuser().Id);
+                    var eve = context.Events.First(e => e.Id == p.EventId);
+                    var part = context.Participate.Where(e => e.EventId == p.EventId && e.UserId == user.Id).FirstOrDefault();
+                    if (part == null)
                     {
-                        return Json(new { status = "error", error = "USER IS NULL"  });
+                        context.Participate.Add(new Participate { UserId = user.Id, EventId = eve.Id, Payed = 0 });
+                        await context.SaveChangesAsync();
+                        return Json(new { status = "success" });
                     }
-                    else if (eve == null)
+                    else
                     {
-                        return Json(new { status = "error", error = "EVENT IS NULL"  });
+                        return Json(new { status = "error", error = "Je bent al ingeschreven voor deze activiteit!" });
                     }
-
-                    var subscription = new Participate { User = user, Event = eve, UserId = user.Id, EventId = eve.Id, Payed = 0 };
-
-                    //Object reference not set to an instance of an object. ERROR
-                    user.Participants.Add(subscription);
-
-                    context.Accounts.Update(user);
-
-                    context.SaveChanges();
-                    return Json(new { status = "success" });
+                    
                 }
                 catch(Exception e)
                 {
-                    return Json(new { status = "error", error = e.ToString() });
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
                 }
+
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> postDeleteEvent(Participate p)
+        {
+            using (var context = new OverstagContext())
+            {
+                try
+                {
+                    var user = context.Accounts.First(a => a.Id == currentuser().Id);
+                    var eve = context.Events.First(e => e.Id == p.EventId);
+                    try
+                    {
+                        var part = context.Participate.Where(e => e.EventId == p.EventId && e.UserId == user.Id).FirstOrDefault();
+                        if (part == null)
+                        {
+                            return Json(new { status = "error", error = "U bent al uitgeschreven voor deze activiteit" });
+                        }
+                        else
+                        {
+                            context.Participate.Remove(part);
+                            await context.SaveChangesAsync();
+                            return Json(new { status = "success" });
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        return Json(new { status = "error", error = "Er is een error opgetreden: NULL", debuginfo = e.ToString() });
+                    }
+
+
+                }
+                catch (Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                }
+
             }
         }
 
@@ -166,6 +178,51 @@ namespace Overstag.Controllers
                 }
                 
             }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> postDeleteAccount(Account a)
+        {
+            using (var context = new OverstagContext())
+            {
+                try
+                {
+                    
+                    var account = context.Accounts.Where(e => e.Token == a.Token).FirstOrDefault();
+                    if (Encryption.PBKDF2.Verify(account.Password, a.Password))
+                    {
+                        try
+                        {
+                            //Ingeschreven events verwijderen
+                            try
+                            {
+                                var subscriptions = context.Participate.Where(p => p.UserId == account.Id).ToList();
+                                foreach(var item in subscriptions)
+                                {
+                                    context.Remove(item);
+                                }
+                            }
+                            catch
+                            {
+
+                            }
+
+                            //Account verwijderen
+                            context.Remove(account);
+                            await context.SaveChangesAsync();
+                            return Json(new { status = "success" });
+                        }
+                        catch (Exception e)
+                        {
+                            return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                        }
+                    }
+                    else { return Json(new { status = "error", error = "Token of wachtwoord onjuist" }); }
+                }
+                catch { return Json(new { status = "error", error = "Token bestaat niet" }); }
+            }
+
 
         }
 

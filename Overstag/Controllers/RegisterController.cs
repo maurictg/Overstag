@@ -12,7 +12,7 @@ namespace Overstag.Controllers
         public IActionResult Index() { return View("Login"); }
         public IActionResult Login() { return View("Login"); }
         public IActionResult Register() { return View("Register"); }
-        public void Logoff() { HttpContext.Session.Remove("Token"); Response.Redirect("/Home/Index"); }
+        public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); Response.Redirect("/Home/Index"); }
 
         [HttpPost]
         public async Task<IActionResult> postRegister(Account account)
@@ -84,5 +84,6 @@ namespace Overstag.Controllers
                 }
             }
         }
+
     }
 }

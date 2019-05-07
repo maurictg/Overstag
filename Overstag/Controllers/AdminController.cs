@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Overstag.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Controllers
 {
@@ -12,6 +13,16 @@ namespace Overstag.Controllers
         public IActionResult Index()
         {
             return View();
+        }
+
+        private bool CheckforAdmin()
+        {
+            string token = HttpContext.Session.GetString("Token");
+            using (var context = new OverstagContext())
+            {
+                var admin = context.Accounts.First(a => a.Username.Equals("admin", StringComparison.CurrentCultureIgnoreCase));
+                return ((admin.Token == token) ? true : false);
+            }
         }
 
         public string InitDB()
@@ -86,8 +97,16 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    Event a = context.Events.Where(e => e.Id.Equals(Id)).FirstOrDefault();
-                    context.Remove(a);
+                    Event eve = context.Events.Where(e => e.Id.Equals(Id)).FirstOrDefault();
+                    //delete participators
+                    try
+                    {
+                        var partici = context.Participate.Where(p => p.EventId == eve.Id).ToList();
+                        foreach (var p in partici) { context.Remove(p); }
+                    }
+                    catch { }
+                    //Delete event
+                    context.Remove(eve);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
@@ -96,6 +115,44 @@ namespace Overstag.Controllers
                     return Json(new { status = "error", error = ex.ToString() });
                 }
             }
+        }
+
+        public IActionResult Users()
+        {
+            using (var context = new OverstagContext())
+            {
+                return View(context.Accounts.ToList());
+            }
+        }
+
+        public IActionResult Participators()
+        {
+            Dictionary<Event, Dictionary<Account,bool>> deelnemers = new Dictionary<Event, Dictionary<Account,bool>>();
+            using (var context = new OverstagContext())
+            {
+                var participators = context.Participate.ToList();
+                var events = context.Events.ToList();
+
+                foreach(var eve in events)
+                {
+                    var part = participators.Where(p => p.EventId == eve.Id);
+                    //Add users
+                    Dictionary<Account, bool> users = new Dictionary<Account, bool>();
+                    foreach(var p in part)
+                    {
+                        var account = context.Accounts.First(u => u.Id == p.UserId);
+                        users.Add(account,(p.Payed != 0));
+                    }
+
+                    deelnemers.Add(eve, users);
+                }
+            }
+            return View(deelnemers);
+        }
+
+        public IActionResult Database()
+        {
+
         }
     }
 }

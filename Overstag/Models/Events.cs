@@ -13,18 +13,14 @@ namespace Overstag.Models
         public string Time { get; set; }
 
         public int Cost { get; set; }
-        public List<Participate> Participants { get; set; } = new List<Participate>();
     }
 
-    //Tussentabel many2many relationship between Event and Account (user)
     public class Participate
     {
         public int Id { get; set; }
 
         public int UserId { get; set; }
-        public Account User { get; set; }
         public int EventId { get; set; }
-        public Event Event { get; set; }
 
         public int Payed { get; set; }
     }

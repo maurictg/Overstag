@@ -1,0 +1,48 @@
+﻿@model Dictionary<Overstag.Models.Event, Dictionary<Overstag.Models.Account,bool>>
+@{
+    Layout = null;
+}
+<div>
+    <br />
+    <table>
+        <thead>
+            <tr>
+                <th>Wat</th>
+                <th>Wanneer</th>
+                <th>Deelnemers</th>
+                <th>Aantal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var e in Model)
+            {
+                <tr>
+                    <td><b><h5>@e.Key.Title</h5></b></td>
+                    <td>@e.Key.Date@Html.Raw(" om ")@e.Key.Time</td>
+                    <td>
+                        <table>
+                            <thead>
+                                <th>Naam</th>
+                                <th>Achternaam</th>
+                                <th>Betaald</th>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in e.Value)
+                                {
+                                    <tr>
+                                        <td>@user.Key.Firstname</td>
+                                        <td>@user.Key.Lastname</td>
+                                        <td class=@(user.Value ? "green-text" : "red-text")>@(user.Value ? "Ja" : "Nee")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </td>
+                    <td><b>@e.Value.Count().ToString()</b></td>
+                </tr>
+            }
+            
+        </tbody>
+    </table>
+</div>
+

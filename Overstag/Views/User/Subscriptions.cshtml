@@ -1,0 +1,30 @@
+﻿@model Dictionary<Overstag.Models.Event, bool>
+@{ 
+    Layout = null;
+}
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Wat</th>
+            <th>Wanneer</th>
+            <th>Omschrijving</th>
+            <th>Kosten</th>
+            <th>Betaald</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in Model)
+        {
+            double c = (double)e.Key.Cost;
+            <tr>
+                <td>@e.Key.Title</td>
+                <td>@e.Key.Date om @e.Key.Time</td>
+                <td>@e.Key.Description</td>
+                <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                <td>@(e.Value ? "Ja" : "Nee")</td>
+                <td><a data-target="uitschrijven" onclick="eventtoremove = @e.Key.Id;" class="modal-trigger">Uitschrijven</a>@(!e.Value ? Html.Raw("&nbsp;| <a onclick='User.pay(" + e.Key.Id + ")'>Betalen</a>") : Html.Raw("&nbsp;"))</td>
+            </tr>
+        }
+    </tbody>
+</table>

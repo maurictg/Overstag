@@ -13,7 +13,7 @@ namespace Overstag.Models
         public string Lastname { get; set; }
         public string Token { get; set; }
 
-        public List<Participate> Participants { get; set; } = new List<Participate>();
+        //public List<Participate> Participants { get; set; } = new List<Participate>();
     }
 
     //NO DATABASE CLASS

@@ -25,6 +25,7 @@
                     });
                 }
             },
+            
             //IMPORTANT VARIABLES
             token: '@Context.Session.GetString("Token")',
             firstname: '@Context.Session.GetString("Name")',
@@ -64,6 +65,7 @@
         $(document).ready(function () {
             $('.sidenav').sidenav();
             $('.collapsible').collapsible();
+            $('.modal').modal();
         });
 
         Overstag.init();

@@ -10,45 +10,46 @@
 </div>
 <div>
     <h3 class="center-align">Inschrijvingen</h3>
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <td>Wat</td>
-                <td>Wanneer</td>
-                <td>Omschrijving</td>
-                <td>Kosten</td>
-                <td>Betaald</td>
-                <td>Acties</td>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var evet in Model)
-            {
-                @foreach (var e in Model)
-                {
-                    double c = (double)e.Key.Cost;
-                    <tr>
-                        <td>@e.Key.Title</td>
-                        <td>@e.Key.Date om @e.Key.Time</td>
-                        <td>@e.Key.Description</td>
-                        <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                        <td>@(e.Value? "Ja" : "Nee")</td>
-                        <td>Geen</td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-    
-</div>
+    <div id="partial">
 
+    </div>
+</div>
+<div id="uitschrijven" class="modal">
+    <div class="modal-content">
+        <h4>Weet je zeker dat je jezelf wilt afmelden voor deze avond?</h4>
+        <p>Natuurlijk kun je je altijd weer opnieuw inschrijven, voor het geval je er spijt van krijgt.</p>
+    </div>
+    <div class="modal-footer">
+        <a class="modal-close waves-effect btn green white-text">Annuleren</a>
+        <a onclick="User.remove()" class="modal-close waves-effect btn red white-text">Toch uitschrijven</a>
+    </div>
+</div>
 <script>
-        var User = {
+    let eventtoremove;
+    var User = {
         init: function () {
-                $('#_aevent').addClass('active');
-                $('#_maevent').addClass('active');
-            }
+            $('#_aevent').addClass('active');
+            $('#_maevent').addClass('active');
+            User.loadcontent();
+        },
+        remove: function() {
+            //Uitschrijven
+
+            $.post("/User/postDeleteEvent", { EventId: eventtoremove }, function (response) {
+                if (response.status == 'success') {
+                    M.toast({ html: 'Successvol uitgeschreven', classes: 'orange' });
+                    User.loadcontent();
+                }
+                else {
+                    //status = error
+                    M.toast({ html: response.error, classes: 'red' });
+                }
+            }, 'json');
+        },
+        loadcontent: function(){
+           $('#partial').load('/User/Subscriptions');
         }
+    }
 
     User.init();
 

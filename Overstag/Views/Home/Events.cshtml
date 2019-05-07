@@ -39,14 +39,12 @@
                 //Inschrijven
                 $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
                         if (response.status == 'success') {
-                            M.toast({ html: 'OK', classes: 'green' });
-                            $('.checki').val('');
-                            M.Collapsible.getInstance($('.collapsible')).close(0);
+                            M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
+                            User.loadcontent();
                         }
                         else {
                             //status = error
                             M.toast({ html: response.error, classes: 'red' });
-                            $('.checki').val('');
                         }
                     }, 'json');
             }

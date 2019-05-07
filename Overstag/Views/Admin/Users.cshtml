@@ -1,0 +1,39 @@
+﻿@model List<Overstag.Models.Account>
+@{
+    Layout = "/Views/_AdminLayout.cshtml";
+    ViewBag.Title = "Gebruikers";
+}
+<br />
+<div class="center-align white-text">
+    <h3>Gebruikersoverzicht</h3>
+    <table>
+        <thead>
+            <tr>
+                <td>Id</td>
+                <td>Gebruikersnaam</td>
+                <td>Emailadres</td>
+                <td>Voornaam</td>
+                <td>Achternaam</td>
+                <td>Token</td>
+                <td>Acties</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var user in Model)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.Username</td>
+                    <td><a href="mailto:@user.Email">@user.Email</a></td>
+                    <td><b>@user.Firstname</b></td>
+                    <td><b>@user.Lastname</b></td>
+                    <td><i>@user.Token</i></td>
+                    <td>Geen</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+    $('#_users').addClass('active');
+</script>
