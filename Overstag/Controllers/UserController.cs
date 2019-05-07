@@ -13,7 +13,7 @@ namespace Overstag.Controllers
     public class UserController : Controller
     {
         //gets the current user
-        private Account currentuser() { using (var c = new OverstagContext()) { try { return c.Accounts.Where(a => a.Token.Equals(HttpContext.Session.GetString("Token"))).FirstOrDefault(); } catch { return null; } } }
+        public Account currentuser() { using (var c = new OverstagContext()) { try { return c.Accounts.Where(a => a.Token.Equals(HttpContext.Session.GetString("Token"))).FirstOrDefault(); } catch { return null; } } }
 
         public IActionResult Index() {return View(currentuser());}
 

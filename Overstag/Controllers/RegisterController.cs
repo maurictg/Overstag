@@ -85,5 +85,46 @@ namespace Overstag.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult postMailreset(Account a)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
+            }
+            else
+            {
+                using (var context = new OverstagContext())
+                {
+                    try
+                    {
+                        UserController u = new UserController();
+                        var account = context.Accounts.Where(e => e.Email == a.Email).FirstOrDefault();
+                            try
+                            {
+                                string message = "<h1>Overstag wachtwoord reset</h1>"+
+                                    "Beste "+ account.Firstname+",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>"+
+                                    "Klik op <a href='/Register/PasswordReset/"+ account.Token+"'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk."+
+                                    "<br>Success! Mocht het niet werken, neem dan contact met ons op";
+                                string res = Core.Mail.SendMail("Wachtwoord reset", message, account.Email);
+                                if(res == "OK")
+                                {
+                                    return Json(new { status = "success" });
+                                }
+                                else
+                                {
+                                    return Json(new { status = "error", error = res });
+                                }
+                            }
+                            catch(Exception e)
+                            {
+                                return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                            }
+                    }
+                    catch { return Json(new { status = "error", error = "Mailadres bestaat niet in ons systeem" }); }
+                }
+            }
+        }
+
     }
 }
