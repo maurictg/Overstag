@@ -41,9 +41,17 @@ namespace Overstag.Models
             .WithMany(t => t.Participants)
             .HasForeignKey(pt => pt.EventId);*/
             //Werkt niet handig
-
         }
+
+        
     }
 
-    
+    //No database field
+    public class SQLQuery
+    {
+        public string Query { get; set; }
+        public string TableName { get; set; }
+        public int Type { get; set; }
+    }
+
 }

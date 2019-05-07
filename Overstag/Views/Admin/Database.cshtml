@@ -1,5 +1,73 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    Layout = "~/Views/_AdminLayout.cshtml";
+    ViewBag.Title = "Database";
 }
+<br />
+<div class="center-align white-text">
+    <h3>Database</h3>
+    <br />
+    <hr />
+    <h5>Query uitvoeren</h5>
+    <div class="row">
+        <div class="col s12 m8 valign-wrapper">
+            <div class="input-field col s8 m6">
+                <input type="text" id="query" placeholder="SQL-Query..." class="white-text" />
+            </div>
+            <div class="input-field col s4 m2">
+                <button id="firequery" onclick="Database.postquery();" class="btn red white-text waves-effect waves-light">Uitvoeren</button>
+            </div>
+
+        </div>
+        <br />
+        <div class="row">
+            <div class="col s12 m6">
+                <input type="text" id="tablename" placeholder="Tabelnaam" class="white-text" />
+                <p>Tabelnaam: Accounts, Events of Participate</p>
+            </div>
+            <div class="col s12 m6">
+                <input type="text" id="type" placeholder="Type" class="white-text" />
+                <p>Type: 0: Uitvoer-query, 1: read single, 2: read list, 3: read array</p>
+            </div>
+            <div class="progress" id="progbar"><div class="indeterminate"></div></div>
+
+        </div>
+        <br />
+    </div>
+    <hr />
+    <h5>Output</h5>
+    <div id="output">
+
+    </div>
+</div>
+
+<script>
+    $('#_database').addClass('active');
+
+    var Database = {
+        init: function () {
+            $('#progbar').hide();
+        },
+        postquery: function () {
+            $('#progbar').show();
+            $.post("/Admin/Query", { Query: $('#query').val(), TableName: $('#tablename').val(), Type: $('#type').val() }, function (response) {
+                if (response.status == 'success') {
+                    M.toast({ html: 'Query successfull', classes: 'green rounded' });
+                    console.log(response.data);
+                    var output = JSON.stringify(response.data);
+                    $('#output').text(output);
+                }
+                else {
+                    //status = error
+                    M.toast({ html: response.error, classes: 'red' });
+                    var output = JSON.stringify(response.error);
+                    $('#output').text(output);
+                }
+                }, 'json'
+            ).done(function(){
+                $('#progbar').hide();
+            });
+        }
+    }
+
+    Database.init();
+</script>

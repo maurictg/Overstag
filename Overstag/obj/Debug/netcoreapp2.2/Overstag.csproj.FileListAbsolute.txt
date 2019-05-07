@@ -93,3 +93,4 @@ C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razo
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\User\Subscriptions.g.cshtml.cs
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Users.g.cshtml.cs
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Participators.g.cshtml.cs
+C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Database.g.cshtml.cs
