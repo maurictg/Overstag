@@ -43,18 +43,26 @@ namespace Overstag.Controllers
 
         public string DeleteDB()
         {
-            using (var context = new Overstag.Models.OverstagContext())
+            if (CheckforAdmin())
             {
-                try
+                using (var context = new Overstag.Models.OverstagContext())
                 {
-                    context.Database.EnsureDeletedAsync();
-                    return "Calling: Admin/deleteDB.\n\nDatabase successfully deleted!!";
-                }
-                catch (Exception ex)
-                {
-                    return "Calling: Admin/deleteDB.\n\nError: " + ex.ToString();
+                    try
+                    {
+                        context.Database.EnsureDeletedAsync();
+                        return "Calling: Admin/deleteDB.\n\nDatabase successfully deleted!!";
+                    }
+                    catch (Exception ex)
+                    {
+                        return "Calling: Admin/deleteDB.\n\nError: " + ex.ToString();
+                    }
                 }
             }
+            else
+            {
+                return "You've no permission to call this function";
+            }
+            
         }
 
         public IActionResult Events()
