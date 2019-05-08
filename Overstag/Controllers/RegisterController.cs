@@ -11,7 +11,30 @@ namespace Overstag.Controllers
     {
         public IActionResult Index() { return View("Login"); }
         public IActionResult Login() { return View("Login"); }
-        public IActionResult Register() { return View("Register"); }
+        public IActionResult Register() { return View(); }
+
+        [HttpGet("Register/Passreset/{token}")]
+        public IActionResult Passreset(string token)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    return View(context.Accounts.First(w => w.Token == token));
+                }
+                catch
+                {
+                    var content = "<h1>Token is onjuist.</h1><br><p>Controleer de link die we u hebben gestuurt via de email en plak deze link in de adresbalk</p>";
+
+                    return new ContentResult()
+                    {
+                        Content = content,
+                        ContentType = "text/html",
+                    };
+                }
+            }
+        }
+
         public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); Response.Redirect("/Home/Index"); }
 
         [HttpPost]
@@ -104,7 +127,7 @@ namespace Overstag.Controllers
                             {
                                 string message = "<h1>Overstag wachtwoord reset</h1>"+
                                     "Beste "+ account.Firstname+",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>"+
-                                    "Klik op <a href='/Register/PasswordReset/"+ account.Token+"'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk."+
+                                    "Klik op <a href='/Register/Passreset/"+ account.Token+"'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk."+
                                     "<br>Success! Mocht het niet werken, neem dan contact met ons op";
                                 string res = Core.Mail.SendMail("Wachtwoord reset", message, account.Email);
                                 if(res == "OK")
@@ -126,5 +149,35 @@ namespace Overstag.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult postPassreset(Account a)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
+            }
+            else
+            {
+                using (var context = new OverstagContext())
+                {
+                    try
+                    {
+                        var account = context.Accounts.Where(e => e.Token == a.Token).FirstOrDefault();
+                        try
+                        {
+                            account.Password = Encryption.PBKDF2.Hash(a.Password);
+                            context.Update(account);
+                            context.SaveChangesAsync();
+                            return Json(new { status = "success" });
+                        }
+                        catch (Exception e)
+                        {
+                            return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                        }
+                    }
+                    catch { return Json(new { status = "error", error = "Token bestaat niet in ons systeem" }); }
+                }
+            }
+        }
     }
 }
