@@ -5,14 +5,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
-using Newtonsoft.Json;
 
 
 namespace Overstag.Controllers
 {
     public class UserController : Controller
     {
-        //gets the current user
+        /// <summary>
+        /// Gets the current user
+        /// </summary>
+        /// <returns>All account info of the current user</returns>
         public Account currentuser() { using (var c = new OverstagContext()) { try { return c.Accounts.Where(a => a.Token.Equals(HttpContext.Session.GetString("Token"))).FirstOrDefault(); } catch { return null; } } }
 
         public IActionResult Index() {return View(currentuser());}
@@ -20,7 +22,10 @@ namespace Overstag.Controllers
         public IActionResult Settings(){return View(currentuser());}
         public IActionResult Events() { return View(); }
 
-        //Partial view
+        /// <summary>
+        /// A partial view rendered into other views
+        /// </summary>
+        /// <returns>A view with events</returns>
         public IActionResult Subscriptions()
         {
             using (var context = new OverstagContext())
@@ -42,7 +47,11 @@ namespace Overstag.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Adds an subscription to the user for an upcoming event
+        /// </summary>
+        /// <param name="p">The EventID</param>
+        /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> postSubscribeEvent(Participate p)
         {
@@ -73,6 +82,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes an subscription from a user
+        /// </summary>
+        /// <param name="p">The event ID</param>
+        /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> postDeleteEvent(Participate p)
         {
@@ -111,6 +125,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Changes the password of the user
+        /// </summary>
+        /// <param name="p">Old pass and new pass</param>
+        /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> postPasswordChange(Password p)
         {
@@ -138,6 +157,12 @@ namespace Overstag.Controllers
             }
 
         }
+
+        /// <summary>
+        /// Changes the account info of an user
+        /// </summary>
+        /// <param name="a">Updated account info</param>
+        /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> postInfoChange(Account a)
         {
@@ -181,6 +206,11 @@ namespace Overstag.Controllers
 
         }
 
+        /// <summary>
+        /// Deletes all info about an user in the database and removes the account
+        /// </summary>
+        /// <param name="a">The account</param>
+        /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> postDeleteAccount(Account a)
         {
@@ -198,15 +228,12 @@ namespace Overstag.Controllers
                             try
                             {
                                 var subscriptions = context.Participate.Where(p => p.UserId == account.Id).ToList();
-                                foreach(var item in subscriptions)
+                                foreach (var item in subscriptions)
                                 {
                                     context.Remove(item);
                                 }
                             }
-                            catch
-                            {
-
-                            }
+                            catch { }
 
                             //Account verwijderen
                             context.Remove(account);

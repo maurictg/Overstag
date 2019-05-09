@@ -29,7 +29,8 @@
 <script>
     var Events = {
         init: function () {
-
+            $('#_events').addClass('active');
+            $('#_mevents').addClass('active');
         },
         subscribe: async function (id) {
             if (!Overstag.loggedin) {

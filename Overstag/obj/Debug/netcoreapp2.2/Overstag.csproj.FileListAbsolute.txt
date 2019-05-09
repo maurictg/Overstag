@@ -104,3 +104,4 @@ C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Debug\netc
 C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\User\Subscriptions.g.cshtml.cs
 C:\Users\mauri\Desktop\Projects\ASP\maurictsite\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\_UserLayout.g.cshtml.cs
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Register\Passreset.g.cshtml.cs
+C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Billing.g.cshtml.cs

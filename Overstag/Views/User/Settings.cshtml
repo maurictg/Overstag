@@ -12,21 +12,53 @@
                 <div class="collapsible-body col s12 m6 center-align">
                     <h5>Persoonlijke informatie</h5>
                     <table class="center-align responsive-table">
-                        <thead>
-                            <tr>
-                                <th>Voornaam</th>
-                                <th>Achternaam</th>
-                                <th>Emailadres</th>
-                            </tr>
-                        </thead>
                         <tbody>
                             <tr>
-                                <td><input type="text" class="checkj" id="firstname" placeholder="Voornaam" value="@Model.Firstname" /></td>
-                                <td><input type="text" class="checkj" id="lastname" placeholder="Achternaam" value="@Model.Lastname" /></td>
-                                <td><input type="text" class="checkj" id="email" placeholder="Emailadres" value="@Model.Email" /></td>
+                                <td>
+                                    <div class="input-field">
+                                        <i class="material-icons prefix">account_circle</i>
+                                        <input type="text" class="checkj" id="firstname" placeholder="Voornaam" value="@Model.Firstname" />
+                                        <label for="firstname">Voornaam</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="input-field">
+                                        <input type="text" class="checkj" id="lastname" placeholder="Achternaam" value="@Model.Lastname" />
+                                        <label for="lastname">Achternaam</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="input-field">
+                                        <i class="material-icons prefix">email</i>
+                                        <input type="text" class="checkj" id="email" placeholder="Emailadres" value="@Model.Email" />
+                                        <label for="email">Emailadres</label>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="input-field">
+                                        <i class="material-icons prefix">home</i>
+                                        <input type="text" class="checkj" id="adress" placeholder="Adres + Huisnummer" value="@Model.Adress" />
+                                        <label for="adress">Adres + Huisnummer</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="input-field">
+                                        <input type="text" class="checkj" id="postalcode" placeholder="Postcode" value="@Model.Postalcode" />
+                                        <label for="postalcode">Postcode</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="input-field">
+                                        <input type="text" class="checkj" id="residence" placeholder="Woonplaats" value="@Model.Residence" />
+                                        <label for="residence">Woonplaats</label>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
+                    
                     <br />
                     <a class="waves-effect waves-light btn orange center" onclick="M.Collapsible.getInstance($('.collapsible')).close(0);">Annuleren</a>
                     <a class="waves-effect waves-light btn green center" id="savechanges">Wijzigingen opslaan</a>
@@ -148,7 +180,15 @@
                     });
                 },
                 savechanges: function () {
-                     $.post("/User/postInfoChange", { Firstname: $('#firstname').val(), Lastname: $('#lastname').val(), Email: $('#email').val() }, function (response) {
+                     var info = {
+                         Firstname: $('#firstname').val(),
+                         Lastname: $('#lastname').val(),
+                         Email: $('#email').val(),
+                         Adress: $('#adress').val(),
+                         Postalcode: $('#postalcode').val(),
+                         Residence: $('#residence').val()
+                     };
+                     $.post("/User/postInfoChange", { info }, function (response) {
                         if (response.status == 'success') {
                             M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
                             $('.checki').val('');
@@ -180,7 +220,7 @@
                 delaccount: function () {
                     var pass = prompt('Typ je wachtwoord in om door te gaan');
                     if (confirm('Account verwijderen? Zeker weten?')) {
-                        $.post("/User/postDeleteAccount", { Token: Overstag.token, Password: pass }, function (response) {
+                        $.post("/User/postDeleteAccount", { Token: '@Model.Token', Password: pass }, function (response) {
                             if (response.status == 'success') {
                                 M.toast({ html: 'Account verwijderd', classes: 'green' });
                                 localStorage.setItem("logout", true);

@@ -37,7 +37,6 @@
             },
 
             //IMPORTANT VARIABLES
-            token: '@Context.Session.GetString("Token")',
             firstname: '@Context.Session.GetString("Name")',
             loggedin: ('@Context.Session.GetString("Token")' != ''),
             url: window.location.href.replace(window.location.origin,''),
@@ -78,6 +77,7 @@
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <!--Li a href-->
                 <li id="_home"><a href="/Home">Home</a></li>
+                <li id="_events"><a href="/Home/Events">Agenda</a></li>
                 <li id="_ainfo"><a href="/User" class="hidden">Mijn account</a></li>
                 <li id="_reg"><a href="/Register">Aanmelden</a></li>
             </ul>
@@ -85,6 +85,7 @@
     </nav>
     <ul class="sidenav" id="mobile-demo">
         <li id="_mhome"><a href="/Home">Home</a></li>
+        <li id="_mevents"><a href="/Home/Events">Agenda</a></li>
         <li id="_mainfo"><a href="/User" class="hidden">Mijn account</a></li>
         <li id="_mreg"><a href="/Register">Aanmelden</a></li>
     </ul>

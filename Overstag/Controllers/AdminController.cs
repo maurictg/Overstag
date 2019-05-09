@@ -11,11 +11,14 @@ namespace Overstag.Controllers
 {
     public class AdminController : Controller
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() { return View(); }
+        public IActionResult Database() { return View(); }
+        public IActionResult Billing() { return View(); }
 
+        /// <summary>
+        /// Checks if the current user is the admin
+        /// </summary>
+        /// <returns>true or false</returns>
         private bool CheckforAdmin()
         {
             string token = HttpContext.Session.GetString("Token");
@@ -25,7 +28,10 @@ namespace Overstag.Controllers
                 return ((admin.Token == token) ? true : false);
             }
         }
-
+        /// <summary>
+        /// Creates the database if not exist
+        /// </summary>
+        /// <returns>string with info</returns>
         public string InitDB()
         {
             using(var context = new Overstag.Models.OverstagContext())
@@ -40,7 +46,10 @@ namespace Overstag.Controllers
                 }
             }
         }
-
+        /// <summary>
+        /// Deletes the full database
+        /// </summary>
+        /// <returns>string with info</returns>
         public string DeleteDB()
         {
             if (CheckforAdmin())
@@ -65,6 +74,10 @@ namespace Overstag.Controllers
             
         }
 
+        /// <summary>
+        /// List all events
+        /// </summary>
+        /// <returns>List(Event)</returns>
         public IActionResult Events()
         {
             using(var context = new OverstagContext())
@@ -74,6 +87,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds an event to the database
+        /// </summary>
+        /// <param name="e">A new event</param>
+        /// <returns>Json result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> postEvent(Event e)
         {
@@ -99,6 +117,11 @@ namespace Overstag.Controllers
             else { return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" }); }
         }
 
+        /// <summary>
+        /// Deletes an event from the database
+        /// </summary>
+        /// <param name="Id">the EventID</param>
+        /// <returns>Json result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<IActionResult> deleteEvent(int Id)
         {
@@ -126,14 +149,19 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// List all users in the database
+        /// </summary>
+        /// <returns>List(Account)</returns>
         public IActionResult Users()
         {
-            using (var context = new OverstagContext())
-            {
-                return View(context.Accounts.ToList());
-            }
+            using (var context = new OverstagContext()){ return View(context.Accounts.ToList()); }
         }
 
+        /// <summary>
+        /// GET all participators on an event including payment info, first and last name
+        /// </summary>
+        /// <returns>Dictionary(Event, Dictonary(Account,bool)) with the event, the user and the bool payed</Account></returns>
         public IActionResult Participators()
         {
             Dictionary<Event, Dictionary<Account,bool>> deelnemers = new Dictionary<Event, Dictionary<Account,bool>>();
@@ -159,11 +187,11 @@ namespace Overstag.Controllers
             return View(deelnemers);
         }
 
-        public IActionResult Database()
-        {
-            return View();
-        }
-
+        /// <summary>
+        /// fire SQL query's on the database. Must be an admin of course
+        /// </summary>
+        /// <param name="q">Query string</param>
+        /// <returns>JSON result, status = "success" including data or status = "error" including error</returns>
         [HttpPost]
         public async Task<IActionResult> Query(SQLQuery q)
         {
