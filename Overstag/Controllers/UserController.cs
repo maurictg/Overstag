@@ -171,6 +171,9 @@ namespace Overstag.Controllers
                 var cuser = context.Accounts.Where(x => x.Token == currentuser().Token).FirstOrDefault();
                 cuser.Firstname = a.Firstname;
                 cuser.Lastname = a.Lastname;
+                cuser.Adress = a.Adress;
+                cuser.Residence = a.Residence;
+                cuser.Postalcode = a.Postalcode;
                 //Check if email is in use
                 bool emailinuse = false;
                 try

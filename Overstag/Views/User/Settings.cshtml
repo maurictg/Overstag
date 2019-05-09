@@ -179,16 +179,9 @@
                         } else { $('#pwhelper').css('visibility', 'hidden'); }
                     });
                 },
+                //Gaat fout, login gaat ook fout
                 savechanges: function () {
-                     var info = {
-                         Firstname: $('#firstname').val(),
-                         Lastname: $('#lastname').val(),
-                         Email: $('#email').val(),
-                         Adress: $('#adress').val(),
-                         Postalcode: $('#postalcode').val(),
-                         Residence: $('#residence').val()
-                     };
-                     $.post("/User/postInfoChange", { info }, function (response) {
+                     $.post("/User/postInfoChange", { Firstname: $('#firstname').val(),Lastname: $('#lastname').val(),Email: $('#email').val(),Adress: $('#adress').val(),Postalcode: $('#postalcode').val(),Residence: $('#residence').val() }, function (response) {
                         if (response.status == 'success') {
                             M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
                             $('.checki').val('');

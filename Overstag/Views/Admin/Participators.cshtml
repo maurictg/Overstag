@@ -18,7 +18,7 @@
             {
                 <tr>
                     <td><b><h5>@e.Key.Title</h5></b></td>
-                    <td>@e.Key.Date@Html.Raw(" om ")@e.Key.Time</td>
+                    <td>@e.Key.Date@Html.Raw(" om ")@Convert.ToDateTime(e.Key.Time).ToShortTimeString()</td>
                     <td>
                         <table>
                             <thead>

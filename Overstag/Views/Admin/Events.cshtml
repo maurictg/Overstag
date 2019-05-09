@@ -27,8 +27,8 @@
                         <td>@e.Id</td>
                         <td>@e.Title</td>
                         <td>@e.Description</td>
-                        <td>@e.Date</td>
-                        <td>@e.Time</td>
+                        <td>@Convert.ToDateTime(e.Date).ToShortDateString()</td>
+                        <td>@Convert.ToDateTime(e.Time).ToShortTimeString()</td>
                         <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
                         <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">delete</a></td>
                     </tr>

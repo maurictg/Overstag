@@ -19,7 +19,7 @@
             double c = (double)e.Key.Cost;
             <tr>
                 <td>@e.Key.Title</td>
-                <td>@e.Key.Date om @e.Key.Time</td>
+                <td>@Convert.ToDateTime(e.Key.Date).ToLongDateString() om @Convert.ToDateTime(e.Key.Time).ToShortTimeString()</td>
                 <td>@e.Key.Description</td>
                 <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
                 <td>@(e.Value ? "Ja" : "Nee")</td>

@@ -18,7 +18,7 @@
             double c = (double)e.Cost;
         <tr>
             <td>@e.Title</td>
-            <td>@e.Date om @e.Time</td>
+            <td>@Convert.ToDateTime(e.Date).ToLongDateString() om @Convert.ToDateTime(e.Time).ToShortTimeString()</td>
             <td>@e.Description</td>
             <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
             <td><a onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>

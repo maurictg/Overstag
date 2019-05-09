@@ -112,7 +112,7 @@ namespace Overstag.Controllers
                         {
                             //Login is juist, redirect naar page, zet sessie variablen
                             HttpContext.Session.SetString("Token", account.Token);
-                            HttpContext.Session.SetString("Name",account.Firstname);
+                            HttpContext.Session.SetString("Name",account.Username);
                             return Json(new { status = "success" });
                         }
                         else { return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" }); }
