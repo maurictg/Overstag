@@ -15,14 +15,17 @@
     <tbody>
         @foreach (var e in Model)
         {
-            double c = (double)e.Cost;
-        <tr>
-            <td>@e.Title</td>
-            <td>@Convert.ToDateTime(e.Date).ToLongDateString() om @Convert.ToDateTime(e.Time).ToShortTimeString()</td>
-            <td>@e.Description</td>
-            <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-            <td><a onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>
-        </tr>
+            if (!Overstag.Core.General.DateIsPassed(e.Date))
+            {
+                double c = (double)e.Cost;
+                <tr>
+                    <td>@e.Title</td>
+                    <td>@Convert.ToDateTime(e.Date).ToLongDateString() om @Convert.ToDateTime(e.Time).ToShortTimeString()</td>
+                    <td>@e.Description</td>
+                    <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                    <td><a onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>
+                </tr>
+            }
         }
     </tbody>
 </table>

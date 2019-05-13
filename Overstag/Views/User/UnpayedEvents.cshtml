@@ -1,0 +1,31 @@
+﻿@model List<Overstag.Models.Event>
+@{
+    Layout = null;
+}
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Wat</th>
+                <th>Wanneer</th>
+                <th>Omschrijving</th>
+                <th>Kosten</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{double topay = 0; }
+            @foreach (var e in Model)
+            {
+                double c = (double)e.Cost;
+                topay += c;
+                <tr>
+                    <td>@e.Title</td>
+                    <td>@Convert.ToDateTime(e.Date).ToLongDateString() om @Convert.ToDateTime(e.Time).ToShortTimeString()</td>
+                    <td>@e.Description</td>
+                    <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                </tr>
+            }
+            <tr class="grey lighten-4">
+                <td colspan="4" class="center"><b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b></td>
+            </tr>
+        </tbody>
+    </table>

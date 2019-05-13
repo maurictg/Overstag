@@ -22,16 +22,19 @@
         <tbody>
             @{ foreach (var e in Model)
                 {
-                    double c = (double)e.Cost;
-                    <tr>
-                        <td>@e.Id</td>
-                        <td>@e.Title</td>
-                        <td>@e.Description</td>
-                        <td>@Convert.ToDateTime(e.Date).ToShortDateString()</td>
-                        <td>@Convert.ToDateTime(e.Time).ToShortTimeString()</td>
-                        <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                        <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">delete</a></td>
-                    </tr>
+                    if (!Overstag.Core.General.DateIsPassed(e.Date))
+                    {
+                        double c = (double)e.Cost;
+                        <tr>
+                            <td>@e.Id</td>
+                            <td>@e.Title</td>
+                            <td>@e.Description</td>
+                            <td>@Convert.ToDateTime(e.Date).ToShortDateString()</td>
+                            <td>@Convert.ToDateTime(e.Time).ToShortTimeString()</td>
+                            <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                            <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">delete</a></td>
+                        </tr>
+                    }
                 }
             }
         </tbody>

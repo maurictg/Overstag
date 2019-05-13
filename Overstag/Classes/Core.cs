@@ -7,6 +7,11 @@ using System.Net.Mail;
 
 namespace Overstag.Core
 {
+    public static class General
+    {
+        public static bool DateIsPassed(string check){return DateTime.Now.CompareTo(DateTime.Parse(check).Add(new TimeSpan(1,0, 0, 0))) > 0;}
+    }
+
     public static class Mail
     {
         public static string SendMail(string title, string body, string to)

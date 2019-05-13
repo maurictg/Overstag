@@ -13,7 +13,6 @@ namespace Overstag.Controllers
     {
         public IActionResult Index() { return View(); }
         public IActionResult Database() { return View(); }
-        public IActionResult Billing() { return View(); }
 
         /// <summary>
         /// Checks if the current user is the admin
@@ -82,7 +81,7 @@ namespace Overstag.Controllers
         {
             using(var context = new OverstagContext())
             {
-                List<Event> events = context.Events.ToList();
+                List<Event> events = context.Events.OrderBy(e => e.Date).ToList();
                 return View(events);
             }
         }
@@ -164,28 +163,65 @@ namespace Overstag.Controllers
         /// <returns>Dictionary(Event, Dictonary(Account,bool)) with the event, the user and the bool payed</Account></returns>
         public IActionResult Participators()
         {
-            Dictionary<Event, Dictionary<Account,bool>> deelnemers = new Dictionary<Event, Dictionary<Account,bool>>();
-            using (var context = new OverstagContext())
+            //ERROR!!!
+            try
             {
-                var participators = context.Participate.ToList();
-                var events = context.Events.ToList();
-
-                foreach(var eve in events)
+                Dictionary<Event, Dictionary<Account, bool>> deelnemers = new Dictionary<Event, Dictionary<Account, bool>>();
+                using (var context = new OverstagContext())
                 {
-                    var part = participators.Where(p => p.EventId == eve.Id);
-                    //Add users
-                    Dictionary<Account, bool> users = new Dictionary<Account, bool>();
-                    foreach(var p in part)
-                    {
-                        var account = context.Accounts.First(u => u.Id == p.UserId);
-                        users.Add(account,(p.Payed != 0));
-                    }
+                    var participators = context.Participate.ToList();
+                    var events = context.Events.OrderBy(e => e.Date).ToList();
 
-                    deelnemers.Add(eve, users);
+                    foreach (var eve in events)
+                    {
+                        var part = participators.Where(p => p.EventId == eve.Id);
+                        //Add users
+                        Dictionary<Account, bool> users = new Dictionary<Account, bool>();
+                        foreach (var p in part)
+                        {
+                            var account = context.Accounts.First(u => u.Id == p.UserId);
+                            users.Add(account, (p.Payed != 0));
+                        }
+
+                        deelnemers.Add(eve, users);
+                    }
+                }
+                return View(deelnemers);
+            }
+            catch(Exception e)
+            {
+                return Content(e.ToString());
+            }
+        }
+
+        public IActionResult Billing()
+        {
+            Dictionary<Account, List<Event>> unpayed = new Dictionary<Account, List<Event>>();
+            using(var context = new OverstagContext())
+            {
+                
+                var a = context.Accounts.ToList();
+                foreach(var e in a)
+                {
+                    List<Event> events = new List<Event>();
+                    var u = context.Participate.Where(b => b.UserId == e.Id).Where(p => p.Payed == 0).ToList();
+                    foreach(var i in u)
+                    {
+                        events.Add(context.Events.First(f => f.Id == i.EventId));
+                    }
+                    unpayed.Add(e, events);
                 }
             }
-            return View(deelnemers);
+
+            return View(unpayed);
         }
+
+        public IActionResult GenerateIvoices()
+        {
+            //En toen stond <3 Peet <3 opeens voor de deur :D
+            return null;
+        }
+
 
         /// <summary>
         /// fire SQL query's on the database. Must be an admin of course
@@ -218,17 +254,12 @@ namespace Overstag.Controllers
                                 {
                                     default:
                                         return Json(new {status = "error", error = "Geen table name gegeven" });
-                                        break;
                                     case "Accounts":
                                         return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).FirstOrDefault() });
-                                        break;
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).FirstOrDefault() });
-                                        break;
                                     case "Participate":
-                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });
-                                        break;
-                                    
+                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });                                    
                                 }
                             }
                             catch(Exception e)
@@ -245,16 +276,12 @@ namespace Overstag.Controllers
                                 {
                                     default:
                                         return Json(new { status = "error", error = "Geen table name gegeven" });
-                                        break;
                                     case "Accounts":
                                         return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).ToList() });
-                                        break;
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToList() });
-                                        break;
                                     case "Participate":
                                         return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToList() });
-                                        break;
                                 }
                             }
                             catch(Exception e)
@@ -270,16 +297,12 @@ namespace Overstag.Controllers
                                 {
                                     default:
                                         return Json(new { status = "error", error = "Geen table name gegeven" });
-                                        break;
                                     case "Accounts":
                                         return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).ToArray() });
-                                        break;
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToArray() });
-                                        break;
                                     case "Participate":
                                         return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToArray() });
-                                        break;
                                 }
                             }
                             catch (Exception e)

@@ -21,6 +21,7 @@ namespace Overstag.Controllers
 
         public IActionResult Settings(){return View(currentuser());}
         public IActionResult Events() { return View(); }
+        public IActionResult Payment() { return View(); }
 
         /// <summary>
         /// A partial view rendered into other views
@@ -42,6 +43,9 @@ namespace Overstag.Controllers
                         events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault(), (part.Payed == 0 ? false : true));
                     }
                 }
+
+                //Sorts the events
+                events = events.OrderBy(e => e.Key.Date).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
 
                 return View(events);
             }
@@ -252,8 +256,35 @@ namespace Overstag.Controllers
                 }
                 catch { return Json(new { status = "error", error = "Token bestaat niet" }); }
             }
+        }
 
+        /// <summary>
+        /// Get unpayed events
+        /// </summary>
+        /// <returns>List(event)</returns>
+        [Route("/User/Payment/Unpayed")]
+        public IActionResult UnpayedEvents()
+        {
+            using (var context = new OverstagContext())
+            {
+                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
+                List<Event> events = new List<Event>();
 
+                foreach (var part in parti)
+                {
+                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault()) && part != null)
+                    {
+                        if (part.Payed == 0)
+                        {
+                            events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault());
+                        }
+                    }
+                }
+
+                //Sorts the events
+                events = events.OrderBy(e => e.Date).ToList();
+                return View(events);
+            }
         }
 
     }

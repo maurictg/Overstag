@@ -1,9 +1,57 @@
-﻿@{
+﻿@model Dictionary<Overstag.Models.Account, List<Overstag.Models.Event>>
+@{
     Layout = "~/Views/_AdminLayout.cshtml";
     ViewBag.Title = "Betalingen";
 }
 <div class="center-align white-text">
-    <h3>Betalingen</h3>
+    <h3>Openstaande avonden per gebruiker</h3>
+    <br />
+    <table>
+        <thead>
+            <th>Naam</th>
+            <th>Openstaande avonden</th>
+        </thead>
+        <tbody>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.Key.Firstname@Html.Raw("&nbsp;")@item.Key.Lastname</td>
+                    <td>
+                        @if (item.Value.Count > 0)
+                        {
+                            <table>
+                                <thead>
+                                <th>Titel</th>
+                                <th>Kosten</th>
+                                </thead>
+                                <tbody>
+                                    @{ int val = 0; }
+                                    @foreach (var i in item.Value)
+                                    {
+                                        <tr>
+                                            <td>@i.Title</td>
+                                            <td>&euro;@Math.Round(Convert.ToDecimal(i.Cost) / 100, 2).ToString("F")</td>
+                                        </tr>
+                                        val += i.Cost;
+                                    }
+                                    
+                                    <tr class="grey darken-2">
+                                        <td colspan="3"><b>Totaal: &euro;@Math.Round(Convert.ToDecimal(val) / 100, 2).ToString("F")</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p>Geen openstaande betalingen</p>
+                        }
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h3>Openstaande facturen per gebruiker</h3>
 </div>
 <script>
     var Pay = {

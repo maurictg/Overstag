@@ -1,8 +1,7 @@
-﻿@model Dictionary<Overstag.Models.Event, bool>
-@{
+﻿@{
     Layout = "/Views/_UserLayout.cshtml";
     var context = new Overstag.Models.OverstagContext();
-    var model = context.Events.ToList();
+    var model = context.Events.OrderBy(e => e.Date).ToList();
 }
 <div>
     <h3 class="center-align">Agenda</h3>

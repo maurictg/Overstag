@@ -1,0 +1,26 @@
+﻿@{
+    Layout = "~/Views/_UserLayout.cshtml";
+    ViewBag.Title = "Betalingen";
+}
+
+<div>
+    <h3>Niet-verrekende avonden</h3>
+    <div id="unpayedevents">
+
+    </div>
+    <h3>Openstaande facturen</h3>
+</div>
+<script>
+    var Payment = {
+        init: function () {
+            Payment.loadpartial();
+            $('#_apay').addClass('active');
+            $('#_mapay').addClass('active');
+        },
+        loadpartial: function () {
+            $('#unpayedevents').load('/User/Payment/Unpayed');
+        }
+    }
+
+    Payment.init();
+</script>
