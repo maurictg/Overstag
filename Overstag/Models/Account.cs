@@ -15,8 +15,6 @@ namespace Overstag.Models
         public string Adress { get; set; }
         public string Postalcode { get; set; }
         public string Residence { get; set; }
-
-        //public List<Participate> Participants { get; set; } = new List<Participate>();
     }
 
     //NO DATABASE CLASS

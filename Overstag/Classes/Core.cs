@@ -9,7 +9,7 @@ namespace Overstag.Core
 {
     public static class General
     {
-        public static bool DateIsPassed(string check){return DateTime.Now.CompareTo(DateTime.Parse(check).Add(new TimeSpan(1,0, 0, 0))) > 0;}
+        public static bool DateIsPassed(DateTime check){return DateTime.Now.CompareTo(check.Add(new TimeSpan(1,0, 0, 0))) > 0;}
     }
 
     public static class Mail

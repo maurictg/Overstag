@@ -1,6 +1,7 @@
 ﻿@model List<Overstag.Models.Event>
 @{
     Layout = null;
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");    
 }
     <table class="responsive-table">
         <thead>
@@ -19,7 +20,7 @@
                 topay += c;
                 <tr>
                     <td>@e.Title</td>
-                    <td>@Convert.ToDateTime(e.Date).ToLongDateString() om @Convert.ToDateTime(e.Time).ToShortTimeString()</td>
+                    <td>@e.When.ToString("D",culture) om @e.When.ToString("t",culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
                 </tr>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
+using Overstag.Models.NoDB;
 
 
 namespace Overstag.Controllers
@@ -32,21 +33,45 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
-                Dictionary<Event, bool> events = new Dictionary<Event, bool>();
+                List<Event> events = new List<Event>();
                 events.Clear();
 
                 foreach(var part in parti)
                 {
-                    bool test = false;
-                    if(!events.TryGetValue(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault(),out test) && part != null)
+                    if(part != null)
                     {
-                        events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault(), (part.Payed == 0 ? false : true));
+                        events.Add(context.Events.First(e => e.Id == part.EventId));
+                    }
+                }
+                return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.OrderBy(e => e.When).ToList() });
+            }
+        }
+
+        /// <summary>
+        /// Get unpayed events
+        /// </summary>
+        /// <returns>List(event)</returns>
+        [Route("/User/Payment/Unpayed")]
+        public IActionResult UnpayedEvents()
+        {
+            using (var context = new OverstagContext())
+            {
+                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
+                List<Event> events = new List<Event>();
+
+                foreach (var part in parti)
+                {
+                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault()) && part != null)
+                    {
+                        if (part.Payed == 0)
+                        {
+                            events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault());
+                        }
                     }
                 }
 
                 //Sorts the events
-                events = events.OrderBy(e => e.Key.Date).ToDictionary((keyItem) => keyItem.Key, (valueItem) => valueItem.Value);
-
+                events = events.OrderBy(e => e.When).ToList();
                 return View(events);
             }
         }
@@ -258,34 +283,7 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// Get unpayed events
-        /// </summary>
-        /// <returns>List(event)</returns>
-        [Route("/User/Payment/Unpayed")]
-        public IActionResult UnpayedEvents()
-        {
-            using (var context = new OverstagContext())
-            {
-                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
-                List<Event> events = new List<Event>();
-
-                foreach (var part in parti)
-                {
-                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault()) && part != null)
-                    {
-                        if (part.Payed == 0)
-                        {
-                            events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault());
-                        }
-                    }
-                }
-
-                //Sorts the events
-                events = events.OrderBy(e => e.Date).ToList();
-                return View(events);
-            }
-        }
+        
 
     }
 }

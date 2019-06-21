@@ -1,6 +1,7 @@
 ﻿@model Dictionary<Overstag.Models.Event, Dictionary<Overstag.Models.Account,bool>>
 @{
     Layout = null;
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");    
 }
 <div>
     <br />
@@ -18,7 +19,7 @@
             {
                     <tr>
                         <td><b><h5>@e.Key.Title</h5></b></td>
-                        <td>@e.Key.Date@Html.Raw(" om ")@Convert.ToDateTime(e.Key.Time).ToShortTimeString()</td>
+                        <td>@e.Key.When.ToString("d",culture)@Html.Raw(" om ")@e.Key.When.ToString("t",culture)</td>
                         <td>
                             <table>
                                 <thead>

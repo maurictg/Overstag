@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Activiteiten";
     Layout = "/Views/_AdminLayout.cshtml";
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");    
 }
 
 <br />
@@ -22,15 +23,15 @@
         <tbody>
             @{ foreach (var e in Model)
                 {
-                    if (!Overstag.Core.General.DateIsPassed(e.Date))
+                    if (!Overstag.Core.General.DateIsPassed(e.When))
                     {
                         double c = (double)e.Cost;
                         <tr>
                             <td>@e.Id</td>
                             <td>@e.Title</td>
                             <td>@e.Description</td>
-                            <td>@Convert.ToDateTime(e.Date).ToShortDateString()</td>
-                            <td>@Convert.ToDateTime(e.Time).ToShortTimeString()</td>
+                            <td>@e.When.ToString("d",culture)</td>
+                            <td>@e.When.ToString("t",culture)</td>
                             <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
                             <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">delete</a></td>
                         </tr>
@@ -90,9 +91,8 @@
         post: function () {
             var data = {
                 Title : $('#ttitle').val(),
-                Description : $('#description').val(),
-                Date : $('#date').val(),
-                Time : $('#time').val(),
+                Description: $('#description').val(),
+                When: $('#date').val() + ' ' + $('#time').val(),
                 Cost : $('#cost').val()
             };
             $('#progbar').show();

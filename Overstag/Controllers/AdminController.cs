@@ -81,7 +81,7 @@ namespace Overstag.Controllers
         {
             using(var context = new OverstagContext())
             {
-                List<Event> events = context.Events.OrderBy(e => e.Date).ToList();
+                List<Event> events = context.Events.OrderBy(e => e.When).ToList();
                 return View(events);
             }
         }
@@ -101,7 +101,7 @@ namespace Overstag.Controllers
                      try
                      {
                          Event a = new Event();
-                         a.Title = e.Title; a.Description = e.Description; a.Date = e.Date; a.Time = e.Time; a.Cost = e.Cost; 
+                         a.Title = e.Title; a.Description = e.Description; a.When = e.When; a.Cost = e.Cost; 
                          context.Add(a);
                          await context.SaveChangesAsync();
                          return Json(new { status = "success" });
@@ -170,7 +170,7 @@ namespace Overstag.Controllers
                 using (var context = new OverstagContext())
                 {
                     var participators = context.Participate.ToList();
-                    var events = context.Events.OrderBy(e => e.Date).ToList();
+                    var events = context.Events.OrderBy(e => e.When).ToList();
 
                     foreach (var eve in events)
                     {

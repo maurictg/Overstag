@@ -17,7 +17,7 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 //Return sorted list
-                return View(context.Events.OrderBy(e => e.Date).ToList());
+                return View(context.Events.OrderBy(e => e.When).ToList());
             }
         }
         

@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "/Views/_UserLayout.cshtml";
     var context = new Overstag.Models.OverstagContext();
-    var model = context.Events.OrderBy(e => e.Date).ToList();
+    var model = context.Events.OrderBy(e => e.When).ToList();
 }
 <div>
     <h3 class="center-align">Agenda</h3>

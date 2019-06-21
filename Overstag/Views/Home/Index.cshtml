@@ -15,8 +15,7 @@
                 </li>
             </ul>
         </div>
-        <!--Hier informatie-->
-        <div id="part_info"></div>
+        
     </body>
 
 <script>
@@ -25,7 +24,6 @@
             //Maak knopje active
             $("#_home").addClass("active");
             $("#_mhome").addClass("active");
-            Home.loadpartial();
 
             //When user is redirected from login, toast message once
             /*if(localStorage.getItem("login")){
@@ -38,9 +36,7 @@
             }
         },
 
-        loadpartial: function () {
-            $('#part_info').load('/html/home_info.html');
-        }
+
     }
     //call init function
     Home.init();
