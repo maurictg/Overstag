@@ -110,10 +110,14 @@ namespace Overstag.Controllers
                         var account = context.Accounts.Where(e => e.Username == a.Username || e.Email == a.Username).FirstOrDefault();
                         if (Encryption.PBKDF2.Verify(account.Password, a.Password))
                         {
+                            string tfa = (string.IsNullOrEmpty(account.TwoFactor)) ? "no" : "yes";
                             //Login is juist, redirect naar page, zet sessie variablen
                             HttpContext.Session.SetString("Token", account.Token);
-                            HttpContext.Session.SetString("Name",account.Username);
-                            return Json(new { status = "success" });
+
+                            if(tfa=="no") //door de username niet te setten bij 2fa ben je alsnog niet ingelogd
+                                HttpContext.Session.SetString("Name",account.Username);
+
+                            return Json(new { status = "success", twofactor = tfa });
                         }
                         else { return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" }); }
                     }
@@ -212,5 +216,30 @@ namespace Overstag.Controllers
                 }
             }
         }
+
+        [HttpGet]
+        public JsonResult Generate2FA()
+        {
+            Security.TFA.Generate(HttpContext.Session.GetString("Token"));
+            return Json(new { status = "success" });
+        }
+
+        [HttpGet]
+        [Route("Register/Validate2FA/{code}")]
+        public JsonResult Validate2FA(string code)
+        {
+            if (Security.TFA.Validate(code))
+            {
+                using(var context = new OverstagContext())
+                {
+                    var a = context.Accounts.First(e => e.Token == HttpContext.Session.GetString("Token"));
+                    HttpContext.Session.SetString("Name", a.Username);
+                }
+                return Json(new { status = "success" });
+            }                
+            else
+                return Json(new { status = "error" });
+        }
+
     }
 }

@@ -360,5 +360,37 @@ namespace Overstag.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult Toggle2FA()
+        {
+            if (string.IsNullOrEmpty(currentuser().TwoFactor))
+            {
+                //aanzetten
+                string secret = Security.TFA.GenerateSecret(currentuser().Token);
+                return Json(new { status = "success", secret });
+            }
+            else
+            {
+                if (Security.TFA.Disable(currentuser().Token))
+                    return Json(new { status = "success", secret = "" });
+                else
+                    return Json(new { status = "error" });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get2FA()
+        {
+            if (!string.IsNullOrEmpty(currentuser().TwoFactor))
+            {
+                string secret = Security.TFA.GetSecret(currentuser().Token);
+                return Json(new { status = "success", secret });
+            }
+            else
+            {
+                return Json(new { status = "error", error = "2FA is niet ingeschakeld" });
+            }
+        }
+
     }
 }

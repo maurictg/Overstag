@@ -55,7 +55,7 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[2.2.3, )"
+              "version": "[2.2.4, )"
             },
             "Microsoft.NETCore.App": {
               "suppressParent": "All",
@@ -69,7 +69,15 @@
             },
             "MySql.Data.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.15, )"
+              "version": "[8.0.16, )"
+            },
+            "QRCoder": {
+              "target": "Package",
+              "version": "[1.3.5, )"
+            },
+            "TwoFactor": {
+              "target": "Package",
+              "version": "[1.0.1, )"
             }
           },
           "imports": [

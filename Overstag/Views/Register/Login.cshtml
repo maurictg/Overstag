@@ -17,7 +17,7 @@
                             <i class="material-icons prefix">lock</i>
                             <input type="password" class="checki" id="Password" placeholder="Wachtwoord" />
                             <label for="Password">Wachtwoord</label>
-                            <a href="#memailreset" class="modal-trigger" id="forgotpass" \>Wachtwoord vergeten?</a>
+                            <a href="#memailreset" class="modal-trigger" id="forgotpass">Wachtwoord vergeten?</a>
                         </div>
                         <a href="/Register/Register"><b>Geen account? Maak er hier een</b></a>
                         <div class="card-action center-align">
@@ -48,6 +48,19 @@
             <div class="modal-footer">
                 <a href="#!" class="modal-close waves-effect waves-red btn-flat">Annuleren</a>
                 <a href="#!" id="sendmailreset" class="waves-effect waves-green btn-flat">Verzenden</a>
+            </div>
+        </div>
+
+        <!-- Modal Structure -->
+        <div id="tfa" class="modal">
+            <div class="modal-content">
+                <h4>Tweetrapsvertificatie (2FA)</h4>
+                <h5>Open uw 2FA app, selecteer het account en type de 6-cijferige code in:</h5>
+                <input type="number" id="2facode" placeholder="000000"/>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-close waves-effect orange btn">Annuleren</a>
+                <a href="#!" class="waves-effect green btn" onclick="Login.validate2fa()">Verifiëren</a>
             </div>
         </div>
     </body>
@@ -84,6 +97,7 @@
                     $('#mailhelper').show();
                 }
             });
+
         },
 
         sendmail: function () {
@@ -127,7 +141,12 @@
                 if (response.status == 'success') {
                     if ($('#Username').val() == 'admin')
                         localStorage.setItem('redirect', '/Admin');
-                    Login.redirect();
+
+                    if (response.twofactor == 'yes') {
+                        Login.generate2fa();
+                    }
+                    else
+                        Login.redirect();
                 }
                 else {
                     //status = error
@@ -150,7 +169,28 @@
             else {
                 $(location).attr('href', '/User');
             }
-        } 
+        },
+
+        generate2fa: function () {
+            $.getJSON('/Register/Generate2FA', function (response) {
+                if (response.status == "success")
+                    M.Modal.getInstance($('#tfa')).open();
+            });
+        },
+
+        validate2fa: function () {
+            if ($('#2facode').val().length != 6)
+                M.toast({ html: 'Type aub een geldige code in', classes: 'orange rounded' });
+            else {
+                $.getJSON('/Register/Validate2FA/' + $('#2facode').val(), function (response) {
+                    if (response.status == 'success') {
+                        Login.redirect();
+                    } else {
+                        M.toast({ html: 'Validatie mislukt.', classes: 'red rounded' });
+                    }
+                });
+            }
+        },
 
     }
 
