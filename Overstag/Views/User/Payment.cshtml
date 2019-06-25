@@ -48,7 +48,7 @@
         @if (Model.UnfacturedEvents.Count() > 0)
         {
             <h6>&nbsp;Factuur genereren van ongefactureerde avonden</h6>
-            <a class="waves-effect waves-light btn" onclick="Payment.generateInvoice()">Factuur genereren</a>
+            <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger">Factuur genereren</a>
             <br /><br />
         }
         @if (Model.Invoices.Count() > 0)
@@ -85,7 +85,6 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @{ double totale = 0;}
                                     @foreach (var e in item.Events)
                                     {
                                         <tr>
@@ -93,11 +92,10 @@
                                             <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                                             <td>@e.Description</td>
                                             <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
-                                            @{ totale += (double)e.Cost;}
                                         </tr>
                                     }
 
-                                <td colspan="4" class="center-align white-text grey darken-1">Totaal: &euro;@Math.Round(totale / 100, 2).ToString("F")</td>
+                                <td colspan="4" class="center-align white-text grey darken-1">Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
                                 </tbody>
                             </table>
                         </div>
@@ -112,12 +110,13 @@
     </div>
 </div>
 
+<!-- Modals -->
 <div id="pay" class="modal">
     <div class="modal-content">
         <h4>Betalen</h4>
         <h6>Je kunt er voor kiezen om zelf te betalen of om deze betaallink naar iemand anders te sturen</h6>
         <input id="payid" type="text" placeholder="payid" data-pid="" />
-        <a class="btn btn-small" onclick="Payment.gotoPay()">Zelf betalen</a>
+        <a class="btn btn-small" onclick="Payment.gotoPay()">Nu zelf betalen</a>
         <a class="btn btn-small" onclick="Payment.copyPay()">Link kopiëren</a>
     </div>
     <div class="modal-footer">
@@ -125,6 +124,21 @@
     </div>
 </div>
 
+<div id="ginvoice" class="modal">
+    <div class="modal-content">
+        <h4>Factuur maken</h4>
+        <p>Wanneer je een factuur maakt, worden alle tot nu toe niet betaalde of gefactureerde avonden
+        (die staan hier boven) gefactureerd. Vervolgens kun je er zelf voor kiezen of je de factuur zelf, nu
+        of later, of door een ander laat betalen door middel van een betaallink.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="waves-effect waves-light btn modal-close orange">Laat maar</a>
+        <a href="#!" onclick="Payment.generateInvoice()" class="waves-effect waves-light btn modal-close green">Oké!</a>
+    </div>
+</div>
+
+<!--Script -->
 <script>
     var Payment = {
         init: function () {
@@ -143,7 +157,7 @@
         },
         getPay: function (payid) {
             $('#payid').data('pid', payid);
-            $('#payid').val('localhost:5000/Pay/Direct/'+payid);
+            $('#payid').val('localhost:5000/Pay/Direct/' + payid);
             M.Modal.getInstance($('#pay')).open();
         },
         gotoPay: function () {
@@ -152,7 +166,7 @@
         copyPay: function () {
             $('#payid').select();
             document.execCommand("copy");
-            M.toast({ html: "Link gekopieërd!" });
+            M.toast({ html: 'Link gekopieërd!', classes: 'blue' });
         }
     }
 

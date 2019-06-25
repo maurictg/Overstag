@@ -1,7 +1,7 @@
-﻿@model IEnumerable<Overstag.Models.Event>
+﻿@model Overstag.Models.Event[]
 @{
     ViewBag.Title = "Activiteiten";
-    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");      
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
 }
 <table class="responsive-table">
     <thead>
@@ -14,19 +14,25 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var e in Model)
+        @if (Model.Length > 0)
         {
-            if (!Overstag.Core.General.DateIsPassed(e.When))
+            @foreach (var e in Model)
             {
                 double c = (double)e.Cost;
                 <tr>
                     <td>@e.Title</td>
-                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t",culture)</td>
+                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
                     <td><a onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>
                 </tr>
             }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5"><h5>Nog geen activiteiten</h5></td>
+            </tr>
         }
     </tbody>
 </table>

@@ -92,7 +92,7 @@ namespace Overstag.Controllers
                         events.Add(context.Events.First(e => e.Id == part.EventId));
                     }
                 }
-                return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.OrderBy(e => e.When).ToList() });
+                return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.Where(e=>e.When>DateTime.Now).OrderBy(e => e.When).ToList() });
             }
         }
 

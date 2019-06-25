@@ -11,8 +11,10 @@
                 <div class="collapsible-header grey darken-4 white-text">
                     <i class="material-icons">calendar_today</i>
                     <b>@e.Event.Title</b> &nbsp;&nbsp;&nbsp; @e.Event.When.ToString("d", culture)@Html.Raw(" om ")@e.Event.When.ToString("t", culture)
+                    
                 </div>
                 <div class="collapsible-body grey darken-4 white-text">
+                    <p>Omschrijving: <b>@e.Event.Description</b> &nbsp;-&nbsp; Kosten: <b>&euro;@Math.Round((double)e.Event.Cost / 100, 2).ToString("F")</b></p>
                     <table>
                         <thead>
                             <tr>
@@ -27,7 +29,7 @@
                                 <tr>
                                     <td>@e.Accounts[i].Firstname</td>
                                     <td>@e.Accounts[i].Lastname</td>
-                                    <td>@Html.Raw((e.Factured[i])?"<span class='green-text'>Ja</span>":"<span class='red-text'>Nee</span>")</td>
+                                    <td>@Html.Raw((e.Factured[i]) ? "<span class='green-text'>Ja</span>" : "<span class='red-text'>Nee</span>")</td>
                                 </tr>
                             }
                         </tbody>

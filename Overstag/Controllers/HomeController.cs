@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Overstag.Models;
+using System;
 
 namespace Overstag.Controllers
 {
@@ -17,7 +18,7 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 //Return sorted list
-                return View(context.Events.OrderBy(e => e.When).ToList());
+                return View(context.Events.Where(e => e.When > DateTime.Now).OrderBy(e => e.When).ToArray());
             }
         }
         

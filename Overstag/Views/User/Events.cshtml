@@ -1,11 +1,11 @@
 ﻿@{
     Layout = "/Views/_UserLayout.cshtml";
     var context = new Overstag.Models.OverstagContext();
-    var model = context.Events.OrderBy(e => e.When).ToList();
+    var model = context.Events.Where(e=>e.When>DateTime.Now).OrderBy(e => e.When).ToArray();
 }
 <div>
     <h3 class="center-align">Agenda</h3>
-    @await Html.PartialAsync("~/Views/Home/Events.cshtml", model);
+    @await Html.PartialAsync("~/Views/Home/Events.cshtml", model)
 </div>
 <div>
     <h3 class="center-align">Inschrijvingen</h3>
