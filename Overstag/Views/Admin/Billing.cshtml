@@ -1,23 +1,24 @@
-﻿@model Dictionary<Overstag.Models.Account, List<Overstag.Models.Event>>
+﻿@model List<Overstag.Models.NoDB.AUnpayed>
 @{
     Layout = "~/Views/_AdminLayout.cshtml";
     ViewBag.Title = "Betalingen";
+    
 }
 <div class="center-align white-text">
-    <h3>Openstaande avonden per gebruiker</h3>
+    <h3>Ongefactureerde avonden per gebruiker</h3>
     <br />
     <table>
         <thead>
             <th>Naam</th>
-            <th>Openstaande avonden</th>
+            <th>Ongefactureerde avonden</th>
         </thead>
         <tbody>
             @foreach(var item in Model)
             {
                 <tr>
-                    <td>@item.Key.Firstname@Html.Raw("&nbsp;")@item.Key.Lastname</td>
+                    <td>@item.User.Firstname@Html.Raw("&nbsp;")@item.User.Lastname</td>
                     <td>
-                        @if (item.Value.Count > 0)
+                        @if (item.Unfactured_Events.Count > 0)
                         {
                             <table>
                                 <thead>
@@ -26,7 +27,7 @@
                                 </thead>
                                 <tbody>
                                     @{ int val = 0; }
-                                    @foreach (var i in item.Value)
+                                    @foreach (var i in item.Unfactured_Events)
                                     {
                                         <tr>
                                             <td>@i.Title</td>
@@ -43,15 +44,60 @@
                         }
                         else
                         {
-                            <p>Geen openstaande betalingen</p>
+                            <p>Geen ongefactureerde avonden</p>
                         }
-
                     </td>
                 </tr>
             }
         </tbody>
     </table>
     <h3>Openstaande facturen per gebruiker</h3>
+    <div id="facturen">
+        <table>
+            <thead>
+            <th>Naam</th>
+            <th>Openstaande facturen</th>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.User.Firstname@Html.Raw("&nbsp;")@item.User.Lastname</td>
+                        <td>
+                            @if (item.Unpayed_Invoices.Count > 0)
+                            {
+                                <table>
+                                    <thead>
+                                    <th>Titel</th>
+                                    <th>Kosten</th>
+                                    </thead>
+                                    <tbody>
+                                        @{ int val = 0; }
+                                        @foreach (var i in item.Unpayed_Invoices)
+                                        {
+                                            <tr>
+                                                <td>@i.Timestamp.ToShortDateString()</td>
+                                                <td>&euro;@Math.Round(Convert.ToDecimal(i.Amount) / 100, 2).ToString("F")</td>
+                                            </tr>
+                                            val += i.Amount;
+                                        }
+
+                                        <tr class="grey darken-2">
+                                            <td colspan="3"><b>Totaal: &euro;@Math.Round(Convert.ToDecimal(val) / 100, 2).ToString("F")</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <p>Geen openstaande facturen</p>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>
 <script>
     var Pay = {

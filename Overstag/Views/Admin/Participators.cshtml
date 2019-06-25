@@ -1,49 +1,45 @@
-﻿@model Dictionary<Overstag.Models.Event, Dictionary<Overstag.Models.Account,bool>>
+﻿@model List<Overstag.Models.NoDB.AParticipator>
 @{
     Layout = null;
-    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");    
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
 }
 <div>
-    <br />
-    <table>
-        <thead>
-            <tr>
-                <th>Wat</th>
-                <th>Wanneer</th>
-                <th>Deelnemers</th>
-                <th>Aantal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var e in Model)
-            {
-                    <tr>
-                        <td><b><h5>@e.Key.Title</h5></b></td>
-                        <td>@e.Key.When.ToString("d",culture)@Html.Raw(" om ")@e.Key.When.ToString("t",culture)</td>
-                        <td>
-                            <table>
-                                <thead>
-                                <th>Naam</th>
+    <ul class="collapsible grey darken-4 white-text">
+        @foreach (var e in Model.ToArray().Reverse())
+        {
+            <li>
+                <div class="collapsible-header grey darken-4 white-text">
+                    <i class="material-icons">calendar_today</i>
+                    <b>@e.Event.Title</b> &nbsp;&nbsp;&nbsp; @e.Event.When.ToString("d", culture)@Html.Raw(" om ")@e.Event.When.ToString("t", culture)
+                </div>
+                <div class="collapsible-body grey darken-4 white-text">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Voornaam</th>
                                 <th>Achternaam</th>
-                                <th>Betaald</th>
-                                </thead>
-                                <tbody>
-                                    @foreach (var user in e.Value)
-                                    {
-                                        <tr>
-                                            <td>@user.Key.Firstname</td>
-                                            <td>@user.Key.Lastname</td>
-                                            <td class=@(user.Value ? "green-text" : "red-text")>@(user.Value ? "Ja" : "Nee")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </td>
-                        <td><b>@e.Value.Count().ToString()</b></td>
-                    </tr>
-            }
-
-        </tbody>
-    </table>
+                                <th>Gefactureerd</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < e.Accounts.Length; i++)
+                            {
+                                <tr>
+                                    <td>@e.Accounts[i].Firstname</td>
+                                    <td>@e.Accounts[i].Lastname</td>
+                                    <td>@Html.Raw((e.Factured[i])?"<span class='green-text'>Ja</span>":"<span class='red-text'>Nee</span>")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+        }
+    </ul>
 </div>
 
+<script>
+    $(document).ready(function () {
+        $('.collapsible').collapsible();
+    });
+</script>

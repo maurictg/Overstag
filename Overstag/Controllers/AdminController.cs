@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Overstag.Models.NoDB;
 using Overstag.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
@@ -163,63 +164,75 @@ namespace Overstag.Controllers
         /// <returns>Dictionary(Event, Dictonary(Account,bool)) with the event, the user and the bool payed</Account></returns>
         public IActionResult Participators()
         {
-            //ERROR!!!
-            try
+            List<AParticipator> aPart = new List<AParticipator>();
+            using(var context = new OverstagContext())
             {
-                Dictionary<Event, Dictionary<Account, bool>> deelnemers = new Dictionary<Event, Dictionary<Account, bool>>();
-                using (var context = new OverstagContext())
+                var events = context.Events.OrderBy(e => e.When).ToArray();
+                var participators = context.Participate.ToArray();
+
+                foreach(var e in events)
                 {
-                    var participators = context.Participate.ToList();
-                    var events = context.Events.OrderBy(e => e.When).ToList();
+                    List<Account> Users = new List<Account>();
+                    List<bool> Factured = new List<bool>();
+                    var parti = participators.Where(o => o.EventId == e.Id);
 
-                    foreach (var eve in events)
+                    foreach(var p in parti)
                     {
-                        var part = participators.Where(p => p.EventId == eve.Id);
-                        //Add users
-                        Dictionary<Account, bool> users = new Dictionary<Account, bool>();
-                        foreach (var p in part)
-                        {
-                            var account = context.Accounts.First(u => u.Id == p.UserId);
-                            users.Add(account, (p.Payed != 0));
-                        }
-
-                        deelnemers.Add(eve, users);
+                        Users.Add(context.Accounts.First(u => u.Id == p.UserId));
+                        Factured.Add(p.Payed==1);
                     }
+
+                    aPart.Add(new AParticipator()
+                    {
+                        Accounts = Users.ToArray(),
+                        Factured = Factured.ToArray(),
+                        Event = e
+                    });
                 }
-                return View(deelnemers);
             }
-            catch(Exception e)
-            {
-                return Content(e.ToString());
-            }
+            return View(aPart.OrderBy(e => e.Event.When).ToList());
         }
 
         public IActionResult Billing()
         {
-            Dictionary<Account, List<Event>> unpayed = new Dictionary<Account, List<Event>>();
-            using(var context = new OverstagContext())
+            List<AUnpayed> aus = new List<AUnpayed>();
+
+            using (var context = new OverstagContext())
             {
-                
-                var a = context.Accounts.ToList();
-                foreach(var e in a)
+                foreach (var user in context.Accounts)
                 {
                     List<Event> events = new List<Event>();
-                    var u = context.Participate.Where(b => b.UserId == e.Id).Where(p => p.Payed == 0).ToList();
-                    foreach(var i in u)
+                    var parti = context.Participate.Where(p => p.UserId == user.Id);
+                    foreach (var part in parti)
                     {
-                        events.Add(context.Events.First(f => f.Id == i.EventId));
+                        var eve = context.Events.First(e => e.Id == part.EventId);
+                        if (part.Payed == 0)
+                        {
+                            if (Core.General.DateIsPassed(eve.When))
+                                events.Add(eve);
+                        }
                     }
-                    unpayed.Add(e, events);
+
+                    aus.Add(new AUnpayed
+                    {
+                        User = user,
+                        Unfactured_Events = events,
+                        Unpayed_Invoices = context.Invoices.Where(f => f.UserID==user.Id&&f.Payed==0).ToList()
+                    });
                 }
             }
+            
 
-            return View(unpayed);
+            return View(aus);
         }
 
-        public IActionResult GenerateIvoices()
+        public IActionResult GenerateInvoices()
         {
             //En toen stond <3 Peet <3 opeens voor de deur :D
             return null;
+            //Maak facturen als gebruiker dat nog niet zelf heeft gedaan.
+            //Als er een factuur bestaat, moet bool payed = true zijn bij avond, en false bij factuur
+            //Knopje bij openstaande facturen "genereren" zowel bij admin als bij user
         }
 
 

@@ -1,26 +1,165 @@
-﻿@{
+﻿@model Overstag.Models.NoDB.UnpayedEvents
+@{
     Layout = "~/Views/_UserLayout.cshtml";
     ViewBag.Title = "Betalingen";
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
 }
 
 <div>
-    <h3>Niet-verrekende avonden</h3>
+    <h3>Niet-gefactureerde avonden</h3>
     <div id="unpayedevents">
-
+        @if (Model.UnfacturedEvents.Count() > 0)
+        {
+            <table class="responsive-table">
+                <thead>
+                    <tr>
+                        <th>Wat</th>
+                        <th>Wanneer</th>
+                        <th>Omschrijving</th>
+                        <th>Kosten</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{double topay = 0; }
+                    @foreach (var e in Model.UnfacturedEvents)
+                    {
+                        double c = (double)e.Cost;
+                        topay += c;
+                        <tr>
+                            <td>@e.Title</td>
+                            <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                            <td>@e.Description</td>
+                            <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                        </tr>
+                    }
+                    <tr class="grey lighten-4">
+                        <td colspan="4" class="center"><b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b></td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <h5>Geen ongefactureerde avonden!</h5>
+        }
     </div>
-    <h3>Openstaande facturen</h3>
+    <h3>Facturen</h3>
+    <div id="factures">
+        @if (Model.UnfacturedEvents.Count() > 0)
+        {
+            <h6>&nbsp;Factuur genereren van ongefactureerde avonden</h6>
+            <a class="waves-effect waves-light btn" onclick="Payment.generateInvoice()">Factuur genereren</a>
+            <br /><br />
+        }
+        @if (Model.Invoices.Count() > 0)
+        {
+            <ul class="collapsible">
+                @foreach (var item in Model.Invoices)
+                {
+                    <li>
+                        <div class="collapsible-header">
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><i class="material-icons">calendar_today</i>@item.Timestamp.ToString("d", culture)</td>
+                                        <td>Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
+                                        <td>Betaald: @Html.Raw((item.Payed) ? "<b class='green-text'>Ja</b>" : "<b class='red-text'>Nee</b>")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="collapsible-body">
+                            @if (!item.Payed)
+                            {
+                                <a class="waves-effect waves-light btn" onclick="Payment.getPay('@item.PayID')">Betalen</a>
+                                <br />
+                            }
+
+                            <table class="responsive-table">
+                                <thead>
+                                    <tr>
+                                        <th>Wat</th>
+                                        <th>Wanneer</th>
+                                        <th>Omschrijving</th>
+                                        <th>Kosten</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ double totale = 0;}
+                                    @foreach (var e in item.Events)
+                                    {
+                                        <tr>
+                                            <td>@e.Title</td>
+                                            <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                            <td>@e.Description</td>
+                                            <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                            @{ totale += (double)e.Cost;}
+                                        </tr>
+                                    }
+
+                                <td colspan="4" class="center-align white-text grey darken-1">Totaal: &euro;@Math.Round(totale / 100, 2).ToString("F")</td>
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <h5>Geen facturen gevonden</h5><br />
+        }
+    </div>
 </div>
+
+<div id="pay" class="modal">
+    <div class="modal-content">
+        <h4>Betalen</h4>
+        <h6>Je kunt er voor kiezen om zelf te betalen of om deze betaallink naar iemand anders te sturen</h6>
+        <input id="payid" type="text" placeholder="payid" data-pid="" />
+        <a class="btn btn-small" onclick="Payment.gotoPay()">Zelf betalen</a>
+        <a class="btn btn-small" onclick="Payment.copyPay()">Link kopiëren</a>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Sluiten</a>
+    </div>
+</div>
+
 <script>
     var Payment = {
         init: function () {
-            Payment.loadpartial();
             $('#_apay').addClass('active');
             $('#_mapay').addClass('active');
         },
-        loadpartial: function () {
-            $('#unpayedevents').load('/User/Payment/Unpayed');
+        generateInvoice: function () {
+            $.getJSON('/User/GenerateInvoice', function (data) {
+                if (data.status == 'success') {
+                    M.toast({ html: 'Factuur gemaakt', classes: 'green' })
+                    window.location.reload();
+                } else {
+                    M.toast({ html: data.error, classes: 'red' })
+                }
+            });
+        },
+        getPay: function (payid) {
+            $('#payid').data('pid', payid);
+            $('#payid').val('localhost:5000/Pay/Direct/'+payid);
+            M.Modal.getInstance($('#pay')).open();
+        },
+        gotoPay: function () {
+            window.location.href = '/Pay/Direct/' + $('#payid').data('pid');
+        },
+        copyPay: function () {
+            $('#payid').select();
+            document.execCommand("copy");
+            M.toast({ html: "Link gekopieërd!" });
         }
     }
 
     Payment.init();
+
+    $(document).ready(function () {
+        $('.collapsible').collapsible();
+        $('.modal').modal();
+    });
 </script>

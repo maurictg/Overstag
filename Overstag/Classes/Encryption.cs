@@ -11,11 +11,12 @@ namespace Overstag.Encryption
         private static System.Random rnd = new System.Random();
         public static string rString (int length)
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
             return new string(Enumerable.Repeat(chars, length)
               .Select(s => s[rnd.Next(s.Length)]).ToArray());
         }
         public static int rInt(int min, int max){return rnd.Next(min, max);}
+        public static string rHash(string seed) { return PBKDF2.Hash(seed + rString(6)).Replace("/","").Replace("?",""); }
     }
     public static class SHA
     {
@@ -33,98 +34,106 @@ namespace Overstag.Encryption
     }
     public static class PBKDF2
     {
-        const string PEPPER = "ohgouhjkgukdftkfyjhjlG#*YJSJEIGE%UH(";
-        const int DEFAULT_ITERATIONS = 50000;
-        const int DEFAULT_LENGTH = 32;
+        private const int defaultIterations = 10000;
+        private const int defaultLength = 16;
 
         /// <summary>
         /// Hash a string with PBKDF2.
         /// </summary>
-        /// <param name="Input">String to hash</param>
-        /// <param name="Iterations">Rounds PBKDF2 will make to genarete the hash</param>
-        /// <param name="Length">Lenth of the hash, the output will also contains the salt</param>
+        /// <param name="input">String to hash</param>
+        /// <param name="iterations">Rounds PBKDF2 will make to genarete the hash</param>
+        /// <param name="length">Lenth of the hash, the output will also contains the salt</param>
         /// <returns>The generated salt+hash</returns>
-        public static string Hash(string Input, int Iterations = DEFAULT_ITERATIONS, int Length = DEFAULT_LENGTH)
+        public static string Hash(string input, int iterations = defaultIterations, int length = defaultLength)
         {
-            if (string.IsNullOrEmpty(Input)) throw new ArgumentException("Could not hash input: Input is empty.");
-            else if (Iterations <= 0) throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or 0.");
-            else if (Length <= 0) throw new ArgumentOutOfRangeException("Could not hash input: Length can't be negative or 0.");
+            if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Could not hash input: Input is empty.");
+            else if (iterations <= 0)
+                throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or 0.");
+            else if (length <= 0)
+                throw new ArgumentOutOfRangeException("Could not hash input: Length can't be negative or 0.");
 
             //Create salt of 16 byte's.
-            byte[] Salt = new byte[16];
-            new RNGCryptoServiceProvider().GetBytes(Salt);
+            byte[] salt = new byte[16];
+            new RNGCryptoServiceProvider().GetBytes(salt);
 
-            //Create hash of (Length) byte's.
-            byte[] Hash = new Rfc2898DeriveBytes(PEPPER+Input, Salt, Iterations).GetBytes(Length);
+            //Create hash of [length] byte's.
+            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
 
             //Combine salt and hash.
-            byte[] CombinedBytes = new byte[16 + Length];
-            Buffer.BlockCopy(Salt, 0, CombinedBytes, 0, 16);
-            Buffer.BlockCopy(Hash, 0, CombinedBytes, 16, Length);
+            byte[] combinedBytes = new byte[16 + length];
+            Buffer.BlockCopy(salt, 0, combinedBytes, 0, 16);//Add salt.
+            Buffer.BlockCopy(hash, 0, combinedBytes, 16, length);//Add hash.
 
-            //Return CombinedBytes as base64 string.
-            return Convert.ToBase64String(CombinedBytes);
+            //Return combinedBytes as base64 string.
+            return Convert.ToBase64String(combinedBytes);
         }
 
         /// <summary>
         /// Hash a byte[] with PBKDF2.
         /// </summary>
-        /// <param name="Input">Byte[] to hash</param>
-        /// <param name="Iterations">Rounds PBKDF2 will make to genarete the hash</param>
-        /// <param name="Length">Lenth of the hash, the output will also contains the salt</param>
+        /// <param name="input">Byte[] to hash</param>
+        /// <param name="iterations">Rounds PBKDF2 will make to genarete the hash</param>
+        /// <param name="length">Lenth of the hash, the output will also contains the salt</param>
         /// <returns>The generated salt+hash</returns>
-        public static byte[] Hash(byte[] Input, int Iterations = DEFAULT_ITERATIONS, int Length = DEFAULT_LENGTH)
+        public static byte[] Hash(byte[] input, int iterations = defaultIterations, int length = defaultLength)
         {
-            if (Input == null) throw new ArgumentNullException("Could not hash input: Input is null.");
-            else if (Iterations <= 0) throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or 0.");
-            else if (Length <= 0) throw new ArgumentOutOfRangeException("Could not hash input: Length can't be negative or 0.");
+            if (input == null)
+                throw new ArgumentNullException("Could not hash input: Input is null.");
+            else if (iterations <= 0)
+                throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or 0.");
+            else if (length <= 0)
+                throw new ArgumentOutOfRangeException("Could not hash input: Length can't be negative or 0.");
 
             //Create salt of 16 byte's.
-            byte[] Salt = new byte[16];
-            new RNGCryptoServiceProvider().GetBytes(Salt);
+            byte[] salt = new byte[16];
+            new RNGCryptoServiceProvider().GetBytes(salt);
 
-            //Create hash of 20 byte's.
-            byte[] Hash = new Rfc2898DeriveBytes(Input, Salt, Iterations).GetBytes(Length);
+            //Create hash of [length] byte's.
+            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
 
             //Combine salt and hash.
-            byte[] CombinedBytes = new byte[16 + Length];
-            Buffer.BlockCopy(Salt, 0, CombinedBytes, 0, 16);
-            Buffer.BlockCopy(Hash, 0, CombinedBytes, 16, Length);
+            byte[] combinedBytes = new byte[16 + length];
+            Buffer.BlockCopy(salt, 0, combinedBytes, 0, 16);//Add salt.
+            Buffer.BlockCopy(hash, 0, combinedBytes, 16, length);//Add hash.
 
-            //Return CombinedBytes;
-            return CombinedBytes;
+            //Return combinedBytes;
+            return combinedBytes;
         }
 
         /// <summary>
         /// Compare hashed string with another string.
         /// </summary>
-        /// <param name="HashedInput">Hashed string</param>
-        /// <param name="Input">String to compare with HashedInput</param>
-        /// <param name="Iterations">Rounds PBKDF2 made to generate HashedInput</param>
-        /// <returns>boolean, true if HashedInput is the same as Input</returns>
-        public static bool Verify(string HashedInput, string Input, int Iterations = DEFAULT_ITERATIONS)
+        /// <param name="hashedInput">Hashed string</param>
+        /// <param name="input">String to compare with hashedInput</param>
+        /// <param name="iterations">Rounds PBKDF2 made to generate hashedInput</param>
+        /// <returns>boolean, true if hashedInput is the same as input</returns>
+        public static bool Verify(string hashedInput, string input, int iterations = defaultIterations)
         {
-            if (string.IsNullOrEmpty(Input)) throw new ArgumentException("Could not hash input: HashedInput is empty.");
-            else if (string.IsNullOrEmpty(Input)) throw new ArgumentException("Could not hash input: Input is empty.");
-            else if (Iterations <= 0) throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or null.");
+            if (string.IsNullOrEmpty(hashedInput))
+                throw new ArgumentException("Could not hash input: HashedInput is empty.");
+            else if (string.IsNullOrEmpty(input))
+                throw new ArgumentException("Could not hash input: Input is empty.");
+            else if (iterations <= 0)
+                throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or 0.");
 
-            //Get byte's from HashedInput.
-            byte[] HashedBytes = Convert.FromBase64String(HashedInput);
+            //Get byte's from hashedInput.
+            byte[] hashedBytes = Convert.FromBase64String(hashedInput);
 
             //Get the length of the hash.
-            int Length = HashedBytes.Length - 16;
-            Console.WriteLine(Length);
+            int length = hashedBytes.Length - 16;
 
-            //Get the salt from HashedInputBytes.
-            byte[] Salt = new byte[16];
-            Buffer.BlockCopy(HashedBytes, 0, Salt, 0, 16);
+            //Get the salt from hashedBytes.
+            byte[] salt = new byte[16];
+            Buffer.BlockCopy(hashedBytes, 0, salt, 0, 16);
 
-            //Generate hash of Input, to compare it with HashedInput
-            byte[] Hash = new Rfc2898DeriveBytes(PEPPER + Input, Salt, Iterations).GetBytes(Length);
+            //Generate hash of input, to compare it with hashedBytes
+            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
 
             //Compare the result's.
-            for (int i = 0; i < Length; i++)
-                if (HashedBytes[i + 16] != Hash[i]) return false;
+            for (int i = 0; i < length; i++)
+                if (hashedBytes[i + 16] != hash[i])
+                    return false;
 
             return true;
         }
@@ -132,33 +141,33 @@ namespace Overstag.Encryption
         /// <summary>
         /// Compare hashed byte[] with another byte[].
         /// </summary>
-        /// <param name="HashedInput">Hashed string</param>
-        /// <param name="Input">String to compare with HashedInput</param>
-        /// <param name="Iterations">Rounds PBKDF2 made to generate HashedInput</param>
-        /// <returns>boolean, true if HashedInput is the same as Input</returns>
-        public static bool Verify(byte[] HashedInput, byte[] Input, int Iterations = DEFAULT_ITERATIONS)
+        /// <param name="hashedBytes">Hashed byte[]</param>
+        /// <param name="input">byte[] to compare with hashedBytes</param>
+        /// <param name="iterations">Rounds PBKDF2 made to generate hashedBytes</param>
+        /// <returns>boolean, true if hashedBytes is the same as input</returns>
+        public static bool Verify(byte[] hashedBytes, byte[] input, int iterations = defaultIterations)
         {
-            if (HashedInput == null) throw new ArgumentException("Could not hash input: HashedInput is empty.");
-            else if (Input == null) throw new ArgumentException("Could not hash input: Input is empty.");
-            else if (Iterations <= 0) throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or null.");
-
-            //Get byte's from HashedInput.
-            byte[] HashedBytes = HashedInput;
+            if (hashedBytes == null)
+                throw new ArgumentException("Could not hash input: hashedBytes is null.");
+            else if (input == null)
+                throw new ArgumentException("Could not hash input: Input is empty.");
+            else if (iterations <= 0)
+                throw new ArgumentOutOfRangeException("Could not hash input: Iterations can't be negative or null.");
 
             //Get the length of the hash.
-            int Length = HashedBytes.Length - 16;
-            Console.WriteLine(Length);
+            int length = hashedBytes.Length - 16;
 
             //Get the salt from HashedInputBytes.
-            byte[] Salt = new byte[16];
-            Buffer.BlockCopy(HashedBytes, 0, Salt, 0, 16);
+            byte[] salt = new byte[16];
+            Buffer.BlockCopy(hashedBytes, 0, salt, 0, 16);
 
-            //Generate hash of Input, to compare it with HashedInput
-            byte[] Hash = new Rfc2898DeriveBytes(Input, Salt, Iterations).GetBytes(Length);
+            //Generate hash of Input, to compare it with hashedBytes.
+            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
 
             //Compare the result's.
-            for (int i = 0; i < Length; i++)
-                if (HashedBytes[i + 16] != Hash[i]) return false;
+            for (int i = 0; i < length; i++)
+                if (hashedBytes[i + 16] != hash[i])
+                    return false;
 
             return true;
         }

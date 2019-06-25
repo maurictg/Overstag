@@ -1,14 +1,16 @@
-﻿namespace Overstag.Models
+﻿using System;
+
+namespace Overstag.Models
 {
-    public class Billing
+    public class Invoice
     {
         public int Id { get; set; }
         public int UserID { get; set; }
         public int Amount { get; set; }
-        public string Timestamp { get; set; }
-        //List met avonden? of in view genereren?
-        public int[] EventIDs { get; set; }
-        public bool Payed { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string EventIDs { get; set; }
+        public int Payed { get; set; }
+        public string PayID { get; set; }
 
     }
 }

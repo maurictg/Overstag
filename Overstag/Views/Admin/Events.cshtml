@@ -21,21 +21,21 @@
             </tr>
         </thead>
         <tbody>
-            @{ foreach (var e in Model)
+
+            @foreach (var e in Model)
+            {
+                @if (!Overstag.Core.General.DateIsPassed(e.When))
                 {
-                    if (!Overstag.Core.General.DateIsPassed(e.When))
-                    {
-                        double c = (double)e.Cost;
-                        <tr>
-                            <td>@e.Id</td>
-                            <td>@e.Title</td>
-                            <td>@e.Description</td>
-                            <td>@e.When.ToString("d",culture)</td>
-                            <td>@e.When.ToString("t",culture)</td>
-                            <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                            <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">delete</a></td>
-                        </tr>
-                    }
+                    double c = (double)e.Cost;
+                    <tr>
+                        <td>@e.Id</td>
+                        <td>@e.Title</td>
+                        <td>@e.Description</td>
+                        <td>@e.When.ToString("d", culture)</td>
+                        <td>@e.When.ToString("t", culture)</td>
+                        <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                        <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">Verwijderen</a></td>
+                    </tr>
                 }
             }
         </tbody>

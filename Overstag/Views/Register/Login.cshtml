@@ -125,6 +125,8 @@
             $('#progbar').show();
             $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
+                    if ($('#Username').val() == 'admin')
+                        localStorage.setItem('redirect', '/Admin');
                     Login.redirect();
                 }
                 else {

@@ -211,6 +211,10 @@
                 },
                 delaccount: function () {
                     var pass = prompt('Typ je wachtwoord in om door te gaan');
+
+                    if (pass == null || pass == '')
+                        return;
+
                     if (confirm('Account verwijderen? Zeker weten?')) {
                         $.post("/User/postDeleteAccount", { Token: '@Model.Token', Password: pass }, function (response) {
                             if (response.status == 'success') {

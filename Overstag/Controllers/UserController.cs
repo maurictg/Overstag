@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
-using Overstag.Models.NoDB;
 
 
 namespace Overstag.Controllers
@@ -22,7 +21,57 @@ namespace Overstag.Controllers
 
         public IActionResult Settings(){return View(currentuser());}
         public IActionResult Events() { return View(); }
-        public IActionResult Payment() { return View(); }
+        public IActionResult Payment() {
+
+            using (var context = new OverstagContext())
+            {
+                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
+                List<Event> events = new List<Event>();
+
+                foreach (var part in parti)
+                {
+                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault()) && part != null)
+                    {
+                        if (part.Payed == 0)
+                        {
+                            var e2 = context.Events.Where(e => e.Id == part.EventId).FirstOrDefault();
+                            if(Core.General.DateIsPassed(e2.When))
+                                events.Add(e2);
+                        }
+                    }
+                }
+
+                var invoices = context.Invoices.Where(i => i.UserID == currentuser().Id).OrderBy(v => v.Payed);
+                List<Models.NoDB.IInvoice> Inv = new List<Models.NoDB.IInvoice>();
+
+                foreach(var i in invoices)
+                {
+                    List<Event> events1 = new List<Event>();
+
+                    foreach (var e in i.EventIDs.Split(','))
+                        events1.Add(context.Events.First(j => j.Id == Convert.ToInt32(e)));
+
+                    Inv.Add(new Models.NoDB.IInvoice
+                    {
+                        Payed = (i.Payed == 1),
+                        Amount = i.Amount,
+                        Events = events1,
+                        Timestamp = i.Timestamp,
+                        UserID = i.UserID,
+                        PayID = i.PayID
+                    });
+                }
+
+                var data = new Overstag.Models.NoDB.UnpayedEvents
+                {
+                    UnfacturedEvents = events = events.OrderBy(e => e.When).ToList(),
+                    Invoices = Inv
+                };
+
+                return View(data);
+            }
+        }
+
 
         /// <summary>
         /// A partial view rendered into other views
@@ -47,34 +96,7 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// Get unpayed events
-        /// </summary>
-        /// <returns>List(event)</returns>
-        [Route("/User/Payment/Unpayed")]
-        public IActionResult UnpayedEvents()
-        {
-            using (var context = new OverstagContext())
-            {
-                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
-                List<Event> events = new List<Event>();
-
-                foreach (var part in parti)
-                {
-                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault()) && part != null)
-                    {
-                        if (part.Payed == 0)
-                        {
-                            events.Add(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault());
-                        }
-                    }
-                }
-
-                //Sorts the events
-                events = events.OrderBy(e => e.When).ToList();
-                return View(events);
-            }
-        }
+       
 
         /// <summary>
         /// Adds an subscription to the user for an upcoming event
@@ -170,6 +192,7 @@ namespace Overstag.Controllers
                     try
                     {
                         cuser.Password = Encryption.PBKDF2.Hash(p.Newpass);
+                        cuser.Token = Encryption.Random.rHash(Encryption.SHA.S256(cuser.Firstname) + cuser.Username);
                         context.Update(cuser);
                         await context.SaveChangesAsync();
                         return Json(new { status = "success" });
@@ -250,10 +273,16 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    
                     var account = context.Accounts.Where(e => e.Token == a.Token).FirstOrDefault();
+
+                    if (currentuser().Username != "admin" && currentuser().Username != account.Username)
+                        return Json(new { status = "error", error = "Mislukt door authenticatiefout!" });
+
                     if (Encryption.PBKDF2.Verify(account.Password, a.Password))
                     {
+                        if (context.Invoices.Where(i => i.UserID == account.Id && i.Payed == 0).Count() > 0)
+                            return Json(new { status = "error", error = "U heeft nog onbetaalde facturen openstaan." });
+
                         try
                         {
                             //Ingeschreven events verwijderen
@@ -283,7 +312,52 @@ namespace Overstag.Controllers
             }
         }
 
-        
+        [HttpGet]
+        public JsonResult GenerateInvoice()
+        {
+            using (var context = new OverstagContext())
+            {
+                var parti = context.Participate.Where(i => i.UserId == currentuser().Id && i.Payed == 0);
+
+                if (parti.Count() < 1)
+                    return Json(new { status = "error", error = "Geen openstaande events gevonden" });
+
+                List<int> eventIDS = new List<int>();
+
+                int bill = 0;
+
+                try {
+
+                    foreach (var part in parti)
+                    {
+                        var eve = context.Events.First(f => f.Id == part.EventId);
+                        if (Core.General.DateIsPassed(eve.When))
+                        {
+                            part.Payed = 1;
+                            bill += eve.Cost;
+                            eventIDS.Add(eve.Id);
+                        }
+                    }
+
+                    var facture = new Invoice()
+                    {
+                        UserID = currentuser().Id,
+                        Amount = bill,
+                        EventIDs = string.Join(',', eventIDS),
+                        Payed = 0,
+                        Timestamp = DateTime.Now,
+                        PayID = Encryption.Random.rHash(currentuser().Token)
+                    };
+
+                    context.Invoices.Add(facture);
+                    context.Participate.UpdateRange(parti);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch (Exception e) { return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message }); }
+
+            }
+        }
 
     }
 }

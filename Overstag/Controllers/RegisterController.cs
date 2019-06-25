@@ -72,7 +72,7 @@ namespace Overstag.Controllers
                         try
                         {
                             account.Password = Encryption.PBKDF2.Hash(account.Password); //Create hash of password
-                            account.Token = Encryption.SHA.S256(Encryption.Random.rString(50)+account.Username);
+                            account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             context.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
@@ -198,7 +198,7 @@ namespace Overstag.Controllers
                         try
                         {
                             account.Password = Encryption.PBKDF2.Hash(a.Password);
-                            account.Token = Encryption.SHA.S256(Encryption.Random.rString(50)+account.Username);
+                            account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             context.Update(account);
                             context.SaveChangesAsync();
                             return Json(new { status = "success" });

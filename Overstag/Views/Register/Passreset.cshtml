@@ -58,6 +58,7 @@
                     if (response.status == 'success') {
                         $('.checki').val('');
                         M.toast({ html: 'Wachtwoord successvol opgeslagen.<br> U kunt nu opnieuw inloggen via het tabje &quot;Aanmelden&quot;', classes: 'green' });
+                        $('#btnsubmit').addClass('disabled');
                     }
                     else {
                         //status = error
