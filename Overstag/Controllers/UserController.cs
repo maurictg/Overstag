@@ -195,6 +195,7 @@ namespace Overstag.Controllers
                         cuser.Token = Encryption.Random.rHash(Encryption.SHA.S256(cuser.Firstname) + cuser.Username);
                         context.Update(cuser);
                         await context.SaveChangesAsync();
+                        HttpContext.Session.SetString("Token", cuser.Token);
                         return Json(new { status = "success" });
                     }
                     catch(Exception e)

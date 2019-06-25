@@ -40,4 +40,10 @@ namespace Overstag.Models.NoDB
         public Account[] Accounts;
         public bool[] Factured;
     }
+
+    public struct OPayInfo
+    {
+        public Account User;
+        public IInvoice Invoice;
+    }
 }

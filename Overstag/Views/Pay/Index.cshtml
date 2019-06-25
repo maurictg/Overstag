@@ -1,0 +1,151 @@
+﻿@model Overstag.Models.NoDB.OPayInfo
+@{
+    Layout = null;
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
+}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Overstag Pay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="~/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="~/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper blue">
+            <a href="#" class="brand-logo center">Overstag Pay</a>
+            <ul id="nav-mobile" class="left hide-on-med-and-down">
+                <li><a href="/Home">Home</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="center-align">
+        <h2>Factuur van @Model.User.Firstname @Model.User.Lastname</h2>
+        <br />
+        <ul class="collapsible expandable" id="info">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">account_circle</i><b>Gebruikersinformatie</b></div>
+                <div class="collapsible-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Naam</th>
+                                <th>Achternaam</th>
+                                <th>Email</th>
+                                <th>Adres</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@Model.User.Username</td>
+                                <td>@Model.User.Lastname</td>
+                                <td><i>@Model.User.Email</i></td>
+                                <td>@Model.User.Adress&nbsp;@Model.User.Postalcode&nbsp;@Model.User.Residence</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">calendar_today</i><b>Evenementen</b></div>
+                <div class="collapsible-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Titel</th>
+                                <th>Omschrijving</th>
+                                <th>Datum en tijd</th>
+                                <th>Kosten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int total = 0;}
+                            @foreach (var e in Model.Invoice.Events)
+                            {
+                                <tr>
+                                    <td>@e.Title</td>
+                                    <td>@e.Description</td>
+                                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                    <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                </tr>
+                                total += e.Cost;
+                            }
+                            <tr>
+                                <td colspan="4" class="grey darken-1 white-text">Totaal: <b>&euro;@Math.Round((double)total / 100, 2).ToString("F")</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">description</i><b>Factuurdetails</b></div>
+                <div class="collapsible-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Tijd</th>
+                                <th>Betaalkenmerk</th>
+                                <th>Totaalbedrag</th>
+                                <th>Betaald</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>@Model.Invoice.Timestamp.ToString("D", culture)</td>
+                                <td>@Model.Invoice.Timestamp.ToString("t", culture)</td>
+                                <td><i>@Model.Invoice.PayID</i></td>
+                                <td><b>&euro;@Math.Round((double)Model.Invoice.Amount / 100, 2).ToString("F")</b></td>
+                                <td><b class="red-text">@Html.Raw((Model.Invoice.Payed) ? "Ja" : "Nee")</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+        </ul>
+
+        <a class="btn waves-effect green" id="btnprint" onclick="Pay.startPrint();">Factuur printen</a>
+        <a href="/Pay/Payment" class="btn waves-effect blue" id="btnnext">Naar betalen</a>
+        <br /><br />
+
+    </div>
+
+    <script>
+        var Pay = {
+            init: function () {
+                M.Collapsible.getInstance($('#info')).open(2);
+            },
+            startPrint: function () {
+                var elem = document.querySelector('.collapsible.expandable');
+                var instance = M.Collapsible.init(elem, { accordion: false });
+                instance.open(0); instance.open(1); instance.open(2);
+                $('nav').hide();
+                $('#pay').hide();
+                $('#btnprint').hide();
+                $('#btnnext').hide();
+                M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 1000, completeCallback: function () { Pay.doPrint() } });
+            },
+            doPrint: function () {
+                window.print();
+                $('nav').show();
+                $('#btnprint').show();
+                $('#pay').show();
+                $('#btnnext').show();
+                var elem = document.querySelector('.collapsible.expandable');
+                var instance = M.Collapsible.init(elem, { accordion: false });
+                instance.close(0); instance.close(1); instance.close(2);
+            },
+        }
+
+        $(document).ready(function () {
+            $('.collapsible').collapsible();
+            Pay.init();
+        });
+
+        
+    </script>
+</body>
+</html>

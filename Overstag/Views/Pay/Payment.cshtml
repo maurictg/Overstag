@@ -1,0 +1,31 @@
+﻿@model string
+@{
+    Layout = null;
+}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <head>
+        <title>Overstag Pay</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="~/js/jquery-3.3.1.min.js"></script>
+        <script type="text/javascript" src="~/js/materialize.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+        <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"
+    </head>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper blue">
+            <a href="#" class="brand-logo center">Overstag Pay</a>
+            <ul id="nav-mobile" class="left hide-on-med-and-down">
+                <li><a href="/Home">Home</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <h3>Betalen</h3>
+        @Model
+    </div>
+</body>
+</html>
