@@ -14,6 +14,7 @@ namespace Overstag.Controllers
         [Route("/Pay/Direct/{invoiceid}")]
         public IActionResult Index(string invoiceid)
         {
+            invoiceid = Uri.UnescapeDataString(invoiceid);
             using(var context = new OverstagContext())
             {
                 var invoice = context.Invoices.FirstOrDefault(f => f.PayID == invoiceid);

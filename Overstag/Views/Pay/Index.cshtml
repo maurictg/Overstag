@@ -23,100 +23,113 @@
         </div>
     </nav>
     <div class="center-align">
-        <h2>Factuur van @Model.User.Firstname @Model.User.Lastname</h2>
-        <br />
-        <ul class="collapsible expandable" id="info">
-            <li>
-                <div class="collapsible-header"><i class="material-icons">account_circle</i><b>Gebruikersinformatie</b></div>
-                <div class="collapsible-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Naam</th>
-                                <th>Achternaam</th>
-                                <th>Email</th>
-                                <th>Adres</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>@Model.User.Username</td>
-                                <td>@Model.User.Lastname</td>
-                                <td><i>@Model.User.Email</i></td>
-                                <td>@Model.User.Adress&nbsp;@Model.User.Postalcode&nbsp;@Model.User.Residence</b></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </li>
-            <li>
-                <div class="collapsible-header"><i class="material-icons">calendar_today</i><b>Evenementen</b></div>
-                <div class="collapsible-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Titel</th>
-                                <th>Omschrijving</th>
-                                <th>Datum en tijd</th>
-                                <th>Kosten</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{ int total = 0;}
-                            @foreach (var e in Model.Invoice.Events)
-                            {
+        <div class="row">
+            <div class="col s6 m2">
+                <br />
+                <img src="~/img/logo_2.png" class="responsive-img" />
+            </div>
+            <div class="col s6 m10">
+                <h3>Factuur van @Model.User.Firstname @Model.User.Lastname</h3>
+            </div>
+        </div>
+        <div class="row">
+            <br />
+            <ul class="collapsible expandable" id="info">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">account_circle</i><b>Gebruikersinformatie</b></div>
+                    <div class="collapsible-body">
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td>@e.Title</td>
-                                    <td>@e.Description</td>
-                                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                                    <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                    <th>Naam</th>
+                                    <th>Achternaam</th>
+                                    <th>Email</th>
+                                    <th>Adres</th>
                                 </tr>
-                                total += e.Cost;
-                            }
-                            <tr>
-                                <td colspan="4" class="grey darken-1 white-text">Totaal: <b>&euro;@Math.Round((double)total / 100, 2).ToString("F")</b></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </li>
-            <li>
-                <div class="collapsible-header"><i class="material-icons">description</i><b>Factuurdetails</b></div>
-                <div class="collapsible-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Datum</th>
-                                <th>Tijd</th>
-                                <th>Betaalkenmerk</th>
-                                <th>Totaalbedrag</th>
-                                <th>Betaald</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>@Model.Invoice.Timestamp.ToString("D", culture)</td>
-                                <td>@Model.Invoice.Timestamp.ToString("t", culture)</td>
-                                <td><i>@Model.Invoice.PayID</i></td>
-                                <td><b>&euro;@Math.Round((double)Model.Invoice.Amount / 100, 2).ToString("F")</b></td>
-                                <td><b class="red-text">@Html.Raw((Model.Invoice.Payed) ? "Ja" : "Nee")</b></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </li>
-        </ul>
-
-        <a class="btn waves-effect green" id="btnprint" onclick="Pay.startPrint();">Factuur printen</a>
-        <a href="/Pay/Payment" class="btn waves-effect blue" id="btnnext">Naar betalen</a>
-        <br /><br />
-
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.User.Username</td>
+                                    <td>@Model.User.Lastname</td>
+                                    <td><i>@Model.User.Email</i></td>
+                                    <td>@Model.User.Adress&nbsp;@Model.User.Postalcode&nbsp;@Model.User.Residence</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </li>
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">calendar_today</i><b>Evenementen</b></div>
+                    <div class="collapsible-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Titel</th>
+                                    <th>Omschrijving</th>
+                                    <th>Datum en tijd</th>
+                                    <th>Kosten</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int total = 0;}
+                                @foreach (var e in Model.Invoice.Events)
+                                {
+                                    <tr>
+                                        <td>@e.Title</td>
+                                        <td>@string.Concat(e.Description.Take(30))...</td>
+                                        <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                        <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                    </tr>
+                                    total += e.Cost;
+                                }
+                                <tr>
+                                    <td colspan="4" class="grey darken-1 white-text">Totaal: <b>&euro;@Math.Round((double)total / 100, 2).ToString("F")</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </li>
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">description</i><b>Factuurdetails</b></div>
+                    <div class="collapsible-body">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Tijd</th>
+                                    <th>Betaalkenmerk</th>
+                                    <th>Totaalbedrag</th>
+                                    <th>Betaald</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.Invoice.Timestamp.ToString("D", culture)</td>
+                                    <td>@Model.Invoice.Timestamp.ToString("t", culture)</td>
+                                    <td><i>@Model.Invoice.PayID</i></td>
+                                    <td><b>&euro;@Math.Round((double)Model.Invoice.Amount / 100, 2).ToString("F")</b></td>
+                                    <td><b class="red-text">@Html.Raw((Model.Invoice.Payed) ? "Ja" : "Nee")</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <h6 id="printedat">Factuur geprint op: <b>@DateTime.Now.ToString("d",culture)&nbsp;om&nbsp;@DateTime.Now.ToString("t",culture)</b></h6>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+            <a class="btn waves-effect green" id="btnprint" onclick="Pay.startPrint();">Factuur printen</a>
+            <a href="/Pay/Payment" class="btn waves-effect blue" id="btnnext">Naar betalen</a>
+            <br /><br />
+        </div>
     </div>
 
     <script>
         var Pay = {
             init: function () {
                 M.Collapsible.getInstance($('#info')).open(2);
+                $('#printedat').hide();
             },
             startPrint: function () {
                 var elem = document.querySelector('.collapsible.expandable');
@@ -126,6 +139,7 @@
                 $('#pay').hide();
                 $('#btnprint').hide();
                 $('#btnnext').hide();
+                $('#printedat').show();
                 M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 1000, completeCallback: function () { Pay.doPrint() } });
             },
             doPrint: function () {
@@ -137,6 +151,7 @@
                 var elem = document.querySelector('.collapsible.expandable');
                 var instance = M.Collapsible.init(elem, { accordion: false });
                 instance.close(0); instance.close(1); instance.close(2);
+                $('#printedat').hide();
             },
         }
 

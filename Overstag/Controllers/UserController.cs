@@ -274,7 +274,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var account = context.Accounts.Where(e => e.Token == a.Token).FirstOrDefault();
+                    var account = context.Accounts.Where(e => e.Token == Uri.UnescapeDataString(a.Token)).FirstOrDefault();
 
                     if (currentuser().Username != "admin" && currentuser().Username != account.Username)
                         return Json(new { status = "error", error = "Mislukt door authenticatiefout!" });
@@ -309,7 +309,7 @@ namespace Overstag.Controllers
                     }
                     else { return Json(new { status = "error", error = "Token of wachtwoord onjuist" }); }
                 }
-                catch { return Json(new { status = "error", error = "Token bestaat niet" }); }
+                catch(Exception e) { return Json(new { status = "error", error = "Token bestaat niet", debuginfo=e }); }
             }
         }
 

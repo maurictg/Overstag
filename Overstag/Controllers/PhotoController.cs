@@ -15,7 +15,7 @@ namespace Overstag.Controllers
         {
             input = Uri.UnescapeDataString(input);
             QRCodeGenerator gen = new QRCodeGenerator();
-            QRCodeData data = gen.CreateQrCode(input, QRCodeGenerator.ECCLevel.L);
+            QRCodeData data = gen.CreateQrCode(input, QRCodeGenerator.ECCLevel.Q);
             QRCode code = new QRCode(data);
             Bitmap img = code.GetGraphic(20);
             var bytes = BitmapToBytes(img);

@@ -12,6 +12,7 @@ namespace Overstag.Models
         public DbSet<Event> Events { get; set; }
         public DbSet<Participate> Participate { get; set; }
         public DbSet<Invoice> Invoices { get; set; } 
+        public DbSet<Logging> Logging { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

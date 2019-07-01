@@ -218,17 +218,10 @@ namespace Overstag.Controllers
         }
 
         [HttpGet]
-        public JsonResult Generate2FA()
-        {
-            Security.TFA.Generate(HttpContext.Session.GetString("Token"));
-            return Json(new { status = "success" });
-        }
-
-        [HttpGet]
         [Route("Register/Validate2FA/{code}")]
         public JsonResult Validate2FA(string code)
         {
-            if (Security.TFA.Validate(code))
+            if (Security.TFA.Validate(code, HttpContext.Session.GetString("Token")))
             {
                 using(var context = new OverstagContext())
                 {

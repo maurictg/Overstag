@@ -71,7 +71,7 @@
                         <div class="collapsible-body">
                             @if (!item.Payed)
                             {
-                                <a class="waves-effect waves-light btn" onclick="Payment.getPay('@item.PayID')">Betalen</a>
+                                <a class="waves-effect waves-light btn" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen</a>
                                 <br />
                             }
 

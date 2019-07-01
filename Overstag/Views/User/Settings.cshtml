@@ -110,7 +110,6 @@
                         <img class="materialboxed" src="" id="qrimg" width="350" height="350"/>
                         <h5 id="qrcode"></h5>
                     </div>
-                    
                 </div>
             </li>
             <li>
@@ -123,7 +122,7 @@
                     - 2. U kunt op deze website <b>NIET meer inloggen</b><br />
                     - 3. U kunt uzelf <b>NIET meer inschrijven</b> voor een avond<br />
                     - Uiteraard kunt u opnieuw uzelf registreren als u er spijt van krijgt</p><br />
-                    <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(2);">Annuleren</a>
+                    <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(3);">Annuleren</a>
                     <a class="waves-effect waves-light btn red center modal-trigger" data-target="delaccount">Account verwijderen</a>
                 </div>
             </li>
@@ -245,7 +244,7 @@
                         return;
 
                     if (confirm('Account verwijderen? Zeker weten?')) {
-                        $.post("/User/postDeleteAccount", { Token: '@Model.Token', Password: pass }, function (response) {
+                        $.post("/User/postDeleteAccount", { Token: '@Uri.EscapeDataString(Model.Token)', Password: pass }, function (response) {
                             if (response.status == 'success') {
                                 M.toast({ html: 'Account verwijderd', classes: 'green' });
                                 localStorage.setItem("logout", true);
@@ -269,7 +268,7 @@
                             }
                             else {
                                 M.toast({ html: '2FA ingeschakeld', classes: 'green rounded' });
-                                $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent('otpauth://totp/Overstag?secret=' + response.secret + '&issuer=Overstag'));
+                                $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent('otpauth://totp/Overstag:@Model.Username?secret=' + response.secret + '&issuer=Overstag'));
                                 $('#qrcode').text(response.secret);
                                 $('#qr').show();
                                 $('#btngetqr').hide();
@@ -284,7 +283,7 @@
                 getQR: function () {
                     $.getJSON('/User/Get2FA', function (response) {
                         if (response.status == 'success') {
-                           $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent('otpauth://totp/Overstag?secret=' + response.secret + '&issuer=Overstag'));
+                           $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent('otpauth://totp/Overstag:@Model.Username?secret=' + response.secret + '&issuer=Overstag'));
                            $('#qrcode').text(response.secret);
                             $('#qr').show();
                             $('#btngetqr').hide();

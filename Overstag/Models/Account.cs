@@ -18,6 +18,13 @@ namespace Overstag.Models
         public string TwoFactor { get; set; }
     }
 
+    public class Logging
+    {
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Ip { get; set; }
+    }
+
     //NO DATABASE CLASS
     public class Login
     {

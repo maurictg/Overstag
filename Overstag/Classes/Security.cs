@@ -227,13 +227,11 @@ namespace Overstag.Security
             }
         }
 
-        static TwoFactor generator = null;
-        public static string Generate(string token)
+        public static bool Validate(string code,string token)
         {
-            generator = new TwoFactor(GetSecret(token));
-            return generator.GenerateCode();
-        } 
-
-        public static bool Validate(string code){ return generator.ValidateCode(code); }
+            TwoFactor generator = new TwoFactor(GetSecret(token));
+            generator.GenerateCode();
+            return generator.ValidateCode(code);
+        }
     }
 }

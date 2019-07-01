@@ -7,7 +7,7 @@ namespace Overstag.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index(){ return View(); }
+        public IActionResult Index(){ ViewBag.ip = HttpContext.Connection.RemoteIpAddress.ToString(); return View(); }
 
         /// <summary>
         /// Get all events from the database
