@@ -272,7 +272,12 @@ namespace Overstag.Controllers
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).FirstOrDefault() });
                                     case "Participate":
-                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });                                    
+                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });
+                                    case "Invoices":
+                                        return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).FirstOrDefault() });
+                                    case "Logging":
+                                        return Json(new { status = "success", data = context.Logging.FromSql(q.Query).FirstOrDefault() });
+
                                 }
                             }
                             catch(Exception e)
@@ -295,6 +300,10 @@ namespace Overstag.Controllers
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToList() });
                                     case "Participate":
                                         return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToList() });
+                                    case "Invoices":
+                                        return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).ToList() });
+                                    case "Logging":
+                                        return Json(new { status = "success", data = context.Logging.FromSql(q.Query).ToList() });
                                 }
                             }
                             catch(Exception e)
@@ -316,6 +325,10 @@ namespace Overstag.Controllers
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToArray() });
                                     case "Participate":
                                         return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToArray() });
+                                    case "Invoices":
+                                        return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).ToArray() });
+                                    case "Logging":
+                                        return Json(new { status = "success", data = context.Logging.FromSql(q.Query).ToArray() });
                                 }
                             }
                             catch (Exception e)

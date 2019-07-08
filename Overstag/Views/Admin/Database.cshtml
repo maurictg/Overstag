@@ -21,8 +21,13 @@
         <br />
         <div class="row">
             <div class="col s12 m6">
-                <input type="text" id="tablename" placeholder="Tabelnaam" class="white-text" />
-                <p>Tabelnaam: Accounts, Events of Participate</p>
+                <select class="input-field" id="tablename">
+                    <option>Accounts</option>
+                    <option>Events</option>
+                    <option>Participate</option>
+                    <option>Invoices</option>
+                    <option>Logging</option>
+                </select>
             </div>
             <div class="col s12 m6">
                 <input type="text" id="type" placeholder="Type" class="white-text" />
@@ -46,10 +51,11 @@
     var Database = {
         init: function () {
             $('#progbar').hide();
+            $('#tablename').addClass('white-text');
         },
         postquery: function () {
             $('#progbar').show();
-            $.post("/Admin/Query", { Query: $('#query').val(), TableName: $('#tablename').val(), Type: $('#type').val() }, function (response) {
+            $.post("/Admin/Query", { Query: $('#query').val(), TableName: $('#tablename option:selected').text(), Type: $('#type').val() }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Query successfull', classes: 'green rounded' });
                     console.log(response.data);
@@ -69,5 +75,11 @@
         }
     }
 
-    Database.init();
+
+    $(document).ready(function(){
+        $('select').formSelect();
+        Database.init();
+    });
+
+
 </script>

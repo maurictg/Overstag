@@ -105,21 +105,44 @@ namespace Overstag.Controllers
             {
                 using (var context = new OverstagContext())
                 {
+                    string ip = HttpContext.Connection.RemoteIpAddress.ToString();
                     try
                     {
                         var account = context.Accounts.Where(e => e.Username == a.Username || e.Email == a.Username).FirstOrDefault();
-                        if (Encryption.PBKDF2.Verify(account.Password, a.Password))
+                        //Controleren op onjuiste inlogpogingen
+                        if(context.Logging.Count(i=>i.Ip==ip && i.Date == DateTime.Now.Date && i.Username==a.Username) > 15)
                         {
-                            string tfa = (string.IsNullOrEmpty(account.TwoFactor)) ? "no" : "yes";
-                            //Login is juist, redirect naar page, zet sessie variablen
-                            HttpContext.Session.SetString("Token", account.Token);
-
-                            if(tfa=="no") //door de username niet te setten bij 2fa ben je alsnog niet ingelogd
-                                HttpContext.Session.SetString("Name",account.Username);
-
-                            return Json(new { status = "success", twofactor = tfa });
+                            return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
                         }
-                        else { return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" }); }
+                        else
+                        {
+                            if (Encryption.PBKDF2.Verify(account.Password, a.Password))
+                            {
+                                string tfa = (string.IsNullOrEmpty(account.TwoFactor)) ? "no" : "yes";
+                                //Login is juist, redirect naar page, zet sessie variablen
+                                HttpContext.Session.SetString("Token", account.Token);
+
+                                if (tfa == "no") //door de username niet te setten bij 2fa ben je alsnog niet ingelogd
+                                    HttpContext.Session.SetString("Name", account.Username);
+
+                                //Eventuele foute pogingen verwijderen
+                                if(context.Logging.Count(i => i.Ip == ip && i.Username == a.Username) > 0)
+                                {
+                                    foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == a.Username))
+                                        context.Logging.Remove(log);
+
+                                    context.SaveChanges();
+                                }
+
+                                return Json(new { status = "success", twofactor = tfa });
+                            }
+                            else
+                            {
+                                context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = a.Username, Date = DateTime.Now.Date });
+                                context.SaveChanges();
+                                return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
+                            }
+                        }
                     }
                     catch { return Json(new { status = "error", error = "Gebruiker bestaat niet" }); }
                 }

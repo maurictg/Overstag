@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 using Overstag.Models;
 
 namespace Overstag.Models
@@ -22,6 +23,8 @@ namespace Overstag.Models
     {
         public int Id { get; set; }
         public string Username { get; set; }
+        public int Type { get; set; }
+        public DateTime Date { get; set; }
         public string Ip { get; set; }
     }
 
