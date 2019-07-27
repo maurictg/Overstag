@@ -5,9 +5,10 @@
 <head>
     <title>@ViewBag.Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="~/js/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
+    <!--script type="text/javascript" src="~/js/materialize.min.js"></script-->
+    <!--link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" /-->
+    <link rel="stylesheet" type="text/css" href="~/css/bootstrap.min.css">
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script>
@@ -51,45 +52,43 @@
         }
     </style>
 </head>
-<body class="grey darken-4">
-    <nav>
-        <div class="nav-wrapper green">
-            <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag Admin</a>
-            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li id="_home"><a href="/Home">Home</a></li>
-                <li id="_ahome"><a href="/Admin/Index">Admin Home</a></li>
-                <li id="_users"><a href="/Admin/Users">Gebruikers</a></li>
-                <li id="_events"><a href="/Admin/Events">Activiteiten</a></li>
-                <li id="_billing"><a href="/Admin/Billing">Betalingen</a></li>
-                <li id="_database"><a href="/Admin/Database">Database</a></li>
-                <li id="_logoff"><a href="/Register/Logoff">Uitloggen</a></li>
+
+<body class="bg-dark text-white">
+    <nav class="navbar navbar-expand-lg navbar navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Overstag Admin</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item" id="_home"><a class="nav-link" href="/Home">Home</a>
+                <li>
+                <li class="nav-item" id="_ahome"><a class="nav-link" href="/Admin/Index">Admin Home</a></li>
+                <li class="nav-item" id="_users"><a class="nav-link" href="/Admin/Users">Gebruikers</a></li>
+                <li class="nav-item" id="_events"><a class="nav-link" href="/Admin/Events">Activiteiten</a></li>
+                <li class="nav-item" id="_billing"><a class="nav-link" href="/Admin/Billing">Betalingen</a></li>
+                <li class="nav-item" id="_database"><a class="nav-link" href="/Admin/Database">Database</a></li>
+            </ul>
+            <ul class="navbar-nav float-right">
+                <li class="nav-item" id="_logoff"><a class="nav-link" href="/Register/Logoff">Uitloggen</a></li>
             </ul>
         </div>
-        <ul class="sidenav" id="mobile-demo">
-            <li id="_home"><a href="/Home">Home</a></li>
-            <li id="_ahome"><a href="/Admin/Index">Admin Home</a></li>
-            <li id="_users"><a href="/Admin/Users">Gebruikers</a></li>
-            <li id="_events"><a href="/Admin/Events">Activiteiten</a></li>
-            <li id="_billing"><a href="/Admin/Billing">Betalingen</a></li>
-            <li id="_database"><a href="/Admin/Database">Database</a></li>
-            <li id="_logoff"><a href="/Register/Logoff">Uitloggen</a></li>
-        </ul>
     </nav>
 
     @RenderBody()
 
+    <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="~/js/bootstrap.min.js"></script>
+
     <script>
         $(document).ready(function () {
-            $('.datepicker').datepicker();
-            $('.timepicker').timepicker();
-            $('.modal').modal();
-            $('.sidenav').sidenav();
+
         });
 
         Overstag.init();
     </script>
-    
 </body>
 </html>
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
@@ -50,7 +49,7 @@ namespace Overstag.Controllers
             }
         }
 
-        public IActionResult Payment()
+        public IActionResult Checkout()
         {
             try
             {
@@ -59,7 +58,8 @@ namespace Overstag.Controllers
                 if(string.IsNullOrEmpty(PayID))
                     return Content("Authenticatiefout!!!");
 
-                return View("Payment",PayID);
+
+                return View();
             }
             catch { return Content("Authenticatiefout!!!"); }
             

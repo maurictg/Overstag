@@ -5,9 +5,9 @@
     
 }
 <div class="center-align white-text">
-    <h3>Ongefactureerde avonden per gebruiker</h3>
     <br />
-    <table>
+    <h3>Ongefactureerde avonden per gebruiker</h3>
+    <table class="table text-white">
         <thead>
             <th>Naam</th>
             <th>Ongefactureerde avonden</th>
@@ -20,10 +20,10 @@
                     <td>
                         @if (item.Unfactured_Events.Count > 0)
                         {
-                            <table>
+                            <table class="table text-white">
                                 <thead>
-                                <th>Titel</th>
-                                <th>Kosten</th>
+                                    <th>Titel</th>
+                                    <th>Kosten</th>
                                 </thead>
                                 <tbody>
                                     @{ int val = 0; }
@@ -53,10 +53,10 @@
     </table>
     <h3>Openstaande facturen per gebruiker</h3>
     <div id="facturen">
-        <table>
+        <table class="table text-white">
             <thead>
-            <th>Naam</th>
-            <th>Openstaande facturen</th>
+                <th>Naam</th>
+                <th>Openstaande facturen</th>
             </thead>
             <tbody>
                 @foreach (var item in Model)
@@ -66,10 +66,10 @@
                         <td>
                             @if (item.Unpayed_Invoices.Count > 0)
                             {
-                                <table>
+                                <table class="table text-white">
                                     <thead>
-                                    <th>Titel</th>
-                                    <th>Kosten</th>
+                                        <th>Datum</th>
+                                        <th>Kosten</th>
                                     </thead>
                                     <tbody>
                                         @{ int val = 0; }

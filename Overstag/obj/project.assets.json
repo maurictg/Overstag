@@ -2870,6 +2870,19 @@
           }
         }
       },
+      "Mollie.Api/2.0.6": {
+        "type": "package",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1",
+          "Newtonsoft.Json": "12.0.1"
+        },
+        "compile": {
+          "lib/netstandard1.2/Mollie.Api.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.2/Mollie.Api.dll": {}
+        }
+      },
       "MySql.Data/8.0.16": {
         "type": "package",
         "dependencies": {
@@ -2914,7 +2927,7 @@
           "build/netstandard2.0/NETStandard.Library.targets": {}
         }
       },
-      "Newtonsoft.Json/11.0.2": {
+      "Newtonsoft.Json/12.0.1": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {}
@@ -8077,6 +8090,19 @@
         "version.txt"
       ]
     },
+    "Mollie.Api/2.0.6": {
+      "sha512": "Z/ZLIWfDxeDeIWKRFASrqhAjiBjocvmK/Ut/ot4XAYFgn29fHoriLgNS+BlK91d7y5W/YbZNQswdJCXUWY7b7w==",
+      "type": "package",
+      "path": "mollie.api/2.0.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Mollie.Api.dll",
+        "lib/netstandard1.2/Mollie.Api.dll",
+        "mollie.api.2.0.6.nupkg.sha512",
+        "mollie.api.nuspec"
+      ]
+    },
     "MySql.Data/8.0.16": {
       "sha512": "2fdNJuQwwZRbQTycyHE61NgWChIWPxeRz6DsGXrVrVHsxEnDyWIb3r1qi4Vr1o1cWZHu4Z8dY8n9l2nGwJ3k5g==",
       "type": "package",
@@ -8243,33 +8269,42 @@
         "netstandard.library.nuspec"
       ]
     },
-    "Newtonsoft.Json/11.0.2": {
-      "sha512": "IvJe1pj7JHEsP8B8J8DwlMEx8UInrs/x+9oVY+oCD13jpLu4JbJU2WCIsMRn5C4yW9+DgkaO8uiVE5VHKjpmdQ==",
+    "Newtonsoft.Json/12.0.1": {
+      "sha512": "pBR3wCgYWZGiaZDYP+HHYnalVnPJlpP1q55qvVb+adrDHmFMDc1NAKio61xTwftK3Pw5h7TZJPJEEVMd6ty8rg==",
       "type": "package",
-      "path": "newtonsoft.json/11.0.2",
+      "path": "newtonsoft.json/12.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.pdb",
         "lib/net20/Newtonsoft.Json.xml",
         "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.pdb",
         "lib/net35/Newtonsoft.Json.xml",
         "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.pdb",
         "lib/net40/Newtonsoft.Json.xml",
         "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.pdb",
         "lib/net45/Newtonsoft.Json.xml",
         "lib/netstandard1.0/Newtonsoft.Json.dll",
+        "lib/netstandard1.0/Newtonsoft.Json.pdb",
         "lib/netstandard1.0/Newtonsoft.Json.xml",
         "lib/netstandard1.3/Newtonsoft.Json.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.pdb",
         "lib/netstandard1.3/Newtonsoft.Json.xml",
         "lib/netstandard2.0/Newtonsoft.Json.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.pdb",
         "lib/netstandard2.0/Newtonsoft.Json.xml",
         "lib/portable-net40+sl5+win8+wp8+wpa81/Newtonsoft.Json.dll",
+        "lib/portable-net40+sl5+win8+wp8+wpa81/Newtonsoft.Json.pdb",
         "lib/portable-net40+sl5+win8+wp8+wpa81/Newtonsoft.Json.xml",
         "lib/portable-net45+win8+wp8+wpa81/Newtonsoft.Json.dll",
+        "lib/portable-net45+win8+wp8+wpa81/Newtonsoft.Json.pdb",
         "lib/portable-net45+win8+wp8+wpa81/Newtonsoft.Json.xml",
-        "newtonsoft.json.11.0.2.nupkg.sha512",
+        "newtonsoft.json.12.0.1.nupkg.sha512",
         "newtonsoft.json.nuspec"
       ]
     },
@@ -13283,6 +13318,7 @@
       "Microsoft.EntityFrameworkCore >= 2.2.4",
       "Microsoft.NETCore.App >= 2.2.0",
       "Microsoft.VisualStudio.Web.CodeGeneration.Design >= 2.2.3",
+      "Mollie.Api >= 2.0.6",
       "MySql.Data.EntityFrameworkCore >= 8.0.16",
       "QRCoder >= 1.3.5",
       "TwoFactor >= 1.0.1"
@@ -13354,6 +13390,10 @@
           "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
             "target": "Package",
             "version": "[2.2.3, )"
+          },
+          "Mollie.Api": {
+            "target": "Package",
+            "version": "[2.0.6, )"
           },
           "MySql.Data.EntityFrameworkCore": {
             "target": "Package",

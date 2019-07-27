@@ -18,17 +18,15 @@ namespace Overstag.Controllers
             QRCodeData data = gen.CreateQrCode(input, QRCodeGenerator.ECCLevel.Q);
             QRCode code = new QRCode(data);
             Bitmap img = code.GetGraphic(20);
-            var bytes = BitmapToBytes(img);
-            return File(bytes, "image/jpeg");
-        }
+            byte[] bytes = { };
 
-        private static byte[] BitmapToBytes(Bitmap img)
-        {
             using (MemoryStream stream = new MemoryStream())
             {
                 img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                return stream.ToArray();
+                bytes = stream.ToArray();
             }
+
+            return File(bytes, "image/jpeg");
         }
     }
 }

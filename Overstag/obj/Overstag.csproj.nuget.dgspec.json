@@ -67,6 +67,10 @@
               "target": "Package",
               "version": "[2.2.3, )"
             },
+            "Mollie.Api": {
+              "target": "Package",
+              "version": "[2.0.6, )"
+            },
             "MySql.Data.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.0.16, )"

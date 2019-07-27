@@ -8,7 +8,8 @@
 <br />
 <div id="eventsdiv" class="center-align">
     <h3 class="white-text">Activiteiten</h3>
-    <table class="white-text">
+    <br />
+    <table class="table text-white">
         <thead>
             <tr>
                 <th>Id</th>
@@ -34,44 +35,58 @@
                         <td>@e.When.ToString("d", culture)</td>
                         <td>@e.When.ToString("t", culture)</td>
                         <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                        <td><a href="#verwijdermodal" class="modal-trigger" onclick="eventtodelete = @e.Id">Verwijderen</a></td>
+                        <td><a data-target="#verwijdermodal" data-toggle="modal"  onclick="eventtodelete = @e.Id">Verwijderen</a></td>
                     </tr>
                 }
             }
         </tbody>
     </table>
     <h3 class="white-text">Activiteiten toevoegen</h3>
-    <form class="center-align">
-        <div class="row">
-            <div class="col m8">
-                <input type="text" class="checki white-text" id="ttitle" placeholder="Titel" />
-                <input type="text" class="checki white-text" id="description" placeholder="Omschrijving" />
-                <input type="text" class="checki white-text datepicker" id="date" placeholder="Datum">
-                <input type="text" class="checki white-text timepicker" id="time" placeholder="Tijd">
-                <input type="text" class="checki white-text" id="cost" placeholder="Kosten in eurocent" />
-                <div class="progress" id="progbar"><div class="indeterminate"></div></div>
-                <a class="waves-effect waves-light btn white-text" id="btnadd">Toevoegen</a>
+    <br />
+    <form class="">
+        <div class="input-group">
+            <div class="input-group-append">
+                &nbsp;<input type="text" class="checki form-control" id="ttitle" placeholder="Titel" />
+                &nbsp;<input type="text" class="checki form-control" id="description" placeholder="Omschrijving" />
+                &nbsp;<input type="text" class="checki form-control datepicker" id="date" placeholder="Datum">
+                &nbsp;<input type="text" class="checki form-control timepicker" id="time" placeholder="Tijd">
+                &nbsp;<input type="text" class="checki form-control" id="cost" placeholder="Kosten in eurocent" />
+                &nbsp;
+            </div>
+            <div class="input-group-append">
+                <input class="btn btn-primary" type="button" value="Toevoegen" id="btnadd">
             </div>
         </div>
     </form>
 
-
-    <!-- Modal Structure -->
-    <div id="verwijdermodal" class="modal grey darken-4 white-text">
-        <div class="modal-content">
-            <h4>Weet u zeker dat u dit event wilt verwijderen?</h4>
-            <p>Deze actie kan niet ongedaan worden gemaakt!</p>
-        </div>
-        <div class="modal-footer grey darken-4 white-text">
-            <a class="modal-close waves-effect waves-red btn-flat white-text">Annuleren</a>
-            <a class="modal-close waves-effect waves-green btn-flat white-text" onclick="Events.delete(eventtodelete)">Verwijderen</a>
-        </div>
-    </div>
     <br />
     <h3 class="white-text">Ingeschreven deelnemers</h3>
+    <br />
     <div id="participators" class="white-text">
         <!--Render deelnemers hier-->
     </div>
+
+    <div class="modal fade" id="verwijdermodal" tabindex="-1" role="dialog" aria-labelledby="DeleteEvent"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title">Event verwijderen?</h5>
+                <button type="button" class="close btn btn-warning" data-dismiss="modal" aria-label="Annuleren">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>Weet u zeker dat u dit event wilt verwijderen?</h4>
+                <p>Dit kan niet ongedaan worden gemaakt!</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-dismiss="modal">Annuleren</button>
+                <button class="btn btn-danger" onclick="Events.delete(eventtodelete)">Verwijderen</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 </div>
 <script>

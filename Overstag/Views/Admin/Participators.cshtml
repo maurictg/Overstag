@@ -2,46 +2,56 @@
 @{
     Layout = null;
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
+    int index = 0;
 }
 <div>
-    <ul class="collapsible grey darken-4 white-text">
+    <div class="accordion bg-dark" id="partiaccordion">
         @foreach (var e in Model.ToArray().Reverse())
         {
-            <li>
-                <div class="collapsible-header grey darken-4 white-text">
-                    <i class="material-icons">calendar_today</i>
-                    <b>@e.Event.Title</b> &nbsp;&nbsp;&nbsp; @e.Event.When.ToString("d", culture)@Html.Raw(" om ")@e.Event.When.ToString("t", culture)
-                    
+            index++;
+            <div class="card bg-dark">
+                <div class="card-header" id="hc_@index">
+                    <div class="row">
+                        <h2 class="mb-0">
+                            <button class="btn text-white" type="button" data-toggle="collapse" data-target="#col_@index" aria-expanded="true" aria-controls="col_@index">
+                                <i class="material-icons">calendar_today</i>
+                                <b>@e.Event.Title</b> &nbsp;&nbsp;&nbsp; @e.Event.When.ToString("d", culture)@Html.Raw(" om ")@e.Event.When.ToString("t", culture)
+                            </button>
+                        </h2>
+                    </div>
                 </div>
-                <div class="collapsible-body grey darken-4 white-text">
-                    <p>Omschrijving: <b>@e.Event.Description</b> &nbsp;-&nbsp; Kosten: <b>&euro;@Math.Round((double)e.Event.Cost / 100, 2).ToString("F")</b></p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Voornaam</th>
-                                <th>Achternaam</th>
-                                <th>Gefactureerd</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int i = 0; i < e.Accounts.Length; i++)
-                            {
+                <div id="col_@index" class="collapse" aria-labelledby="hc_@index" data-parent="#partiaccordion">
+                    <div class="card-body">
+                        <p>Omschrijving: <b>@e.Event.Description</b> &nbsp;-&nbsp; Kosten: <b>&euro;@Math.Round((double)e.Event.Cost / 100, 2).ToString("F")</b></p>
+                        <table class="table text-white">
+                            <thead>
                                 <tr>
-                                    <td>@e.Accounts[i].Firstname</td>
-                                    <td>@e.Accounts[i].Lastname</td>
-                                    <td>@Html.Raw((e.Factured[i]) ? "<span class='green-text'>Ja</span>" : "<span class='red-text'>Nee</span>")</td>
+                                    <th>Voornaam</th>
+                                    <th>Achternaam</th>
+                                    <th>Gefactureerd</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < e.Accounts.Length; i++)
+                                {
+                                    <tr>
+                                        <td>@e.Accounts[i].Firstname</td>
+                                        <td>@e.Accounts[i].Lastname</td>
+                                        <td>@Html.Raw((e.Factured[i]) ? "<span class='green-text'>Ja</span>" : "<span class='red-text'>Nee</span>")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </li>
+            </div>
         }
-    </ul>
+    </div>
 </div>
 
 <script>
     $(document).ready(function () {
-        $('.collapsible').collapsible();
+        //$('.collapsible').collapsible();
+        $('.collapse').collapse('hide');
     });
 </script>
