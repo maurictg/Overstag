@@ -49,15 +49,15 @@
             } else {
                 //Inschrijven
                 $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
-                        if (response.status == 'success') {
-                            M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
-                            User.loadcontent();
-                        }
-                        else {
-                            //status = error
-                            M.toast({ html: response.error, classes: 'red' });
-                        }
-                    }, 'json');
+                    if (response.status == 'success') {
+                        M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
+                        User.loadcontent();
+                    }
+                    else {
+                        //status = error
+                        M.toast({ html: response.error, classes: 'red' });
+                    }
+                }, 'json');
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
+using System.Threading.Tasks;
 using Overstag.Models.NoDB;
 
 namespace Overstag.Controllers
@@ -63,6 +64,12 @@ namespace Overstag.Controllers
             }
             catch { return Content("Authenticatiefout!!!"); }
             
+        }
+
+        public async Task<IActionResult> Test()
+        {
+            Overstag.Payment.OPay o = new Payment.OPay();
+            return Json(new { result = await o.Test() });
         }
     }
 }

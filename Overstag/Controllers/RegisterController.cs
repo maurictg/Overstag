@@ -25,7 +25,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    return View(context.Accounts.First(w => w.Token == token));
+                    return View(context.Accounts.First(w => w.Token == Uri.UnescapeDataString(token)));
                 }
                 catch
                 {
@@ -175,7 +175,7 @@ namespace Overstag.Controllers
                             {
                                 string message = "<h1>Overstag wachtwoord reset</h1>" +
                                     "Beste " + account.Firstname + ",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>" +
-                                    "Klik op <a href='/Register/Passreset/" + account.Token + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
+                                    "Klik op <a href='/Register/Passreset/" + Uri.EscapeDataString(account.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
                                     "<br>Success! Mocht het niet werken, neem dan contact met ons op";
                                 string res = Core.Mail.SendMail("Wachtwoord reset", message, account.Email);
                                 if (res == "OK")
@@ -211,6 +211,7 @@ namespace Overstag.Controllers
         [HttpPost]
         public JsonResult postPassreset(Account a)
         {
+            a.Token = Uri.UnescapeDataString(a.Token);
             if (!ModelState.IsValid)
             {
                 return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });

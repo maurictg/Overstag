@@ -13,20 +13,13 @@ namespace Overstag.Controllers
         [Route("/Photo/GetQR/{input}")]
         public IActionResult GetQR(string input)
         {
-            input = Uri.UnescapeDataString(input);
-            QRCodeGenerator gen = new QRCodeGenerator();
-            QRCodeData data = gen.CreateQrCode(input, QRCodeGenerator.ECCLevel.Q);
-            QRCode code = new QRCode(data);
-            Bitmap img = code.GetGraphic(20);
-            byte[] bytes = { };
-
             using (MemoryStream stream = new MemoryStream())
             {
+                Bitmap img = new QRCode(new QRCodeGenerator().CreateQrCode(Uri.UnescapeDataString(input), QRCodeGenerator.ECCLevel.Q)).GetGraphic(20);
                 img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                bytes = stream.ToArray();
+                var bytes = stream.ToArray();
+                return File(bytes, "image/jpeg");
             }
-
-            return File(bytes, "image/jpeg");
         }
     }
 }

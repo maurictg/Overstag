@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;    
 using Overstag.Models;
 
 
@@ -88,9 +88,7 @@ namespace Overstag.Controllers
                 foreach(var part in parti)
                 {
                     if(part != null)
-                    {
                         events.Add(context.Events.First(e => e.Id == part.EventId));
-                    }
                 }
                 return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.Where(e=>e.When>DateTime.Now).OrderBy(e => e.When).ToList() });
             }
@@ -112,6 +110,10 @@ namespace Overstag.Controllers
                 {
                     var user = context.Accounts.First(a => a.Id == currentuser().Id);
                     var eve = context.Events.First(e => e.Id == p.EventId);
+
+                    if (Core.General.DateIsPassed(eve.When))
+                        return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
+
                     var part = context.Participate.Where(e => e.EventId == p.EventId && e.UserId == user.Id).FirstOrDefault();
                     if (part == null)
                     {
@@ -120,10 +122,7 @@ namespace Overstag.Controllers
                         return Json(new { status = "success" });
                     }
                     else
-                    {
                         return Json(new { status = "error", error = "Je bent al ingeschreven voor deze activiteit!" });
-                    }
-                    
                 }
                 catch(Exception e)
                 {
@@ -147,6 +146,10 @@ namespace Overstag.Controllers
                 {
                     var user = context.Accounts.First(a => a.Id == currentuser().Id);
                     var eve = context.Events.First(e => e.Id == p.EventId);
+
+                    if (Core.General.DateIsPassed(eve.When))
+                        return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer uitschrijven" });
+
                     try
                     {
                         var part = context.Participate.Where(e => e.EventId == p.EventId && e.UserId == user.Id).FirstOrDefault();

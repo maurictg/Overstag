@@ -54,7 +54,7 @@
                 }
             });
             if (isValid) {
-                $.post("/Register/postPassreset", { Token: '@Model.Token', Password: $('#Password1').val() }, function (response) {
+                $.post("/Register/postPassreset", { Token: '@Uri.EscapeDataString(Model.Token)', Password: $('#Password1').val() }, function (response) {
                     if (response.status == 'success') {
                         $('.checki').val('');
                         M.toast({ html: 'Wachtwoord successvol opgeslagen.<br> U kunt nu opnieuw inloggen via het tabje &quot;Aanmelden&quot;', classes: 'green' });

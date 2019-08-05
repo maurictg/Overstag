@@ -235,6 +235,26 @@ namespace Overstag.Controllers
             //Knopje bij openstaande facturen "genereren" zowel bij admin als bij user
         }
 
+        /// <summary>
+        /// Logs in as the user with that token
+        /// </summary>
+        /// <param name="q"></param>
+        /// <returns></returns>
+        [Route("Admin/Loginas/{token}")]
+        public IActionResult LoginAs(string token)
+        {
+            using(var context = new OverstagContext())
+            {
+               var usr = context.Accounts.First(a => a.Token == Uri.UnescapeDataString(token));
+               HttpContext.Session.SetString("Token", usr.Token);
+               HttpContext.Session.SetString("Name", usr.Username);
+
+               Response.Redirect("/Home");
+               return Content("OK");
+            }
+        }
+
+
 
         /// <summary>
         /// fire SQL query's on the database. Must be an admin of course
