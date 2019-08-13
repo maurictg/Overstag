@@ -7,6 +7,12 @@ namespace Overstag.Models
     public class Account
     {
         public int Id { get; set; }
+        public int FamilyID { get; set; }
+        //default -1
+        public int Sex { get; set; } 
+        //0 (male)/1 (female)
+        public int Type { get; set; }
+        //0 user, 1 parent, 2 mentor, 3 admin
         public string Username { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
@@ -16,6 +22,7 @@ namespace Overstag.Models
         public string Adress { get; set; }
         public string Postalcode { get; set; }
         public string Residence { get; set; }
+        public DateTime Birthdate { get; set; }
         public string TwoFactor { get; set; }
     }
 

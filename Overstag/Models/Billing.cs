@@ -11,6 +11,5 @@ namespace Overstag.Models
         public string EventIDs { get; set; }
         public int Payed { get; set; }
         public string PayID { get; set; }
-
     }
 }

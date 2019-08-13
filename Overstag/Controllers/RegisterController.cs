@@ -9,9 +9,9 @@ namespace Overstag.Controllers
 {
     public class RegisterController : Controller
     {
-        public IActionResult Index() { return View("Login"); }
-        public IActionResult Login() { return View("Login"); }
-        public IActionResult Register() { return View(); }
+        public IActionResult Index() => View("Login");
+        public IActionResult Login() => View("Login");
+        public IActionResult Register() => View();
 
         /// <summary>
         /// Resets the password of the user
@@ -40,7 +40,7 @@ namespace Overstag.Controllers
             }
         }
 
-        public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); Response.Redirect("/Home/Index"); }
+        public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); HttpContext.Session.Remove("Type") Response.Redirect("/Home/Index"); }
 
         /// <summary>
         /// Register a new user to the system
@@ -73,7 +73,9 @@ namespace Overstag.Controllers
                         {
                             account.Password = Encryption.PBKDF2.Hash(account.Password); //Create hash of password
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                            context.Add(account);
+                            account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
+                            account.FamilyID = -1;
+                            context.Accounts.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
                         }
@@ -118,15 +120,19 @@ namespace Overstag.Controllers
                         {
                             if (Encryption.PBKDF2.Verify(account.Password, a.Password))
                             {
-                                string tfa = (string.IsNullOrEmpty(account.TwoFactor)) ? "no" : "yes";
+                                bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
                                 //Login is juist, redirect naar page, zet sessie variablen
-                                HttpContext.Session.SetString("Token", account.Token);
 
-                                if (tfa == "no") //door de username niet te setten bij 2fa ben je alsnog niet ingelogd
+
+                                if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
+                                {
+                                    HttpContext.Session.SetString("Token", account.Token);
+                                    HttpContext.Session.SetInt32("Type", account.Type);
                                     HttpContext.Session.SetString("Name", account.Username);
+                                }
 
                                 //Eventuele foute pogingen verwijderen
-                                if(context.Logging.Count(i => i.Ip == ip && i.Username == a.Username) > 0)
+                                if (context.Logging.Count(i => i.Ip == ip && i.Username == a.Username) > 0)
                                 {
                                     foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == a.Username))
                                         context.Logging.Remove(log);
@@ -134,7 +140,7 @@ namespace Overstag.Controllers
                                     context.SaveChanges();
                                 }
 
-                                return Json(new { status = "success", twofactor = tfa });
+                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", token = (no2fa) ? "" : Uri.EscapeDataString(account.Token) });
                             }
                             else
                             {
@@ -229,6 +235,9 @@ namespace Overstag.Controllers
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             context.Update(account);
                             context.SaveChangesAsync();
+
+                            if(HttpContext.Session.GetString("Token")==a.Token)
+                                HttpContext.Session.SetString("Token", account.Token);
                             return Json(new { status = "success" });
                         }
                         catch (Exception e)
@@ -242,14 +251,17 @@ namespace Overstag.Controllers
         }
 
         [HttpGet]
-        [Route("Register/Validate2FA/{code}")]
-        public JsonResult Validate2FA(string code)
+        [Route("Register/Validate2FA/{token}/{code}")]
+        public JsonResult Validate2FA(string token, string code)
         {
-            if (Security.TFA.Validate(code, HttpContext.Session.GetString("Token")))
+            token = Uri.UnescapeDataString(token);
+            if (Security.TFA.Validate(code, token))
             {
                 using(var context = new OverstagContext())
                 {
-                    var a = context.Accounts.First(e => e.Token == HttpContext.Session.GetString("Token"));
+                    var a = context.Accounts.First(e => e.Token == token);
+                    HttpContext.Session.SetString("Token", a.Token);
+                    HttpContext.Session.SetInt32("Type", a.Type);
                     HttpContext.Session.SetString("Name", a.Username);
                 }
                 return Json(new { status = "success" });

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Overstag.Models;
+using System.Collections.Generic;
 
 namespace Overstag.Middleware
 {
@@ -10,37 +10,51 @@ namespace Overstag.Middleware
     public class Authentication
     {
         private readonly RequestDelegate _next;
-        //Paths that are allowed without login token
-        private readonly string[] allowedpaths = { "/Home", "/Register", "/Admin/initdb", "/Pay" };
+        //Allowed paths are defined per user type
+        private readonly string[] typenull = { "/Home", "/Register", "/Admin/initdb", "/Pay" }
+        ,typezero = { "/User", "/Photo" }, typeone = { "/Parent" } ,typetwo = { "/Mentor" } ,typethree = { "/Admin" };
 
         public Authentication(RequestDelegate next)
-        {
-            _next = next;
-        }
+            => _next = next;
 
-        public Task Invoke(HttpContext httpContext)
+        public Task Invoke(HttpContext c)
         {
-            var path = httpContext.Request.Path;
-            bool allowed = false;
-            if (path.HasValue)
+            if (c.Request.Path.HasValue)
             {
+                string p = c.Request.Path.Value;
+                int? t = c.Session.GetInt32("Type");
+                bool allowed = false;
 
-                foreach (string p in allowedpaths) { if (path.Value.ToString().StartsWith(p,StringComparison.CurrentCultureIgnoreCase)) { allowed = true; } }
-                if (!allowed)
+                //Calculate list with allowed paths
+                List<string> paths = new List<string>();
+                paths.AddRange(typenull);
+
+                if(t != null)
                 {
-                    if (httpContext.Session.GetString("Token") == null || httpContext.Session.GetString("Name") == null) //not logged in
-                    {
-                        httpContext.Response.Redirect("/Home");
-                    }
-                    else if(path.Value.ToString().StartsWith("/Admin", StringComparison.CurrentCultureIgnoreCase) && !httpContext.Session.GetString("Name").Equals("admin", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        httpContext.Response.Redirect("/Home");
-                    }
-                    else{ return _next(httpContext); }
+                    if (t >= 3)
+                        paths.AddRange(typethree);
+
+                    if (t >= 2)
+                        paths.AddRange(typetwo);
+
+                    if (t >= 1)
+                        paths.AddRange(typeone);
+
+                    if (t >= 0)
+                        paths.AddRange(typezero);
                 }
-                else {return _next(httpContext); }
+
+                foreach (string path in paths)
+                    if (p.StartsWith(path, StringComparison.CurrentCultureIgnoreCase))
+                        allowed = true;
+
+                if(allowed)
+                    return _next(c);
+
+                c.Response.Redirect("/Home");
             }
-            httpContext.Response.WriteAsync("Authentication error");
+
+            c.Response.WriteAsync("Authentication error");
             return null;
         }
     }
@@ -49,8 +63,6 @@ namespace Overstag.Middleware
     public static class MiddlewareExtensions
     {
         public static IApplicationBuilder UseMiddleware(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<Authentication>();
-        }
+            => builder.UseMiddleware<Authentication>();
     }
 }

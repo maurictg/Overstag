@@ -16,10 +16,8 @@ namespace Overstag.Models
     public class Participate
     {
         public int Id { get; set; }
-
         public int UserId { get; set; }
         public int EventId { get; set; }
-
         public int Payed { get; set; }
     }
 }

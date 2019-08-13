@@ -35,13 +35,14 @@
                         <td>@e.When.ToString("d", culture)</td>
                         <td>@e.When.ToString("t", culture)</td>
                         <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                        <td><a data-target="#verwijdermodal" data-toggle="modal"  onclick="eventtodelete = @e.Id">Verwijderen</a></td>
+                        <td><a class="text-warning" data-target="#verwijdermodal" data-toggle="modal" onclick="eventtoedit = @e.Id">Delete</a>
+                        <br /><a class="text-primary" onclick="Events.edit(@e.Id)">Edit</a></td>
                     </tr>
                 }
             }
         </tbody>
     </table>
-    <h3 class="white-text">Activiteiten toevoegen</h3>
+    <h3 class="white-text">Activiteiten toevoegen/bewerken</h3>
     <br />
     <form class="">
         <div class="input-group">
@@ -55,6 +56,8 @@
             </div>
             <div class="input-group-append">
                 <input class="btn btn-primary" type="button" value="Toevoegen" id="btnadd">
+                <input class="btn btn-secondary" type="button" value="Annuleren" id="btncancel" style="display: none;">
+                <input class="btn btn-primary" type="button" value="Opslaan" id="btnsave" style="display: none;">
             </div>
         </div>
     </form>
@@ -77,12 +80,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <h4>Weet u zeker dat u dit event wilt verwijderen?</h4>
+                <h4>Weet u zeker dat u deze activiteit wilt verwijderen?</h4>
                 <p>Dit kan niet ongedaan worden gemaakt!</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary" data-dismiss="modal">Annuleren</button>
-                <button class="btn btn-danger" onclick="Events.delete(eventtodelete)">Verwijderen</button>
+                <button class="btn btn-danger" onclick="Events.delete(eventtoedit)">Verwijderen</button>
             </div>
         </div>
     </div>
@@ -90,7 +93,8 @@
 
 </div>
 <script>
-    let eventtodelete = 0;
+    let eventtoedit = 0;
+
     Events = {
         init: function () {
             $('#_events').addClass('active');
@@ -99,8 +103,60 @@
             $('#participators').load('/Admin/Participators');
         },
         mapEvents: function () {
-             $('#btnadd').click(function () {
-                 Events.post();
+            $('#btnadd').click(function () {
+                Events.post();
+            });
+            $('#btncancel').click(function () {
+                $('#ttitle').val('');
+                $('#description').val('');
+                $('#date').val('');
+                $('#time').val('');
+                $('#cost').val('');
+                $('#btncancel').hide();
+                $('#btnsave').hide();
+                $('#btnadd').show();
+            });
+            $('#btnsave').click(function () {
+                var data = {
+                    Title: $('#ttitle').val(),
+                    Description: $('#description').val(),
+                    When: $('#date').val() + ' ' + $('#time').val(),
+                    Cost: $('#cost').val(), Id: eventtoedit
+                };
+                $.post('/Admin/UpdateEvent', data, function (r) {
+                    if(r.status == 'success'){
+                        $.bootstrapGrowl('Wijzigingen opgeslagen!', { type: 'success' });
+                        location.reload();
+                    }
+                    else{
+                        $.bootstrapGrowl(r.error, { type: 'danger' });
+                    }
+                    
+                }, 'json');
+                
+            });
+        },
+        edit: function (id) {
+            eventtoedit = id;
+            moment.locale('nl');
+            $.getJSON('/Admin/getEvent/' + id, function (r) {
+                if (r.status == 'success') {
+                    var data = r.data;
+                    var date = new Date(Date.parse(data.when));
+                    date = moment(date);
+                    console.log(date);
+                    $('#ttitle').val(data.title);
+                    $('#description').val(data.description);
+                    $('#date').val(date.format('DD-MM-YYYY'));
+                    $('#time').val(date.format('HH:mm'));
+                    $('#cost').val(data.cost);
+                    $('#btncancel').show();
+                    $('#btnsave').show();
+                    $('#btnadd').hide();
+                }
+                else
+                    $.bootstrapGrowl(r.error, {type: 'danger'})
+                
             });
         },
         post: function () {
@@ -118,7 +174,7 @@
                 }
                 else {
                     //status = error
-                    M.toast({ html: response.error, classes: 'red' });
+                    $.bootstrapGrowl(response.error, {type: 'danger'})
                 }
                 }, 'json'
             ).done(function(){
@@ -133,7 +189,7 @@
                 }
                 else {
                     //status = error
-                    M.toast({ html: response.error, classes: 'red' });
+                    $.bootstrapGrowl(response.error, {type: 'danger'})
                 }
             }, 'json').done(function () {
             });
@@ -141,5 +197,4 @@
     }
 
     Events.init();
-    //Comment: Misschien datetime library uit calvijn.ga gebruiken?
 </script>

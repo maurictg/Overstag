@@ -72,6 +72,7 @@
 <script>
 
     let wrong2fa = 0;
+    var token = "";
 
     Login = {
         init: function () {
@@ -117,11 +118,11 @@
             $.post("/Register/postMailreset", { Email: $('#tbrmail').val() }, function (response) {
                 if (response.status == 'success') {
                     $('#tbrmail').val('')
-                    M.toast({ html: 'Mail verzonden. Check je email a.u.b.', classes: 'green' });
+                    M.toast({ html: 'Mail verzonden. Check je email a.u.b.', classes: 'green ' });
                 }
                 else {
                     //status = error
-                    M.toast({ html: response.error, classes: 'red' });
+                    M.toast({ html: response.error, classes: 'red ' });
                     $('.checki').val('');
                 }
             }, 'json').done(function () {
@@ -156,13 +157,14 @@
 
                     if (response.twofactor == 'yes') {
                         Login.open2fa();
+                        token = response.token;
                     }
                     else
                         Login.redirect();
                 }
                 else {
                     //status = error
-                    M.toast({ html: response.error, classes: 'red' });
+                    M.toast({ html: response.error, classes: 'red ' });
                     $('.checki').val('');
                 }
             }, 'json'
@@ -190,21 +192,21 @@
 
         validate2fa: function () {
             if ($('#2facode').val().length != 6 || isNaN($('#2facode').val())) {
-                M.toast({ html: 'Type aub een geldige code in', classes: 'orange rounded' });
+                M.toast({ html: 'Type aub een geldige code in', classes: 'orange' });
                 $('#2facode').val('');
             }
             else {
-                $.getJSON('/Register/Validate2FA/' + $('#2facode').val(), function (response) {
+                $.getJSON('/Register/Validate2FA/'+token+'/'+ $('#2facode').val(), function (response) {
                     if (response.status == 'success') {
                         Login.redirect();
                         M.Modal.getInstance($('#tfa')).close();
                         $('#2facode').val('');
                     } else {
-                        M.toast({ html: 'Validatie mislukt.', classes: 'red rounded' });
+                        M.toast({ html: 'Validatie mislukt.', classes: 'red' });
                         $('#2facode').val('');
                         wrong2fa++;
                         if (wrong2fa > 5) {
-                            M.toast({ html: 'Te veel pogingen. Probeer het later opnieuw', classes: 'orange rounded' });
+                            M.toast({ html: 'Te veel pogingen. Probeer het later opnieuw', classes: 'orange ' });
                             Login.cancel2fa();
                         }
                     }

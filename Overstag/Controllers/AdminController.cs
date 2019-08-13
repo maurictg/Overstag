@@ -21,12 +21,8 @@ namespace Overstag.Controllers
         /// <returns>true or false</returns>
         private bool CheckforAdmin()
         {
-            string token = HttpContext.Session.GetString("Token");
             using (var context = new OverstagContext())
-            {
-                var admin = context.Accounts.First(a => a.Username.Equals("admin", StringComparison.CurrentCultureIgnoreCase));
-                return ((admin.Token == token) ? true : false);
-            }
+                return (HttpContext.Session.GetInt32("Type") != null && HttpContext.Session.GetInt32("Type") == 3);
         }
         /// <summary>
         /// Creates the database if not exist
@@ -84,6 +80,52 @@ namespace Overstag.Controllers
             {
                 List<Event> events = context.Events.OrderBy(e => e.When).ToList();
                 return View(events);
+            }
+        }
+
+        /// <summary>
+        /// Returns the data of an event by it's id
+        /// </summary>
+        /// <param name="id">The eventID</param>
+        /// <returns>Json with data: serialized event</returns>
+        [Route("Admin/getEvent/{id}")]
+        public IActionResult getEvent(int id)
+        {
+            using (var context = new OverstagContext())
+            {
+                var eve = context.Events.First(e => e.Id == id);
+                if (eve != null)
+                    return Json(new { status = "success", data = eve });
+                else
+                    return Json(new { status = "error", error = "Event bestaat niet" });
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing event
+        /// </summary>
+        /// <param name="e">The event</param>
+        /// <returns>Json, success or error</returns>
+        [HttpPost]
+        public IActionResult UpdateEvent(Event e)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var eve = context.Events.First(f => f.Id == e.Id);
+                    eve.Title = e.Title;
+                    eve.Description = e.Description;
+                    eve.Cost = e.Cost;
+                    eve.When = e.When;
+                    context.Events.Update(eve);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch(Exception ex)
+                {
+                    return Json(new { status = "error", error = ex.Message });
+                }
             }
         }
 
@@ -247,6 +289,7 @@ namespace Overstag.Controllers
             {
                var usr = context.Accounts.First(a => a.Token == Uri.UnescapeDataString(token));
                HttpContext.Session.SetString("Token", usr.Token);
+               HttpContext.Session.SetInt32("Type", usr.Type);
                HttpContext.Session.SetString("Name", usr.Username);
 
                Response.Redirect("/Home");

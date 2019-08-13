@@ -4,9 +4,11 @@
 }
 <body>
     <div class="row">
-        <div class="col s12 m6 offset-m3">
+        <div class="col s12 m8 offset-m2">
             <h4 class="blue-light-text center-align"><b>Registreren</b></h4><br />
             <div class="card-panel" style="display: block; margin-left: auto; margin-right: auto">
+                <a href="/Register/Login"><b>Al een account? Log hier in</b></a>
+                <br /><br />
                 <form class="login-form" id="frmRegister">
                     <div class="row">
                         <div class="input-field col s12 m6">
@@ -26,7 +28,7 @@
                             <label for="Adress">Adres + Huisnummer</label>
                         </div>
                         <div class="input-field col s12 m2">
-                            <input type="text" class="validate checki" id="Postalcode" placeholder="Postcode" />
+                            <input type="text" class="validate checki" maxlength="6" id="Postalcode" placeholder="Postcode" />
                             <label for="Postalcode">Postcode</label>
                         </div>
                         <div class="input-field col s12 m4">
@@ -34,29 +36,66 @@
                             <label for="Residence">Woonplaats</label>
                         </div>
                     </div>
-                    <div class="input-field">
-                        <i class="material-icons prefix">account_circle</i>
-                        <input type="text" class="validate checki" id="Username" placeholder="Gebruikersnaam" />
-                        <label class="active" for="Username">Gebruikersnaam</label>
+                    <div class="row">
+                        <div class="input-field col s12 m8">
+                            <i class="material-icons prefix">account_circle</i>
+                            <input type="text" class="validate checki" id="Username" placeholder="Gebruikersnaam" />
+                            <label class="active" for="Username">Gebruikersnaam</label>
+                        </div>
+                        <div class="input-field col s12 m4">
+                            <p>
+                                Geslacht:&nbsp;
+                                <label>
+                                    <input value="0" class="with-gap" name="sex" type="radio" checked />
+                                    <span>M</span>&nbsp;
+                                </label>
+                                <label>
+                                    <input value="1" class="with-gap" name="sex" type="radio" />
+                                    <span>V</span>
+                                </label>
+                            </p>
+                        </div>
                     </div>
-                    <div class="input-field">
-                        <i class="material-icons prefix">email</i>
-                        <input type="email" class="validate checki" id="Email" placeholder="Email" />
-                        <label for="Email">Email</label>
-                        <span class="helper-text" data-error="Vul een geldig email adres in" data-success=""></span>
+                    <div class="row">
+                        <div class="input-field col s12 m9">
+                            <i class="material-icons prefix">email</i>
+                            <input type="email" class="validate checki" id="Email" placeholder="Email" />
+                            <label for="Email">Email</label>
+                            <span class="helper-text" data-error="Vul een geldig email adres in" data-success=""></span>
+                        </div>
+                        <div class="input-field col s12 m3">
+                            <input type="date" class="checki" id="Birthdate" placeholder="Geboortedatum">
+                            <label for="Birthdate">Geboortedatum</label>
+                        </div>
                     </div>
-                    <div class="input-field">
-                        <i class="material-icons prefix">lock</i>
-                        <input type="password" class="validate checki" id="Password" placeholder="Wachtwoord" />
-                        <label for="Password">Wachtwoord</label>
-                    </div>
-                    <div class="input-field">
-                        <i class="material-icons prefix">lock</i>
-                        <input type="password" placeholder="Wachtwoord herhalen" id="Passwordrep" class="checki" />
-                        <label for="Passwordrep">Wachtwoord herhalen</label>
+                    <div class="row">
+                        <div class="input-field col s12 m6">
+                            <i class="material-icons prefix">lock</i>
+                            <input type="password" class="validate checki" id="Password" placeholder="Wachtwoord" />
+                            <label for="Password">Wachtwoord</label>
+                        </div>
+                        <div class="input-field col s12 m6">
+                            <i class="material-icons prefix">lock</i>
+                            <input type="password" placeholder="Wachtwoord herhalen" id="Passwordrep" class="checki" />
+                            <label for="Passwordrep">Wachtwoord herhalen</label>
+                        </div>
                         <span id="pwhelper" style="color: red; visibility: hidden;">Wachtwoorden komen niet overeen</span>
                     </div>
-                    <a href="/Register/Login"><b>Al een account? Log hier in</b></a>
+                    <div class="row">
+                        <p>Type gebruiker: </p>
+                        <p>
+                            <label>
+                                <input value="0" class="with-gap" name="type" type="radio" checked />
+                                <span>Normale gebruiker</span>&nbsp;
+                            </label>
+                        </p>
+                        <p>
+                            <label>
+                                <input value="1" class="with-gap" name="type" type="radio" />
+                                <span>Ouder (gezinsaccount)</span>
+                            </label>
+                        </p>
+                    </div>
                     <div class="card-action center-align">
                         <br />
                         <div class="progress" id="progbar"><div class="indeterminate"></div></div>
@@ -67,7 +106,6 @@
                             </label>
                         </p>
                         <a class="btn btn-large blue-light waves-effect" id="register">Registreren</a><br />
-                        <span id="tbhelper" style="color: red; visibility: hidden;">Vul alle velden in</span>
                     </div>
                 </form>
             </div>
@@ -111,12 +149,13 @@
                 }
             });
 
-            if (isValid) {
+            var passMatch = ($('#Password').val() == $('#Passwordrep').val());
+
+            if (isValid && passMatch) {
                 Register.post();
-                $('#tbhelper').css('visibility', 'hidden');
             }
             else {
-                $('#tbhelper').css('visibility', 'visible');
+                M.toast({ html: 'Vul a.u.b. alle velden correct in', classes: 'orange' });
             }
         },
 
@@ -129,7 +168,10 @@
                 Lastname: $('#Lastname').val(),
                 Adress: $('#Adress').val(),
                 Postalcode: $('#Postalcode').val(),
-                Residence: $('#Residence').val()
+                Residence: $('#Residence').val(),
+                Sex: $('input[name=sex]:checked').val(),
+                Type: $('input[name=type]:checked').val(),
+                Birthdate: $('#Birthdate').val()
             };
             $('#progbar').show();
             $.post("/Register/postRegister",data , function (response) {
@@ -177,6 +219,9 @@
         }
     }
 
+    $(function () {
+        Register.init();
+    });
     //init
-    Register.init();
+    
 </script>
