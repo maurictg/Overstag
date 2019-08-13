@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;    
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 
 
@@ -25,19 +26,22 @@ namespace Overstag.Controllers
 
             using (var context = new OverstagContext())
             {
-                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
+                var user = context.Accounts.Include(f => f.Subscriptions).First(p => p.Id == currentuser().Id);
+                var parti = user.Subscriptions;
+
                 List<Event> events = new List<Event>();
 
                 foreach (var part in parti)
                 {
-                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventId).FirstOrDefault()) && part != null)
+                    if (!events.Contains(context.Events.Where(e => e.Id == part.EventID).FirstOrDefault()) && part != null)
                     {
-                        if (part.Payed == 0)
+                        if(part.Payed == 0)
                         {
-                            var e2 = context.Events.Where(e => e.Id == part.EventId).FirstOrDefault();
-                            if(Core.General.DateIsPassed(e2.When))
+                            var e2 = context.Events.Where(e => e.Id == part.EventID).FirstOrDefault();
+                            if (Core.General.DateIsPassed(e2.When))
                                 events.Add(e2);
                         }
+                       
                     }
                 }
 
@@ -81,15 +85,15 @@ namespace Overstag.Controllers
         {
             using (var context = new OverstagContext())
             {
-                var parti = context.Participate.Where(p => p.UserId == currentuser().Id).ToList();
+                var user = context.Accounts.Include(a => a.Subscriptions).First(p => p.Id == currentuser().Id);
+                var parti = user.Subscriptions;
+
                 List<Event> events = new List<Event>();
-                events.Clear();
 
                 foreach(var part in parti)
-                {
                     if(part != null)
-                        events.Add(context.Events.First(e => e.Id == part.EventId));
-                }
+                        events.Add(context.Events.First(e => e.Id == part.EventID));
+
                 return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.Where(e=>e.When>DateTime.Now).OrderBy(e => e.When).ToList() });
             }
         }
@@ -108,16 +112,16 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var user = context.Accounts.First(a => a.Id == currentuser().Id);
-                    var eve = context.Events.First(e => e.Id == p.EventId);
+                    var user = context.Accounts.Include(f => f.Subscriptions).First(a => a.Id == currentuser().Id);
+                    var eve = context.Events.First(e => e.Id == p.EventID);
 
                     if (Core.General.DateIsPassed(eve.When))
                         return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
 
-                    var part = context.Participate.Where(e => e.EventId == p.EventId && e.UserId == user.Id).FirstOrDefault();
-                    if (part == null)
+                    var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
+                    if(part == null)
                     {
-                        context.Participate.Add(new Participate { UserId = user.Id, EventId = eve.Id, Payed = 0 });
+                        user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id });
                         await context.SaveChangesAsync();
                         return Json(new { status = "success" });
                     }
@@ -144,22 +148,22 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var user = context.Accounts.First(a => a.Id == currentuser().Id);
-                    var eve = context.Events.First(e => e.Id == p.EventId);
+                    var user = context.Accounts.Include(f => f.Subscriptions).First(a => a.Id == currentuser().Id);
+                    var eve = context.Events.First(e => e.Id == p.EventID);
 
                     if (Core.General.DateIsPassed(eve.When))
                         return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer uitschrijven" });
 
                     try
                     {
-                        var part = context.Participate.Where(e => e.EventId == p.EventId && e.UserId == user.Id).FirstOrDefault();
+                        var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
                         if (part == null)
                         {
                             return Json(new { status = "error", error = "U bent al uitgeschreven voor deze activiteit" });
                         }
                         else
                         {
-                            context.Participate.Remove(part);
+                            user.Subscriptions.Remove(part);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
                         }
@@ -277,7 +281,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var account = context.Accounts.Where(e => e.Token == Uri.UnescapeDataString(a.Token)).FirstOrDefault();
+                    var account = context.Accounts.Where(e => e.Token == Uri.UnescapeDataString(a.Token)).Include(f => f.Subscriptions).FirstOrDefault();
 
                     if (currentuser().Username != "admin" && currentuser().Username != account.Username)
                         return Json(new { status = "error", error = "Mislukt door authenticatiefout!" });
@@ -292,10 +296,9 @@ namespace Overstag.Controllers
                             //Ingeschreven events verwijderen
                             try
                             {
-                                var subscriptions = context.Participate.Where(p => p.UserId == account.Id).ToList();
-                                foreach (var item in subscriptions)
+                                foreach (var item in account.Subscriptions)
                                 {
-                                    context.Remove(item);
+                                    account.Subscriptions.Remove(item);
                                 }
                             }
                             catch { }
@@ -321,7 +324,8 @@ namespace Overstag.Controllers
         {
             using (var context = new OverstagContext())
             {
-                var parti = context.Participate.Where(i => i.UserId == currentuser().Id && i.Payed == 0);
+                var user = context.Accounts.Include(p => p.Subscriptions).First(f => f.Id == currentuser().Id);
+                var parti = user.Subscriptions;
 
                 if (parti.Count() < 1)
                     return Json(new { status = "error", error = "Geen openstaande events gevonden" });
@@ -334,7 +338,7 @@ namespace Overstag.Controllers
 
                     foreach (var part in parti)
                     {
-                        var eve = context.Events.First(f => f.Id == part.EventId);
+                        var eve = context.Events.First(f => f.Id == part.EventID);
                         if (Core.General.DateIsPassed(eve.When))
                         {
                             part.Payed = 1;
@@ -354,7 +358,10 @@ namespace Overstag.Controllers
                     };
 
                     context.Invoices.Add(facture);
-                    context.Participate.UpdateRange(parti);
+
+                    user.Subscriptions = parti;
+                    context.Accounts.Update(user);
+
                     context.SaveChanges();
                     return Json(new { status = "success" });
                 }

@@ -40,7 +40,7 @@ namespace Overstag.Controllers
             }
         }
 
-        public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); HttpContext.Session.Remove("Type") Response.Redirect("/Home/Index"); }
+        public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); HttpContext.Session.Remove("Type"); Response.Redirect("/Home/Index"); }
 
         /// <summary>
         /// Register a new user to the system
@@ -74,7 +74,6 @@ namespace Overstag.Controllers
                             account.Password = Encryption.PBKDF2.Hash(account.Password); //Create hash of password
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
-                            account.FamilyID = -1;
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });

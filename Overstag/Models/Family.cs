@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Overstag.Models
 {
@@ -7,8 +8,12 @@ namespace Overstag.Models
         public int Id { get; set; }
         public string UserID { get; set; } //parent
         public string Token { get; set; }
+
+        //Relations
+        public List<Account> Members { get; set; }
     }
 
+    // <<<Under Construction>>>
     public class FamilyInvoice
     {
         public int Id { get; set; }

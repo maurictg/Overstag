@@ -11,13 +11,20 @@ namespace Overstag.Models
         public string Description { get; set; }
         public DateTime When { get; set; }
         public int Cost { get; set; }
+
+        //Relations
+        public List<Participate> Participators { get; set; }
     }
 
+    // [Intermediate table]
     public class Participate
     {
-        public int Id { get; set; }
-        public int UserId { get; set; }
-        public int EventId { get; set; }
+        //Relations
+        public int UserID { get; set; }
+        public Account User { get; set; }
+        public int EventID { get; set; }
+        public Event Event { get; set; }
+
         public int Payed { get; set; }
     }
 }

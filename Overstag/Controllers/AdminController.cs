@@ -171,12 +171,12 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    Event eve = context.Events.Where(e => e.Id.Equals(Id)).FirstOrDefault();
+                    Event eve = context.Events.Where(e => e.Id.Equals(Id)).Include(f => f.Participators).FirstOrDefault();
                     //delete participators
                     try
                     {
-                        var partici = context.Participate.Where(p => p.EventId == eve.Id).ToList();
-                        foreach (var p in partici) { context.Remove(p); }
+                        var partici = eve.Participators;
+                        foreach (var p in partici) { eve.Participators.Remove(p); }
                     }
                     catch { }
                     //Delete event
@@ -209,27 +209,31 @@ namespace Overstag.Controllers
             List<AParticipator> aPart = new List<AParticipator>();
             using(var context = new OverstagContext())
             {
-                var events = context.Events.OrderBy(e => e.When).ToArray();
-                var participators = context.Participate.ToArray();
+                var events = context.Events.Include(f => f.Participators).OrderBy(e => e.When).ToArray();
+                //var participators = context.Participate.ToArray();
 
                 foreach(var e in events)
                 {
                     List<Account> Users = new List<Account>();
                     List<bool> Factured = new List<bool>();
-                    var parti = participators.Where(o => o.EventId == e.Id);
+                    var parti = e.Participators;
 
-                    foreach(var p in parti)
+                    if(parti != null)
                     {
-                        Users.Add(context.Accounts.First(u => u.Id == p.UserId));
-                        Factured.Add(p.Payed==1);
+                        foreach (var p in parti)
+                        {
+                            Users.Add(context.Accounts.First(u => u.Id == p.UserID));
+                            Factured.Add(p.Payed==1);
+                        }
+
+                        aPart.Add(new AParticipator()
+                        {
+                            Accounts = Users.ToArray(),
+                            Factured = Factured.ToArray(),
+                            Event = e
+                        });
                     }
-
-                    aPart.Add(new AParticipator()
-                    {
-                        Accounts = Users.ToArray(),
-                        Factured = Factured.ToArray(),
-                        Event = e
-                    });
+                    
                 }
             }
             return View(aPart.OrderBy(e => e.Event.When).ToList());
@@ -241,26 +245,31 @@ namespace Overstag.Controllers
 
             using (var context = new OverstagContext())
             {
-                foreach (var user in context.Accounts)
+                foreach (var user in context.Accounts.Include(f => f.Subscriptions))
                 {
                     List<Event> events = new List<Event>();
-                    var parti = context.Participate.Where(p => p.UserId == user.Id);
-                    foreach (var part in parti)
+                    var parti = user.Subscriptions;
+
+                    if(parti != null)
                     {
-                        var eve = context.Events.First(e => e.Id == part.EventId);
-                        if (part.Payed == 0)
+                        foreach (var part in parti)
                         {
+                            var eve = context.Events.Include(f => f.Participators).First(e => e.Id == part.EventID);
+                            if (part.Payed == 0)
+                            {
                             if (Core.General.DateIsPassed(eve.When))
                                 events.Add(eve);
+                            }
                         }
-                    }
 
-                    aus.Add(new AUnpayed
-                    {
-                        User = user,
-                        Unfactured_Events = events,
-                        Unpayed_Invoices = context.Invoices.Where(f => f.UserID==user.Id&&f.Payed==0).ToList()
-                    });
+                        aus.Add(new AUnpayed
+                        {
+                            User = user,
+                            Unfactured_Events = events,
+                            Unpayed_Invoices = context.Invoices.Where(f => f.UserID == user.Id && f.Payed == 0).ToList()
+                        });
+                    }
+                    
                 }
             }
             
@@ -334,8 +343,8 @@ namespace Overstag.Controllers
                                         return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).FirstOrDefault() });
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).FirstOrDefault() });
-                                    case "Participate":
-                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });
+                                    //case "Participate":
+                                    //    return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });
                                     case "Invoices":
                                         return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).FirstOrDefault() });
                                     case "Logging":
@@ -361,8 +370,8 @@ namespace Overstag.Controllers
                                         return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).ToList() });
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToList() });
-                                    case "Participate":
-                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToList() });
+                                    //case "Participate":
+                                    //    return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToList() });
                                     case "Invoices":
                                         return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).ToList() });
                                     case "Logging":
@@ -386,8 +395,8 @@ namespace Overstag.Controllers
                                         return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).ToArray() });
                                     case "Events":
                                         return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToArray() });
-                                    case "Participate":
-                                        return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToArray() });
+                                    //case "Participate":
+                                    //    return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToArray() });
                                     case "Invoices":
                                         return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).ToArray() });
                                     case "Logging":

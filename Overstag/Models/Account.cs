@@ -7,10 +7,8 @@ namespace Overstag.Models
     public class Account
     {
         public int Id { get; set; }
-        public int FamilyID { get; set; }
-        //default -1
-        public int Sex { get; set; } 
-        //0 (male)/1 (female)
+        public int Sex { get; set; }
+        //0 (male) /1 (female)
         public int Type { get; set; }
         //0 user, 1 parent, 2 mentor, 3 admin
         public string Username { get; set; }
@@ -24,6 +22,12 @@ namespace Overstag.Models
         public string Residence { get; set; }
         public DateTime Birthdate { get; set; }
         public string TwoFactor { get; set; }
+
+        //Relations
+        public Family Family { get; set; }
+        public int FamilyID { get; set; }
+        public List<Participate> Subscriptions { get; set; }
+        public List<Invoice> Invoices { get; set; }
     }
 
     public class Logging
