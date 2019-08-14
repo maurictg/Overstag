@@ -38,17 +38,9 @@ namespace Overstag.Models
                 .HasForeignKey(f => f.UserID);
 
             //One to may (account aan familie koppelen)
-            mb.Entity<Family>()
-                .HasMany(a => a.Members)
-                .WithOne(f => f.Family)
-                .HasForeignKey(g => g.FamilyID);
-
-
-            //One to may (invoice aan account koppelen)
-            mb.Entity<Invoice>()
-                .HasOne(a => a.User)
-                .WithMany(f => f.Invoices)
-                .HasForeignKey(g => g.UserID);
+            mb.Entity<Account>()
+                .HasOne(a => a.Family)
+                .WithMany(l => l.Members);
 
         }
 

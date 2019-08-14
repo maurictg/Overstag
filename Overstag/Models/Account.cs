@@ -25,9 +25,7 @@ namespace Overstag.Models
 
         //Relations
         public Family Family { get; set; }
-        public int FamilyID { get; set; }
         public List<Participate> Subscriptions { get; set; }
-        public List<Invoice> Invoices { get; set; }
     }
 
     public class Logging
