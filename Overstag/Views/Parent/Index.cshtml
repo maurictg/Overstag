@@ -1,0 +1,105 @@
+﻿@model Overstag.Models.Family
+@{
+    ViewBag.Title = "Mijn gezin";
+    Layout = "~/Views/_UserLayout.cshtml";
+}
+
+<div>
+    <h3>Mijn gezin</h3>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Naam</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var user in Model.Members)
+            {
+                <tr>
+                    <td>@user.Firstname</td>
+                    <td>
+                        <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
+                    </td>
+                </tr>
+            }
+            @if(Model.Members.Count() == 0)
+            {
+                <tr><td colspan="2" class="center-align"><h5><b>Geen gezinsleden</b>.</h5> Klik op de + om iemand uit te nodigen</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="fixed-action-btn">
+    <a class="btn-floating btn-large blue-dark">
+        <i class="large material-icons" onclick="Parent.openLink()">add</i>
+    </a>
+</div>
+
+<!--Modals-->
+<div id="invite" class="modal">
+    <div class="modal-content">
+        <h4>Uitnodiging</h4>
+        <h6>Via deze uitnodiging kan iemand zich voegen bij uw gezin</h6>
+        <input id="familyid" type="text" placeholder="familyid"/>
+        <a class="btn btn-small" onclick="Parent.copyLink()">Link kopiëren</a>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Sluiten</a>
+    </div>
+</div>
+
+<div id="areusure" class="modal">
+    <div class="modal-content">
+        <h4>Weet u zeker dat u deze gebruiker wilt verwijderen?</h4>
+        <h6>U kunt hem/haar altijd later weer opnieuw uitnodigen</h6>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" id="btndelete" class="modal-close waves-effect waves-green btn red">Ja, verwijderen</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn green">Nee, annuleren</a>
+    </div>
+</div>
+
+<script>
+    var Parent = {
+        init: function() {
+            $('#_family').addClass('active');
+            $('#_mfamily').addClass('active');
+            this.mapEvents();
+        },
+        mapEvents: function() {
+            $('#btndelete').click(function() {
+                Parent.postRemove($(this).data('id'));
+            });
+        },
+        openLink: function() {
+            M.Modal.getInstance($('#invite')).open();
+            var link = window.location.origin + '/Register/joinFamily/@Uri.EscapeDataString(Model.Token)';
+            $('#familyid').val(link);
+        },
+        copyLink: function() {
+            $('#familyid').select();
+            document.execCommand("copy");
+            M.toast({ html: 'Link gekopieërd!', classes: 'blue' });
+        },
+        postRemove: function(id) {
+            $.get('/Parent/Remove/' + id, function(r) {
+                if(r.status == 'success') {
+                    M.toast({ html: 'Gebruiker verwijderd', classes: 'green' });
+                    window.location.reload();
+                }
+                else
+                    M.toast({ html: r.error, classes: 'red' });
+            },'json');
+        },
+        openRemove: function(id) {
+            $('#btndelete').data('id', id);
+            M.Modal.getInstance($('#areusure')).open();
+        }
+    }
+
+    $(document).ready(function() {
+        Parent.init();
+    });
+</script>

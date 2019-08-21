@@ -6,7 +6,7 @@ namespace Overstag.Models
     public class Family
     {
         public int Id { get; set; }
-        public string UserID { get; set; } //parent
+        public int ParentID { get; set; } //parent
         public string Token { get; set; }
 
         //Relations

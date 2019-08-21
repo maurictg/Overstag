@@ -1,7 +1,8 @@
 ﻿@{
     Layout = "/Views/_UserLayout.cshtml";
     var context = new Overstag.Models.OverstagContext();
-    var model = context.Events.Where(e=>e.When>DateTime.Now).OrderBy(e => e.When).ToArray();
+    var model = context.Events.Where(e => e.When > DateTime.Now).OrderBy(e => e.When).ToArray();
+    ViewBag.Title = "Evenementen";
 }
 <div>
     <h3 class="center-align">Agenda</h3>
@@ -23,6 +24,15 @@
         <a onclick="User.remove()" class="modal-close waves-effect btn red white-text">Toch uitschrijven</a>
     </div>
 </div>
+
+<div class="fixed-action-btn">
+    <a class="btn-floating btn-large blue-dark waves-effect" href="/User/Vote">
+        <i class="large material-icons">how_to_vote</i>
+    </a>
+</div>
+
+
+
 <script>
     let eventtoremove;
     var User = {
@@ -30,8 +40,12 @@
             $('#_aevent').addClass('active');
             $('#_maevent').addClass('active');
             User.loadcontent();
+            User.mapEvents();
         },
-        remove: function() {
+        mapEvents: function () {
+
+        },
+        remove: function () {
             //Uitschrijven
 
             $.post("/User/postDeleteEvent", { EventId: eventtoremove }, function (response) {
@@ -45,12 +59,17 @@
                 }
             }, 'json');
         },
-        loadcontent: function(){
-           $('#partial').load('/User/Subscriptions');
+        loadcontent: function () {
+            $('#partial').load('/User/Subscriptions');
         }
     }
 
-    User.init();
+    $(document).ready(function () {
+        $('.modal').modal();
+        $('.tooltipped').tooltip();
+        User.init();
+    });
+
 
 </script>
 

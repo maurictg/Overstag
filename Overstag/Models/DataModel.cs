@@ -13,7 +13,7 @@ namespace Overstag.Models
         public DbSet<Invoice> Invoices { get; set; } 
         public DbSet<Logging> Logging { get; set; }
         public DbSet<Family> Families { get; set; }
-
+        public DbSet<Idea> Ideas { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -23,6 +23,8 @@ namespace Overstag.Models
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
+            //Mapping relations between tables
+
             //Many to many (event aan user koppelen)
             mb.Entity<Participate>()
               .HasKey(ue => new { ue.EventID, ue.UserID });
@@ -37,10 +39,24 @@ namespace Overstag.Models
                 .WithMany(e => e.Subscriptions)
                 .HasForeignKey(f => f.UserID);
 
-            //One to may (account aan familie koppelen)
+            //Many to many (idee aan user koppelen)
+            mb.Entity<Vote>()
+                .HasKey(v => new { v.IdeaID, v.UserID });
+
+            mb.Entity<Vote>()
+                .HasOne(u => u.User)
+                .WithMany(v => v.Votes)
+                .HasForeignKey(w => w.UserID);
+
+            mb.Entity<Vote>()
+                .HasOne(v => v.Idea)
+                .WithMany(w => w.Votes)
+                .HasForeignKey(x => x.IdeaID);
+
+            //One to many (account aan familie koppelen)
             mb.Entity<Account>()
-                .HasOne(a => a.Family)
-                .WithMany(l => l.Members);
+                .HasOne(f => f.Family)
+                .WithMany(n => n.Members);
 
         }
 

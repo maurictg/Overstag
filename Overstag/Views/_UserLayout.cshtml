@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Http
+
 <!-- OVERSTAG (C) 2019 MaurICT (github.com/maurictg/Overstag) -->
 <!DOCTYPE html>
 <html>
@@ -14,6 +15,11 @@
         Overstag = {
             init: function(){
                 Overstag.mapevents();
+
+                if (Overstag.type == 1) {
+                    $('#_mfamily').show();
+                    $('#_family').show();
+                }
             },
             mapevents: function () {
                 if (Overstag.loggedin) {
@@ -29,21 +35,46 @@
             //IMPORTANT VARIABLES
             firstname: '@Context.Session.GetString("Name")',
             loggedin: ('@Context.Session.GetString("Token")' != ''),
+            type: @Context.Session.GetInt32("Type"),
             url: window.location.href.replace(window.location.origin,''),
         }
     </script>
     <style>
         /* Overwrite materialize.css */
+        .blue-light {
+            background-color: #3096D3 !important;
+        }
+
+        .blue-middle {
+            background-color: #0B86CF !important;
+        }
+
+        .blue-dark {
+            background-color: #04507D !important;
+        }
+
+        .blue-light-text {
+            color: #3096D3 !important;
+        }
+
+        .blue-middle-text {
+            color: #0B86CF !important;
+        }
+
+        .blue-dark-text {
+            color: #04507D !important;
+        }
     </style>
 </head>
 <body>
     <nav>
-        <div class="nav-wrapper cyan darken-4">
+        <div class="nav-wrapper blue-dark">
             <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li id="_home"><a href="/Home">Home</a></li>
                 <li id="_ainfo"><a href="/User">Mijn account</a></li>
+                <li id="_family" style="display: none;"><a href="/Parent/Family">Mijn gezin</a></li>
                 <li id="_asetting"><a href="/User/Settings">Instellingen</a></li>
                 <li id="_aevent"><a href="/User/Events">Activiteiten</a></li>
                 <li id="_apay"><a href="/User/Payment">Betalingen</a></li>
@@ -54,6 +85,7 @@
     <ul class="sidenav" id="mobile-demo">
         <li id="_mhome"><a href="/Home">Home</a></li>
         <li id="_mainfo"><a href="/User">Mijn account</a></li>
+        <li id="_mfamily" style="display: none;"><a href="/Parent/Family">Mijn gezin</a></li>
         <li id="_masetting"><a href="/User/Settings">Instellingen</a></li>
         <li id="_maevent"><a href="/User/Events">Activiteiten</a></li>
         <li id="_mapay"><a href="/User/Payment">Betalingen</a></li>

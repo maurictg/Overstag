@@ -3,14 +3,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
+
 
 namespace Overstag.Controllers
 {
     public class RegisterController : Controller
     {
         public IActionResult Index() => View("Login");
-        public IActionResult Login() => View("Login");
+        public IActionResult Login() => View("Login","");
         public IActionResult Register() => View();
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace Overstag.Controllers
                             account.Password = Encryption.PBKDF2.Hash(account.Password); //Create hash of password
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
-                            
+
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
@@ -268,6 +270,46 @@ namespace Overstag.Controllers
             }                
             else
                 return Json(new { status = "error" });
+        }
+
+        /// <summary>
+        /// Join a family by its token
+        /// </summary>
+        /// <param name="token">The family token</param>
+        /// <returns>HTML content</returns>
+        [HttpGet("Register/joinFamily/{token}")]
+        public IActionResult JoinFamily(string token)
+        {
+            if(string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
+            {
+                return View("Login","/Register/joinFamily/"+token);
+            }
+            else
+            {
+                using (var context = new OverstagContext())
+                {
+                    var content = "";
+                    var family = context.Families.Include(g => g.Members).FirstOrDefault(f => f.Token == Uri.UnescapeDataString(token));
+
+                    if (family == null)
+                        content = "<h1>Token is onjuist of famillie bestaat niet</h1><br><p>Controleer de link die je hebt gekregen.</p>";
+                    else
+                    {
+                        var user = context.Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
+                        user.Family = family;
+                        context.Accounts.Update(user);
+                        context.SaveChanges();
+                        content = "<h1 style=\"color: green;\">Gelukt!!!</h1><h1>U bent nu lid van de famillie</h1>" +
+                            "<br><a href=\"/User\">Klik hier om verder te gaan</a>";
+                    }
+
+                    return new ContentResult()
+                    {
+                        Content = content,
+                        ContentType = "text/html",
+                    };
+                }
+            }
         }
 
     }

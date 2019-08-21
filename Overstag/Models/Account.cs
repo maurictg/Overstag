@@ -7,7 +7,7 @@ namespace Overstag.Models
     public class Account
     {
         public int Id { get; set; }
-        public int Sex { get; set; }
+        public byte Sex { get; set; }
         //0 (male) /1 (female)
         public int Type { get; set; }
         //0 user, 1 parent, 2 mentor, 3 admin
@@ -26,6 +26,7 @@ namespace Overstag.Models
         //Relations
         public Family Family { get; set; }
         public List<Participate> Subscriptions { get; set; }
+        public List<Vote> Votes { get; set; }
     }
 
     public class Logging

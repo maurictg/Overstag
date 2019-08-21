@@ -1,4 +1,4 @@
-﻿@model Overstag.Models.Login
+﻿@model string
 @{
     ViewBag.Title = "Inloggen";
 }
@@ -73,6 +73,7 @@
 
     let wrong2fa = 0;
     var token = "";
+    let redirecturl = '@Model';
 
     Login = {
         init: function () {
@@ -176,6 +177,11 @@
         redirect: function () {
             //Redirect to user page
             localStorage.setItem("login", true);
+            if (redirecturl != '') {
+                $(location).attr('href', redirecturl);
+                return;
+            }
+
             if (localStorage.getItem("redirect")) {
                 $(location).attr('href', localStorage.getItem("redirect"));
                 localStorage.removeItem("redirect");

@@ -1,114 +1,124 @@
 ﻿@model Overstag.Models.NoDB.UnpayedEvents
+@using Microsoft.AspNetCore.Http
+@using Microsoft.EntityFrameworkCore;
 @{
     Layout = "~/Views/_UserLayout.cshtml";
     ViewBag.Title = "Betalingen";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
+    var currentuser = new Overstag.Models.OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == Context.Session.GetString("Token"));
 }
 
-<div>
-    <h3>Niet-gefactureerde avonden</h3>
-    <div id="unpayedevents">
-        @if (Model.UnfacturedEvents.Count() > 0)
+    <div>
+        @if (currentuser.Family != null)
         {
-            <table class="responsive-table">
-                <thead>
-                    <tr>
-                        <th>Wat</th>
-                        <th>Wanneer</th>
-                        <th>Omschrijving</th>
-                        <th>Kosten</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @{double topay = 0; }
-                    @foreach (var e in Model.UnfacturedEvents)
-                    {
-                        double c = (double)e.Cost;
-                        topay += c;
-                        <tr>
-                            <td>@e.Title</td>
-                            <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                            <td>@e.Description</td>
-                            <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                        </tr>
-                    }
-                    <tr class="grey lighten-4">
-                        <td colspan="4" class="center"><b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b></td>
-                    </tr>
-                </tbody>
-            </table>
+            <h4 class="red-text center-align" style="font-weight: bold;">De facturering wordt beheert door uw ouder.</h4>
         }
         else
         {
-            <h5>Geen ongefactureerde avonden!</h5>
-        }
-    </div>
-    <h3>Facturen</h3>
-    <div id="factures">
-        @if (Model.UnfacturedEvents.Count() > 0)
-        {
-            <h6>&nbsp;Factuur genereren van ongefactureerde avonden</h6>
-            <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger">Factuur genereren</a>
-            <br /><br />
-        }
-        @if (Model.Invoices.Count() > 0)
-        {
-            <ul class="collapsible">
-                @foreach (var item in Model.Invoices)
+            <h3>Niet-gefactureerde avonden</h3>
+            <div id="unpayedevents">
+                @if (Model.UnfacturedEvents.Count() > 0)
                 {
-                    <li>
-                        <div class="collapsible-header">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td><i class="material-icons">calendar_today</i>@item.Timestamp.ToString("d", culture)</td>
-                                        <td>Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
-                                        <td>Betaald: @Html.Raw((item.Payed) ? "<b class='green-text'>Ja</b>" : "<b class='red-text'>Nee</b>")</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="collapsible-body">
-                            @if (!item.Payed)
+                    <table class="responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Wat</th>
+                                <th>Wanneer</th>
+                                <th>Omschrijving</th>
+                                <th>Kosten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{double topay = 0; }
+                            @foreach (var e in Model.UnfacturedEvents)
                             {
-                                <a class="waves-effect waves-light btn" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen</a>
-                                <br />
+                                double c = (double)e.Cost;
+                                topay += c;
+                                <tr>
+                                    <td>@e.Title</td>
+                                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                    <td>@e.Description</td>
+                                    <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                                </tr>
                             }
-
-                            <table class="responsive-table">
-                                <thead>
-                                    <tr>
-                                        <th>Wat</th>
-                                        <th>Wanneer</th>
-                                        <th>Omschrijving</th>
-                                        <th>Kosten</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var e in item.Events)
+                            <tr class="grey lighten-4">
+                                <td colspan="4" class="center"><b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <h5>Geen ongefactureerde avonden!</h5>
+                }
+            </div>
+            <h3>Facturen</h3>
+            <div id="factures">
+                @if (Model.UnfacturedEvents.Count() > 0)
+                {
+                    <h6>&nbsp;Factuur genereren van ongefactureerde avonden</h6>
+                    <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger">Factuur genereren</a>
+                    <br /><br />
+                }
+                @if (Model.Invoices.Count() > 0)
+                {
+                    <ul class="collapsible">
+                        @foreach (var item in Model.Invoices)
+                        {
+                            <li>
+                                <div class="collapsible-header">
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td><i class="material-icons">calendar_today</i>@item.Timestamp.ToString("d", culture)</td>
+                                                <td>Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
+                                                <td>Betaald: @Html.Raw((item.Payed) ? "<b class='green-text'>Ja</b>" : "<b class='red-text'>Nee</b>")</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="collapsible-body">
+                                    @if (!item.Payed)
                                     {
-                                        <tr>
-                                            <td>@e.Title</td>
-                                            <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                                            <td>@e.Description</td>
-                                            <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
-                                        </tr>
+                                        <a class="waves-effect waves-light btn" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen</a>
+                                        <br />
                                     }
 
-                                <td colspan="4" class="center-align white-text grey darken-1">Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
-                                </tbody>
-                            </table>
-                        </div>
-                    </li>
+                                    <table class="responsive-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Wat</th>
+                                                <th>Wanneer</th>
+                                                <th>Omschrijving</th>
+                                                <th>Kosten</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var e in item.Events)
+                                            {
+                                                <tr>
+                                                    <td>@e.Title</td>
+                                                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                                    <td>@e.Description</td>
+                                                    <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                                </tr>
+                                            }
+
+                                            <tr><td colspan="4" class="center-align white-text grey darken-1">Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </li>
+                        }
+                    </ul>
                 }
-            </ul>
-        }
-        else
-        {
-            <h5>Geen facturen gevonden</h5><br />
+                else
+                {
+                    <h5>Geen facturen gevonden</h5><br />
+                }
+            </div>
         }
     </div>
-</div>
 
 <!-- Modals -->
 <div id="pay" class="modal">
@@ -127,9 +137,10 @@
 <div id="ginvoice" class="modal">
     <div class="modal-content">
         <h4>Factuur maken</h4>
-        <p>Wanneer je een factuur maakt, worden alle tot nu toe niet betaalde of gefactureerde avonden
-        (die staan hier boven) gefactureerd. Vervolgens kun je er zelf voor kiezen of je de factuur zelf, nu
-        of later, of door een ander laat betalen door middel van een betaallink.
+        <p>
+            Wanneer je een factuur maakt, worden alle tot nu toe niet betaalde of gefactureerde avonden
+            (die staan hier boven) gefactureerd. Vervolgens kun je er zelf voor kiezen of je de factuur zelf, nu
+            of later, of door een ander laat betalen door middel van een betaallink.
         </p>
     </div>
     <div class="modal-footer">

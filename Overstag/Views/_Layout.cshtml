@@ -20,8 +20,11 @@
                     $('#_reg a').text('Uitloggen');
                     $('#_mreg a').attr('href', '/Register/Logoff');
                     $('#_mreg a').text('Uitloggen');
-                } else {
-                    $('.hidden').hide();
+                    $('#_events a').attr('href', '/User/Events');
+                    $('#_mevents a').attr('href', '/User/Events');
+                    $('#_events a').text('Mijn agenda');
+                    $('#_mevents a').text('Mijn agenda');
+                    $('.hidden').show();
                 }
 
                 Overstag.mapevents();
@@ -40,6 +43,7 @@
             //IMPORTANT VARIABLES
             firstname: '@Context.Session.GetString("Name")',
             loggedin: ('@Context.Session.GetString("Token")' != ''),
+            type: @Html.Raw(Context.Session.GetInt32("Type") != null ? Context.Session.GetInt32("Type") : -1),
             url: window.location.href.replace(window.location.origin,''),
         }
     </script>
@@ -76,10 +80,9 @@
             <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <!--Li a href-->
                 <li id="_home"><a href="/Home">Home</a></li>
                 <li id="_events"><a href="/Home/Events">Agenda</a></li>
-                <li id="_ainfo"><a href="/User" class="hidden">Mijn account</a></li>
+                <li id="_ainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
                 <li id="_reg"><a href="/Register">Aanmelden</a></li>
             </ul>
         </div>
@@ -87,7 +90,7 @@
     <ul class="sidenav" id="mobile-demo">
         <li id="_mhome"><a href="/Home">Home</a></li>
         <li id="_mevents"><a href="/Home/Events">Agenda</a></li>
-        <li id="_mainfo"><a href="/User" class="hidden">Mijn account</a></li>
+        <li id="_mainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
         <li id="_mreg"><a href="/Register">Aanmelden</a></li>
     </ul>
 

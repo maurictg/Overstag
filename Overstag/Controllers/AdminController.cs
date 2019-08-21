@@ -83,6 +83,7 @@ namespace Overstag.Controllers
             }
         }
 
+        
         /// <summary>
         /// Returns the data of an event by it's id
         /// </summary>
@@ -187,6 +188,28 @@ namespace Overstag.Controllers
                 catch (Exception ex)
                 {
                     return Json(new { status = "error", error = ex.ToString() });
+                }
+            }
+        }
+
+        public IActionResult Ideas()
+            => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote == 1) - b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
+        
+        [HttpGet("Admin/Ideas/Delete/{id}")]
+        public IActionResult DeleteIdea(int id)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var idea = context.Ideas.First(i => i.Id == id);
+                    context.Ideas.Remove(idea);
+                    context.SaveChanges();
+                    return Json(new { status = "success"});
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = e });
                 }
             }
         }

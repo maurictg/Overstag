@@ -16,7 +16,9 @@ namespace Overstag.Controllers
         /// Gets the current user
         /// </summary>
         /// <returns>All account info of the current user</returns>
-        public Account currentuser() { using (var c = new OverstagContext()) { try { return c.Accounts.Where(a => a.Token.Equals(HttpContext.Session.GetString("Token"))).FirstOrDefault(); } catch { return null; } } }
+        //public Account currentuser() { using (var c = new OverstagContext()) { try { return c.Accounts.Where(a => a.Token.Equals(HttpContext.Session.GetString("Token"))).FirstOrDefault(); } catch { return null; } } }
+        public Account currentuser()
+            => new OverstagContext().Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
 
         public IActionResult Index() {return View(currentuser());}
 
@@ -98,7 +100,69 @@ namespace Overstag.Controllers
             }
         }
 
-       
+        /// <summary>
+        /// Renders all ideas with up and downvotes from user
+        /// </summary>
+        /// <returns>A View with votes</returns>
+        public IActionResult Vote()
+        {
+            ViewBag.UserID = currentuser().Id;
+            return View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote==1)- b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
+        }
+
+        /// <summary>
+        /// Post a new idea to the server
+        /// </summary>
+        /// <param name="idea">The formencoded Idea</param>
+        /// <returns>JSON (status = "success" or "error")</returns>
+        [HttpPost("User/Vote/postIdea")]
+        public IActionResult postIdea(Idea idea)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    context.Ideas.Add(idea);
+                    context.SaveChanges();
+                }
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Mislukt vanwege interne fout", devinfo = e });
+            }
+        }
+
+        [HttpGet("User/Vote/Like/{id}/{like}")]
+        public IActionResult Like(int id, byte like)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var user = context.Accounts.Include(f => f.Votes).First(u => u.Id == currentuser().Id);
+
+                    if (user.Votes.Any(u => u.IdeaID == id))
+                        user.Votes.First(u => u.IdeaID == id).Upvote = like;
+                    else
+                    {
+                        user.Votes.Add(new Models.Vote
+                        {
+                            IdeaID = id,
+                            UserID = user.Id,
+                            Upvote = like
+                        });
+                    }
+                    context.Accounts.Update(user);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Mislukt vanwege interne fout", devinfo = e });
+                }
+            }
+        }
 
         /// <summary>
         /// Adds an subscription to the user for an upcoming event
