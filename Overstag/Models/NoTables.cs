@@ -46,4 +46,10 @@ namespace Overstag.Models.NoDB
         public Account User;
         public IInvoice Invoice;
     }
+
+    public struct FUnpayed
+    {
+        public Account User;
+        public List<Event> UnpayedEvents;
+    }
 }

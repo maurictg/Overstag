@@ -20,11 +20,14 @@
                     $('#_reg a').text('Uitloggen');
                     $('#_mreg a').attr('href', '/Register/Logoff');
                     $('#_mreg a').text('Uitloggen');
+                    $('.hidden').show();
+                }
+
+                if (Overstag.type != 1) {
                     $('#_events a').attr('href', '/User/Events');
                     $('#_mevents a').attr('href', '/User/Events');
                     $('#_events a').text('Mijn agenda');
                     $('#_mevents a').text('Mijn agenda');
-                    $('.hidden').show();
                 }
 
                 Overstag.mapevents();

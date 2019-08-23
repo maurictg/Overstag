@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using TwoFactorAuthentication;
 using Overstag.Models;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Overstag.Encryption
 {
@@ -233,5 +234,17 @@ namespace Overstag.Security
             generator.GenerateCode();
             return generator.ValidateCode(code);
         }
+
+        public static string[] GetBackupCodes(string token, int amount = 10)
+        {
+            string secret = new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor;
+            List<string> Codes = new List<string>();
+            for (int i = 0; i < amount; i++)
+                Codes.Add(Encryption.PBKDF2.Hash(secret, 1234, 5));
+            return Codes.ToArray();
+        }
+
+        public static bool RestoreBackupCode(string code, string token)
+            =>  (Encryption.PBKDF2.Verify(code, new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor, 1234));
     }
 }

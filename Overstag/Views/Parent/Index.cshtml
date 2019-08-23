@@ -4,36 +4,41 @@
     Layout = "~/Views/_UserLayout.cshtml";
 }
 
-<div>
-    <h3>Mijn gezin</h3>
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <th>Naam</th>
-                <th>Acties</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var user in Model.Members)
-            {
+    <div>
+        <h3>Mijn gezin</h3>
+        <table class="responsive-table">
+            <thead>
                 <tr>
-                    <td>@user.Firstname</td>
-                    <td>
-                        <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
-                    </td>
+                    <th>Naam</th>
+                    <th>Acties</th>
                 </tr>
-            }
-            @if(Model.Members.Count() == 0)
-            {
-                <tr><td colspan="2" class="center-align"><h5><b>Geen gezinsleden</b>.</h5> Klik op de + om iemand uit te nodigen</td></tr>
-            }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Members)
+                {
+                    <tr>
+                        <td>@user.Firstname</td>
+                        <td>
+                            <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Members.Count() == 0)
+                {
+                    <tr><td colspan="2" class="center-align"><h5><b>Geen gezinsleden</b>.</h5> Klik op de + om iemand uit te nodigen</td></tr>
+                }
+            </tbody>
+        </table>
+        <div class="center-align">
+            <br />
+            <a href="/Parent/Billing" class="waves-effect waves-light btn blue-dark">Betalingen en facturering</a>
+        </div>
+        <br />
+    </div>
 
 <div class="fixed-action-btn">
-    <a class="btn-floating btn-large blue-dark">
-        <i class="large material-icons" onclick="Parent.openLink()">add</i>
+    <a class="btn-floating btn-large blue-dark" onclick="Parent.openLink()">
+        <i class="large material-icons">add</i>
     </a>
 </div>
 
@@ -87,7 +92,7 @@
             $.get('/Parent/Remove/' + id, function(r) {
                 if(r.status == 'success') {
                     M.toast({ html: 'Gebruiker verwijderd', classes: 'green' });
-                    window.location.reload();
+                    setTimeout(window.location.reload.bind(window.location), 500);
                 }
                 else
                     M.toast({ html: r.error, classes: 'red' });

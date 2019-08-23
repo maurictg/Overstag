@@ -1,0 +1,121 @@
+﻿@model List<Overstag.Models.NoDB.FUnpayed>
+@{
+    Layout = "~/Views/_UserLayout.cshtml";
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
+    int eventcnt = 0;
+}
+
+<h3>Ongefactureerde activiteiten per kind</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Naam</th>
+            <th>Facturering</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.User.Firstname</td>
+                <td>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Titel</th>
+                                <th>Datum</th>
+                                <th>Kosten</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (u.UnpayedEvents.Count() > 0)
+                            {
+                                double total = 0;
+                                @foreach (var e in u.UnpayedEvents)
+                                {
+                                    eventcnt++;
+                                    total += (double)e.Cost;
+                                    <tr>
+                                        <td>@e.Title</td>
+                                        <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                        <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td class="center-align" colspan="3">
+                                        Totaal: <b>&euro;@Math.Round(total / 100, 2).ToString("F")</b>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="center-align"><h6>Geen ongefactureerde activiteiten gevonden</h6></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (eventcnt > 0)
+{
+    <div class="center-align">
+        <br />
+        <a class="waves-effect waves-light btn blue-dark modal-trigger" data-target="areusure">Factuur maken</a>
+        <div class="progress" style="display: none;"><div class="indeterminate"></div></div>
+    </div>
+    <br />
+}
+
+<h3>Facturen</h3>
+<h6>De facturen staan onder <b>&quot;Betalingen&quot;</b> in het menu.</h6>
+
+<div id="areusure" class="modal">
+    <div class="modal-content">
+        <h4>Weet u zeker dat u een factuur wilt laten maken?</h4>
+        <h6>Alle tot nu toe niet verrekende avonden (die op deze pagina staan) worden </h6>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn orange">Annuleren</a>
+        <a href="#!" id="btngenerate" class="modal-close waves-effect waves-green btn green">Factuur maken</a>
+    </div>
+</div>
+
+<div class="fixed-action-btn">
+    <a class="btn-floating btn-large blue-dark" href="/Parent/Family">
+        <i class="large material-icons">arrow_back</i>
+    </a>
+</div>
+
+
+<script>
+    var Billing = {
+        init: function () {
+            $('#_family').addClass('active');
+            $('#_mfamily').addClass('active');
+            Billing.mapEvents();
+        },
+        mapEvents: function () {
+            $('#btngenerate').click(function () {
+                $('#progress').show();
+                $.get('/Parent/GenerateInvoice', function (r) {
+                    if (r.status == 'success') {
+                        M.toast({ html: 'Factuur successvol gemaakt!', classes: 'green' })
+                        setTimeout(window.location.reload.bind(window.location), 1000);
+                    } else {
+                        M.toast({ html: 'Er is iets fout gegaan. Probeer het later opnieuw', classes: 'red' })
+                    }
+                    $('#progress').hide();
+                },'json');
+            });
+        }
+    }
+
+    $(function () {
+        Billing.init();
+    });
+</script>

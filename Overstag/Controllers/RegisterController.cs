@@ -73,7 +73,16 @@ namespace Overstag.Controllers
                     {
                         try
                         {
-                            account.Password = Encryption.PBKDF2.Hash(account.Password); //Create hash of password
+                            //Make name uppercase
+                            account.Firstname = account.Firstname[0].ToString().ToUpper() + account.Firstname.Substring(1);
+
+                            char[] l = account.Lastname.ToCharArray();
+                            int i = (account.Lastname.Contains(' ')) ? account.Lastname.TrimEnd(' ').LastIndexOf(' ') + 1 : 0;
+                            l[i] = char.ToUpper(l[i]);
+                            account.Lastname = new string(l);
+
+                            //Set password hashes, create token and set type
+                            account.Password = Encryption.PBKDF2.Hash(account.Password);
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
 
@@ -272,6 +281,18 @@ namespace Overstag.Controllers
                 return Json(new { status = "error" });
         }
 
+        [HttpGet]
+        [Route("Register/Restore2FA/{token}/{code}")]
+        public JsonResult Restore2FA(string token, string code)
+        {
+            if (Security.TFA.RestoreBackupCode(Uri.UnescapeDataString(code), Uri.UnescapeDataString(token)))
+                return Json(new { status = "success", secret = Uri.EscapeDataString(new OverstagContext().Accounts.First(t => t.Token == Uri.UnescapeDataString(token)).TwoFactor) });
+            else
+                return Json(new { status = "error" });
+        }
+         
+
+
         /// <summary>
         /// Join a family by its token
         /// </summary>
@@ -292,7 +313,7 @@ namespace Overstag.Controllers
                     var family = context.Families.Include(g => g.Members).FirstOrDefault(f => f.Token == Uri.UnescapeDataString(token));
 
                     if (family == null)
-                        content = "<h1>Token is onjuist of famillie bestaat niet</h1><br><p>Controleer de link die je hebt gekregen.</p>";
+                        content = "<h1 style=\"color: red;\">Token is onjuist of famillie bestaat niet</h1><br><p>Controleer de link die je hebt gekregen.</p>";
                     else
                     {
                         var user = context.Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));

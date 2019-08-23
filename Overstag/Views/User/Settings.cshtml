@@ -112,7 +112,7 @@
                         </label>
                     </div>
                     <br />
-                    <a class="btn waves-effect btn-small blue" id="btngetqr" onclick="User.getQR()">Code ophalen</a>
+                    <a class="btn waves-effect btn-small blue-dark" id="btngetqr" onclick="User.getQR()">Code ophalen</a>
                     <div id="qr">
                         <h6>Scan deze code met uw 2FA app (zoals Authy)</h6>
                         <img class="materialboxed" src="" id="qrimg" width="350" height="350"/>
@@ -125,13 +125,17 @@
                 <div class="collapsible-body col s12 m6 center-align">
                     <h5>Account</h5>
                     <h6>Account sluiten</h6>
-                    <p>Wanneer u besluit uw account te sluiten, is het volgende van toepassing: </p>
-                    <p>- 1. Al uw persoonlijke gegevens worden uit onze database verwijderd<br />
-                    - 2. U kunt op deze website <b>NIET meer inloggen</b><br />
-                    - 3. U kunt uzelf <b>NIET meer inschrijven</b> voor een avond<br />
-                    - Uiteraard kunt u opnieuw uzelf registreren als u er spijt van krijgt</p><br />
-                    <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(3);">Annuleren</a>
+                    <p>Wanneer u uw account wilt verwijderen, klik dan op &quot;Account verwijderen&quot;.</p>
                     <a class="waves-effect waves-light btn red center modal-trigger" data-target="delaccount">Account verwijderen</a>
+
+                    @if (Model.Family != null)
+                    {
+                        <h5>Gezin</h5>
+                        <p>Uw account is gekoppeld aan een gezin. Wanneer u het gezin wilt verlaten, klik dan op &quot;Gezin verlaten&quot;.</p>
+                        <a class="waves-effect waves-light btn orange center" onclick="User.leaveFamily();">Gezin verlaten</a>
+                    }
+                    <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(3);">Annuleren</a>
+
                 </div>
             </li>
         </ul>
@@ -300,6 +304,18 @@
                             M.toast({ html: response.error, classes: 'red' });
                         }
                     });
+                },
+                leaveFamily: function () {
+                    if (confirm("Weet u zeker dat u het gezin wilt verlaten? Deze actie kan niet ongedaan worden gemaakt.")) {
+                        $.get('/User/LeaveFamily', function (r) {
+                            if (r.status == 'success') {
+                                M.toast({ html: 'Gezin successvol verlaten', classes: 'green' });
+                                setTimeout(window.location.reload.bind(window.location), 750);
+                            } else {
+                                M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
+                            }
+                        }, 'json');
+                    }
                 }
 
             }

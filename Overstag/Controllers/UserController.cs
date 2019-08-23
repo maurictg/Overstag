@@ -22,7 +22,7 @@ namespace Overstag.Controllers
 
         public IActionResult Index() {return View(currentuser());}
 
-        public IActionResult Settings(){return View(currentuser());}
+        public IActionResult Settings(){return View(new OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == HttpContext.Session.GetString("Token")));}
         public IActionResult Events() { return View(); }
         public IActionResult Payment() {
 
@@ -104,11 +104,13 @@ namespace Overstag.Controllers
         /// Renders all ideas with up and downvotes from user
         /// </summary>
         /// <returns>A View with votes</returns>
-        public IActionResult Vote()
+        public IActionResult Ideas()
         {
             ViewBag.UserID = currentuser().Id;
             return View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote==1)- b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
         }
+
+        public IActionResult Vote() => View();
 
         /// <summary>
         /// Post a new idea to the server
@@ -118,6 +120,9 @@ namespace Overstag.Controllers
         [HttpPost("User/Vote/postIdea")]
         public IActionResult postIdea(Idea idea)
         {
+            if (currentuser().Type == 1)
+                return Json(new { status = "error", error = "Als ouder kunt u niet een idee indienen." });
+
             try
             {
                 using (var context = new OverstagContext())
@@ -136,7 +141,10 @@ namespace Overstag.Controllers
         [HttpGet("User/Vote/Like/{id}/{like}")]
         public IActionResult Like(int id, byte like)
         {
-            using(var context = new OverstagContext())
+            if (currentuser().Type == 1)
+                return Json(new { status = "error", error = "Als ouder kunt u niet stemmen voor een activiteit." });
+
+            using (var context = new OverstagContext())
             {
                 try
                 {
@@ -172,6 +180,9 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<IActionResult> postSubscribeEvent(Participate p)
         {
+            if (currentuser().Type == 1)
+                return Json(new { status = "error", error = "Als ouder kunt u zich niet inschrijven voor een activiteit." });
+
             using (var context = new OverstagContext())
             {
                 try
@@ -464,6 +475,29 @@ namespace Overstag.Controllers
             {
                 return Json(new { status = "error", error = "2FA is niet ingeschakeld" });
             }
+        }
+
+        public JsonResult Get2FACodes()
+            => Json(new { status = "success", data = Security.TFA.GetBackupCodes(currentuser().Token)});
+
+        public IActionResult LeaveFamily()
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var user = context.Accounts.Include(f => f.Family).First(u => u.Id == currentuser().Id);
+                    user.Family = null;
+                    context.Accounts.Update(user);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", debuginfo = e });
+            }
+            
         }
 
     }

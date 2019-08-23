@@ -81,5 +81,7 @@ namespace TwoFactorAuthentication
             new RNGCryptoServiceProvider().GetBytes(randomBytes);
             return string.Concat(randomBytes.Select(v => "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"[v & 31]));
         }
+
+        
     }
 }

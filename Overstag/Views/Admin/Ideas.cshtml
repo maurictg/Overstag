@@ -28,7 +28,7 @@
                         </td>
                         <td>@idea.Description</td>
                         <td>
-                            <button type="button" class="btn btn-danger" id="btndelete" data-id="@idea.Id">Verwijderen</button>
+                            <button type="button" class="btn btn-danger btndelete" data-id="@idea.Id">Verwijderen</button>
                         </td>
                     </tr>
                 }
@@ -41,7 +41,7 @@
         init: function () {
             $('#_ideas').addClass('active');
 
-            $('#btndelete').click(function () {
+            $('.btndelete').click(function () {
                 if (confirm("Weet u zeker dat u dit idee wilt verwijderen? Dit kan niet ongedaan worden gemaakt!!!")) {
                     $.get('/Admin/Ideas/Delete/' + $(this).data('id'), function (r) {
                         if (r.status == "success")

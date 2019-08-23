@@ -13,7 +13,7 @@ namespace Overstag.Models
         public List<Account> Members { get; set; }
     }
 
-    // <<<Under Construction>>>
+    /* <<<Under Construction>>>
     public class FamilyInvoice
     {
         public int Id { get; set; }
@@ -21,6 +21,6 @@ namespace Overstag.Models
         public int InvoiceID { get; set; } //id van invoice die wordt gemaakt
         public int ParticipatorCount { get; set; }
         public DateTime Timestamp { get; set; }
-    }
+    }*/
 
 }
