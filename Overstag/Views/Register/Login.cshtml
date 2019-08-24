@@ -258,7 +258,7 @@
             if ($('#tfarest').val() == '')
                 M.toast({ html: 'Vul a.u.b. alle velden in!', classes: 'orange' });
             else {
-                $.get('/Register/Restore2FA/' + token + '/' + escape($('#tfarest').val()), function (r) {
+                $.get('/Register/Restore2FA/' + token + '/' + encodeURIComponent($('#tfarest').val()), function (r) {
                     if (r.status == 'success') {
                         $('#secret').text(unescape(r.secret));
                         $('#secretdiv').show();

@@ -7,7 +7,10 @@ namespace Overstag.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index(){  return View(); }
+        public IActionResult Index() => View();
+        public IActionResult About() => View();
+        public IActionResult Contact() => View();
+
 
         /// <summary>
         /// Get all events from the database

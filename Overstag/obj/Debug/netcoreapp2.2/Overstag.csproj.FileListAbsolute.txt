@@ -114,3 +114,5 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razo
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Parent\Index.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\User\Ideas.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Parent\Billing.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Home\About.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Register\Contact.g.cshtml.cs

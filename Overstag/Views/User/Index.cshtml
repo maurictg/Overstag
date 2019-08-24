@@ -3,17 +3,30 @@
     Layout = "/Views/_UserLayout.cshtml";
     ViewBag.Title = "Mijn account";
 }
-    <div>
-        &nbsp;<h4>Welkom <b>@Model.Firstname</b>!</h4><br />
 
+<div class="row">
+    <div class="center-align flow-text col s10 offset-s1">
+        &nbsp;<h4 class="blue-middle-text">Welkom <b>@Model.Firstname</b>!</h4>
         &nbsp;<h5>Navigeer via het <b>menu</b></h5>
-        <h6>Om jezelf in te schrijven voor een activiteit, navigeer je via het menu naar "<b>Activiteiten</b>".<br />
-        Wanneer je de instellingen van je account wilt bekijken en wijzigen, bijvoorbeeld je wachtwoord veranderen, navigeer je naar "<b>Instellingen</b>"</h6>
+        <p>
+            Om jezelf in te schrijven voor een activiteit, navigeer je via het menu naar "<b>Activiteiten</b>".<br />
+            Wanneer je de instellingen van je account wilt bekijken en wijzigen, bijvoorbeeld je wachtwoord veranderen, navigeer je naar "<b>Instellingen</b>"
+        </p>
+        <br /><br />
+        <h4 class="blue-middle-text">Huisregels tijdens activiteiten</h4>
+        <p>De 10 geboden zijn ons uitgangspunt tijdens de chill-avonden en als we activiteiten gaan ondernemen.</p>
+        <p>We willen met God en elkaar omgaan zoals dat verwoord is in Mattheus 22: &quot;<i>Gij zult de Heere, uw God, liefhebben met heel uw hart, met heel uw ziel en met heel uw verstand. Dit is het grote en eerste gebod. Het tweede, daaraan gelijk, is: Gij zult uw naaste liefhebben als uzelf.</i>&quot;</p>
+        <p>In de kist is het niet toegestaan om alcohol te nuttigen, we serveren wel alcoholvrij bier of radler. We zijn ervan overtuigd dat we het ook zonder alcohol gezellig kunnen hebben met elkaar. Roken mag uitsluitend buiten. Gebruik van wiet of andere drugs is niet toegestaan. Als je toch alcoholische drank drinkt /meeneemt of bepaalde middelen gebruikt krijg je een waarschuwing. Na een tweede keer ben je niet meer welkom in de kist. We vertrouwen er op dat dit uiteraard niet zal plaatsvinden.</p>
+        <p>Wel vinden we het fijn als je op een fatsoenlijke manier gekleed bent en met je kleding geen aanstoot geeft.</p>
     </div>
-    <script>
-        $(function(){
-            $('#_ainfo').addClass('active');
-            $('#_mainfo').addClass('active');
-        });
-    </script>
-        
+</div>
+
+
+
+<script>
+    $(function () {
+        $('#_ainfo').addClass('active');
+        $('#_mainfo').addClass('active');
+    });
+</script>
+
