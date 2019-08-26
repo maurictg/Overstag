@@ -59,8 +59,8 @@ namespace Overstag.Controllers
 
         public async Task<IActionResult> Checkout()
         {
-            //try
-            //{
+            try
+            {
                 string PayID = HttpContext.Session.GetString("PayID");
 
                 if(string.IsNullOrEmpty(PayID))
@@ -85,12 +85,23 @@ namespace Overstag.Controllers
                     Locale = "nl_NL",
                 };
 
-                PaymentResponse ps = await pc.CreatePaymentAsync(pr);
+                pr.SetMetadata(invoice);
 
+                PaymentResponse ps = await pc.CreatePaymentAsync(pr);
+                Models.Payment p = new Models.Payment()
+                {
+                    InvoiceID = invoice.PayID,
+                    PaymentID = ps.Id,
+                    UserID = invoice.UserID
+                };
+                
+                //Add p to database.
+                //TODO:
+                //Create webhook etc, check status e.d.
 
                 return View();
-            //}
-            //catch { return Content("Authenticatiefout!!!"); }
+            }
+            catch { return Content("Er is iets fout gegaan!!!"); }
             
         }
 

@@ -14,6 +14,7 @@ namespace Overstag.Models
         public DbSet<Logging> Logging { get; set; }
         public DbSet<Family> Families { get; set; }
         public DbSet<Idea> Ideas { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
