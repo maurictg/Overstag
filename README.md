@@ -24,17 +24,4 @@ var responseString = new System.IO.StreamReader(response.GetResponseStream()).Re
 //You can parse it to JSON using the Newtonsoft.JSON (JSON.net) package from nuget
 ```
 In this way, you can call the Register controller from an external application to validate a login
-You can also do this using JQuery:
-```js
-$.post("/Register/postLogin", { Username: 'test', Password: 'test123' }, function (response) {
-    if (response.status == 'success') {
-      //login is valid    
-    }
-    else {
-      //status = error  
-    }
- }, 'json'
- );
- //Response looks like: {'status':'success'} or {'status':'error','error':'Exception blah blah'}  
-```
-In the future, the api will be made better
+In the future, the api will be improved.
