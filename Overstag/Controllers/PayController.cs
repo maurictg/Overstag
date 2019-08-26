@@ -67,22 +67,22 @@ namespace Overstag.Controllers
                     return Content("Authenticatiefout!!!");
                 //Get Invoice
                 var invoice = new OverstagContext().Invoices.First(f => f.PayID == PayID);
-                double cost = (double)invoice.Amount / 100;
+                double amount = (double)invoice.Amount / 100;
+                string cost = Math.Round(amount, 2).ToString("F").Replace(",",".");
 
                 string url = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Done";
                 string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
 
                 //Create payment
-                PaymentClient pc = new PaymentClient("test_sapB3sVqDTfxCSjdutvaPyQRnrwUJQ"); //no valid oauth token???
+                PaymentClient pc = new PaymentClient("test_sapB3sVqDTfxCSjdutvaPyQRnrwUJQ");
                 
                 PaymentRequest pr = new PaymentRequest()
                 {
-                    Amount = new Amount(Currency.EUR, cost.ToString("0.00")),
+                    Amount = new Amount(Currency.EUR, cost),
                     Description = $"Overstag factuur #{invoice.PayID}",
                     RedirectUrl = url,
-                    WebhookUrl = webhook,
+                    //WebhookUrl = webhook,
                     Locale = "nl_NL",
-                    Testmode = true
                 };
 
                 PaymentResponse ps = await pc.CreatePaymentAsync(pr);
