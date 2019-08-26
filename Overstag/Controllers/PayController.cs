@@ -7,6 +7,13 @@ using Overstag.Models;
 using System.Threading.Tasks;
 using Overstag.Models.NoDB;
 
+using Mollie.Api;
+using Mollie.Api.Models;
+using Mollie.Api.Client;
+using Mollie.Api.Client.Abstract;
+using Mollie.Api.Models.Payment.Request;
+using Mollie.Api.Models.Payment.Response;
+
 namespace Overstag.Controllers
 {
     public class PayController : Controller
@@ -50,19 +57,40 @@ namespace Overstag.Controllers
             }
         }
 
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {
-            try
-            {
+            //try
+            //{
                 string PayID = HttpContext.Session.GetString("PayID");
 
                 if(string.IsNullOrEmpty(PayID))
                     return Content("Authenticatiefout!!!");
+                //Get Invoice
+                var invoice = new OverstagContext().Invoices.First(f => f.PayID == PayID);
+                double cost = (double)invoice.Amount / 100;
+
+                string url = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Done";
+                string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
+
+                //Create payment
+                PaymentClient pc = new PaymentClient("test_sapB3sVqDTfxCSjdutvaPyQRnrwUJQ"); //no valid oauth token???
+                
+                PaymentRequest pr = new PaymentRequest()
+                {
+                    Amount = new Amount(Currency.EUR, cost.ToString("0.00")),
+                    Description = $"Overstag factuur #{invoice.PayID}",
+                    RedirectUrl = url,
+                    WebhookUrl = webhook,
+                    Locale = "nl_NL",
+                    Testmode = true
+                };
+
+                PaymentResponse ps = await pc.CreatePaymentAsync(pr);
 
 
                 return View();
-            }
-            catch { return Content("Authenticatiefout!!!"); }
+            //}
+            //catch { return Content("Authenticatiefout!!!"); }
             
         }
 
