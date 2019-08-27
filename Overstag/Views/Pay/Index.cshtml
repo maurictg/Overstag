@@ -108,7 +108,7 @@
                                     <td>@Model.Invoice.Timestamp.ToString("t", culture)</td>
                                     <td><i>@Model.Invoice.PayID</i></td>
                                     <td><b>&euro;@Math.Round((double)Model.Invoice.Amount / 100, 2).ToString("F")</b></td>
-                                    <td><b class="red-text">@Html.Raw((Model.Invoice.Payed) ? "Ja" : "Nee")</b></td>
+                                    <td><b class="@Html.Raw((Model.Invoice.Payed) ? "green-text" : "red-text")">@Html.Raw((Model.Invoice.Payed) ? "Ja" : "Nee")</b></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -120,7 +120,10 @@
         </div>
         <div class="row">
             <a class="btn waves-effect green" id="btnprint" onclick="Pay.startPrint();">Factuur printen</a>
-            <a href="/Pay/Checkout" class="btn waves-effect blue" id="btnnext">Naar betalen</a>
+            @if (!Model.Invoice.Payed)
+            {
+                <a href="/Pay/Checkout" class="btn waves-effect blue" id="btnnext">Naar betalen</a>
+            }
             <br /><br />
         </div>
     </div>

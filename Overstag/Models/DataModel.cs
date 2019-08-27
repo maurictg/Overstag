@@ -19,7 +19,7 @@ namespace Overstag.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Connection string
-            optionsBuilder.UseMySQL("server=localhost;database=test;user=root;password=root");
+            optionsBuilder.UseMySQL($"server=localhost;database=test;user={Core.General.Credentials.mySqlUsername};password={Core.General.Credentials.mySqlPass}");
         }
 
         protected override void OnModelCreating(ModelBuilder mb)

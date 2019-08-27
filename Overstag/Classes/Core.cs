@@ -2,31 +2,46 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using System.Net;
+using Newtonsoft.Json;
 using System.Net.Mail;
 
 namespace Overstag.Core
 {
-    public static class General
+    public class Credentials
     {
-        public static bool DateIsPassed(DateTime check){return check < DateTime.Now;}
+        public string mailUsername { get; set; }
+        public string mailPass { get; set; }
+        public string mySqlUsername { get; set; }
+        public string mySqlPass { get; set; }
+        public string mollieApiToken { get; set; }
+
+        public Credentials Get()
+        {
+            var o =  JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "credentials.json")));
+            return o;
+        }
     }
 
-    public static class Mail
+
+    public static class General
     {
+        public static Credentials Credentials = new Credentials().Get();
+
+        public static bool DateIsPassed(DateTime check){return check < DateTime.Now;}
         public static string SendMail(string title, string body, string to)
         {
             try
             {
                 SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
                 client.UseDefaultCredentials = false;
-                string pass = System.IO.File.ReadAllText(@"C:\Overstag\mailcredential.txt");
-                if(pass != string.Empty)
+                if (Credentials.mailPass != string.Empty)
                 {
-                    client.Credentials = new NetworkCredential("overstagrilland@gmail.com", pass);
+                    client.Credentials = new NetworkCredential(Credentials.mailUsername, Credentials.mailPass);
                     client.EnableSsl = true;
                     MailMessage mail = new MailMessage();
-                    mail.From = new MailAddress("overstagrilland@gmail.com");
+                    mail.From = new MailAddress(Credentials.mailUsername);
                     mail.To.Add(to);
                     mail.Subject = title;
                     mail.IsBodyHtml = true;
@@ -38,9 +53,9 @@ namespace Overstag.Core
                 {
                     return "ERR: pass is empty";
                 }
-                
+
             }
-            catch(Exception e) { return "ERR: "+e.ToString(); }
+            catch (Exception e) { return "ERR: " + e.ToString(); }
         }
     }
 

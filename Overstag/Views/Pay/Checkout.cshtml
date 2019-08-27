@@ -1,17 +1,16 @@
-﻿@{
+﻿@model string
+@{
     Layout = null;
 }
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <head>
-        <title>Overstag Pay</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script type="text/javascript" src="~/js/jquery-3.3.1.min.js"></script>
-        <script type="text/javascript" src="~/js/materialize.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
-        <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"
-    </head>
+    <title>Overstag Pay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="~/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
 </head>
 <body>
     <nav>
@@ -23,8 +22,9 @@
         </div>
     </nav>
     <div>
-        <h3>Betalen</h3>
-        
+        <h2>Betaling geplaatst. Klik op de onderstaande knop om af te rekenen</h2>
+        <br />
+        &nbsp;<a class="btn blue btn-large" href="@Model">Betalen met mollie</a><br />
     </div>
 </body>
 </html>

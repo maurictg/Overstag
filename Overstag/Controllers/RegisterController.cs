@@ -194,7 +194,7 @@ namespace Overstag.Controllers
                                     "Beste " + account.Firstname + ",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>" +
                                     "Klik op <a href='/Register/Passreset/" + Uri.EscapeDataString(account.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
                                     "<br>Success! Mocht het niet werken, neem dan contact met ons op";
-                                string res = Core.Mail.SendMail("Wachtwoord reset", message, account.Email);
+                                string res = Core.General.SendMail("Wachtwoord reset", message, account.Email);
                                 if (res == "OK")
                                 {
                                     return Json(new { status = "success" });

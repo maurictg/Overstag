@@ -11,6 +11,8 @@ namespace Overstag.Models
         public string PaymentID { get; set; }
         public string InvoiceID { get; set; }
         public int UserID { get; set; }
-        DateTime Timestamp { get; set; }
+        public Mollie.Api.Models.Payment.PaymentStatus? Status { get; set; }
+        public DateTime PlacedAt { get; set; }
+        public DateTime? PayedAt { get; set; }
     }
 }

@@ -1,0 +1,57 @@
+﻿@model string
+@{
+    Layout = null;
+    ViewBag.Title = "Betaling voltooid";
+}
+
+<html>
+<head>
+    <title>Overstag Pay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="~/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper blue">
+            <a href="#" class="brand-logo center">Overstag Pay</a>
+            <ul id="nav-mobile" class="left hide-on-med-and-down">
+                <li><a href="/Home">Home</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <p>Hier komt ooit een keer een interface die de status van de betaling vermeld.</p>
+    </div>
+    <script>
+    let payid = '@Model';
+
+    var Pay = function () {
+        return {
+            init: function () {
+                this.getStatus();
+                setTimeout(this.getStatus, 10000);
+            },
+            updateStatus: function () {
+                $.get('/Pay/UpdatePayment/' + payid, function (r) {
+                    if (r.status == 'success') {
+                        console.log(r.data);
+                    }
+                }, 'json').fail(function () {
+                    M.toast({ html: 'Er is een interne fout opgetreden', classes: 'red' });
+                });
+            },
+            getStatus: function () {
+                $.get('/Pay/GetPayment/' + payid, function (r) {
+                    if (r.status == 'success') {
+                        console.log(r.data);
+                    }
+                }, 'json');
+            }
+        };
+    }();
+    </script>
+</body>
+</html>
