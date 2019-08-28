@@ -73,6 +73,7 @@ namespace Overstag.Controllers
                         return Content("<h1 style=\"color: orange;\">Factuur is al betaald</h1>","text/html");
 
 
+                    var user = context.Accounts.First(f => f.Id == invoice.UserID);
 
                     double amount = (double)invoice.Amount / 100;
                     string cost = Math.Round(amount, 2).ToString("F").Replace(",", ".");
@@ -81,9 +82,7 @@ namespace Overstag.Controllers
                     string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
 
                     //Create payment
-                    
                     PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
-
                     PaymentRequest pr = new PaymentRequest()
                     {
                         Amount = new Amount(Currency.EUR, cost),
@@ -91,6 +90,7 @@ namespace Overstag.Controllers
                         RedirectUrl = url,
                         //WebhookUrl = webhook,
                         Locale = "nl_NL",
+                        CustomerId = user.MollieID
                     };
 
                     pr.SetMetadata(Uri.EscapeDataString(invoice.PayID));
@@ -143,24 +143,39 @@ namespace Overstag.Controllers
 
                 using (var context = new OverstagContext())
                 {
-                    var payment = context.Payments.First(f => f.PaymentID == id);
+                    var payment = context.Payments.FirstOrDefault(f => f.PaymentID == id);
+                    if (payment != null)
+                    {
+                        payment.Status = ps.Status;
+                        payment.PayedAt = ps.PaidAt;
 
-                    payment.Status = ps.Status;
-                    payment.PayedAt = ps.PaidAt;
+                        /*
+                        string iid = Uri.UnescapeDataString(ps.GetMetadata<string>());
 
-                    string iid = Uri.UnescapeDataString(ps.GetMetadata<string>());
+                        var invoice = context.Invoices.First(f => f.PayID == iid);
+                        if (payment.Status == PaymentStatus.Paid)
+                            invoice.Payed = 1;
+                        */
+                        var invoice = context.Invoices.FirstOrDefault(f => f.PayID == payment.InvoiceID);
+                        if (invoice != null)
+                        {
+                            if (payment.Status == PaymentStatus.Paid)
+                                invoice.Payed = 1;
 
-                    var invoice = context.Invoices.First(f => f.PayID == iid);
-                    if (payment.Status == PaymentStatus.Paid)
-                        invoice.Payed = 1;
+                            context.Invoices.Update(invoice);
+                            context.Payments.Update(payment);
+                            context.SaveChanges();
+                        }
+                        else
+                            return Json(new { status = "warning", warning = "invoice not found in DB", ps });
 
-                    context.Invoices.Update(invoice);
-                    context.Payments.Update(payment);
-                    context.SaveChanges();
-                    return Json(new { status = "success", data = payment });
+                        return Json(new { status = "success", data = payment });
+                    }
+                    else
+                        return Json(new { status = "warning", warning = "payment not found in DB", ps });
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return Json(new { status = "error", error = e });
             }

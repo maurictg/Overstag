@@ -1,26 +1,40 @@
 ﻿using System.Collections.Generic;
 using System;
 using Overstag.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Overstag.Models
 {
     public class Account
     {
         public int Id { get; set; }
+
+        [Required]
         public byte Sex { get; set; }
         //0 (male) /1 (female)
         public int Type { get; set; }
         //0 user, 1 parent, 2 mentor, 3 admin
+        [Required]
         public string Username { get; set; }
+
+        [Required]
         public string Password { get; set; }
+
+        [Required]
+        [EmailAddress(ErrorMessage = "Emailadres is niet geldig")]
         public string Email { get; set; }
+
         public string Firstname { get; set; }
         public string Lastname { get; set; }
+
         public string Token { get; set; }
         public string Adress { get; set; }
         public string Postalcode { get; set; }
         public string Residence { get; set; }
         public DateTime Birthdate { get; set; }
+
+        public string MollieID { get; set; }
+
         public string TwoFactor { get; set; }
 
         //Relations

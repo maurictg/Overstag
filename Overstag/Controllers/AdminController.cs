@@ -7,6 +7,10 @@ using Overstag.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Mollie.Api.Client.Abstract;
+using Mollie.Api.Client;
+using Mollie.Api.Models.List;
+using Mollie.Api.Models.Payment.Response;
 
 namespace Overstag.Controllers
 {
@@ -82,6 +86,24 @@ namespace Overstag.Controllers
                 return View(events);
             }
         }
+
+        /// <summary>
+        /// Get and return all payments
+        /// </summary>
+        /// <returns>View with mollie payments</returns>
+        public async Task<IActionResult> PayingMollie()
+        {
+            IPaymentClient paymentClient = new PaymentClient(Core.General.Credentials.mollieApiToken);
+            ListResponse<PaymentResponse> response = await paymentClient.GetPaymentListAsync();
+            return View(response.Items);
+        }
+
+        /// <summary>
+        /// Get all payments from database
+        /// </summary>
+        /// <returns>View with database payments</returns>
+        public IActionResult Paying()
+            => View(new OverstagContext().Payments.OrderBy(f => f.PlacedAt).ToArray().Reverse().ToArray());
 
         
         /// <summary>

@@ -61,6 +61,8 @@
                 $.post('/User/Vote/postIdea', { Title: $('#tbtitle').val(), Description: $('#tbdesc').val() }, function (r) {
                     if (r.status == 'success') {
                         Vote.load();
+                        $('#tbtitle').val('');
+                        $('#tbdesc').val('');
                     } else {
                         M.toast({ html: r.error, classes: 'red' });
                     }

@@ -1,0 +1,82 @@
+﻿@model Overstag.Models.Payment[]
+@{
+    ViewBag.Title = "Betalingen";
+    Layout = "~/Views/_AdminLayout.cshtml";
+}
+<br />
+<h3><a class="badge badge-primary" href="/Admin/PayingMollie">Mollie betalingen</a></h3>
+
+<br />
+<table class="table text-white">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>InvoiceID</th>
+            <th>Status</th>
+            <th>UserID</th>
+            <th>Geplaatst op</th>
+            <th>Mollie ID</th>
+            <th>? Betaald op</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var i in Model)
+        {
+            <tr>
+                <td>@i.Id</td>
+                <td>@i.InvoiceID</td>
+                <td class="status">@i.Status.ToString()</td>
+                <td>@i.UserID</td>
+                <td>@i.PlacedAt</td>
+                <td>@i.PaymentID</td>
+                <td>@i.PayedAt</td>
+                <td><a class="badge badge-secondary" onclick="Update('@i.PaymentID')">Bijwerken</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function Update(id) {
+        $.get('/Pay/UpdatePayment/' + id, function (r) {
+            console.log(r);
+            if (r.status == 'success') {
+                $.bootstrapGrowl('Gevonden! Pagina ververst nu...', { type: 'success' });
+                setTimeout(window.location.reload.bind(window.location), 1000);
+            }
+            else if (r.status == 'warning') {
+                $.bootstrapGrowl(r.warning, { type: 'warning' });
+                console.log(r.ps);
+            }
+            else {
+                $.bootstrapGrowl(r.error, { type: 'danger' });
+            }
+        });
+    }
+
+    $(function () {
+        $('#_paying').addClass('active');
+
+        $.each($('.status'), function (i, e) {
+            switch ($(e).text()) {
+                case 'Paid':
+                    $(e).addClass('text-success');
+                    break;
+                case 'Open':
+                    $(e).addClass('text-primary');
+                    break;
+                case 'Failed':
+                    $(e).addClass('text-danger');
+                    break;
+                case 'Expired':
+                    $(e).addClass('text-warning');
+                    break;
+                case 'Pending':
+                    $(e).addClass('text-secondary');
+                    break;
+            }
+                
+        });
+    });
+</script>

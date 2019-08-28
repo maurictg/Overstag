@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 
+using Mollie.Api;
+using Mollie.Api.Models.Customer;
+using Mollie.Api.Client.Abstract;
+using Mollie.Api.Client;
 
 namespace Overstag.Controllers
 {
@@ -86,6 +90,29 @@ namespace Overstag.Controllers
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
 
+                            try
+                            {
+                                if(account.Type < 2)
+                                {
+                                    CustomerRequest cr = new CustomerRequest()
+                                    {
+                                        Name = $"{account.Firstname} {account.Lastname}",
+                                        Email = account.Email,
+                                        Locale = "nl-NL",
+                                        Metadata = account.Token
+                                    };
+
+                                    CustomerClient client = new CustomerClient(Core.General.Credentials.mollieApiToken);
+                                    CustomerResponse cs = await client.CreateCustomerAsync(cr);
+
+                                    account.MollieID = cs.Id;
+                                }
+                            }
+                            catch(Exception e)
+                            {
+                                return Json(new { status = "error", error = "Mollie integratie voor het verwerken van betalingen mislukt, neem contact op met ons.", debuginfo = e });
+                            }
+                            
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
@@ -99,7 +126,7 @@ namespace Overstag.Controllers
                 }
 
             }
-            else { return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" }); }
+            else { return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer of alle velden juist zijn ingevuld" }); }
         }
 
         /// <summary>

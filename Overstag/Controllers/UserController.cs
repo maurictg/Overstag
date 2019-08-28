@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
-
+using Mollie.Api.Client;
 
 namespace Overstag.Controllers
 {
@@ -377,6 +377,19 @@ namespace Overstag.Controllers
                                 }
                             }
                             catch { }
+
+                            //Mollie integratie verwijderen
+                            try
+                            {
+                                if (!string.IsNullOrEmpty(account.MollieID))
+                                {
+                                    CustomerClient customerClient = new CustomerClient(Core.General.Credentials.mollieApiToken);
+                                    await customerClient.DeleteCustomerAsync(account.MollieID);
+                                }
+                            }
+                            catch {
+                                return Json(new { status = "warning", warning = "Mollie integratie verwijderen mislukt" });
+                            }
 
                             //Account verwijderen
                             context.Remove(account);

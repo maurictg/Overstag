@@ -169,3 +169,5 @@ C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overst
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Overstag.csproj.CopyComplete
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Home\Contact.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Pay\Done.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Paying.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\PayingMollie.g.cshtml.cs
