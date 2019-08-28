@@ -45,7 +45,8 @@ namespace Overstag.Controllers
                         Events = events.OrderBy(e => e.When).ToList()
                     };
 
-                    HttpContext.Session.SetString("PayID", invoice.PayID);
+                    if(HttpContext.Session.GetString("PayUrl")!=null)
+                        ViewBag.PayURL = HttpContext.Session.GetString("PayUrl");
 
                     return View(new OPayInfo
                     {
@@ -56,21 +57,21 @@ namespace Overstag.Controllers
             }
         }
 
-        public async Task<IActionResult> Checkout()
+        [HttpPost("/Pay/Checkout")]
+        public async Task<IActionResult> Checkout(string invoiceid)
         {
             try
             {
-                string PayID = HttpContext.Session.GetString("PayID");
-
-                if(string.IsNullOrEmpty(PayID))
-                    return Content("<h1 style=\"color: red;\">Authenticatiefout!!!</h1>", "text/html");
-
                 using (var context = new OverstagContext())
                 {
                     //Get Invoice
-                    var invoice = context.Invoices.First(f => f.PayID == PayID);
+                    var invoice = context.Invoices.FirstOrDefault(f => f.PayID == Uri.UnescapeDataString(invoiceid));
+
+                    if (invoice == null)
+                        return Json(new { status = "error", error = "Factuur niet gevonden. Bestelling kan niet worden geplaatst." });
+
                     if (invoice.Payed == 1)
-                        return Content("<h1 style=\"color: orange;\">Factuur is al betaald</h1>","text/html");
+                        return Json(new { status = "warning", warning = "Factuur is al betaald!" });
 
 
                     var user = context.Accounts.First(f => f.Id == invoice.UserID);
@@ -98,7 +99,7 @@ namespace Overstag.Controllers
                     PaymentResponse ps = await pc.CreatePaymentAsync(pr);
                    
 
-                    context.Payments.Add(new Models.Payment(){
+                    context.Payments.Add(new Payment(){
                         InvoiceID = invoice.PayID,
                         PaymentID = ps.Id,
                         UserID = invoice.UserID,
@@ -109,10 +110,16 @@ namespace Overstag.Controllers
                     context.SaveChanges();
 
                     string paylink = ps.Links.Checkout.Href;
-                    return View("Checkout",paylink);
+
+                    //Set session for check
+                    HttpContext.Session.SetString("PayUrl", paylink);
+                    return Json(new { status = "success", href = Uri.EscapeDataString(paylink) });
                 }
             }
-            catch { return Content("Er is iets fout gegaan!!!"); }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Er is intern iets fout gegaan. Neem contact met ons op.", debuginfo = e });
+            }
             
         }
 
@@ -121,7 +128,11 @@ namespace Overstag.Controllers
         { 
             using(var context = new OverstagContext())
             {
-                var payment = context.Payments.First(f => f.InvoiceID == Uri.UnescapeDataString(id));
+                var payment = context.Payments.FirstOrDefault(f => f.InvoiceID == Uri.UnescapeDataString(id));
+                if (payment == null)
+                    return Content("<h1 style=\"color: red;\">Betaling bestaat niet!!!.</h1>","text/html");
+
+                HttpContext.Session.Remove("PayUrl");
                 return View("Done",payment.PaymentID);
             }
         }
@@ -161,6 +172,9 @@ namespace Overstag.Controllers
                         {
                             if (payment.Status == PaymentStatus.Paid)
                                 invoice.Payed = 1;
+                            
+                            if(payment.Status != PaymentStatus.Open)
+                                HttpContext.Session.Remove("PayUrl");
 
                             context.Invoices.Update(invoice);
                             context.Payments.Update(payment);

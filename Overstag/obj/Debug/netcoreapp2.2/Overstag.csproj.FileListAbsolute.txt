@@ -108,7 +108,6 @@ C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razo
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\User\Payment.g.cshtml.cs
 C:\Users\MaurICT\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\User\UnpayedEvents.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Pay\Index.g.cshtml.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Pay\Checkout.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\User\Vote.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Ideas.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.2\Razor\Views\Parent\Index.g.cshtml.cs
