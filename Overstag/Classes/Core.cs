@@ -13,8 +13,8 @@ namespace Overstag.Core
     {
         public string mailUsername { get; set; }
         public string mailPass { get; set; }
-        public string mySqlUsername { get; set; }
-        public string mySqlPass { get; set; }
+        public string mySqlConnectionString { get; set; }
+        public string msSqlConnectionString { get; set; }
         public string mollieApiToken { get; set; }
 
         public Credentials Get()

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
+using Newtonsoft.Json;
 
 using Mollie.Api;
 using Mollie.Api.Models.Customer;
@@ -75,8 +76,8 @@ namespace Overstag.Controllers
                     }
                     else
                     {
-                        try
-                        {
+                        //try
+                        //{
                             //Make name uppercase
                             account.Firstname = account.Firstname[0].ToString().ToUpper() + account.Firstname.Substring(1);
 
@@ -116,11 +117,11 @@ namespace Overstag.Controllers
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
-                        }
-                        catch(Exception e)
-                        {
-                            return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nProbeer het later opnieuw.", debuginfo = e, code = 2 });
-                        }
+                        //}
+                        //catch(Exception e)
+                        //{
+                        //    return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nProbeer het later opnieuw.", debuginfo = e, code = 2 });
+                        //}
 
                     }
                 }
@@ -148,7 +149,10 @@ namespace Overstag.Controllers
                     string ip = HttpContext.Connection.RemoteIpAddress.ToString();
                     try
                     {
-                        var account = context.Accounts.Where(e => e.Username == a.Username || e.Email == a.Username).FirstOrDefault();
+                        var account = context.Accounts.FirstOrDefault(e => e.Username == a.Username || e.Email == a.Username);
+                        if (account == null)
+                            return Json(new { status = "error", error = "Gebruiker bestaat niet" });
+
                         //Controleren op onjuiste inlogpogingen
                         if(context.Logging.Count(i=>i.Ip==ip && i.Date == DateTime.Now.Date && i.Username==a.Username) > 15)
                         {
@@ -188,7 +192,7 @@ namespace Overstag.Controllers
                             }
                         }
                     }
-                    catch { return Json(new { status = "error", error = "Gebruiker bestaat niet" }); }
+                    catch(Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e }); }
                 }
             }
         }

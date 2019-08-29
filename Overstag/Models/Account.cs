@@ -8,19 +8,12 @@ namespace Overstag.Models
     public class Account
     {
         public int Id { get; set; }
-
-        [Required]
-        public byte Sex { get; set; }
+        public int Sex { get; set; }
         //0 (male) /1 (female)
         public int Type { get; set; }
         //0 user, 1 parent, 2 mentor, 3 admin
-        [Required]
         public string Username { get; set; }
-
-        [Required]
         public string Password { get; set; }
-
-        [Required]
         [EmailAddress(ErrorMessage = "Emailadres is niet geldig")]
         public string Email { get; set; }
 

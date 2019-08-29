@@ -33,7 +33,7 @@ namespace Overstag.Models
         public Idea Idea { get; set; }
         public int UserID { get; set; }
         public Account User { get; set; }
-        public byte Upvote { get; set; }
+        public int Upvote { get; set; }
     }
 
     // [Intermediate table]
@@ -45,6 +45,6 @@ namespace Overstag.Models
         public int EventID { get; set; }
         public Event Event { get; set; }
 
-        public byte Payed { get; set; }
+        public int Payed { get; set; }
     }
 }
