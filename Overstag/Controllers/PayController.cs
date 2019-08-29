@@ -6,11 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Overstag.Models;
 using System.Threading.Tasks;
 using Overstag.Models.NoDB;
-
-using Mollie.Api;
 using Mollie.Api.Models;
 using Mollie.Api.Client;
-using Mollie.Api.Client.Abstract;
 using Mollie.Api.Models.Payment.Request;
 using Mollie.Api.Models.Payment.Response;
 using Mollie.Api.Models.Payment;
@@ -19,6 +16,11 @@ namespace Overstag.Controllers
 {
     public class PayController : Controller
     {
+        /// <summary>
+        /// Get an invoice by its token
+        /// </summary>
+        /// <param name="invoiceid">The URI-encoded invoice token</param>
+        /// <returns>View with invoice and its details</returns>
         [Route("/Pay/Direct/{invoiceid}")]
         public IActionResult Index(string invoiceid)
         {
@@ -48,6 +50,16 @@ namespace Overstag.Controllers
                     if(HttpContext.Session.GetString("PayUrl")!=null)
                         ViewBag.PayURL = HttpContext.Session.GetString("PayUrl");
 
+                    if(iinvoice.Payed)
+                    {
+                        //Validate payment
+                        var payment = context.Payments.FirstOrDefault(f => f.InvoiceID == invoice.PayID);
+                        if (payment == null || string.IsNullOrEmpty(payment.PaymentID))
+                            ViewBag.Info = "Payment not validated";
+                        else
+                            ViewBag.Payment = payment;
+                    }
+
                     return View(new OPayInfo
                     {
                         User = context.Accounts.First(a => a.Id==invoice.UserID),
@@ -57,6 +69,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Creates a Mollie payment
+        /// </summary>
+        /// <param name="invoiceid">The invoice token/invoiceID</param>
+        /// <returns>Json (status = success with mollie href, status = warning with warning or status = error with details)</returns>
         [HttpPost("/Pay/Checkout")]
         public async Task<IActionResult> Checkout(string invoiceid)
         {
@@ -123,6 +140,11 @@ namespace Overstag.Controllers
             
         }
 
+        /// <summary>
+        /// Redirect page for Mollie
+        /// </summary>
+        /// <param name="id">The invoice's token or invoiceID</param>
+        /// <returns>View</returns>
         [HttpGet("Pay/Done/{id}")]
         public IActionResult Done(string id)
         { 
@@ -137,6 +159,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Webhook for mollie
+        /// </summary>
+        /// <param name="id">The mollieID</param>
+        /// <returns>HTTP status 200 (OK)</returns>
         [HttpPost("Pay/Webhook")]
         public async Task<IActionResult> Webhook([FromHeader]string id)
         {
@@ -144,6 +171,11 @@ namespace Overstag.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Update payment using MollieAPI
+        /// </summary>
+        /// <param name="id">The mollie paymentID</param>
+        /// <returns>JSON (status = success with payment data, status = warning with warning, status = error with error)</returns>
         [HttpGet("Pay/UpdatePayment/{id}")]
         public async Task<IActionResult> UpdatePayment(string id)
         {
@@ -195,13 +227,26 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Get payment status and details from database
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>JSON (status = success with data or status = error with details)</returns>
         [HttpGet("Pay/GetPayment/{id}")]
         public IActionResult GetPayment(string id)
         {
-            using (var context = new OverstagContext())
+            try
             {
-                var payment = context.Payments.First(f => f.PaymentID == id);
-                return Json(new { status = "success", data = payment });
+                using (var context = new OverstagContext())
+                {
+                    var payment = context.Payments.First(f => f.PaymentID == id);
+                    payment.InvoiceID = Uri.EscapeDataString(payment.InvoiceID);
+                    return Json(new { status = "success", data = payment });
+                }
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Er is intern iets fout gegaan", debuginfo = e });
             }
         }
 

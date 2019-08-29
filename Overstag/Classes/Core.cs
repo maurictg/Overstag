@@ -29,7 +29,10 @@ namespace Overstag.Core
     {
         public static Credentials Credentials = new Credentials().Get();
 
-        public static bool DateIsPassed(DateTime check){return check < DateTime.Now;}
+        public static bool DateIsPassed(DateTime check)
+            => check < DateTime.Now;
+        public static int getAge(DateTime bd)
+         => (new DateTime(DateTime.Now.Year, bd.Month, bd.Day) > DateTime.Now ? (DateTime.Now.Year - bd.Year)-1 : (DateTime.Now.Year - bd.Year));
         public static string SendMail(string title, string body, string to)
         {
             try

@@ -12,9 +12,17 @@ namespace Overstag.Controllers
 {
     public class ParentController : Controller
     {
+        /// <summary>
+        /// Gets the current user
+        /// </summary>
+        /// <returns>Overstag Account model</returns>
         public Account currentuser() 
             => new OverstagContext().Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
 
+        /// <summary>
+        /// Get parent index page with family info or create new family if not exist
+        /// </summary>
+        /// <returns>View with info</returns>
         [Route("Parent/Family")]
         public IActionResult Index()
         {
@@ -61,6 +69,9 @@ namespace Overstag.Controllers
             return View(Billing);
         }
 
+        /// <summary>
+        /// Create a new family with currentuser as parent
+        /// </summary>
         private void CreateFamily()
         {
             using(var context = new OverstagContext())
@@ -108,6 +119,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Generate a invoice for all members of the family
+        /// </summary>
+        /// <returns>Json (status = success or status = error with details)</returns>
         public IActionResult GenerateInvoice()
         {
             try

@@ -63,6 +63,7 @@
                                     <p>Geslacht: @Html.Raw(Model.Sex == 0 ? "<b class='blue-text'>Man</b>" : "<b class='pink-text'>Vrouw</b>")</p>
                                     <p>Type: <b>@type[Model.Type]</b></p>
                                     <p>Geboortedatum: <b>@Model.Birthdate.ToString("dd-MM-yyyy")</b></p>
+                                    <p>Leeftijd: <b>@Overstag.Core.General.getAge(Model.Birthdate)</b></p>
                                 </td>
                             </tr>
                         </tbody>

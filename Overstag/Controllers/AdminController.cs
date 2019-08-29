@@ -16,8 +16,11 @@ namespace Overstag.Controllers
 {
     public class AdminController : Controller
     {
-        public IActionResult Index() { return View(); }
-        public IActionResult Database() { return View(); }
+        public IActionResult Index() 
+            => View();
+
+        public IActionResult Database() 
+            => View();
 
         /// <summary>
         /// Checks if the current user is the admin
@@ -214,9 +217,18 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all ideas sorted by votes
+        /// </summary>
+        /// <returns>View with sorted ideas</returns>
         public IActionResult Ideas()
             => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote == 1) - b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
         
+        /// <summary>
+        /// Delete an idea
+        /// </summary>
+        /// <param name="id">The ID of the idea</param>
+        /// <returns>JSON (status = success or status = error with details)</returns>
         [HttpGet("Admin/Ideas/Delete/{id}")]
         public IActionResult DeleteIdea(int id)
         {
@@ -284,6 +296,10 @@ namespace Overstag.Controllers
             return View(aPart.OrderBy(e => e.Event.When).ToList());
         }
 
+        /// <summary>
+        /// Get an overview of all unfactured events and unpayed invoices for all users
+        /// </summary>
+        /// <returns>View with a List of AUnpayed objects</returns>
         public IActionResult Billing()
         {
             List<AUnpayed> aus = new List<AUnpayed>();
@@ -318,10 +334,10 @@ namespace Overstag.Controllers
                 }
             }
             
-
             return View(aus);
         }
 
+        /*//NOT IN USE 
         public IActionResult GenerateInvoices()
         {
             //En toen stond <3 Peet <3 opeens voor de deur :D
@@ -329,7 +345,7 @@ namespace Overstag.Controllers
             //Maak facturen als gebruiker dat nog niet zelf heeft gedaan.
             //Als er een factuur bestaat, moet bool payed = true zijn bij avond, en false bij factuur
             //Knopje bij openstaande facturen "genereren" zowel bij admin als bij user
-        }
+        }*/
 
         /// <summary>
         /// Logs in as the user with that token
@@ -350,8 +366,6 @@ namespace Overstag.Controllers
                return Content("OK");
             }
         }
-
-
 
         /// <summary>
         /// fire SQL query's on the database. Must be an admin of course

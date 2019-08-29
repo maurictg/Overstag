@@ -16,14 +16,34 @@ namespace Overstag.Controllers
         /// Gets the current user
         /// </summary>
         /// <returns>All account info of the current user</returns>
-        //public Account currentuser() { using (var c = new OverstagContext()) { try { return c.Accounts.Where(a => a.Token.Equals(HttpContext.Session.GetString("Token"))).FirstOrDefault(); } catch { return null; } } }
         public Account currentuser()
             => new OverstagContext().Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
 
-        public IActionResult Index() {return View(currentuser());}
+        /// <summary>
+        /// Get user homepage
+        /// </summary>
+        /// <returns>User homepage (view)</returns>
+        public IActionResult Index() => 
+            View(currentuser());
 
-        public IActionResult Settings(){return View(new OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == HttpContext.Session.GetString("Token")));}
-        public IActionResult Events() { return View(); }
+        /// <summary>
+        /// Get settings with user info
+        /// </summary>
+        /// <returns>View with User modal including family info</returns>
+        public IActionResult Settings() 
+            => View(new OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == HttpContext.Session.GetString("Token")));
+
+        /// <summary>
+        /// Get events page (partials are loaded into this view)
+        /// </summary>
+        /// <returns>View</returns>
+        public IActionResult Events()
+            =>View();
+
+        /// <summary>
+        /// Get invoices and unfactured events of user
+        /// </summary>
+        /// <returns>View with UnpayedEvents object including List with IInvoices and List with events</returns>
         public IActionResult Payment() {
 
             using (var context = new OverstagContext())
@@ -138,6 +158,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Like an event
+        /// </summary>
+        /// <param name="id">The id of the idea</param>
+        /// <param name="like">Upvote (1) or Downvote (0)</param>
+        /// <returns>Json, status = success or error with details</returns>
         [HttpGet("User/Vote/Like/{id}/{like}")]
         public IActionResult Like(int id, byte like)
         {
@@ -407,6 +433,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Generates invoice from all unpayed events of current user
+        /// </summary>
+        /// <returns>Json (status = success or status = error with details)</returns>
         [HttpGet]
         public JsonResult GenerateInvoice()
         {
@@ -458,6 +488,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Toggles the 2FA for the current user
+        /// </summary>
+        /// <returns>Json (status = success with the secret or status = error)</returns>
         [HttpGet]
         public JsonResult Toggle2FA()
         {
@@ -476,6 +510,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets the 2fa secret of the current user
+        /// </summary>
+        /// <returns>Json (status = success with the secret or status = error with reason)</returns>
         [HttpGet]
         public JsonResult Get2FA()
         {
@@ -490,9 +528,17 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets 2fa codes (beta)
+        /// </summary>
+        /// <returns>List with 2fa restore codes</returns>
         public JsonResult Get2FACodes()
             => Json(new { status = "success", data = Security.TFA.GetBackupCodes(currentuser().Token)});
 
+        /// <summary>
+        /// Leave the family
+        /// </summary>
+        /// <returns>Json (status = success or status = error with details)</returns>
         public IActionResult LeaveFamily()
         {
             try

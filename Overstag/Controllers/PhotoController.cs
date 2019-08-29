@@ -9,6 +9,11 @@ namespace Overstag.Controllers
 {
     public class PhotoController : Controller
     {
+        /// <summary>
+        /// Creates a QR-code
+        /// </summary>
+        /// <param name="input">String to create a QR with (URI-encoded)</param>
+        /// <returns>Image file</returns>
         [HttpGet]
         [Route("/Photo/GetQR/{input}")]
         public IActionResult GetQR(string input)

@@ -97,7 +97,7 @@
                                 <tr>
                                     <th>Datum</th>
                                     <th>Tijd</th>
-                                    <th>Betaalkenmerk</th>
+                                    <th>Factuurkenmerk</th>
                                     <th>Totaalbedrag</th>
                                     <th>Betaald</th>
                                 </tr>
@@ -112,6 +112,39 @@
                                 </tr>
                             </tbody>
                         </table>
+
+                        @if (ViewBag.Payment != null)
+                        {
+                            Overstag.Models.Payment p = ViewBag.Payment;
+                            DateTime dt = p.PayedAt ?? new DateTime(0, 0, 0);
+                            bool validated = (Model.Invoice.Payed == (p.PayedAt != null && !string.IsNullOrEmpty(p.PaymentID) && p.InvoiceID == Model.Invoice.PayID));
+                            <br />
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Betalingskenmerk</th>
+                                        <th>Geplaatst op</th>
+                                        <th>Betaald op</th>
+                                        <th>Betaling gevalideerd</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><b>@p.PaymentID</b></td>
+                                        <td>@p.PlacedAt.ToString("dd-MM-yyyy hh:mm:ss")</td>
+                                        <td>@dt.ToString("dd-MM-yyyy hh:mm:ss")</td>
+                                        <td><b class="@Html.Raw((validated) ? "green-text" : "red-text")">@Html.Raw((validated) ? "Ja" : "Nee")</b></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            @Html.Raw((!validated) ? "<h5 class=\"red-text\">Er is iets fout gegaan met de validatie. Neem a.u.b. contact op met de beheerder</h5>" : "");
+                        }
+                        else
+                        {
+                            if (Model.Invoice.Payed) { 
+                                Html.Raw("<h5 class=\"red-text\">Er is iets fout gegaan met de validatie. Neem a.u.b. contact op met de beheerder</h5>");
+                            }
+                        }
                         <br />
                         <h6 id="printedat">Factuur geprint op: <b>@DateTime.Now.ToString("d", culture)&nbsp;om&nbsp;@DateTime.Now.ToString("t", culture)</b></h6>
                     </div>
@@ -161,7 +194,7 @@
         let invoiceid = '@Uri.EscapeDataString(Model.Invoice.PayID)';
         let url = '@Uri.UnescapeDataString((ViewBag.PayURL==null)?"":ViewBag.PayURL)';
 
-        var Pay = {
+            var Pay = {
             init: function () {
                 M.Collapsible.getInstance($('#info')).open(2);
                 $('#printedat').hide();

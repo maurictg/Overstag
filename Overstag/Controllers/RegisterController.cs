@@ -288,6 +288,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Validates the 2fa code
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <param name="code">The validation code</param>
+        /// <returns>Json (status = success or error)</returns>
         [HttpGet]
         [Route("Register/Validate2FA/{token}/{code}")]
         public JsonResult Validate2FA(string token, string code)
@@ -308,6 +314,12 @@ namespace Overstag.Controllers
                 return Json(new { status = "error" });
         }
 
+        /// <summary>
+        /// Restores a 2fa backup code
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <param name="code">The restoration code</param>
+        /// <returns>Json (status = success with the secret or status = error)</returns>
         [HttpGet]
         [Route("Register/Restore2FA/{token}/{code}")]
         public JsonResult Restore2FA(string token, string code)
