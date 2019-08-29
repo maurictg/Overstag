@@ -223,13 +223,13 @@
             $('#2facode').focus();
         },
 
-        validate2fa: function () {
+        validate2fa: function() {
             if ($('#2facode').val().length != 6 || isNaN($('#2facode').val())) {
                 M.toast({ html: 'Type aub een geldige code in', classes: 'orange' });
                 $('#2facode').val('');
             }
             else {
-                $.getJSON('/Register/Validate2FA/'+token+'/'+ $('#2facode').val(), function (response) {
+                $.post('/Register/Validate2FA' , { token: token, code: $('#2facode').val() }, function (response) {
                     if (response.status == 'success') {
                         Login.redirect();
                         M.Modal.getInstance($('#tfa')).close();
@@ -243,6 +243,8 @@
                             Login.cancel2fa();
                         }
                     }
+                },'json').fail(function () {
+                    M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
                 });
             }
         },

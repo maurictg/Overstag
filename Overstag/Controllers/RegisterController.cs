@@ -16,9 +16,14 @@ namespace Overstag.Controllers
 {
     public class RegisterController : Controller
     {
-        public IActionResult Index() => View("Login");
-        public IActionResult Login() => View("Login","");
-        public IActionResult Register() => View();
+        public IActionResult Index() 
+            => View("Login");
+
+        public IActionResult Login() 
+            => View("Login","");
+
+        public IActionResult Register() 
+            => View();
 
         /// <summary>
         /// Resets the password of the user
@@ -298,9 +303,9 @@ namespace Overstag.Controllers
         /// <param name="token">The user's token</param>
         /// <param name="code">The validation code</param>
         /// <returns>Json (status = success or error)</returns>
-        [HttpGet]
-        [Route("Register/Validate2FA/{token}/{code}")]
-        public JsonResult Validate2FA(string token, string code)
+        [HttpPost]
+        [Route("Register/Validate2FA")]
+        public JsonResult Validate2FA([FromForm]string token, [FromForm]string code)
         {
             token = Uri.UnescapeDataString(token);
             if (Security.TFA.Validate(code, token))

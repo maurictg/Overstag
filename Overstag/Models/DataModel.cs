@@ -20,7 +20,11 @@ namespace Overstag.Models
         {
             //Connection string
             //optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
+#if DEBUG
+            optionsBuilder.UseSqlServer("Server=185.41.126.25,9145;Database=Golverdimssql;User=Golverdiroot;Password=maurice123");
+#else
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlConnectionString);
+#endif
         }
 
         protected override void OnModelCreating(ModelBuilder mb)
