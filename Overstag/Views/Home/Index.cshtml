@@ -2,20 +2,20 @@
     ViewBag.Title = "Overstag - Welkom!";
 }
 
-    <body class="grey darken-3">
+    <body>
         <div class="slider">
             <ul class="slides">
                 <!-- Voeg meer li's toe voor een slideshow-->
                 <li>
-                    <img src="~/img/logo.png" class="grey darken-2 responsive-img">
-                    <div class="caption center-align white-text">
-                        <h2><b>Welkom bij Overstag!</b></h2>
-                        <h5 class="light grey-text text-lighten-3">Welkom op onze website van stichting Overstag!</h5>
+                    <img src="~/img/logo.png" class="blue lighten-4 responsive-img">
+                    <div class="caption center-align">
+                        
                     </div>
                 </li>
             </ul>
         </div>
-        <div class="white-text center-align flow-text">
+        <div class="center-align flow-text">
+            <h3 class="blue-dark-text">Welkom bij Overstag!</h3>
             <h4 class="blue-middle-text"><b>Wat wij doen</b></h4>
             <p>
                 Wij organiseren voor christelijke jongeren in Rilland en omgeving elke week een chill- of activiteitenavond.<br />
@@ -23,7 +23,7 @@
             </p>
         </div>
         <br />
-        <div class="white-text center-align grey darken-2">
+        <div class="center-align blue lighten-4">
             <br />
             <div class="flow-text">
                 <h4 class="blue-middle-text"><b>Onze activiteiten</b></h4>
@@ -52,12 +52,12 @@
             </div>
             <br />
         </div>
-        <div class="white-text center-align flow-text">
+        <div class="center-align flow-text">
             <h4 class="blue-middle-text"><b>Over ons</b></h4>
             <p>Meer informatie over onze stichting,<br />doelstelling en huisregels kan je vinden op de pagina <a href="/Home/About">Over ons</a></p>
         </div>
         <br />
-        <div class="white-text grey darken-2 center-align flow-text">
+        <div class="blue lighten-4 center-align flow-text">
             <br />
             <h4 class="blue-middle-text"><b>Contact</b></h4>
             <p>Als geinteresseerd of nog vragen hebt, neem dan <a href="/Home/Contact">contact</a> met ons op.</p>
@@ -68,15 +68,10 @@
 <script>
     Home = {
         init: function () {
-            //Maak knopje active
             $("#_home").addClass("active");
             $("#_mhome").addClass("active");
 
-            //When user is redirected from login, toast message once
-            /*if(localStorage.getItem("login")){
-                M.toast({ html: 'Successvol ingelogd!', classes: 'green' });
-                localStorage.removeItem("login");
-            }*/
+            //Toast wanneer doorverwezen vanaf logout
             if(localStorage.getItem("logout")){
                 M.toast({ html: 'Successvol uitgelogd!', classes: 'orange' });
                 localStorage.removeItem("logout");

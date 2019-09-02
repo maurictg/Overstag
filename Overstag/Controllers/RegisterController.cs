@@ -81,8 +81,8 @@ namespace Overstag.Controllers
                     }
                     else
                     {
-                        //try
-                        //{
+                        try
+                        {
                             //Make name uppercase
                             account.Firstname = account.Firstname[0].ToString().ToUpper() + account.Firstname.Substring(1);
 
@@ -122,11 +122,11 @@ namespace Overstag.Controllers
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
-                        //}
-                        //catch(Exception e)
-                        //{
-                        //    return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nProbeer het later opnieuw.", debuginfo = e, code = 2 });
-                        //}
+                        }
+                        catch(Exception e)
+                        {
+                            return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nNeem a.u.b contact met ons op.", debuginfo = e, code = 2 });
+                        }
 
                     }
                 }
@@ -228,7 +228,8 @@ namespace Overstag.Controllers
                             {
                                 string message = "<h1>Overstag wachtwoord reset</h1>" +
                                     "Beste " + account.Firstname + ",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>" +
-                                    "Klik op <a href='/Register/Passreset/" + Uri.EscapeDataString(account.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
+                                    "Klik op <a href='http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(account.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
+                                    "Als de link het niet doet, kopieer en plak deze dan: http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(account.Token)+"<br>"+
                                     "<br>Success! Mocht het niet werken, neem dan contact met ons op";
                                 string res = Core.General.SendMail("Wachtwoord reset", message, account.Email);
                                 if (res == "OK")

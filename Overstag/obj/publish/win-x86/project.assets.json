@@ -20281,11 +20281,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
+      "projectUniqueName": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
       "projectName": "Overstag",
-      "projectPath": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
+      "projectPath": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
       "packagesPath": "C:\\Users\\maurict\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\obj\\publish\\win-x86\\",
+      "outputPath": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\obj\\publish\\win-x86\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

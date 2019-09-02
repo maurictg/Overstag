@@ -37,12 +37,18 @@ namespace Overstag.Core
         {
             try
             {
-                SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
+                SmtpClient client = new SmtpClient("smtp.mijnhostingpartner.nl", 25); //587
                 client.UseDefaultCredentials = false;
                 if (Credentials.mailPass != string.Empty)
                 {
                     client.Credentials = new NetworkCredential(Credentials.mailUsername, Credentials.mailPass);
+
+                    //Code toegevoegd voor overstag mailsender
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    //client.UseDefaultCredentials = false;
+
                     client.EnableSsl = true;
+
                     MailMessage mail = new MailMessage();
                     mail.From = new MailAddress(Credentials.mailUsername);
                     mail.To.Add(to);
@@ -58,7 +64,7 @@ namespace Overstag.Core
                 }
 
             }
-            catch (Exception e) { return "ERR: " + e.ToString(); }
+            catch (Exception e) { throw e; /*return "ERR: " + e.ToString();*/ }
         }
     }
 

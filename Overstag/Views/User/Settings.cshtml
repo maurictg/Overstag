@@ -281,7 +281,7 @@
                             }
                             else {
                                 M.toast({ html: '2FA ingeschakeld', classes: 'green' });
-                                $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent('otpauth://totp/Overstag:@Model.Username?secret=' + response.secret + '&issuer=Overstag'));
+                                $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent(response.secret)+'/@Model.Username');
                                 $('#qrcode').text(response.secret);
                                 $('#qr').show();
                                 $('#btngetqr').hide();
@@ -296,8 +296,8 @@
                 getQR: function () {
                     $.getJSON('/User/Get2FA', function (response) {
                         if (response.status == 'success') {
-                           $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent('otpauth://totp/Overstag:@Model.Username?secret=' + response.secret + '&issuer=Overstag'));
-                           $('#qrcode').text(response.secret);
+                            $('#qrimg').attr('src', '/Photo/GetQR/'+encodeURIComponent(response.secret)+'/@Model.Username');
+                            $('#qrcode').text(response.secret);
                             $('#qr').show();
                             $('#btngetqr').hide();
                         }
