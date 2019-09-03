@@ -24,7 +24,7 @@
                     <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                    <td><a onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>
+                    <td><a class="btn green waves-effect" onclick="Events.subscribe(@e.Id);">Inschrijven</a></td>
                 </tr>
             }
         }

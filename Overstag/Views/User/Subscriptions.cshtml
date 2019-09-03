@@ -24,7 +24,7 @@
                     <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                    <td><a data-target="uitschrijven" onclick="eventtoremove = @e.Id;" class="modal-trigger">Uitschrijven</a></td>
+                    <td><a data-target="uitschrijven" onclick="eventtoremove = @e.Id;" class="modal-trigger btn orange waves-effect">Uitschrijven</a></td>
                 </tr>
             }
         }

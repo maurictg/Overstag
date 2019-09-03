@@ -30,7 +30,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="token">The user's token</param>
         /// <returns>View with the password reset fields, or a string with an error</returns>
-        [HttpGet("Register/Passreset/{token}")]
+        [Route("Register/Passreset/{token}")]
         public IActionResult Passreset(string token)
         {
             using(var context = new OverstagContext())
