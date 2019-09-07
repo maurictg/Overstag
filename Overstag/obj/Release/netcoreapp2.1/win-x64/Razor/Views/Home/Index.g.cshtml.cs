@@ -51,12 +51,12 @@ namespace AspNetCore
             WriteLiteral("\r\n    ");
             EndContext();
             BeginContext(56, 3325, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("body", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "7a899f2cdb304ccdbd1060c7912e297e", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("body", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "14ce86d12f1048dba893a89efbe61609", async() => {
                 BeginContext(62, 170, true);
                 WriteLiteral("\r\n        <div class=\"slider\">\r\n            <ul class=\"slides\">\r\n                <!-- Voeg meer li\'s toe voor een slideshow-->\r\n                <li>\r\n                    ");
                 EndContext();
                 BeginContext(232, 64, false);
-                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagOnly, "4f562ba366c14b289830c1c2c76608a4", async() => {
+                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagOnly, "d393cfaab1264214984de60809ba1a29", async() => {
                 }
                 );
                 __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();

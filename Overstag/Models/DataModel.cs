@@ -19,9 +19,9 @@ namespace Overstag.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Connection string
-            //optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
+            optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
 #if DEBUG
-            optionsBuilder.UseSqlServer("Server=185.41.126.25,9145;Database=Golverdimssql;User=Golverdiroot;Password=maurice123");
+            //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
 #else
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlConnectionString);
 #endif
@@ -68,13 +68,4 @@ namespace Overstag.Models
 
         
     }
-
-    //No database field
-    public class SQLQuery
-    {
-        public string Query { get; set; }
-        public string TableName { get; set; }
-        public int Type { get; set; }
-    }
-
 }

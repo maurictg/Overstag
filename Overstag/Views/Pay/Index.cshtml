@@ -9,6 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
+    <script type="text/javascript" src="~/js/Overstag.js"></script>
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
@@ -155,7 +156,7 @@
             <a class="btn waves-effect green" id="btnprint" onclick="Pay.startPrint();">Factuur printen</a>
             @if (!Model.Invoice.Payed)
             {
-                <button class="btn waves-effect blue modal-trigger" data-target="modalpay">Betaling plaatsen</button>
+                <button class="btn waves-effect blue modal-trigger" id="btnnext" data-target="modalpay">Betaling plaatsen</button>
             }
             <br /><br />
         </div>
@@ -216,7 +217,6 @@
                 $('#pay').hide();
                 $('#btnprint').hide();
                 $('#btnnext').hide();
-                $('#printedat').show();
                 M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 1000, completeCallback: function () { Pay.doPrint() } });
             },
             doPrint: function () {

@@ -16,6 +16,7 @@ namespace Overstag.Core
         public string mySqlConnectionString { get; set; }
         public string msSqlConnectionString { get; set; }
         public string mollieApiToken { get; set; }
+        public string msSqlDebugCString { get; set; }
 
         public Credentials Get()
         {
@@ -23,7 +24,6 @@ namespace Overstag.Core
             return o;
         }
     }
-
 
     public static class General
     {

@@ -1,5 +1,4 @@
-﻿@model string
-@{
+﻿@{
     ViewBag.Title = "Inloggen";
 }
     <body>
@@ -178,8 +177,11 @@
             $('#progbar').show();
             $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
-                    if ($('#Username').val() == 'admin')
+                    if (response.type == 3)
                         localStorage.setItem('redirect', '/Admin');
+
+                    if (response.type == 2)
+                        localStorage.setItem('redirect', '/Mentor');
 
                     if (response.twofactor == 'yes') {
                         Login.open2fa();

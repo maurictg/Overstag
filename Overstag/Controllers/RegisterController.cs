@@ -187,7 +187,7 @@ namespace Overstag.Controllers
                                     context.SaveChanges();
                                 }
 
-                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", token = (no2fa) ? "" : Uri.EscapeDataString(account.Token) });
+                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
                             }
                             else
                             {

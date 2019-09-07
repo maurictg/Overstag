@@ -34,13 +34,14 @@ namespace Overstag
             app.UseSession();
             //wwwroot folder
             app.UseStaticFiles();
-            /*custom folder
+
+            //custom folder
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "HtmlPartials")),
-                RequestPath = "/html"
-            });*/
+                    Path.Combine(Directory.GetCurrentDirectory(), "www")),
+                RequestPath = "/www"
+            });
 
             app.UseMiddleware<Overstag.Middleware.Authentication>();
 

@@ -12,16 +12,24 @@
             Om jezelf in te schrijven voor een activiteit, navigeer je via het menu naar &quot;<a href="/User/Events"><b>Activiteiten</b></a>&quot;.<br />
             Wanneer je de instellingen van je account wilt bekijken en wijzigen, bijvoorbeeld je wachtwoord veranderen, navigeer je naar &quot;<a href="/User/Settings"><b>Instellingen</b></a>&quot;
         </p>
-        
+
+        @if(Model.Type >= 2)
+        {
+            <a class="btn btn-large green darken-4" href="/Mentor"><b>Naar Overstag Bestuur</b></a>
+        }
+
     </div>
 </div>
-
-
 
 <script>
     $(function () {
         $('#_ainfo').addClass('active');
         $('#_mainfo').addClass('active');
     });
+
+    $(document).ready(function(){
+        $('.modal').modal();
+    });
+
 </script>
 

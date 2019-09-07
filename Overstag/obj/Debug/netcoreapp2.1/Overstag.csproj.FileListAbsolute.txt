@@ -69,7 +69,6 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.TagHelpers.output.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.RazorCoreGenerate.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Admin\Billing.g.cshtml.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Admin\Database.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Admin\Events.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Admin\Ideas.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Admin\Index.g.cshtml.cs
@@ -106,3 +105,5 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.dll
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.pdb
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.csproj.CopyComplete
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Index.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_MentorLayout.g.cshtml.cs

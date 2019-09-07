@@ -7,9 +7,9 @@
             <ul class="slides">
                 <!-- Voeg meer li's toe voor een slideshow-->
                 <li>
-                    <img src="~/img/logo.png" class="blue lighten-4 responsive-img">
+                    <img src="/img/logo.png" class="blue lighten-4 responsive-img">
                     <div class="caption center-align">
-                        
+
                     </div>
                 </li>
             </ul>
@@ -63,6 +63,19 @@
             <p>Als geinteresseerd of nog vragen hebt, neem dan <a href="/Home/Contact">contact</a> met ons op.</p>
             <br />
         </div>
+        <div class="center-align flow-text">
+            <h5 class="blue-middle-text">Zet het licht uit</h5>
+            <!-- Switch -->
+            <div class="switch">
+                <label>
+                    Uit
+                    <input type="checkbox" id="light">
+                    <span class="lever"></span>
+                    Aan
+                </label>
+            </div>
+            <br />
+        </div>
     </body>
 
 <script>
@@ -76,9 +89,19 @@
                 M.toast({ html: 'Successvol uitgelogd!', classes: 'orange' });
                 localStorage.removeItem("logout");
             }
+
+            $('#light').change(function () {
+                if ($(this).prop('checked') == false) {
+                    OverstagJS.Theme.setLight();
+                } else {
+                    OverstagJS.Theme.setDark();
+                }
+            });
+
+            if (localStorage.getItem('darktheme') == 'true') {
+                $('#light').attr('checked', true);
+            }
         },
-
-
     }
     //call init function
     Home.init();

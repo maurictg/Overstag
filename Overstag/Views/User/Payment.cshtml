@@ -80,8 +80,12 @@
                                 <div class="collapsible-body">
                                     @if (!item.Payed)
                                     {
-                                        <a class="waves-effect waves-light btn" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen</a>
+                                        <a class="waves-effect waves-light btn blue" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen</a>
                                         <br />
+                                    }
+                                    else
+                                    {
+                                        <a class="waves-effect waves-light btn green" target="_blank" href="/Pay/Direct/@Uri.EscapeDataString(item.PayID)">Factuur openen</a>
                                     }
 
                                     <table class="responsive-table">

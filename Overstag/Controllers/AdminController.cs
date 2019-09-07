@@ -19,9 +19,6 @@ namespace Overstag.Controllers
         public IActionResult Index() 
             => View();
 
-        public IActionResult Database() 
-            => View();
-
         /// <summary>
         /// Checks if the current user is the admin
         /// </summary>
@@ -367,122 +364,7 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// fire SQL query's on the database. Must be an admin of course
-        /// </summary>
-        /// <param name="q">Query string</param>
-        /// <returns>JSON result, status = "success" including data or status = "error" including error</returns>
-        [HttpPost]
-        public async Task<IActionResult> Query(SQLQuery q)
-        {
-            if (CheckforAdmin())
-            {
-                if (q.Query != string.Empty)
-                {
-                    using (var context = new OverstagContext())
-                    {
-                        if (q.Type == 0) //fire
-                        {
-                            try
-                            {
-                                int rows = 0;
-                                rows = await context.Database.ExecuteSqlCommandAsync(q.Query); return Json(new { status = "success", data = rows.ToString()+" rows affected"});
-                            }
-                            catch (Exception e) { return Json(new { status = "error", error = e.ToString() }); }
-                        }
-                        else if (q.Type == 1) //read single
-                        {
-                            try
-                            {
-                                switch (q.TableName)
-                                {
-                                    default:
-                                        return Json(new {status = "error", error = "Geen table name gegeven" });
-                                    case "Accounts":
-                                        return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).FirstOrDefault() });
-                                    case "Events":
-                                        return Json(new { status = "success", data = context.Events.FromSql(q.Query).FirstOrDefault() });
-                                    //case "Participate":
-                                    //    return Json(new { status = "success", data = context.Participate.FromSql(q.Query).FirstOrDefault() });
-                                    case "Invoices":
-                                        return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).FirstOrDefault() });
-                                    case "Logging":
-                                        return Json(new { status = "success", data = context.Logging.FromSql(q.Query).FirstOrDefault() });
-
-                                }
-                            }
-                            catch(Exception e)
-                            {
-                                return Json(new { status = "error", error = e.ToString() });
-                            }
-                            
-                        }
-                        else if (q.Type == 2) //read object as list
-                        {
-                            try
-                            {
-                                switch (q.TableName)
-                                {
-                                    default:
-                                        return Json(new { status = "error", error = "Geen table name gegeven" });
-                                    case "Accounts":
-                                        return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).ToList() });
-                                    case "Events":
-                                        return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToList() });
-                                    //case "Participate":
-                                    //    return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToList() });
-                                    case "Invoices":
-                                        return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).ToList() });
-                                    case "Logging":
-                                        return Json(new { status = "success", data = context.Logging.FromSql(q.Query).ToList() });
-                                }
-                            }
-                            catch(Exception e)
-                            {
-                                return Json(new { status = "error", error = e.ToString() });
-                            }
-                        }
-                        else if (q.Type == 3) //read object as array
-                        {
-                            try
-                            {
-                                switch (q.TableName)
-                                {
-                                    default:
-                                        return Json(new { status = "error", error = "Geen table name gegeven" });
-                                    case "Accounts":
-                                        return Json(new { status = "success", data = context.Accounts.FromSql(q.Query).ToArray() });
-                                    case "Events":
-                                        return Json(new { status = "success", data = context.Events.FromSql(q.Query).ToArray() });
-                                    //case "Participate":
-                                    //    return Json(new { status = "success", data = context.Participate.FromSql(q.Query).ToArray() });
-                                    case "Invoices":
-                                        return Json(new { status = "success", data = context.Invoices.FromSql(q.Query).ToArray() });
-                                    case "Logging":
-                                        return Json(new { status = "success", data = context.Logging.FromSql(q.Query).ToArray() });
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                return Json(new { status = "error", error = e.ToString() });
-                            }
-                        }
-                        else
-                        {
-                            return Json(new { status = "error", error = "Onjuist type opgegeven" });
-                        }
-                    }
-                }
-                else
-                {
-                    return Json(new { status = "error", error = "Query is NULL" });
-                }
-
-            }
-            else
-            {
-                return Json(new { status = "error", error = "U heeft onvoldoende rechten om SQL-Query's uit te voeren" });
-            }
-        }
+       
+       
     }
 }
