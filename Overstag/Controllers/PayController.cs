@@ -44,7 +44,8 @@ namespace Overstag.Controllers
                         Payed = invoice.Payed==1,
                         PayID = invoice.PayID,
                         Timestamp = invoice.Timestamp,
-                        Events = events.OrderBy(e => e.When).ToList()
+                        Events = events.OrderBy(e => e.When).ToList(),
+                        Additions = invoice.AdditionsCount
                     };
 
                     if(HttpContext.Session.GetString("PayUrl")!=null)

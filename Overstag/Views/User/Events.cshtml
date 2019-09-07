@@ -1,7 +1,7 @@
 ﻿@{
     Layout = "/Views/_UserLayout.cshtml";
     var context = new Overstag.Models.OverstagContext();
-    var model = context.Events.Where(e => e.When > DateTime.Now).OrderBy(e => e.When).ToArray();
+    var model = context.Events.Where(e => e.When.Date >= DateTime.Now.Date).OrderBy(e => e.When).ToArray();
     ViewBag.Title = "Evenementen";
 }
 <div>
@@ -52,8 +52,7 @@
     let eventtoremove;
     var User = {
         init: function () {
-            $('#_aevent').addClass('active');
-            $('#_maevent').addClass('active');
+            $('#_aevent, #_maevent').addClass('active');
             User.loadcontent();
             User.mapEvents();
         },

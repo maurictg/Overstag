@@ -84,10 +84,13 @@
                                     total += e.Cost;
                                 }
                                 <tr>
-                                    <td colspan="4" class="grey darken-1 white-text">Totaal: <b>&euro;@Math.Round((double)total / 100, 2).ToString("F")</b></td>
+                                    <td colspan="4" class="grey darken-1 white-text">
+                                        Totaal: <b>&euro;@Math.Round((double)total / 100, 2).ToString("F")</b> (exclusief drankjes)<br />
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
+                        <h6><b>@Model.Invoice.Additions</b> drankje(s) gekocht ter waarde van <b>&euro;@Model.Invoice.Additions,00</b></h6>
                     </div>
                 </li>
                 <li>
@@ -213,18 +216,12 @@
                 var elem = document.querySelector('.collapsible.expandable');
                 var instance = M.Collapsible.init(elem, { accordion: false });
                 instance.open(0); instance.open(1); instance.open(2);
-                $('nav').hide();
-                $('#pay').hide();
-                $('#btnprint').hide();
-                $('#btnnext').hide();
+                $('nav, #pay, #btnprint, #btnnext').hide();
                 M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 1000, completeCallback: function () { Pay.doPrint() } });
             },
             doPrint: function () {
                 window.print();
-                $('nav').show();
-                $('#btnprint').show();
-                $('#pay').show();
-                $('#btnnext').show();
+                $('nav, #btnprint, #pay, #btnnext').show();
                 var elem = document.querySelector('.collapsible.expandable');
                 var instance = M.Collapsible.init(elem, { accordion: false });
                 instance.close(0); instance.close(1); instance.close(2);

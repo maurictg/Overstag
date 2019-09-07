@@ -81,8 +81,7 @@
 <script>
     Home = {
         init: function () {
-            $("#_home").addClass("active");
-            $("#_mhome").addClass("active");
+            $("#_home, #_mhome").addClass("active");
 
             //Toast wanneer doorverwezen vanaf logout
             if(localStorage.getItem("logout")){

@@ -70,28 +70,39 @@ namespace Overstag.Controllers
                 var invoices = context.Invoices.Where(i => i.UserID == currentuser().Id).OrderBy(v => v.Payed);
                 List<Models.NoDB.IInvoice> Inv = new List<Models.NoDB.IInvoice>();
 
-                foreach(var i in invoices)
+                if(invoices.Count() > 0)
                 {
-                    List<Event> events1 = new List<Event>();
-
-                    foreach (var e in i.EventIDs.Split(','))
-                        events1.Add(context.Events.First(j => j.Id == Convert.ToInt32(e)));
-
-                    Inv.Add(new Models.NoDB.IInvoice
+                    foreach (var i in invoices)
                     {
-                        Payed = (i.Payed == 1),
-                        Amount = i.Amount,
-                        Events = events1,
-                        Timestamp = i.Timestamp,
-                        UserID = i.UserID,
-                        PayID = i.PayID
-                    });
+                        List<Event> events1 = new List<Event>();
+
+                        foreach (string e in i.EventIDs.Split(','))
+                        {
+                            var eve = context.Events.FirstOrDefault(j => j.Id == Convert.ToInt32(e));
+                            if(eve != null)
+                                events1.Add(eve);
+                        }
+                                
+                            
+                        Inv.Add(new Models.NoDB.IInvoice
+                        {
+                            Payed = (i.Payed == 1),
+                            Amount = i.Amount,
+                            Events = events1,
+                            Timestamp = i.Timestamp,
+                            UserID = i.UserID,
+                            PayID = i.PayID,
+                            Additions = i.AdditionsCount
+                        });
+                    }
                 }
+                
 
                 var data = new Overstag.Models.NoDB.UnpayedEvents
                 {
                     UnfacturedEvents = events = events.OrderBy(e => e.When).ToList(),
-                    Invoices = Inv
+                    Invoices = Inv,
+                    Subscriptions = parti
                 };
 
                 return View(data);
@@ -116,7 +127,7 @@ namespace Overstag.Controllers
                     if(part != null)
                         events.Add(context.Events.First(e => e.Id == part.EventID));
 
-                return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.Where(e=>e.When>DateTime.Now).OrderBy(e => e.When).ToList() });
+                return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.Where(e => e.When>DateTime.Now).OrderBy(e => e.When).ToList() });
             }
         }
 
@@ -216,7 +227,7 @@ namespace Overstag.Controllers
                     var user = context.Accounts.Include(f => f.Subscriptions).First(a => a.Id == currentuser().Id);
                     var eve = context.Events.First(e => e.Id == p.EventID);
 
-                    if (Core.General.DateIsPassed(eve.When))
+                    if (DateTime.Today > eve.When.Date)
                         return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
 
                     var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
@@ -451,6 +462,7 @@ namespace Overstag.Controllers
                 List<int> eventIDS = new List<int>();
 
                 int bill = 0;
+                int additions = 0;
 
                 try {
 
@@ -461,6 +473,10 @@ namespace Overstag.Controllers
                         {
                             part.Payed = 1;
                             bill += eve.Cost;
+
+                            additions = part.ConsumptionCount;
+                            bill += part.ConsumptionTax;
+
                             eventIDS.Add(eve.Id);
                         }
                     }
@@ -472,7 +488,8 @@ namespace Overstag.Controllers
                         EventIDs = string.Join(',', eventIDS),
                         Payed = 0,
                         Timestamp = DateTime.Now,
-                        PayID = Encryption.Random.rHash(currentuser().Token)
+                        PayID = Encryption.Random.rHash(currentuser().Token),
+                        AdditionsCount = additions
                     };
 
                     context.Invoices.Add(facture);

@@ -164,8 +164,7 @@
     <script>
             var User = {
                 init: function () {
-                    $('#_asetting').addClass('active');
-                    $('#_masetting').addClass('active');
+                    $('#_asetting, #_masetting').addClass('active');
                     $('#cb2fa').attr('checked', ('@(!string.IsNullOrEmpty(Model.TwoFactor))' == 'True'));
 
                     if ($('#cb2fa').prop('checked'))

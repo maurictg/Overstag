@@ -93,7 +93,6 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razo
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\Payment.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\Settings.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\Subscriptions.g.cshtml.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\UnpayedEvents.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\Vote.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_AdminLayout.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_Layout.g.cshtml.cs
@@ -107,3 +106,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.csproj.CopyComplete
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Index.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_MentorLayout.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Today.g.cshtml.cs

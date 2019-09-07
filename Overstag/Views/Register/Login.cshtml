@@ -101,11 +101,8 @@
 
     Login = {
         init: function () {
-            $("#_reg").addClass("active");
-            $("#_mreg").addClass("active");
-            $('#progbar').hide();
-            $('#progbar2').hide();
-            $('#mailhelper').hide();
+            $("#_reg, #_mreg").addClass("active");
+            $('#progbar, #progbar2, #mailhelper').hide();
             Login.mapEvents();
         },
 

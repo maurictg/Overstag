@@ -25,6 +25,7 @@
                                 <th>Wat</th>
                                 <th>Wanneer</th>
                                 <th>Omschrijving</th>
+                                <th>Aantal drankjes</th>
                                 <th>Kosten</th>
                             </tr>
                         </thead>
@@ -32,17 +33,22 @@
                             @{double topay = 0; }
                             @foreach (var e in Model.UnfacturedEvents)
                             {
+                                var p = Model.Subscriptions.First(f => f.EventID == e.Id);
                                 double c = (double)e.Cost;
                                 topay += c;
+                                topay += p.ConsumptionTax;
                                 <tr>
                                     <td>@e.Title</td>
                                     <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                                     <td>@e.Description</td>
-                                    <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                                    <td>@p.ConsumptionCount <b>(&euro;@(p.ConsumptionTax / 100),00)</b></td>
+                                    <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
                                 </tr>
                             }
                             <tr class="grey lighten-4">
-                                <td colspan="4" class="center"><b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b></td>
+                                <td colspan="5" class="center">
+                                    <b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -108,7 +114,12 @@
                                                 </tr>
                                             }
 
-                                            <tr><td colspan="4" class="center-align white-text grey darken-1">Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td></tr>
+                                            <tr>
+                                                <td colspan="4" class="center-align white-text grey darken-1">
+                                                    Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")<br />
+                                                    @Html.Raw((item.Additions > 0) ? $"<br />Let op: Dit is <b>inclusief</b> de drankjes. ({item.Additions})" : "")
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -157,8 +168,7 @@
 <script>
     var Payment = {
         init: function () {
-            $('#_apay').addClass('active');
-            $('#_mapay').addClass('active');
+            $('#_apay, #_mapay').addClass('active');
         },
         generateInvoice: function () {
             $.getJSON('/User/GenerateInvoice', function (data) {

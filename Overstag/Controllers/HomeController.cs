@@ -26,7 +26,7 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 //Return sorted list
-                return View(context.Events.Where(e => e.When > DateTime.Now).OrderBy(e => e.When).ToArray());
+                return View(context.Events.Where(e => !Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray());
             }
         }
         

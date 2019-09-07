@@ -11,6 +11,7 @@ namespace Overstag.Models
         public int Amount { get; set; }
         public DateTime Timestamp { get; set; }
         public string EventIDs { get; set; }
+        public int AdditionsCount { get; set; }
         public int Payed { get; set; }
         public string PayID { get; set; }
     }

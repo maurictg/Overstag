@@ -46,5 +46,8 @@ namespace Overstag.Models
         public Event Event { get; set; }
 
         public int Payed { get; set; }
+
+        public int ConsumptionTax { get; set; }
+        public int ConsumptionCount { get; set; }
     }
 }

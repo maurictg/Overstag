@@ -11,10 +11,17 @@ namespace Overstag.Models.NoDB
         public List<Event> Events { get; set; }
     }
 
+    public struct UserEvent
+    {
+        public Event Event;
+        public List<Account> Participators;
+    }
+
     public struct UnpayedEvents
     {
         public List<IInvoice> Invoices;
         public List<Event> UnfacturedEvents;
+        public List<Participate> Subscriptions;
     }
 
     public struct IInvoice
@@ -25,6 +32,7 @@ namespace Overstag.Models.NoDB
         public bool Payed;
         public DateTime Timestamp;
         public string PayID;
+        public int Additions;
     }
     
     public struct AUnpayed
