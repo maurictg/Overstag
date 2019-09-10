@@ -2,6 +2,7 @@
 @{
     Layout = "/Views/_AdminLayout.cshtml";
     ViewBag.Title = "Gebruikers";
+    string[] types = { "Lid", "Ouder", "Bestuurder", "Administrator" };
 }
 <br />
 <div class="center-align white-text">
@@ -10,14 +11,15 @@
     <table class="table text-white">
         <thead>
             <tr>
-                <td>Id</td>
-                <td>Gebruikersnaam</td>
-                <td>Emailadres</td>
-                <td>Voornaam</td>
-                <td>Achternaam</td>
-                <td>Adres</td>
-                <td>Token</td>
-                <td>Acties</td>
+                <th>Id</th>
+                <th>Gebruikersnaam</th>
+                <th>Emailadres</th>
+                <th>Voornaam</th>
+                <th>Achternaam</th>
+                <th>Adres</th>
+                <th>Token</th>
+                <th>Type</th>
+                <th>Acties</th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +33,10 @@
                     <td><b>@user.Lastname</b></td>
                     <td>@user.Adress ,&nbsp; @user.Postalcode &nbsp; @user.Residence</td>
                     <td><i>@user.Token</i></td>
+                    <td>
+                        @types[user.Type]<br />
+                        <a href="javascript:" onclick="Admin.grade(0,'@user.Id')">- down</a>|<a href="javascript:" onclick="Admin.grade(1,'@user.Id')">+ up</a>
+                    </td>
                     <td><a href="/Register/Passreset/@Uri.EscapeDataString(user.Token)">Reset</a><br /><a href="/Admin/Loginas/@Uri.EscapeDataString(user.Token)">Login</a></td>
                 </tr>
             }
@@ -44,5 +50,11 @@
         init: function () {
 
         },
+        grade: function (up, id) {
+            $.get('/Admin/upgrade/' + up + '/' + id, function (r) {
+                if (r.status == 'success')
+                    window.location.reload();
+            }, 'json');
+        }
     }
 </script>

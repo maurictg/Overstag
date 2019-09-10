@@ -364,6 +364,22 @@ namespace Overstag.Controllers
             }
         }
 
+        [HttpGet("Admin/upgrade/{grade}/{id}")]
+        public IActionResult Upgrade(int grade, int id)
+        {
+            int inc = (grade == 0) ? -1 : 1;
+            using(var context = new OverstagContext())
+            {
+                var user = context.Accounts.First(f => f.Id == id);
+                if ((user.Type + inc) > -1 && (user.Type + inc) < 4)
+                    user.Type += inc;
+
+                context.Accounts.Update(user);
+                context.SaveChanges();
+
+                return Json(new { status = "success" });
+            }
+        }
        
        
     }
