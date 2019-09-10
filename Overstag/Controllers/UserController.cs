@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
@@ -574,6 +575,91 @@ namespace Overstag.Controllers
                 return Json(new { status = "error", debuginfo = e });
             }
             
+        }
+
+        /// <summary>
+        /// Create a new ticket
+        /// </summary>
+        /// <param name="ticket">The ticket object</param>
+        /// <returns>json, status: success or status:error</returns>
+        [HttpPost("Tickets/createTicket")]
+        public IActionResult CreateTicket(Ticket ticket)
+        {
+            try
+            {
+                Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
+                using (var context = new OverstagContext())
+                {
+                    ticket.Timestamp = DateTime.Now;
+                    ticket.UserID = currentuser().Id;
+                    ticket.Message = e.Encrypt(ticket.Message);
+                    context.Tickets.Add(ticket);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = e });
+            }
+        }
+
+        /// <summary>
+        /// Get tickets in View
+        /// </summary>
+        /// <param name="all">defines if top(4) or all (enter random number)</param>
+        /// <returns>View with tickets</returns>
+        [Route("Tickets/{all?}")]
+        public IActionResult Tickets(int? all)
+        {
+            var user = currentuser();
+            if (user == null)
+                return Content("<h1 style=\"color: red;\">Je moet ingelogd zijn</h1>", "text/html");
+            try
+            {
+                ViewBag.AllowTickets = (user.DenyTickets == 0);
+                if (all == null)
+                {
+                    ViewBag.All = false;
+                    return View(getTickets(user.Type));
+                }
+                else
+                {
+                    ViewBag.All = true;
+                    return View(getTickets(user.Type, true));
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = e });
+            }
+        }
+
+        /// <summary>
+        /// Create a list with tickets
+        /// </summary>
+        /// <param name="usertype">The type</param>
+        /// <param name="all">defines if you want top(4) or all records. Default false</param>
+        /// <returns>List(Ticket)</returns>
+        private List<Ticket> getTickets(int usertype, bool all = false)
+        {
+            List<Ticket> tickets = new List<Ticket>();
+            Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
+            using (var context = new OverstagContext())
+            {
+                var ticketss = new List<Ticket>();
+                if (!all)
+                    ticketss = context.Tickets.Where(f => f.Type == usertype).OrderBy(f => f.Timestamp).ToArray().Reverse().ToList().Take(4).ToList();
+                else
+                    ticketss = context.Tickets.Where(f => f.Type == usertype).OrderBy(f => f.Timestamp).ToArray().Reverse().ToList().ToList();
+
+                foreach (var ticket in ticketss)
+                {
+                    ticket.Message = e.Decrypt(ticket.Message);
+                    tickets.Add(ticket);
+                }
+            }
+            return tickets;
         }
 
     }

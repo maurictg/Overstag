@@ -12,7 +12,7 @@ namespace Overstag.Middleware
         private readonly RequestDelegate _next;
         //Allowed paths are defined per user type
         private readonly string[] typenull = { "/Home", "/Register", "/Admin/initdb", "/Pay", "/www" }
-        ,typezero = { "/User", "/Photo" }, typeone = { "/Parent" } ,typetwo = { "/Mentor" } ,typethree = { "/Admin" };
+        ,typezero = { "/User", "/Photo", "/Tickets" }, typeone = { "/Parent" } ,typetwo = { "/Mentor" } ,typethree = { "/Admin" };
 
         public Authentication(RequestDelegate next)
             => _next = next;

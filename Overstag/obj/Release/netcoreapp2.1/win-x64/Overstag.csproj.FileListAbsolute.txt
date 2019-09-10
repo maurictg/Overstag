@@ -109,3 +109,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\wi
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\Mentor\Index.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\Mentor\Today.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\_MentorLayout.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\User\Tickets.g.cshtml.cs

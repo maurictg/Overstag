@@ -9,7 +9,7 @@ namespace Overstag.Models
     {
         public int Id { get; set; }
         public int UserID { get; set; }
-        public int MinType { get; set; }
+        public int Type { get; set; }
         public string Title { get; set; }
         public string Message { get; set; }
         public DateTime Timestamp { get; set; }

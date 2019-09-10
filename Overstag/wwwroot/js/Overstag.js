@@ -21,16 +21,16 @@
         Theme: function () {
             return {
                 setDark: function () {
-                    $('.card-panel').addClass('white-text grey darken-3');
-                    $(':text, :password').addClass('white-text');
+                    $('.card-panel, .card, .card-content, .card-reveal, .card-image').addClass('white-text grey darken-3');
+                    $(':text, :password, textarea').addClass('white-text');
                     $('tr.grey').removeClass('lighten-4').addClass('darken-1');
                     $('img.blue, div.blue').removeClass('blue lighten-4').addClass('grey darken-3');
                     $('.modal, .modal-footer, .collapsible-header, .collection-item, body').addClass('white-text grey darken-4');
                     localStorage.setItem('darktheme', 'true');
                 },
                 setLight: function () {
-                    $('.card-panel').removeClass('white-text grey darken-3');
-                    $(':text, :password').removeClass('white-text');
+                    $('.card-panel, .card, .card-content, .card-reveal, .card-image').removeClass('white-text grey darken-3');
+                    $(':text, :password, textarea').removeClass('white-text');
                     $('.modal, .modal-footer, .collapsible-header, .collection-item, body').removeClass('white-text grey darken-4');
                     $('img.grey, div.grey').removeClass('grey darken-3').addClass('blue lighten-4');
                     $('tr.grey').removeClass('darken-1').addClass('lighten-4');
@@ -46,7 +46,7 @@
                     }
                 }
             };
-        }(),
+        }()
     };
 }();
 

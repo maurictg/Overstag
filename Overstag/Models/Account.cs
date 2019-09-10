@@ -29,6 +29,9 @@ namespace Overstag.Models
         public string MollieID { get; set; }
 
         public string TwoFactor { get; set; }
+        
+        //Policies
+        public int DenyTickets { get; set; }
 
         //Relations
         public Family Family { get; set; }

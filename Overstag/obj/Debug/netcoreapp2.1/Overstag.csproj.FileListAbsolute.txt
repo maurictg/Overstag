@@ -59,7 +59,6 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp2.1\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp2.1\Overstag.pdb
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp2.1\Overstag.Views.dll
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp2.1\Overstag.Views.pdb
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.csprojAssemblyReference.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.csproj.CoreCompileInputs.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.RazorAssemblyInfo.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.RazorAssemblyInfo.cs
@@ -80,6 +79,8 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razo
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Home\Contact.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Home\Events.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Home\Index.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Index.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Today.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Parent\Billing.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Parent\Index.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Pay\Done.g.cshtml.cs
@@ -96,6 +97,7 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razo
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\Vote.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_AdminLayout.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_Layout.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_MentorLayout.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_UserLayout.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_ViewStart.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.RazorTargetAssemblyInfo.cache
@@ -104,7 +106,5 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.dll
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.pdb
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.csproj.CopyComplete
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Index.g.cshtml.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_MentorLayout.g.cshtml.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Today.g.cshtml.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp2.1\www\html\loader.htm
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Overstag.csprojAssemblyReference.cache
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\User\Tickets.g.cshtml.cs
