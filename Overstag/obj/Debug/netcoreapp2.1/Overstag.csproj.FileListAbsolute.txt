@@ -107,3 +107,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Index.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\_MentorLayout.g.cshtml.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp2.1\Razor\Views\Mentor\Today.g.cshtml.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp2.1\www\html\loader.htm

@@ -48,7 +48,7 @@ namespace AspNetCore
             WriteLiteral("\r\n    ");
             EndContext();
             BeginContext(56, 3736, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("body", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "756d7e402b0f459390f6361163de841a", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("body", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "cbb29ff2249340a5800e06cd78e5d81a", async() => {
                 BeginContext(62, 3723, true);
                 WriteLiteral(@"
         <div class=""slider"">

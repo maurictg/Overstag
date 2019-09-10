@@ -5,35 +5,59 @@ using TwoFactorAuthentication;
 using Overstag.Models;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Overstag.Encryption
 {
+    //© 2019 MaurictG
     public static class Random
     {
         private static System.Random rnd = new System.Random();
-        public static string rString (int length)
+
+        public static string rString(int length)
         {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
-            return new string(Enumerable.Repeat(chars, length)
-              .Select(s => s[rnd.Next(s.Length)]).ToArray());
+            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < length; i++)
+                sb.Append(chars[rInt(0, chars.Length - 1)]);
+
+            return sb.ToString();
         }
-        public static int rInt(int min, int max){return rnd.Next(min, max);}
-        public static string rHash(string seed) { return PBKDF2.Hash(seed + rString(6)).Replace("/","").Replace("?",""); }
+
+        public static int rInt(int min, int max)
+        {
+            int result = BitConverter.ToInt32(rBytes(4), 0);
+            return new System.Random(result).Next(min, max);
+        }
+
+        public static byte[] rBytes(int length)
+        {
+            byte[] buffer = new byte[length];
+            new RNGCryptoServiceProvider().GetBytes(buffer);
+            return buffer;
+        }
+
+        public static string rHash(string seed) =>
+            PBKDF2.Hash(seed + rString(6)).Replace("/", "").Replace("?", "");
     }
+
     public static class SHA
     {
         public static string S256(string input)
         {
-            var crypt = new System.Security.Cryptography.SHA256Managed();
-            var hash = new System.Text.StringBuilder();
+            var crypt = new SHA256Managed();
+            var hash = new StringBuilder();
             byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(input));
-            foreach (byte theByte in crypto)
+            foreach (byte b in crypto)
             {
-                hash.Append(theByte.ToString("x2"));
+                hash.Append(b.ToString("x2"));
             }
             return hash.ToString();
         }
     }
+
+    // © 2019 ghenkje (github.com/ghenkje) & MIT LICENCE
     public static class PBKDF2
     {
         private const int defaultIterations = 10000;
@@ -174,7 +198,6 @@ namespace Overstag.Encryption
             return true;
         }
     }
-
 }
 
 namespace Overstag.Security
@@ -240,7 +263,7 @@ namespace Overstag.Security
             string secret = new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor;
             List<string> Codes = new List<string>();
             for (int i = 0; i < amount; i++)
-                Codes.Add(Encryption.PBKDF2.Hash(secret, 1234, 5));
+                Codes.Add(Overstag.Encryption.PBKDF2.Hash(secret, 1234, 5));
             return Codes.ToArray();
         }
 

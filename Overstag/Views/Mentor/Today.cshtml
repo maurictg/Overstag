@@ -51,7 +51,7 @@
             <p class="flow-text">&nbsp;Selecteer een gebruiker en druk op &quot;Opslaan&quot;</p>
             <div class="row">
                 <div class="input-field col s12 m6">
-                    <select id="userselect">
+                    <select id="userselect" onchange="$('#btndrink').removeClass('disabled')">
                         @foreach (var user in Model.Participators)
                         {
                             <option value="@user.Id">@user.Firstname @user.Lastname</option>

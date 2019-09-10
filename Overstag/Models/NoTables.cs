@@ -59,5 +59,7 @@ namespace Overstag.Models.NoDB
     {
         public Account User;
         public List<Event> UnpayedEvents;
+        public int ConsumptionCount;
+        public int ConsumptionCost;
     }
 }

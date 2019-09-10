@@ -28,6 +28,7 @@ CREATE TABLE invoices (
   [Timestamp] datetime2(0) NOT NULL,
   [EventIDs] varchar(max),
   [Payed] int NOT NULL,
+  [AdditionsCount] int NOT NULL,
   [PayID] varchar(max),
   PRIMARY KEY ([Id])
 ) ;
@@ -80,6 +81,8 @@ CREATE TABLE participate (
   [UserID] int NOT NULL,
   [EventID] int NOT NULL,
   [Payed] int NOT NULL,
+  [ConsumptionTax] int NOT NULL,
+  [ConsumptionCount] int NOT NULL,
   PRIMARY KEY ([EventID],[UserID])
  ,
   CONSTRAINT [FK_Participate_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES accounts ([Id]) ON DELETE CASCADE,

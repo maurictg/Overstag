@@ -53,16 +53,20 @@ namespace Overstag.Controllers
 
                 foreach(var user in Users)
                 {
+                    int ccnt = 0;
+                    int cc = 0;
+
                     List<Event> Events = new List<Event>();
                     foreach (var s in user.Subscriptions.Where(s => s.Payed == 0))
                     {
+                        ccnt += s.ConsumptionCount;
+                        cc += s.ConsumptionTax;
                         var e = context.Events.First(f => f.Id == s.EventID);
                         if(Core.General.DateIsPassed(e.When))
                             Events.Add(e);
                     }
                         
-
-                    Billing.Add(new FUnpayed { UnpayedEvents = Events.OrderBy(b => b.When).ToList(), User = user });
+                    Billing.Add(new FUnpayed { UnpayedEvents = Events.OrderBy(b => b.When).ToList(), User = user, ConsumptionCount = ccnt, ConsumptionCost = cc });
                 }
             }
 
@@ -138,7 +142,7 @@ namespace Overstag.Controllers
 
                     List<int> EventIDS = new List<int>();
                     int bill = 0;
-
+                    int ccnt = 0;
 
                     //Get events that are unfactured per user
                     foreach (var member in Members)
@@ -149,7 +153,9 @@ namespace Overstag.Controllers
                             if (Core.General.DateIsPassed(eve.When))
                             {
                                 sub.Payed = 1;
+                                bill += sub.ConsumptionTax;
                                 bill += eve.Cost;
+                                ccnt += sub.ConsumptionCount;
                                 EventIDS.Add(eve.Id);
                             }
                         }
@@ -165,7 +171,8 @@ namespace Overstag.Controllers
                         EventIDs = string.Join(',', EventIDS),
                         Payed = 0,
                         Timestamp = DateTime.Now,
-                        PayID = Encryption.Random.rHash(currentuser().Token)
+                        PayID = Encryption.Random.rHash(currentuser().Token),
+                        AdditionsCount = ccnt
                     };
 
                     context.Invoices.Add(facture);

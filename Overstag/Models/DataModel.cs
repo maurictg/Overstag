@@ -19,8 +19,8 @@ namespace Overstag.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Connection string
-            optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
 #if DEBUG
+            optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
             //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
 #else
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlConnectionString);

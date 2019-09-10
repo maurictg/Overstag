@@ -107,9 +107,11 @@ namespace Overstag.Controllers
                         Amount = new Amount(Currency.EUR, cost),
                         Description = $"Overstag factuur #{invoice.Id}",
                         RedirectUrl = url,
-                        //WebhookUrl = webhook,
                         Locale = "nl_NL",
                         CustomerId = user.MollieID
+#if !DEBUG
+                        ,WebhookUrl = webhook
+#endif
                     };
 
                     pr.SetMetadata(Uri.EscapeDataString(invoice.PayID));
@@ -166,7 +168,7 @@ namespace Overstag.Controllers
         /// <param name="id">The mollieID</param>
         /// <returns>HTTP status 200 (OK)</returns>
         [HttpPost("Pay/Webhook")]
-        public async Task<IActionResult> Webhook([FromHeader]string id)
+        public async Task<IActionResult> Webhook([FromForm]string id)
         {
             await UpdatePayment(id);
             return Ok();
