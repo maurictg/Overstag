@@ -30,7 +30,7 @@ namespace Overstag.Controllers
                 var invoice = context.Invoices.FirstOrDefault(f => f.PayID == invoiceid);
 
                 if (invoice == null)
-                    return Content("<h1 style=\"color: red;\">ERROR: InvoiceID in URL is wrong!!!. Invoice does not exist</h1>","text/html");
+                    return Content("<h1 style=\"color: red;\">ERROR: InvoiceID in URL is onjuist!!!. Factuur bestaat niet</h1>","text/html");
                 else
                 {
                     List<Event> events = new List<Event>();
@@ -116,24 +116,25 @@ namespace Overstag.Controllers
 
                     pr.SetMetadata(Uri.EscapeDataString(invoice.PayID));
 
-                    PaymentResponse ps = await pc.CreatePaymentAsync(pr);
+                    //PaymentResponse ps = await pc.CreatePaymentAsync(pr); <--temp
                    
 
                     context.Payments.Add(new Payment(){
                         InvoiceID = invoice.PayID,
-                        PaymentID = ps.Id,
+                        //PaymentID = ps.Id, <--temp
                         UserID = invoice.UserID,
                         PlacedAt = DateTime.Now,
-                        Status = ps.Status
+                        //Status = ps.Status <--temp
                     });
 
                     context.SaveChanges();
 
-                    string paylink = ps.Links.Checkout.Href;
+                    //string paylink = ps.Links.Checkout.Href; <--temp
 
                     //Set session for check
-                    HttpContext.Session.SetString("PayUrl", paylink);
-                    return Json(new { status = "success", href = Uri.EscapeDataString(paylink) });
+                    //HttpContext.Session.SetString("PayUrl", paylink); <--temp
+                    HttpContext.Session.SetString("PayUrl", "/Home");
+                    return Json(new { status = "success"/*, href = Uri.EscapeDataString(paylink)*/ }); //<--temp
                 }
             }
             catch(Exception e)
@@ -216,12 +217,12 @@ namespace Overstag.Controllers
                             context.SaveChanges();
                         }
                         else
-                            return Json(new { status = "warning", warning = "invoice not found in DB", ps });
+                            return Json(new { status = "warning", warning = "Factuur niet gevonden in de database", ps });
 
                         return Json(new { status = "success", data = payment });
                     }
                     else
-                        return Json(new { status = "warning", warning = "payment not found in DB", ps });
+                        return Json(new { status = "warning", warning = "Betaling niet gevonden in de database", ps });
                 }
             }
             catch (Exception e)

@@ -266,7 +266,6 @@ namespace Overstag.Controllers
         [HttpPost]
         public JsonResult postPassreset(Account a)
         {
-            a.Token = Uri.UnescapeDataString(a.Token);
             if (!ModelState.IsValid)
             {
                 return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
@@ -277,16 +276,18 @@ namespace Overstag.Controllers
                 {
                     try
                     {
+                        a.Token = Uri.UnescapeDataString(a.Token);
                         var account = context.Accounts.Where(e => e.Token == a.Token).FirstOrDefault();
                         try
                         {
-                            account.Password = Encryption.PBKDF2.Hash(a.Password);
+                            account.Password = Encryption.PBKDF2.Hash(a.Password); //<--NULLexception
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             context.Update(account);
                             context.SaveChangesAsync();
 
-                            if(HttpContext.Session.GetString("Token")==a.Token)
-                                HttpContext.Session.SetString("Token", account.Token);
+                            //if(HttpContext.Session.GetString("Token")==a.Token) <--This might cause the 500
+                            //    HttpContext.Session.SetString("Token", account.Token);
+
                             return Json(new { status = "success" });
                         }
                         catch (Exception e)

@@ -613,6 +613,7 @@ namespace Overstag.Controllers
         public IActionResult Tickets(int? all)
         {
             var user = currentuser();
+            ViewBag.Type = user.Type;
             if (user == null)
                 return Content("<h1 style=\"color: red;\">Je moet ingelogd zijn</h1>", "text/html");
             try

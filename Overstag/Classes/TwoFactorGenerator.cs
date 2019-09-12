@@ -42,10 +42,12 @@ namespace TwoFactorAuthentication
         public string GenerateCode()
         {
             //Get timestamp.
+            DateTime Now = Overstag.Core.General.GetNetworkTime().ToUniversalTime();
             DateTime EPOCH = new DateTime(1970, 1, 1, 0, 0, 0);
-            long timestamp = Convert.ToInt64(
-                Math.Round((DateTime.UtcNow - EPOCH).TotalSeconds)) / 30;
 
+            long timestamp = Convert.ToInt64(
+                Math.Round((Now - EPOCH).TotalSeconds)) / 30;
+                //DateTime.UtcNow
             //Generate hash.
             byte[] HMAC = new HMACSHA1(Secret)
                 .ComputeHash(

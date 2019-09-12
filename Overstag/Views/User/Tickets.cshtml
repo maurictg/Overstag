@@ -68,25 +68,25 @@
                 <p>Wie moet uw ticket te zien krijgen?</p>
                 <p>
                     <label>
-                        <input class="with-gap" name="rights" type="radio" checked value="0" />
+                        <input class="with-gap" name="rights" type="radio" @Html.Raw(((int)ViewBag.Type==0)?"checked":"") value="0" />
                         <span>Jongeren</span>
                     </label>
                 </p>
                 <p>
                     <label>
-                        <input class="with-gap" name="rights" type="radio" value="1" />
+                        <input class="with-gap" name="rights" type="radio" @Html.Raw(((int)ViewBag.Type==1)?"checked":"") value="1" />
                         <span>Ouders</span>
                     </label>
                 </p>
                 <p>
                     <label>
-                        <input class="with-gap" name="rights" type="radio" value="2" />
+                        <input class="with-gap" name="rights" type="radio" @Html.Raw(((int)ViewBag.Type==2)?"checked":"") value="2" />
                         <span>Bestuursleden</span>
                     </label>
                 </p>
                 <p>
                     <label>
-                        <input class="with-gap" name="rights" type="radio" value="3" />
+                        <input class="with-gap" name="rights" type="radio" @Html.Raw(((int)ViewBag.Type==3)?"checked":"") value="3" />
                         <span>Administrators</span>
                     </label>
                 </p>
