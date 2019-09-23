@@ -5,6 +5,9 @@
     ViewBag.Description = "Stichting Overstag's activiteiten. Bekijk onze agenda en schrijf je in voor een van onze activiteiten!";
     ViewBag.Keywords = "Overstag, stichting overstag, Rilland, Reimerswaal, jongerenavonden rilland, jongerenavonden reimerswaal, overstag inschrijven, overstag meedoen";
 }
+
+<h5 class="blue-middle-text">&nbsp;Komende evenementen, onder het voorbehoud van <a href="https://herzienestatenvertaling.nl/teksten/jakobus/4#15" target="_blank">Jakobus 4:15</a></h5>
+
 <table class="responsive-table">
     <thead>
         <tr>
@@ -27,7 +30,7 @@
                     <td>@Html.Raw((iss) ? "(<b class=\"red-text\">te laat</b>) " : "")@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                    <td><a class="btn @Html.Raw((iss)?"red":"green") waves-effect" onclick="Events.subscribe(@e.Id);">@Html.Raw((iss) ? "Alsnog " : "")Inschrijven</a></td>
+                    <td><a class="btn green waves-effect" onclick="Events.sub();">Inschrijven</a></td>
                 </tr>
             }
         }
@@ -44,24 +47,15 @@
         init: function () {
             $('#_events, #_mevents').addClass('active');
         },
-        subscribe: async function (id) {
+        sub: function () {
             if (!Overstag.loggedin) {
-                localStorage.setItem("redirect", "/Home/Events");
-                $(location).attr('href', '/Register');
+                localStorage.setItem("redirect", "/User/Events");
+                $(location).attr('href', '/Register/Login');
             } else {
-                //Inschrijven
-                $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
-                    if (response.status == 'success') {
-                        M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
-                        User.loadcontent();
-                    }
-                    else {
-                        //status = error
-                        M.toast({ html: response.error, classes: 'red' });
-                    }
-                }, 'json');
+                $(location).attr('href', '/User/Events');
             }
         }
+        
     }
 
     Events.init();

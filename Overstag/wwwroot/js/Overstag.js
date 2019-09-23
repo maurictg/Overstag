@@ -6,8 +6,10 @@
         Loader: function () {
             return {
                 init: function () {
-                    $.get('/www/html/loader.htm', function (r) {
-                        $('body').html($('body').html() + r);
+                    $.get('/html/loader.html', function (r) {
+                        $('#_data').html(r);
+                    }).done(function () {
+                        $('.modal').modal();
                     });
                 },
                 show: function () {

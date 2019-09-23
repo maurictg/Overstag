@@ -182,7 +182,7 @@
         },
         getPay: function (payid) {
             $('#payid').data('pid', payid);
-            $('#payid').val('localhost:5000/Pay/Direct/' + payid);
+            $('#payid').val(window.location.origin+'/Pay/Direct/' + payid);
             M.Modal.getInstance($('#pay')).open();
         },
         gotoPay: function () {

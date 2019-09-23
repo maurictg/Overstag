@@ -30,6 +30,15 @@ namespace Overstag.Core
     {
         public static Credentials Credentials = new Credentials().Get();
 
+        public static void CreateBackup()
+        {
+            int errorcount = 0;
+            List<Exception> exceptions = new List<Exception>();
+
+            Overstag.Security.Backup b = new Security.Backup("");
+            b.Create(ref errorcount, ref exceptions);
+        }
+
         public static bool DateIsPassed(DateTime check)
             => check < DateTime.Now;
         public static int getAge(DateTime bd)

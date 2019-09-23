@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
+using System.Globalization;
 using Newtonsoft.Json;
 
 using Mollie.Api;
@@ -277,25 +278,19 @@ namespace Overstag.Controllers
                     try
                     {
                         a.Token = Uri.UnescapeDataString(a.Token);
-                        var account = context.Accounts.Where(e => e.Token == a.Token).FirstOrDefault();
-                        try
-                        {
-                            account.Password = Encryption.PBKDF2.Hash(a.Password); //<--NULLexception
-                            account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                            context.Update(account);
-                            context.SaveChangesAsync();
+                        var account = context.Accounts.FirstOrDefault(e => e.Token == a.Token);
 
-                            //if(HttpContext.Session.GetString("Token")==a.Token) <--This might cause the 500
-                            //    HttpContext.Session.SetString("Token", account.Token);
+                        if (account == null)
+                            return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
 
-                            return Json(new { status = "success" });
-                        }
-                        catch (Exception e)
-                        {
-                            return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
-                        }
+                        account.Password = Encryption.PBKDF2.Hash(a.Password); //<--NULLexception
+                        account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
+                        context.Accounts.Update(account);
+                        context.SaveChangesAsync();
+
+                        return Json(new { status = "success" });
                     }
-                    catch { return Json(new { status = "error", error = "Token bestaat niet in ons systeem" }); }
+                    catch (Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
                 }
             }
         }
@@ -308,10 +303,15 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or error)</returns>
         [HttpPost]
         [Route("Register/Validate2FA")]
-        public JsonResult Validate2FA([FromForm]string token, [FromForm]string code)
+        public JsonResult Validate2FA([FromForm]string token, [FromForm]string code, [FromForm]string datetime)
         {
+            DateTime now = DateTime.ParseExact(datetime, "dd-MM-yyyy HH:mm:ss",CultureInfo.InvariantCulture);
+
+            if(now < DateTime.Now.AddMinutes(-2))
+                return Json(new { status = "timeout" });
+
             token = Uri.UnescapeDataString(token);
-            if (Security.TFA.Validate(code, token))
+            if (Security.TFA.Validate(code, token,now))
             {
                 using(var context = new OverstagContext())
                 {

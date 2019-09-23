@@ -1,5 +1,4 @@
 ﻿using System;
-using Overstag.Models;
 
 namespace Overstag.API
 {

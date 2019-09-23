@@ -11,6 +11,7 @@ using Mollie.Api.Client.Abstract;
 using Mollie.Api.Client;
 using Mollie.Api.Models.List;
 using Mollie.Api.Models.Payment.Response;
+using System.Security.Cryptography;
 
 namespace Overstag.Controllers
 {
@@ -334,16 +335,6 @@ namespace Overstag.Controllers
             return View(aus);
         }
 
-        /*//NOT IN USE 
-        public IActionResult GenerateInvoices()
-        {
-            //En toen stond <3 Peet <3 opeens voor de deur :D
-            return null;
-            //Maak facturen als gebruiker dat nog niet zelf heeft gedaan.
-            //Als er een factuur bestaat, moet bool payed = true zijn bij avond, en false bij factuur
-            //Knopje bij openstaande facturen "genereren" zowel bij admin als bij user
-        }*/
-
         /// <summary>
         /// Logs in as the user with that token
         /// </summary>
@@ -364,6 +355,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a user type
+        /// </summary>
+        /// <param name="grade">The in or decrementer</param>
+        /// <param name="id">The user's id</param>
+        /// <returns>JSON(status=success)</returns>
         [HttpGet("Admin/upgrade/{grade}/{id}")]
         public IActionResult Upgrade(int grade, int id)
         {
@@ -380,7 +377,69 @@ namespace Overstag.Controllers
                 return Json(new { status = "success" });
             }
         }
-       
-       
+
+        /// <summary>
+        /// Get all tickets
+        /// </summary>
+        /// <returns>View with tickets</returns>
+        public IActionResult Tickets()
+        {
+            using (var context = new OverstagContext())
+            {
+                Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
+                List<Ticket> tickets = new List<Ticket>();
+                foreach(var ticket in context.Tickets.ToList())
+                {
+                    ticket.Message = e.Decrypt(ticket.Message);
+                    tickets.Add(ticket);
+                }
+                return View(tickets.OrderBy(f => f.Timestamp).ToList());
+            }
+        }
+
+        /// <summary>
+        /// Remove a ticket from the database
+        /// </summary>
+        /// <param name="id">The ticket's id</param>
+        /// <returns>JSON (status=success or status=error)</returns>
+        [HttpPost("Admin/deleteTicket/{id}")]
+        public IActionResult DeleteTicket(int id)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var ticket = context.Tickets.First(f => f.Id == id);
+                    context.Tickets.Remove(ticket);
+                    context.SaveChanges();
+                }
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new {status = "error", error = e.Message });
+            }
+        }
+
+        [Route("Admin/blockTicketSender/{id}/{allow}")]
+        public IActionResult blockTicketSender(int id, int allow)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var user = context.Accounts.First(f => f.Id == id);
+                    user.DenyTickets = (allow > 0) ? 1 : 0;
+                    context.SaveChanges();
+                }
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = e.Message });
+            }
+        }
+
+
     }
 }

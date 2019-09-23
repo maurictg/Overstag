@@ -39,10 +39,12 @@ namespace TwoFactorAuthentication
         /// </summary>
         /// <returns>2FA code</returns>
         /// See: https://tools.ietf.org/html/rfc6238
-        public string GenerateCode()
+        public string GenerateCode(DateTime Now)
         {
+            if (Now == null)
+                Now = DateTime.UtcNow;
             //Get timestamp.
-            DateTime Now = Overstag.Core.General.GetNetworkTime().ToUniversalTime();
+            //DateTime Now = Overstag.Core.General.GetNetworkTime().ToUniversalTime();
             DateTime EPOCH = new DateTime(1970, 1, 1, 0, 0, 0);
 
             long timestamp = Convert.ToInt64(
@@ -70,8 +72,8 @@ namespace TwoFactorAuthentication
         /// Validate a passed code.
         /// </summary>
         /// <param name="twoFactorCode">6 digit 2FA code</param>
-        public bool ValidateCode(string twoFactorCode)=>
-            GenerateCode().Equals(twoFactorCode);
+        public bool ValidateCode(string twoFactorCode, DateTime now)=>
+            GenerateCode(now).Equals(twoFactorCode);
 
         /// <summary>
         /// Generate a new secret

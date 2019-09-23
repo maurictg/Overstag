@@ -251,23 +251,128 @@ namespace Overstag.Security
             }
         }
 
-        public static bool Validate(string code,string token)
+        public static bool Validate(string code,string token, DateTime now)
         {
             TwoFactor generator = new TwoFactor(GetSecret(token));
-            generator.GenerateCode();
-            return generator.ValidateCode(code);
+            //generator.GenerateCode(now);
+            return generator.ValidateCode(code,now.ToUniversalTime());
         }
 
         public static string[] GetBackupCodes(string token, int amount = 10)
         {
             string secret = new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor;
             List<string> Codes = new List<string>();
+
             for (int i = 0; i < amount; i++)
-                Codes.Add(Overstag.Encryption.PBKDF2.Hash(secret, 1234, 5));
+                Codes.Add(Overstag.Encryption.PBKDF2.Hash(secret, 1234));
+
             return Codes.ToArray();
         }
 
         public static bool RestoreBackupCode(string code, string token)
             =>  (Encryption.PBKDF2.Verify(code, new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor, 1234));
+
     }
+
+    public class Backup
+    {
+        private string Folder = Path.Combine(Environment.CurrentDirectory, "Backup");
+
+        int _errors = 0;
+        List<Exception> _exceptions = new List<Exception>();
+
+        private List<Account> Accounts { get; set; }
+        private List<Event> Events { get; set; }
+        private List<Invoice> Invoices { get; set; }
+        private List<Logging> Logging { get; set; }
+        private List<Family> Families { get; set; }
+        private List<Idea> Ideas { get; set; }
+        private List<Payment> Payments { get; set; }
+        private List<Ticket> Tickets { get; set; }
+
+
+        public Backup(string folder)
+        {
+            if(folder != string.Empty)
+                Folder = folder;
+
+            if (!Directory.Exists(Folder))
+                Directory.CreateDirectory(Folder);
+        }
+
+        public void Create(ref int errorcount, ref List<Exception> exceptions)
+        {
+            using(var context = new OverstagContext())
+            {
+                Accounts = context.Accounts.ToList();
+                Write(Accounts,"Accounts");
+                Accounts.Clear();
+                Accounts = null;
+                GC.Collect();
+
+                Events = context.Events.ToList();
+                Write(Events, "Events");
+                Events.Clear();
+                Events = null;
+                GC.Collect();
+
+                Invoices = context.Invoices.ToList();
+                Write(Invoices, "Invoices");
+                Invoices.Clear();
+                Invoices = null;
+                GC.Collect();
+
+                Logging = context.Logging.ToList();
+                Write(Logging, "Logging");
+                Logging.Clear();
+                Logging = null;
+                GC.Collect();
+
+                Families = context.Families.ToList();
+                Write(Families, "Families");
+                Families.Clear();
+                Families = null;
+                GC.Collect();
+
+                Ideas = context.Ideas.ToList();
+                Write(Ideas, "Ideas");
+                Ideas.Clear();
+                Ideas = null;
+                GC.Collect();
+
+                Payments = context.Payments.ToList();
+                Write(Payments, "Payments");
+                Payments.Clear();
+                Payments = null;
+                GC.Collect();
+
+                Tickets = context.Tickets.ToList();
+                Write(Tickets, "Tickets");
+                Tickets.Clear();
+                Tickets = null;
+                GC.Collect();
+            }
+
+            errorcount = _errors;
+            exceptions = _exceptions;
+        }
+
+        public void Write(Object obj, string objname)
+        {
+            try
+            {
+                string json = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+                string path = Path.Combine(Folder, objname + ".json");
+                File.WriteAllText(path, json);
+                Console.WriteLine("Saved " + objname);
+            }
+            catch(Exception e)
+            {
+                _errors+=1;
+                _exceptions.Add(e);
+            }
+        }
+    }
+
+
 }

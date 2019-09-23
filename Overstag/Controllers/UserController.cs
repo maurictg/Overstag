@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
+using Overstag.Models.NoDB;
 using Mollie.Api.Client;
 
 namespace Overstag.Controllers
@@ -35,7 +36,7 @@ namespace Overstag.Controllers
             => View(new OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == HttpContext.Session.GetString("Token")));
 
         /// <summary>
-        /// Get events page (partials are loaded into this view)
+        /// Get events page with all subscriptions
         /// </summary>
         /// <returns>View</returns>
         public IActionResult Events()
@@ -120,15 +121,17 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 var user = context.Accounts.Include(a => a.Subscriptions).First(p => p.Id == currentuser().Id);
-                var parti = user.Subscriptions;
+                var parti = user.Subscriptions.ToList();
 
-                List<Event> events = new List<Event>();
+                List<ISubscription> events = new List<ISubscription>();
 
-                foreach(var part in parti)
-                    if(part != null)
-                        events.Add(context.Events.First(e => e.Id == part.EventID));
+                foreach (var eve in context.Events.Where(e => e.When.Date >= DateTime.Today).OrderBy(e => e.When).ToList())
+                    events.Add(new ISubscription() {
+                        Event = eve,
+                        Subscribed = !parti.Any(f => f.EventID == eve.Id)
+                    });
 
-                return View(new Overstag.Models.NoDB.Subscriptions() { Events = events.Where(e => e.When>DateTime.Now).OrderBy(e => e.When).ToList() });
+                return View(events);
             }
         }
 
@@ -313,7 +316,7 @@ namespace Overstag.Controllers
                     {
                         cuser.Password = Encryption.PBKDF2.Hash(p.Newpass);
                         cuser.Token = Encryption.Random.rHash(Encryption.SHA.S256(cuser.Firstname) + cuser.Username);
-                        context.Update(cuser);
+                        context.Accounts.Update(cuser);
                         await context.SaveChangesAsync();
                         HttpContext.Session.SetString("Token", cuser.Token);
                         return Json(new { status = "success" });
@@ -341,7 +344,7 @@ namespace Overstag.Controllers
         {
             using (var context = new OverstagContext())
             {
-                var cuser = context.Accounts.Where(x => x.Token == currentuser().Token).FirstOrDefault();
+                var cuser = context.Accounts.FirstOrDefault(x => x.Token == currentuser().Token);
                 cuser.Firstname = a.Firstname;
                 cuser.Lastname = a.Lastname;
                 cuser.Adress = a.Adress;
@@ -351,7 +354,7 @@ namespace Overstag.Controllers
                 bool emailinuse = false;
                 try
                 {
-                    var testem = context.Accounts.Where(b => b.Email == a.Email).FirstOrDefault();
+                    var testem = context.Accounts.FirstOrDefault(b => b.Email == a.Email);
                     if(testem.Token != cuser.Token && testem.Email == a.Email) //Dan is er dus een emailadres opgegeven dat van iemand anders is
                     {
                         emailinuse = true;

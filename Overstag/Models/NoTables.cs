@@ -6,9 +6,11 @@ using Overstag.Models;
 
 namespace Overstag.Models.NoDB
 {
-    public struct Subscriptions
+
+    public struct ISubscription
     {
-        public List<Event> Events { get; set; }
+        public Event Event;
+        public bool Subscribed;
     }
 
     public struct UserEvent

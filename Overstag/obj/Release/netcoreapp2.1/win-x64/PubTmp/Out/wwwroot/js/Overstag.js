@@ -6,7 +6,7 @@
         Loader: function () {
             return {
                 init: function () {
-                    $.get('/www/html/loader.htm', function (r) {
+                    $.get('/html/loader.htm', function (r) {
                         $('body').html($('body').html() + r);
                     });
                 },

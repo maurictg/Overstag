@@ -64,7 +64,7 @@
                                 <input type="number" style="font-size: xx-large" maxlength="6" data-length="6" id="2facode" placeholder="000000" />
                             </div>
                         </div>
-                        <a href="#!" class="modal-close waves-effect orange btn modal-trigger" data-target="tfarestore" onclick="Login.cancel2fa();">Code vergeten</a>
+                        <!--a href="#!" class="modal-close waves-effect orange btn modal-trigger" data-target="tfarestore" onclick="Login.cancel2fa();">Code vergeten</a-->
                         <a href="#!" class="modal-close waves-effect red btn" onclick="Login.cancel2fa();">Annuleren</a>
                     </div>
                 </div>
@@ -94,6 +94,7 @@
                 </div>
             </div>
         </div>
+        <div id="_data"></div>
     </body>
 <script>
 
@@ -230,17 +231,22 @@
                 $('#2facode').val('');
             }
             else {
-                $.post('/Register/Validate2FA' , { token: token, code: $('#2facode').val() }, function (response) {
+                var now = new Date();
+                var timestring = `${now.getDate().toString().padStart(2, '0')}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                $.post('/Register/Validate2FA', { token: token, code: $('#2facode').val(), datetime: timestring }, function (response) {
                     if (response.status == 'success') {
                         Login.redirect();
                         M.Modal.getInstance($('#tfa')).close();
                         $('#2facode').val('');
-                    } else {
+                    }
+                    else if (response.status == 'timeout') {
+                        M.toast({ html: 'Uw klok staat niet goed.', classes: 'orange' });
+                    } else{
                         M.toast({ html: 'Validatie mislukt.', classes: 'red' });
                         $('#2facode').val('');
                         wrong2fa++;
                         if (wrong2fa > 5) {
-                            M.toast({ html: 'Te veel pogingen. Probeer het later opnieuw', classes: 'orange ' });
+                            M.toast({ html: 'Te veel pogingen. Probeer het later opnieuw', classes: 'orange' });
                             Login.cancel2fa();
                         }
                     }
