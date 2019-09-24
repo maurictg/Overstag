@@ -126,10 +126,15 @@ namespace Overstag.Controllers
                 List<ISubscription> events = new List<ISubscription>();
 
                 foreach (var eve in context.Events.Where(e => e.When.Date >= DateTime.Today).OrderBy(e => e.When).ToList())
-                    events.Add(new ISubscription() {
+                {
+                    bool hasparti = parti.Any(f => f.EventID == eve.Id);
+                    events.Add(new ISubscription()
+                    {
                         Event = eve,
-                        Subscribed = !parti.Any(f => f.EventID == eve.Id)
+                        Subscribed = hasparti,
+                        Friends = (hasparti ? parti.First(f => f.EventID == eve.Id).FriendCount : 0)
                     });
+                }
 
                 return View(events);
             }
@@ -300,6 +305,33 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
+        /// Increase or decrease FriendCount in subscription model
+        /// </summary>
+        /// <param name="id">The event's id</param>
+        /// <param name="incr">The incrementer</param>
+        /// <returns>JSON result, status=error or status=success</returns>
+        [HttpPost]
+        public IActionResult SubscribeFriends([FromForm]int id, [FromForm]int amount)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var user = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
+                    var part = user.Subscriptions.First(f => f.EventID == id);
+                    part.FriendCount = (amount>0) ? amount : 0;
+                    context.Accounts.Update(user);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = e.Message });
+                }
+            }
+        }
+
+        /// <summary>
         /// Changes the password of the user
         /// </summary>
         /// <param name="p">Old pass and new pass</param>
@@ -354,35 +386,32 @@ namespace Overstag.Controllers
                 bool emailinuse = false;
                 try
                 {
-                    var testem = context.Accounts.FirstOrDefault(b => b.Email == a.Email);
-                    if(testem.Token != cuser.Token && testem.Email == a.Email) //Dan is er dus een emailadres opgegeven dat van iemand anders is
-                    {
+                    //var testem = context.Accounts.FirstOrDefault(b => b.Email == a.Email);
+                    //if(testem.Token != cuser.Token && testem.Email == a.Email) //Dan is er dus een emailadres opgegeven dat van iemand anders is
+                    //{
+                    //    emailinuse = true;
+                    //}
+
+                    if (context.Accounts.Any(f => f.Token != cuser.Token && f.Email == a.Email))
                         emailinuse = true;
-                    }
                 }
                 catch { emailinuse = false; }
 
                 if (emailinuse)
-                {
                     return Json(new { status = "error", error = "Emailadres is al in gebruik!" });
-                }
-                else
-                {
-                    cuser.Email = a.Email;
-                    try
-                    {
-                        context.Update(cuser);
-                        await context.SaveChangesAsync();
-                        return Json(new { status = "success" });
-                    }
-                    catch (Exception e)
-                    {
-                        return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.ToString() });
-                    }
-                }
-                
-            }
 
+                cuser.Email = a.Email;
+                try
+                {
+                    context.Accounts.Update(cuser);
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
+                }
+                catch (Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.ToString() });
+                }
+            }
         }
 
         /// <summary>
@@ -458,7 +487,7 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 var user = context.Accounts.Include(p => p.Subscriptions).First(f => f.Id == currentuser().Id);
-                var parti = user.Subscriptions;
+                var parti = user.Subscriptions.Where(f => f.Payed == 0).ToList();
 
                 if (parti.Count() < 1)
                     return Json(new { status = "error", error = "Geen openstaande events gevonden" });
@@ -476,12 +505,13 @@ namespace Overstag.Controllers
                         if (Core.General.DateIsPassed(eve.When))
                         {
                             part.Payed = 1;
-                            bill += eve.Cost;
+                            bill += (eve.Cost * (part.FriendCount+1));
 
-                            additions = part.ConsumptionCount;
-                            bill += part.ConsumptionTax;
+                            additions += part.ConsumptionCount;
+                            bill += (part.ConsumptionTax * part.ConsumptionCount);
 
-                            eventIDS.Add(eve.Id);
+                            for (int i = 0; i < part.FriendCount+1; i++)
+                                eventIDS.Add(eve.Id);
                         }
                     }
 

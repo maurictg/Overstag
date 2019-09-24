@@ -23,7 +23,6 @@ namespace Overstag.Controllers
         /// Get parent index page with family info or create new family if not exist
         /// </summary>
         /// <returns>View with info</returns>
-        [Route("Parent/Family")]
         public IActionResult Index()
         {
             using(var context = new OverstagContext())
@@ -44,6 +43,8 @@ namespace Overstag.Controllers
         public IActionResult Billing()
         {
             List<FUnpayed> Billing = new List<FUnpayed>();
+            int fc = 0;
+
             using(var context = new OverstagContext())
             {
                 List<Account> Users = new List<Account>();
@@ -60,13 +61,16 @@ namespace Overstag.Controllers
                     foreach (var s in user.Subscriptions.Where(s => s.Payed == 0))
                     {
                         ccnt += s.ConsumptionCount;
-                        cc += s.ConsumptionTax;
+                        cc += (s.ConsumptionTax * s.ConsumptionCount);
                         var e = context.Events.First(f => f.Id == s.EventID);
+
+                        fc += s.FriendCount;
+
                         if(Core.General.DateIsPassed(e.When))
                             Events.Add(e);
                     }
                         
-                    Billing.Add(new FUnpayed { UnpayedEvents = Events.OrderBy(b => b.When).ToList(), User = user, ConsumptionCount = ccnt, ConsumptionCost = cc });
+                    Billing.Add(new FUnpayed { UnpayedEvents = Events.OrderBy(b => b.When).ToList(), User = user, ConsumptionCount = ccnt, ConsumptionCost = cc, FriendCount = fc });
                 }
             }
 
@@ -129,6 +133,7 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or status = error with details)</returns>
         public IActionResult GenerateInvoice()
         {
+            /*
             try
             {
                 using (var context = new OverstagContext())
@@ -153,10 +158,12 @@ namespace Overstag.Controllers
                             if (Core.General.DateIsPassed(eve.When))
                             {
                                 sub.Payed = 1;
-                                bill += sub.ConsumptionTax;
-                                bill += eve.Cost;
+                                bill += (sub.ConsumptionTax * sub.ConsumptionCount);
+                                bill += (eve.Cost * (sub.FriendCount + 1));
                                 ccnt += sub.ConsumptionCount;
-                                EventIDS.Add(eve.Id);
+
+                                for (int i = 0; i < sub.FriendCount + 1; i++)
+                                    EventIDS.Add(eve.Id);
                             }
                         }
 
@@ -183,8 +190,39 @@ namespace Overstag.Controllers
             catch(Exception e)
             {
                 return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message });
+            }*/
+            using (var context = new OverstagContext())
+            {
+                var me = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
+                var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id);
+                List<Account> members = new List<Account>();
+
+                foreach (var user in family.Members)
+                    members.Add(context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == user.Id));
+
+                foreach (var m in members)
+                    foreach (var f in m.Subscriptions.Where(g => g.Payed == 0))
+                    {
+                        me.Subscriptions.Add(new Participate { UserID = me.Id, EventID = f.EventID, FriendCount = f.FriendCount, ConsumptionTax = f.ConsumptionTax, ConsumptionCount = f.ConsumptionCount });
+                        f.Payed = 1;
+                    }
+
+                try
+                {
+                    context.Accounts.Update(me);
+                    context.Accounts.UpdateRange(members);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch (Exception e)
+                {
+                    return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message });
+                }
+
+
             }
         }
+
 
     }
 }

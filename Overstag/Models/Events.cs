@@ -49,5 +49,7 @@ namespace Overstag.Models
 
         public int ConsumptionTax { get; set; }
         public int ConsumptionCount { get; set; }
+
+        public int FriendCount { get; set; }
     }
 }

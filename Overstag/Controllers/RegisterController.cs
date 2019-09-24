@@ -364,7 +364,7 @@ namespace Overstag.Controllers
                     var family = context.Families.Include(g => g.Members).FirstOrDefault(f => f.Token == Uri.UnescapeDataString(token));
 
                     if (family == null)
-                        content = "<h1 style=\"color: red;\">Token is onjuist of famillie bestaat niet</h1><br><p>Controleer de link die je hebt gekregen.</p>";
+                        content = "<h1 style=\"color: red;\">Token is onjuist of famillie bestaat niet</h1><br><p>Controleer de link die je hebt gekregen. Probeer deze nog een keer te openen, soms helpt dat.</p>";
                     else
                     {
                         var user = context.Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));

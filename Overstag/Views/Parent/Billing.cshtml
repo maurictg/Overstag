@@ -5,7 +5,7 @@
     int eventcnt = 0;
 }
 
-<h3>Ongefactureerde activiteiten per kind</h3>
+<h3>Overzicht van onverwerkte activiteiten per kind</h3>
 <table>
     <thead>
         <tr>
@@ -45,14 +45,18 @@
                                 <tr>
                                     <td class="center-align" colspan="3">
                                         Totaal aantal drankjes: <b>@u.ConsumptionCount</b> (&euro;1,00/st.)<br />
-                                        Totaalbedrag: <b>&euro;@Math.Round(total / 100, 2).ToString("F")</b>
+                                        Bedrag: <b>&euro;@Math.Round(total / 100, 2).ToString("F")</b>
+                                        @if(u.FriendCount > 0)
+                                        {
+                                            <p class="red-text">LET OP: tijdens de avonden had @u.User.Firstname <b>@u.FriendCount</b> keer een vriend(in) mee. Dit kan vanwege technische redenen niet hier berekend worden. Op de factuur wordt dit er nog bij gerekend. Op de factuur worden deze avonden dubbel gerekend.</p>
+                                        }
                                     </td>
                                 </tr>
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="3" class="center-align"><h6>Geen ongefactureerde activiteiten gevonden</h6></td>
+                                    <td colspan="3" class="center-align"><h6>Geen onverwerkte ongefactureerde avonden. Kijk onder &quot;Betalingen&quot;</h6></td>
                                 </tr>
                             }
                         </tbody>
@@ -67,28 +71,17 @@
 {
     <div class="center-align">
         <br />
-        <a class="waves-effect waves-light btn blue-dark modal-trigger" data-target="areusure">Factuur maken</a>
+        <a class="waves-effect waves-light btn blue-dark" id="btngenerate">Verwerken</a>
         <div class="progress" style="display: none;"><div class="indeterminate"></div></div>
     </div>
     <br />
 }
 
 <h3>Facturen</h3>
-<h6>De facturen staan onder <b>&quot;Betalingen&quot;</b> in het menu.</h6>
-
-<div id="areusure" class="modal">
-    <div class="modal-content">
-        <h4>Weet u zeker dat u een factuur wilt laten maken?</h4>
-        <h6>Alle tot nu toe niet verrekende avonden (die op deze pagina staan) worden in rekening gebracht op een factuur</h6>
-    </div>
-    <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-green btn orange">Annuleren</a>
-        <a href="#!" id="btngenerate" class="modal-close waves-effect waves-green btn green">Factuur maken</a>
-    </div>
-</div>
+<h6>De facturen staan onder <b>&quot;<a href="/User/Payment">Betalingen</a>&quot;</b> in het menu.</h6>
 
 <div class="fixed-action-btn">
-    <a class="btn-floating btn-large blue-dark" href="/Parent/Family">
+    <a class="btn-floating btn-large blue-dark" href="/Parent">
         <i class="large material-icons">arrow_back</i>
     </a>
 </div>

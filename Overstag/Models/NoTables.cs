@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Overstag.Models;
 
 namespace Overstag.Models.NoDB
 {
@@ -11,6 +8,7 @@ namespace Overstag.Models.NoDB
     {
         public Event Event;
         public bool Subscribed;
+        public int Friends;
     }
 
     public struct UserEvent
@@ -61,6 +59,7 @@ namespace Overstag.Models.NoDB
     {
         public Account User;
         public List<Event> UnpayedEvents;
+        public int FriendCount;
         public int ConsumptionCount;
         public int ConsumptionCost;
     }

@@ -26,6 +26,7 @@
                                 <th>Wanneer</th>
                                 <th>Omschrijving</th>
                                 <th>Aantal drankjes</th>
+                                <th>Aantal vriend(inn)en</th>
                                 <th>Kosten</th>
                             </tr>
                         </thead>
@@ -35,18 +36,33 @@
                             {
                                 var p = Model.Subscriptions.First(f => f.EventID == e.Id);
                                 double c = (double)e.Cost;
-                                topay += c;
-                                topay += p.ConsumptionTax;
-                                <tr>
-                                    <td>@e.Title</td>
-                                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                                    <td>@e.Description</td>
-                                    <td>@p.ConsumptionCount <b>(&euro;@(p.ConsumptionTax / 100),00)</b></td>
-                                    <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
-                                </tr>
+                                topay += c * (p.FriendCount + 1);
+                                topay += (p.ConsumptionTax * p.ConsumptionCount);
+                            <tr>
+                                <td>@e.Title</td>
+                                <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                <td>@e.Description</td>
+                                @if (p.ConsumptionCount > 0)
+                                {
+                                    <td>@p.ConsumptionCount (<b>+&euro;@Math.Round((double)((p.ConsumptionTax * p.ConsumptionCount) / 100), 2).ToString("F")</b>)</td>
+                                }
+                                else
+                                {
+                                    <td>-</td>
+                                }
+                                @if (p.FriendCount > 0)
+                                {
+                                    <td>@p.FriendCount (<b>+&euro;@Math.Round(c * (p.FriendCount) / 100, 2).ToString("F")</b>)</td>
+                                }
+                                else
+                                {
+                                    <td>-</td>
+                                }
+                                <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
+                            </tr>
                             }
                             <tr class="grey lighten-4">
-                                <td colspan="5" class="center">
+                                <td colspan="6" class="center">
                                     <b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b>
                                 </td>
                             </tr>

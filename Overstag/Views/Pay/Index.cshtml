@@ -39,7 +39,7 @@
                 <li>
                     <div class="collapsible-header"><i class="material-icons">account_circle</i><b>Gebruikersinformatie</b></div>
                     <div class="collapsible-body">
-                        <table>
+                        <table class="responsive-table">
                             <thead>
                                 <tr>
                                     <th>Naam</th>
@@ -62,7 +62,7 @@
                 <li>
                     <div class="collapsible-header"><i class="material-icons">calendar_today</i><b>Evenementen</b></div>
                     <div class="collapsible-body">
-                        <table>
+                        <table class="responsive-table">
                             <thead>
                                 <tr>
                                     <th>Titel</th>
@@ -96,7 +96,7 @@
                 <li>
                     <div class="collapsible-header"><i class="material-icons">description</i><b>Factuurdetails</b></div>
                     <div class="collapsible-body">
-                        <table>
+                        <table class="responsive-table">
                             <thead>
                                 <tr>
                                     <th>Datum</th>
@@ -123,7 +123,7 @@
                             DateTime dt = p.PayedAt ?? new DateTime(0, 0, 0);
                             bool validated = (Model.Invoice.Payed == (p.PayedAt != null && !string.IsNullOrEmpty(p.PaymentID) && p.InvoiceID == Model.Invoice.PayID));
                             <br />
-                            <table>
+                            <table class="responsive-table">
                                 <thead>
                                     <tr>
                                         <th>Betalingskenmerk</th>

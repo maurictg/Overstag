@@ -21,7 +21,7 @@ namespace Overstag.Controllers
         {
             using (var context = new OverstagContext())
             {
-                var now = context.Events.Include(f => f.Participators).FirstOrDefault(g => g.When.Date == DateTime.Today);
+                var now = context.Events.Include(f => f.Participators).OrderBy(h => h.When).FirstOrDefault(g => g.When.Date == DateTime.Today);
                 List<Account> Users = new List<Account>();
 
                 if(now != null)
