@@ -508,7 +508,7 @@ namespace Overstag.Controllers
                             bill += (eve.Cost * (part.FriendCount+1));
 
                             additions += part.ConsumptionCount;
-                            bill += (part.ConsumptionTax * part.ConsumptionCount);
+                            bill += part.ConsumptionTax;
 
                             for (int i = 0; i < part.FriendCount+1; i++)
                                 eventIDS.Add(eve.Id);

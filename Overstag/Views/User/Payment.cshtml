@@ -37,14 +37,14 @@
                                 var p = Model.Subscriptions.First(f => f.EventID == e.Id);
                                 double c = (double)e.Cost;
                                 topay += c * (p.FriendCount + 1);
-                                topay += (p.ConsumptionTax * p.ConsumptionCount);
+                                topay += p.ConsumptionTax;
                             <tr>
                                 <td>@e.Title</td>
                                 <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                                 <td>@e.Description</td>
                                 @if (p.ConsumptionCount > 0)
                                 {
-                                    <td>@p.ConsumptionCount (<b>+&euro;@Math.Round((double)((p.ConsumptionTax * p.ConsumptionCount) / 100), 2).ToString("F")</b>)</td>
+                                    <td>@p.ConsumptionCount (<b>+&euro;@Math.Round(Convert.ToDouble(p.ConsumptionTax) / 100,2).ToString("F")</b>)</td>
                                 }
                                 else
                                 {
