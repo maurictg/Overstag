@@ -29,6 +29,7 @@ namespace Overstag.Models
         public string MollieID { get; set; }
 
         public string TwoFactor { get; set; }
+        public string TwoFactorCodes { get; set; }
         
         //Policies
         public int DenyTickets { get; set; }

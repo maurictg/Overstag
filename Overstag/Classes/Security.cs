@@ -14,9 +14,8 @@ namespace Overstag.Encryption
     {
         private static System.Random rnd = new System.Random();
 
-        public static string rString(int length)
+        public static string rString(int length, string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+")
         {
-            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
             StringBuilder sb = new StringBuilder();
 
             for (int i = 0; i < length; i++)
@@ -24,6 +23,9 @@ namespace Overstag.Encryption
 
             return sb.ToString();
         }
+
+        public static string rCode(int length)
+            => rString(length, "0123456789");
 
         public static int rInt(int min, int max)
         {
@@ -213,7 +215,8 @@ namespace Overstag.Security
                 {
                     var a = context.Accounts.First(f => f.Token == token);
                     a.TwoFactor = secret;
-                    context.Update(a);
+                    a.TwoFactorCodes = string.Join(',',TFA.GenerateBackupCodes());
+                    context.Accounts.Update(a);
                     context.SaveChanges();
                     return secret;
                 }
@@ -240,7 +243,8 @@ namespace Overstag.Security
                 {
                     var account = context.Accounts.First(f => f.Token == token);
                     account.TwoFactor = string.Empty;
-                    context.Update(account);
+                    account.TwoFactorCodes = string.Empty;
+                    context.Accounts.Update(account);
                     context.SaveChanges();
                 }
                 return true;
@@ -258,20 +262,38 @@ namespace Overstag.Security
             return generator.ValidateCode(code,now.ToUniversalTime());
         }
 
-        public static string[] GetBackupCodes(string token, int amount = 10)
+        public static string[] GenerateBackupCodes(int amount = 10)
         {
-            string secret = new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor;
-            List<string> Codes = new List<string>();
+            using(var context = new OverstagContext())
+            {
+                List<string> Codes = new List<string>();
+                for (int i = 0; i < amount; i++)
+                    Codes.Add(Encryption.Random.rCode(10));
 
-            for (int i = 0; i < amount; i++)
-                Codes.Add(Overstag.Encryption.PBKDF2.Hash(secret, 1234));
-
-            return Codes.ToArray();
+                return Codes.ToArray();
+            }
         }
 
-        public static bool RestoreBackupCode(string code, string token)
-            =>  (Encryption.PBKDF2.Verify(code, new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor, 1234));
+        public static string[] GetBackupCodes(string token)
+            => new OverstagContext().Accounts.First(f => f.Token == token).TwoFactorCodes.Split(",");
 
+        public static bool RestoreBackupCode(string code, string token)
+        {
+            using(var context = new OverstagContext())
+            {
+                var a = context.Accounts.First(f => f.Token == token);
+                if ((a.TwoFactorCodes.Contains(code) && !code.Contains(",") && code.Length == a.TwoFactorCodes.Split(",")[0].Length))
+                {
+                    a.TwoFactor = string.Empty;
+                    a.TwoFactorCodes = string.Empty;
+                    context.Accounts.Update(a);
+                    context.SaveChanges();
+                    return true;
+                }
+                else
+                    return false;
+            }
+        }
     }
 
     public class Backup

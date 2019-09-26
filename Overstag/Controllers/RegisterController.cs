@@ -337,7 +337,7 @@ namespace Overstag.Controllers
         public JsonResult Restore2FA(string token, string code)
         {
             if (Security.TFA.RestoreBackupCode(Uri.UnescapeDataString(code), Uri.UnescapeDataString(token)))
-                return Json(new { status = "success", secret = Uri.EscapeDataString(new OverstagContext().Accounts.First(t => t.Token == Uri.UnescapeDataString(token)).TwoFactor) });
+                return Json(new { status = "success"});
             else
                 return Json(new { status = "error" });
         }

@@ -64,7 +64,7 @@
                                 <input type="number" style="font-size: xx-large" maxlength="6" data-length="6" id="2facode" placeholder="000000" />
                             </div>
                         </div>
-                        <!--a href="#!" class="modal-close waves-effect orange btn modal-trigger" data-target="tfarestore" onclick="Login.cancel2fa();">Code vergeten</a-->
+                        <a href="#!" class="modal-close waves-effect orange btn modal-trigger" data-target="tfarestore" onclick="Login.cancel2fa();">Code vergeten</a>
                         <a href="#!" class="modal-close waves-effect red btn" onclick="Login.cancel2fa();">Annuleren</a>
                     </div>
                 </div>
@@ -76,16 +76,11 @@
             <div class="modal-content">
                 <div class="row">
                     <div class="center-align">
-                        <h4>2FA code herstellen</h4>
+                        <h4>2FA uitschakelen</h4>
                         <h5>Type hier een van uw backupcodes in:</h5>
                         <div class="row">
-                            <div class="input-field col s4 offset-s4">
+                            <div class="input-field col s12 m4 offset-m4">
                                 <input type="text" placeholder="Herstelcode" id="tfarest" />
-                            </div>
-                            <div id="secretdiv" style="display: none;">
-                                <br />
-                                <h6>Uw secret is: </h6>
-                                <h5 id="secret"></h5>
                             </div>
                         </div>
                         <a href="#!" class="modal-close waves-effect red btn">Sluiten</a>
@@ -269,15 +264,14 @@
             else {
                 $.get('/Register/Restore2FA/' + token + '/' + encodeURIComponent($('#tfarest').val()), function (r) {
                     if (r.status == 'success') {
-                        $('#secret').text(unescape(r.secret));
-                        $('#secretdiv').show();
-                        M.toast({ html: 'Code successvol hersteld', classes: 'green' });
-                    } else {
+                        M.Modal.getInstance($('#tfarestore')).close();
+                        M.toast({ html: 'Code is juist. Log a.u.b. opnieuw in', classes: 'green' });
+                    } else
                         M.toast({ html: 'Code onjuist', classes: 'red' });
-                        $('#tfarest').val('');
-                    }
+
+                    $('#tfarest').val('');
                 }, 'json').fail(function () {
-                    M.toast({ html: 'Dit is geen geldige code', classes: 'red' });
+                    M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
                 });
             }
         }
