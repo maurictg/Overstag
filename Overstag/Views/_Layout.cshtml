@@ -14,7 +14,7 @@
     <script type="text/javascript" src="~/js/Overstag.js"></script>
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="~/css/Overstag.css" />
     <script>
         Overstag = {
             init: function(){
@@ -34,6 +34,7 @@
                     }
                 }
 
+                OverstagJS.General.detectIE();
                 Overstag.mapevents();
             },
             mapevents: function () {
@@ -54,32 +55,6 @@
             url: window.location.href.replace(window.location.origin,''),
         }
     </script>
-    <style>
-        /*Add to materialize css*/
-        .blue-light {
-            background-color: #3096D3 !important;
-        }
-
-        .blue-middle {
-            background-color: #0B86CF !important;
-        }
-
-        .blue-dark {
-            background-color: #04507D !important;
-        }
-
-        .blue-light-text {
-            color: #3096D3 !important;
-        }
-
-        .blue-middle-text {
-            color: #0B86CF !important;
-        }
-
-        .blue-dark-text {
-            color: #04507D !important;
-        }
-    </style>
 </head>
 <body>
     <nav>

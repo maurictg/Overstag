@@ -360,7 +360,10 @@ namespace Overstag.Controllers
             else
             {
                 if(!string.IsNullOrEmpty(HttpContext.Session.GetString("JoinFamily")))
+                {
                     token = HttpContext.Session.GetString("JoinFamily");
+                    HttpContext.Session.Remove("JoinFamily");
+                }
 
                 using (var context = new OverstagContext())
                 {
