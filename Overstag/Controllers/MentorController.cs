@@ -12,11 +12,19 @@ namespace Overstag.Controllers
 {
     public class MentorController : Controller
     {
+        /// <summary>
+        /// Get Mentor homepage
+        /// </summary>
+        /// <returns>View</returns>
         public IActionResult Index()
         {
             return View();
         }
 
+        /// <summary>
+        /// Get event and subscription of the current event
+        /// </summary>
+        /// <returns>View with info</returns>
         public IActionResult Today()
         {
             using (var context = new OverstagContext())
@@ -38,6 +46,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Get statistics about subscriptions
+        /// </summary>
+        /// <returns>View with graphs and info</returns>
         public IActionResult Stats()
         {
             using (var context = new OverstagContext())
@@ -65,6 +77,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes all subscriptions from absent people
+        /// </summary>
+        /// <param name="absentids">Array with absent ids (json)</param>
+        /// <returns>JSON, success error or warning</returns>
         [HttpPost]
         public IActionResult postPresence([FromForm]string absentids)
         {
@@ -104,6 +121,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Set drink amount for user
+        /// </summary>
+        /// <param name="userid">The user's id</param>
+        /// <param name="count">The amount of drinks</param>
+        /// <returns>JSON, success or error</returns>
         [HttpGet("/Mentor/setDrink/{userid}/{count}")]
         public IActionResult setDrink(int userid, int count)
         {

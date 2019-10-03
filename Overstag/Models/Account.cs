@@ -16,6 +16,7 @@ namespace Overstag.Models
         public string Password { get; set; }
         [EmailAddress(ErrorMessage = "Emailadres is niet geldig")]
         public string Email { get; set; }
+        public string Phone { get; set; }
 
         public string Firstname { get; set; }
         public string Lastname { get; set; }

@@ -24,8 +24,7 @@
                         <div class="card-action center-align">
                             <br />
                             <div class="progress" id="progbar"><div class="indeterminate"></div></div>
-                            <a class="btn blue-light waves-effect" id="btnlogin">Inloggen</a><br />
-                            <span id="tbhelper" style="color: red; visibility: hidden;">Vul alle velden in</span>
+                            <a class="btn btn-large blue-light waves-effect" id="btnlogin">Inloggen</a><br />
                         </div>
                     </form>
                 </div>
@@ -111,6 +110,12 @@
                 }
             });
 
+            $('#Username').keydown(function (e) {
+                if (e.which == 13) {
+                    $('#Password').focus();
+                }
+            });
+
             $('#btnlogin').click(function () {
                 Login.login();
             });
@@ -161,14 +166,14 @@
 
             if (isValid) {
                 Login.post();
-                $('#tbhelper').css('visibility', 'hidden');
             }
             else {
-                $('#tbhelper').css('visibility', 'visible');
+                M.toast({ html: 'Vul a.u.b. alle velden in', classes: 'orange' });
             }
         },
 
         post: function () {
+            $('#btnlogin').addClass('disabled');
             $('#progbar').show();
             $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
@@ -195,6 +200,7 @@
             }, 'json'
             ).done(function () {
                 $('#progbar').hide();
+                $('#btnlogin').removeClass('disabled');
             });
         },
 

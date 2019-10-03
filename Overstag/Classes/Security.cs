@@ -14,6 +14,12 @@ namespace Overstag.Encryption
     {
         private static System.Random rnd = new System.Random();
 
+        /// <summary>
+        /// Get a random string
+        /// </summary>
+        /// <param name="length">The desired length</param>
+        /// <param name="chars">The chars it must contain</param>
+        /// <returns>A random string</returns>
         public static string rString(int length, string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+")
         {
             StringBuilder sb = new StringBuilder();
@@ -206,6 +212,11 @@ namespace Overstag.Security
 {
     public static class TFA
     {
+        /// <summary>
+        /// Generate a 2FA secret
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <returns>the secret or null</returns>
         public static string GenerateSecret(string token)
         {
             try
@@ -228,13 +239,13 @@ namespace Overstag.Security
         }
 
         public static string GetSecret(string token)
-        {
-            using (var context = new OverstagContext())
-            {
-                return context.Accounts.First(f => f.Token == token).TwoFactor;
-            }
-        }
+            => new OverstagContext().Accounts.First(f => f.Token == token).TwoFactor;
 
+        /// <summary>
+        /// Disable 2fa
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <returns>true (success) or false (error)</returns>
         public static bool Disable(string token)
         {
             try
@@ -262,6 +273,11 @@ namespace Overstag.Security
             return generator.ValidateCode(code,now.ToUniversalTime());
         }
 
+        /// <summary>
+        /// Get an array with random codes
+        /// </summary>
+        /// <param name="amount">The amount of codes</param>
+        /// <returns>string[] with codes</returns>
         public static string[] GenerateBackupCodes(int amount = 10)
         {
             using(var context = new OverstagContext())
@@ -277,6 +293,12 @@ namespace Overstag.Security
         public static string[] GetBackupCodes(string token)
             => new OverstagContext().Accounts.First(f => f.Token == token).TwoFactorCodes.Split(",");
 
+        /// <summary>
+        /// Remove 2fa with provided backup code
+        /// </summary>
+        /// <param name="code">The backup code</param>
+        /// <param name="token">The user's token</param>
+        /// <returns>true (success) or false (error)</returns>
         public static bool RestoreBackupCode(string code, string token)
         {
             using(var context = new OverstagContext())

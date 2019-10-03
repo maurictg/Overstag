@@ -14,6 +14,12 @@ namespace Overstag.Controllers
 {
     public class WWWController : Controller
     {
+        /// <summary>
+        /// Serve a html file by name
+        /// </summary>
+        /// <param name="file">The file's name</param>
+        /// <returns>File or error 404</returns>
+        
         [Route("html/{file}")]
         public IActionResult Serve(string file)
         {

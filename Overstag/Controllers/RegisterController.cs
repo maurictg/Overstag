@@ -354,10 +354,14 @@ namespace Overstag.Controllers
         {
             if(string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
             {
+                HttpContext.Session.SetString("JoinFamily",token);
                 return View("Login","/Register/joinFamily/"+token);
             }
             else
             {
+                if(!string.IsNullOrEmpty(HttpContext.Session.GetString("JoinFamily")))
+                    token = HttpContext.Session.GetString("JoinFamily");
+
                 using (var context = new OverstagContext())
                 {
                     var content = "";

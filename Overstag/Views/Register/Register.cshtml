@@ -39,12 +39,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="input-field col s12 m8">
+                        <div class="input-field col s12 m6">
                             <i class="material-icons prefix">account_circle</i>
                             <input type="text" class="validate checki" id="Username" placeholder="Gebruikersnaam" />
                             <label class="active" for="Username">Gebruikersnaam</label>
                         </div>
-                        <div class="input-field col s12 m4">
+                        <div class="input-field col s12 m3">
+                            <input type="date" class="checki" id="Birthdate" placeholder="Geboortedatum">
+                            <label for="Birthdate">Geboortedatum</label>
+                        </div>
+                        <div class="input-field col s12 m3">
                             <p>
                                 Geslacht:&nbsp;
                                 <label>
@@ -59,15 +63,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="input-field col s12 m9">
+                        <div class="input-field col s12 m7">
                             <i class="material-icons prefix">email</i>
                             <input type="email" class="validate checki" id="Email" placeholder="Email" />
                             <label for="Email">Email</label>
                             <span class="helper-text" data-error="Vul een geldig email adres in" data-success=""></span>
                         </div>
-                        <div class="input-field col s12 m3">
-                            <input type="date" class="checki" id="Birthdate" placeholder="Geboortedatum">
-                            <label for="Birthdate">Geboortedatum</label>
+                        <div class="input-field col s12 m5">
+                            <i class="material-icons prefix">phone</i>
+                            <input type="text" maxlength="12" id="Phone" placeholder="Telefoonnummer" />
+                            <label for="Phone">Telefoonnummer</label>
                         </div>
                     </div>
                     <div class="row">
@@ -161,6 +166,7 @@
         },
 
         post: function () {
+            $('#register').addClass('disabled');
             var data = {
                 Username: $('#Username').val(),
                 Password: $('#Password').val(),
@@ -172,7 +178,8 @@
                 Residence: $('#Residence').val(),
                 Sex: $('input[name=sex]:checked').val(),
                 Type: $('input[name=type]:checked').val(),
-                Birthdate: $('#Birthdate').val()
+                Birthdate: $('#Birthdate').val(),
+                Phone: $('#Phone').val()
             };
             $('#progbar').show();
             $.post("/Register/postRegister",data , function (response) {
@@ -197,6 +204,7 @@
                 }, 'json'
             ).done(function(){
                 $('#progbar').hide();
+                $('#register').removeClass('disabled');
             });
         },
 

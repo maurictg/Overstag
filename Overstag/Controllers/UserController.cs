@@ -376,31 +376,28 @@ namespace Overstag.Controllers
         {
             using (var context = new OverstagContext())
             {
-                var cuser = context.Accounts.FirstOrDefault(x => x.Token == currentuser().Token);
+                var cuser = context.Accounts.First(f => f.Id == currentuser().Id);
                 cuser.Firstname = a.Firstname;
                 cuser.Lastname = a.Lastname;
                 cuser.Adress = a.Adress;
                 cuser.Residence = a.Residence;
                 cuser.Postalcode = a.Postalcode;
+                cuser.Phone = a.Phone;
+
                 //Check if email is in use
-                bool emailinuse = false;
-                try
-                {
-                    //var testem = context.Accounts.FirstOrDefault(b => b.Email == a.Email);
-                    //if(testem.Token != cuser.Token && testem.Email == a.Email) //Dan is er dus een emailadres opgegeven dat van iemand anders is
-                    //{
-                    //    emailinuse = true;
-                    //}
-
-                    if (context.Accounts.Any(f => f.Token != cuser.Token && f.Email == a.Email))
-                        emailinuse = true;
-                }
-                catch { emailinuse = false; }
-
-                if (emailinuse)
+                var x = context.Accounts.FirstOrDefault(f => f.Email == a.Email);
+                if (x != null && x.Token != cuser.Token)
                     return Json(new { status = "error", error = "Emailadres is al in gebruik!" });
+                else
+                    cuser.Email = a.Email;
 
-                cuser.Email = a.Email;
+                //Check if username is in use
+                var y = context.Accounts.FirstOrDefault(f => f.Username == a.Username);
+                if (y != null && y.Token != cuser.Token)
+                    return Json(new { status = "error", error = "Gebruikersnaam is al in gebruik!" });
+                else
+                    cuser.Username = a.Username;
+
                 try
                 {
                     context.Accounts.Update(cuser);

@@ -134,7 +134,7 @@
             @foreach (var e in upcoming.OrderBy(f => f.Event.When))
             {
                 <li>
-                    <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy hh:mm:ss")</div>
+                    <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
                     <div class="collapsible-body">
                         <h6><b>Omschrijving:</b> @e.Event.Description</h6>
                         <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
@@ -171,7 +171,7 @@
             @foreach (var e in after.OrderBy(f => f.Event.When).ToArray().Reverse())
             {
                 <li>
-                    <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy hh:mm:ss")</div>
+                    <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
                     <div class="collapsible-body">
                         <h6><b>Omschrijving:</b> @e.Event.Description</h6>
                         <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>

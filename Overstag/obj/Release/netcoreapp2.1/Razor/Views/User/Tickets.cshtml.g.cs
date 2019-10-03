@@ -70,7 +70,7 @@ namespace AspNetCore
             WriteLiteral("        <div class=\"col s12 m6\">\r\n            <div class=\"card\">\r\n                <div class=\"card-image waves-effect waves-block waves-light\">\r\n                    ");
             EndContext();
             BeginContext(424, 44, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagOnly, "16215e9613da485ebbcd4afcb74b1e08", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagOnly, "3e0cac609e574831ab7a19ced15081d9", async() => {
             }
             );
             __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();
