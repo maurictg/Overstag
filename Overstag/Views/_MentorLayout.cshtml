@@ -9,7 +9,10 @@
     <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
     <script type="text/javascript" src="~/js/Overstag.js"></script>
+    <script type="text/javascript" src="~/js/moment.min.js"></script>
+    <script type="text/javascript" src="~/js/chart.min.js"></script>
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/chart.min.css" />
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script>
@@ -20,7 +23,7 @@
 
             //IMPORTANT VARIABLES
             firstname: '@Context.Session.GetString("Name")',
-            loggedin: ('@Context.Session.GetString("Token")' != ''),
+            loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
             type: @Context.Session.GetInt32("Type"),
             url: window.location.href.replace(window.location.origin,''),
         }
@@ -60,6 +63,7 @@
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="/Home">Home</a></li>
                 <li id="_home"><a href="/Mentor">Bestuur home</a></li>
+                <li id="_stats"><a href="/Mentor/Stats">Statistieken</a></li>
                 <li id="_pres"><a href="/Mentor/Today">Vandaag</a></li>
                 <li><a href="/User">Mijn account</a></li>
                 <li id="_mreg"><a href="/Register/Logoff"><b>Uitloggen</b></a></li>
@@ -69,6 +73,7 @@
     <ul class="sidenav" id="mobile-demo">
         <li><a href="/Home">Home</a></li>
         <li id="_mhome"><a href="/Mentor">Bestuur home</a></li>
+        <li id="_mstats"><a href="/Mentor/Stats">Statistieken</a></li>
         <li id="_mpres"><a href="/Mentor/Today">Vandaag</a></li>
         <li><a href="/User">Mijn account</a></li>
         <li id="_mreg"><a href="/Register/Logoff"><b>Uitloggen</b></a></li>

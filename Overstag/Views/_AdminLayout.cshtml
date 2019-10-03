@@ -17,7 +17,7 @@
             //IMPORTANT VARIABLES
             token: '@Context.Session.GetString("Token")',
             firstname: '@Context.Session.GetString("Name")',
-            loggedin: ('@Context.Session.GetString("Token")' != ''),
+            loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
             url: window.location.href.replace(window.location.origin, ''),
             init: function () {
                 if (!Overstag.loggedin) {

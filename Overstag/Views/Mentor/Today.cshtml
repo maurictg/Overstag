@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "Deze avond";
     Layout = "~/Views/_MentorLayout.cshtml";
+    int totald = 0;
 }
 
     <div>
@@ -19,25 +20,28 @@
                 <div class="col s6 m3">
                     <div class="card-panel center-align">
                         <span class="flow-text">Aantal mannen</span>
-                        <h3><b class="blue-text" id="aantalm">@Model.Participators.Count(f => f.Sex == 0)</b></h3>
+                        <h3><b class="blue-text" id="aantalm">@Model.Participators.Count(f => f.account.Sex == 0)</b></h3>
                     </div>
                 </div>
                 <div class="col s6 m3">
                     <div class="card-panel center-align">
                         <span class="flow-text">Aantal vrouwen</span>
-                        <h3><b class="red-text" id="aantalv">@Model.Participators.Count(f => f.Sex == 1)</b></h3>
+                        <h3><b class="red-text" id="aantalv">@Model.Participators.Count(f => f.account.Sex == 1)</b></h3>
                     </div>
                 </div>
                 <div class="col s6 m3">
                     <div class="card-panel center-align">
-                        <span class="flow-text">Totaal aantal present</span>
-                        <h3><b id="aantal">@Model.Participators.Count()</b></h3>
+                        <span class="flow-text">Totaal present/absent</span>
+                        <h3><b id="aantal">@Model.Participators.Count()</b> / <span id="aantala">0</span></h3>
                     </div>
                 </div>
+                @{ 
+                    Model.Participators.ForEach(f => totald += f.part.ConsumptionCount);
+                }
                 <div class="col s6 m3">
                     <div class="card-panel center-align">
-                        <span class="flow-text">Totaal aantal absent</span>
-                        <h3><b id="aantala">0</b></h3>
+                        <span class="flow-text">Totaal aantal drankjes</span>
+                        <h3><b class="green-text" id="aantald">@totald</b></h3>
                     </div>
                 </div>
             </div>
@@ -50,13 +54,13 @@
 
 
             <ul class="collection">
-                @foreach (var p in Model.Participators.OrderBy(f => f.Firstname).OrderBy(g => g.Lastname))
+                @foreach (var p in Model.Participators.OrderBy(f => f.account.Firstname).OrderBy(g => g.account.Lastname))
                 {
                     <li class="collection-item">
                         <p>
                             <label>
-                                <input type="checkbox" class="filled-in checki" checked="checked" data-id="@p.Id" data-sx="@p.Sex" />
-                                <span style="font-size: large;"><b>@p.Firstname @p.Lastname</b> (@Html.Raw((p.Sex == 0) ? "<b class=\"blue-text\">m</b>" : "<b class=\"red-text\">v</b>"))</span>
+                                <input type="checkbox" class="filled-in checki" checked="checked" data-id="@p.account.Id" data-sx="@p.account.Sex" />
+                                <span style="font-size: large;"><b>@p.account.Firstname @p.account.Lastname</b> (@Html.Raw((p.account.Sex == 0) ? "<b class=\"blue-text\">m</b>" : "<b class=\"red-text\">v</b>"))</span>
                             </label>
                         </p>
                     </li>
@@ -67,21 +71,41 @@
             <small>&nbsp;Staat er iemand niet tussen? Vraag hem/haar zich alsnog in te schrijven</small>
             <br />
 
-            <h3 class="green-text text-darken-4">Drankjes toevoegen</h3>
-            <p class="flow-text">&nbsp;Selecteer een gebruiker en druk op &quot;Opslaan&quot;</p>
+            <h3 class="green-text text-darken-4">Drankjes</h3>
             <div class="row">
-                <div class="input-field col s12 m6">
-                    <select id="userselect" onchange="$('#btndrink').removeClass('disabled')">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Voornaam</th>
+                            <th>Achternaam</th>
+                            <th>Vriend(inn)en mee?</th>
+                            <th>Aantal drankjes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         @foreach (var user in Model.Participators)
                         {
-                            <option value="@user.Id">@user.Firstname @user.Lastname</option>
+                            <tr>
+                                <td>@user.account.Firstname</td>
+                                <td>@user.account.Lastname</td>
+                                <td>@Html.Raw((user.part.FriendCount>0)?"Ja, <b>"+user.part.FriendCount+"</b>":"Nee")</td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col s6 center-align">
+                                            <h5 id="@user.account.Id-cc">@user.part.ConsumptionCount</h5>
+                                        </div>
+                                        <div class="col s6 left-align">
+                                            <a onclick="Presence.setDrink('@user.account.Id',1)" class="btn btn-flat green waves-effect white-text"><i class="material-icons">add_circle</i></a>
+                                            <a onclick="Presence.setDrink('@user.account.Id',-1)" class="btn btn-flat red waves-effect white-text"><i class="material-icons">remove_circle</i></a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                    </select>
-                    <label>Kies een gebruiker</label>
-                </div>
-                <div class="col s12 m6">
-                    <button class="btn btn-large green" id="btndrink"><b>Opslaan</b></button>
-                </div>
+
+
+                    </tbody>
+                </table>
             </div>
         }
     </div>
@@ -172,12 +196,14 @@
             $(el).data('confirm', '');
             $(el).fadeIn();
         },
-        addDrink: function () {
-            var userid = $('#userselect').val();
-            if (userid > 0) {
-                $.get('/Mentor/addDrink/' + userid, function (r) {
+        setDrink: function(id, add) {
+            var count = Number($('#' + id + '-cc').text()) + add;
+            if (count >= 0 && id > 0 && count <= 15) {
+                $.get('/Mentor/setDrink/' + id + '/' + count, function (r) {
                     if (r.status == 'success') {
-                        M.toast({ html: 'Drankje toegevoegd!', classes: 'green' });
+                        M.toast({ html: 'Drankje ' + (add > 0 ? 'toegevoegd!' : 'verwijderd!'), classes: 'green' });
+                        $('#' + id + '-cc').text(count);
+                        $('#aantald').text(Number($('#aantald').text()) + add);
                     } else {
                         M.toast({ html: r.error, classes: 'red' });
                     }

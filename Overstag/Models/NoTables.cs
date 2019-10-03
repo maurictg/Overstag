@@ -14,7 +14,7 @@ namespace Overstag.Models.NoDB
     public struct UserEvent
     {
         public Event Event;
-        public List<Account> Participators;
+        public List<SSub> Participators;
     }
 
     public struct UnpayedEvents
@@ -53,6 +53,18 @@ namespace Overstag.Models.NoDB
     {
         public Account User;
         public IInvoice Invoice;
+    }
+
+    public struct SSub
+    {
+        public Account account;
+        public Participate part;
+    }
+
+    public struct SSubEvent
+    {
+        public Event Event;
+        public List<SSub> Sub;
     }
 
     public struct FUnpayed

@@ -37,7 +37,7 @@
 
             //IMPORTANT VARIABLES
             firstname: '@Context.Session.GetString("Name")',
-            loggedin: ('@Context.Session.GetString("Token")' != ''),
+            loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
             type: @Context.Session.GetInt32("Type"),
             url: window.location.href.replace(window.location.origin,''),
         }

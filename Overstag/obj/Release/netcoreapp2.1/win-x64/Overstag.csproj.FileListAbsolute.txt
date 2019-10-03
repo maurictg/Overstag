@@ -112,3 +112,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\wi
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\_MentorLayout.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\_UserLayout.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\_ViewStart.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp2.1\win-x64\Razor\Views\Mentor\Stats.cshtml.g.cs

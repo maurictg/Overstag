@@ -22,12 +22,12 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 var now = context.Events.Include(f => f.Participators).OrderBy(h => h.When).FirstOrDefault(g => g.When.Date == DateTime.Today);
-                List<Account> Users = new List<Account>();
+                List<SSub> Users = new List<SSub>();
 
                 if(now != null)
                 {
                     foreach (var p in now.Participators)
-                        Users.Add(context.Accounts.First(f => f.Id == p.UserID));
+                        Users.Add(new SSub { account = context.Accounts.First(f => f.Id == p.UserID), part = p});
                 }
                 
                 return View(new UserEvent
@@ -35,6 +35,33 @@ namespace Overstag.Controllers
                     Event = now,
                     Participators = Users
                 });
+            }
+        }
+
+        public IActionResult Stats()
+        {
+            using (var context = new OverstagContext())
+            {
+                var events = context.Events.Include(f => f.Participators).OrderBy(f => f.When);
+                List<SSubEvent> sse = new List<SSubEvent>();
+                foreach (var e in events)
+                {
+                    List<SSub> subs = new List<SSub>();
+                    foreach (var s in e.Participators)
+                        subs.Add(new SSub
+                        {
+                            account = context.Accounts.First(f => f.Id == s.UserID),
+                            part = s
+                        });
+
+                    sse.Add(new SSubEvent()
+                    {
+                        Event = e,
+                        Sub = subs.OrderBy(f => f.account.Lastname).ToList()
+                    });
+                }
+
+                return View(sse);
             }
         }
 
@@ -77,8 +104,8 @@ namespace Overstag.Controllers
             }
         }
 
-        [HttpGet("/Mentor/addDrink/{userid}")]
-        public IActionResult addDrink(int userid)
+        [HttpGet("/Mentor/setDrink/{userid}/{count}")]
+        public IActionResult setDrink(int userid, int count)
         {
             using(var context = new OverstagContext())
             {
@@ -90,8 +117,8 @@ namespace Overstag.Controllers
                 try
                 {
                     var user = eve.Participators.First(f => f.UserID == userid);
-                    user.ConsumptionCount++;
-                    user.ConsumptionTax += 100;
+                    user.ConsumptionCount = (count >= 0) ? count : 0;
+                    user.ConsumptionTax = user.ConsumptionCount * 100;
                     context.Events.Update(eve);
                     context.SaveChanges();
                     return Json(new { status = "success" });
