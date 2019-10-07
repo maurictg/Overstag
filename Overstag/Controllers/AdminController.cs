@@ -47,34 +47,7 @@ namespace Overstag.Controllers
                 }
             }
         }
-        /// <summary>
-        /// Deletes the full database
-        /// </summary>
-        /// <returns>string with info</returns>
-        public string DeleteDB()
-        {
-            if (CheckforAdmin())
-            {
-                using (var context = new Overstag.Models.OverstagContext())
-                {
-                    try
-                    {
-                        context.Database.EnsureDeletedAsync();
-                        return "Calling: Admin/deleteDB.\n\nDatabase successfully deleted!!";
-                    }
-                    catch (Exception ex)
-                    {
-                        return "Calling: Admin/deleteDB.\n\nError: " + ex.ToString();
-                    }
-                }
-            }
-            else
-            {
-                return "You've no permission to call this function";
-            }
-            
-        }
-
+       
         /// <summary>
         /// List all events
         /// </summary>

@@ -2,10 +2,30 @@
 @{
     ViewData["Title"] = "Activiteiten";
     Layout = "/Views/_AdminLayout.cshtml";
-    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");    
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
 }
 
 <br />
+<h3 id="events" class="white-text">Activiteiten toevoegen/bewerken</h3>
+<form class="">
+    <div class="input-group">
+        <div class="input-group-append">
+            &nbsp;<input type="text" class="checki form-control" id="ttitle" placeholder="Titel" />
+            &nbsp;<input type="text" class="checki form-control" id="description" placeholder="Omschrijving" />
+            &nbsp;<input type="text" class="checki form-control datepicker" id="date" placeholder="Datum (dd-mm-jjjj)">
+            &nbsp;<input type="text" class="checki form-control timepicker" id="time" placeholder="Tijd (uu:mm)">
+            &nbsp;<input type="text" class="checki form-control" id="cost" placeholder="Kosten in eurocent (€)" />
+            &nbsp;
+        </div>
+        <div class="input-group-append">
+            <input class="btn btn-primary" type="button" value="Toevoegen" id="btnadd">
+            <input class="btn btn-secondary" type="button" value="Annuleren" id="btncancel" style="display: none;">
+            <input class="btn btn-primary" type="button" value="Opslaan" id="btnsave" style="display: none;">
+        </div>
+    </div>
+</form>
+<br />
+
 <div id="eventsdiv" class="center-align">
     <h3 class="white-text">Activiteiten</h3>
     <br />
@@ -35,32 +55,15 @@
                         <td>@e.When.ToString("d", culture)</td>
                         <td>@e.When.ToString("t", culture)</td>
                         <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                        <td><a class="text-warning" data-target="#verwijdermodal" data-toggle="modal" onclick="eventtoedit = @e.Id">Delete</a>
-                        <br /><a class="text-primary" onclick="Events.edit(@e.Id)">Edit</a></td>
+                        <td>
+                            <a class="text-warning" data-target="#verwijdermodal" data-toggle="modal" onclick="eventtoedit = @e.Id">Delete</a>
+                            <br /><a class="text-primary" href="#events" onclick="Events.edit(@e.Id)">Edit</a>
+                        </td>
                     </tr>
                 }
             }
         </tbody>
     </table>
-    <h3 class="white-text">Activiteiten toevoegen/bewerken</h3>
-    <br />
-    <form class="">
-        <div class="input-group">
-            <div class="input-group-append">
-                &nbsp;<input type="text" class="checki form-control" id="ttitle" placeholder="Titel" />
-                &nbsp;<input type="text" class="checki form-control" id="description" placeholder="Omschrijving" />
-                &nbsp;<input type="text" class="checki form-control datepicker" id="date" placeholder="Datum (dd-mm-jjjj)">
-                &nbsp;<input type="text" class="checki form-control timepicker" id="time" placeholder="Tijd (uu:mm)">
-                &nbsp;<input type="text" class="checki form-control" id="cost" placeholder="Kosten in eurocent (€)" />
-                &nbsp;
-            </div>
-            <div class="input-group-append">
-                <input class="btn btn-primary" type="button" value="Toevoegen" id="btnadd">
-                <input class="btn btn-secondary" type="button" value="Annuleren" id="btncancel" style="display: none;">
-                <input class="btn btn-primary" type="button" value="Opslaan" id="btnsave" style="display: none;">
-            </div>
-        </div>
-    </form>
 
     <br />
     <h3 class="white-text">Ingeschreven deelnemers</h3>
@@ -70,26 +73,26 @@
     </div>
 
     <div class="modal fade" id="verwijdermodal" tabindex="-1" role="dialog" aria-labelledby="DeleteEvent"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content bg-dark">
-            <div class="modal-header">
-                <h5 class="modal-title">Event verwijderen?</h5>
-                <button type="button" class="close btn btn-warning" data-dismiss="modal" aria-label="Annuleren">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <h4>Weet u zeker dat u deze activiteit wilt verwijderen?</h4>
-                <p>Dit kan niet ongedaan worden gemaakt!</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal">Annuleren</button>
-                <button class="btn btn-danger" onclick="Events.delete(eventtoedit)">Verwijderen</button>
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content bg-dark">
+                <div class="modal-header">
+                    <h5 class="modal-title">Event verwijderen?</h5>
+                    <button type="button" class="close btn btn-warning" data-dismiss="modal" aria-label="Annuleren">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>Weet u zeker dat u deze activiteit wilt verwijderen?</h4>
+                    <p>Dit kan niet ongedaan worden gemaakt!</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal">Annuleren</button>
+                    <button class="btn btn-danger" onclick="Events.delete(eventtoedit)">Verwijderen</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 </div>
 <script>
@@ -124,16 +127,16 @@
                     Cost: $('#cost').val(), Id: eventtoedit
                 };
                 $.post('/Admin/UpdateEvent', data, function (r) {
-                    if(r.status == 'success'){
+                    if (r.status == 'success') {
                         $.bootstrapGrowl('Wijzigingen opgeslagen!', { type: 'success' });
                         location.reload();
                     }
-                    else{
+                    else {
                         $.bootstrapGrowl(r.error, { type: 'danger' });
                     }
-                    
+
                 }, 'json');
-                
+
             });
         },
         edit: function (id) {
@@ -155,29 +158,29 @@
                     $('#btnadd').hide();
                 }
                 else
-                    $.bootstrapGrowl(r.error, {type: 'danger'})
-                
+                    $.bootstrapGrowl(r.error, { type: 'danger' })
+
             });
         },
         post: function () {
             var data = {
-                Title : $('#ttitle').val(),
+                Title: $('#ttitle').val(),
                 Description: $('#description').val(),
                 When: $('#date').val() + ' ' + $('#time').val(),
-                Cost : $('#cost').val()
+                Cost: $('#cost').val()
             };
             $('#progbar').show();
-            $.post("/Admin/postEvent",data , function (response) {
+            $.post("/Admin/postEvent", data, function (response) {
                 if (response.status == 'success') {
                     location.reload();
                     $('.checki').val('');
                 }
                 else {
                     //status = error
-                    $.bootstrapGrowl(response.error, {type: 'danger'})
+                    $.bootstrapGrowl(response.error, { type: 'danger' })
                 }
-                }, 'json'
-            ).done(function(){
+            }, 'json'
+            ).done(function () {
                 $('#progbar').hide();
             });
         },
@@ -189,7 +192,7 @@
                 }
                 else {
                     //status = error
-                    $.bootstrapGrowl(response.error, {type: 'danger'})
+                    $.bootstrapGrowl(response.error, { type: 'danger' })
                 }
             }, 'json').done(function () {
             });

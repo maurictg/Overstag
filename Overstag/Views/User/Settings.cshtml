@@ -141,6 +141,24 @@
                         <p>Uw account is gekoppeld aan een gezin. Wanneer u het gezin wilt verlaten, klik dan op &quot;Gezin verlaten&quot;.</p>
                         <a class="waves-effect waves-light btn orange center" onclick="User.leaveFamily();">Gezin verlaten</a>
                     }
+
+                    <br />
+                    <h5>Opgeslagen logins</h5>
+                    <div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Laatst ingelogd op</th>
+                                    <th>IP-adres</th>
+                                    <th>Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logins">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <br />
                     <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(3);">Annuleren</a>
 
                 </div>
@@ -167,6 +185,7 @@
         </div>
 
     </div>
+    <script src="~/js/moment.min.js"></script>
     <script>
             var User = {
                 init: function () {
@@ -180,6 +199,7 @@
 
                     $('#qr').hide();
                     User.mapEvents();
+                    User.getLogins();
                 },
                 mapEvents: function () {
                     $('#savechanges').click(function () {
@@ -331,6 +351,28 @@
                             }
                         }, 'json');
                     }
+                },
+                getLogins: function () {
+                    $.getJSON('/User/getAuth', function (r) {
+                        var html = '';
+                        $.each(r, function (i, e) {
+                            moment.locale('nl');
+                            var dt = moment(Date.parse(e.lastSeen));
+                            html += `
+                             <tr><td>${dt.format('DD-MM-YYYY')+' om '+dt.format('HH:mm:ss')}</td><td>${e.ip}</td><td><button class="btn orange" onclick="User.logOut('${encodeURIComponent(e.token)}')">Verwijderen</button></td></tr>
+                            `;
+                        })
+                        $('#logins').html(html);
+                    });
+                },
+                logOut: function (token) {
+                    $.get('/User/removeRemember/' + token, function (res) {
+                        if (res.status === 'success') {
+                            User.getLogins();
+                        } else {
+                            M.toast({ html: 'Uitloggen mislukt', classes: 'red' });
+                        }
+                    })
                 }
 
             }

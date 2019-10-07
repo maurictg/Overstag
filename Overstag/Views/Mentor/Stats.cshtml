@@ -35,6 +35,7 @@
 
     foreach (var e in after)
     {
+        e.Sub.RemoveAll(f => f.account.Type != 0);
         aadata.Add(Math.Round(e.Sub.Select(f => Overstag.Core.General.getAge(f.account.Birthdate)).Average(),1).ToString().Replace(",","."));
 
         int ttm = e.Sub.Where(f => f.account.Sex == 0).Count();
@@ -149,7 +150,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var a in e.Sub)
+                                @foreach (var a in e.Sub.Where(f => f.account.Type < 3))
                                 {
                                     <tr>
                                         <td>@a.account.Firstname</td>

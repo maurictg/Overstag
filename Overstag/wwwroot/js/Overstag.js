@@ -90,6 +90,75 @@
                     }
                 }
             };
+        }(),
+        Security: function () {
+            return {
+                init: function () {
+                    if (localStorage.getItem('remember')) {
+                        if (localStorage.getItem('remember') === 'yes') {
+                            this.setRemember();
+                        }
+                    }
+                },
+                Login: function () {
+                    if (localStorage.getItem('remember')) {
+                        var r = localStorage.getItem('remember');
+                        if (r.length > 3) {
+                            $.get('/Register/tryRestore/' + r, function (res) {
+                                if (res.status === 'success') {
+                                    console.log('Welcome back!');
+                                    localStorage.setItem('remember', res.newtoken);
+                                    window.location.href = '/User';
+                                } else {
+                                    console.log(res.error);
+                                    localStorage.removeItem('remember');
+                                }
+                            }, 'json');
+                        }
+                    }
+                },
+                Logout: function () {
+                    console.log('Logging out...');
+                    this.removeRemember();
+                },
+                setRemember: function () {
+                    console.log('Ill remember you');
+                    $.get('/User/setRemember', function (r) {
+                        localStorage.setItem('remember', r);
+                    }, 'json');
+                },
+                removeRemember: function () {
+                    if (localStorage.getItem('remember')) {
+                        var r = localStorage.getItem('remember');
+                        if (r !== 'yes' && r !== '') {
+                            $.get('/User/removeRemember/' + r, function (res) {
+                                if (res.status === 'success') {
+                                    console.log('Bye!');
+                                    localStorage.removeItem('remember');
+                                } else {
+                                    console.log('Error status');
+                                }
+                            }).fail(function() {
+                                M.toast({ html: 'Er gaat iets fout', classes: 'red' });
+                                localStorage.removeItem('remember');
+                            }).always(function () {
+                                OverstagJS.Security.redirect();
+                            });
+                        } else {
+                            localStorage.removeItem('remember');
+                        }
+                    }
+                    else {
+                        this.redirect();
+                    }
+
+                },
+                redirect: function () {
+                    localStorage.setItem('logout', '1');
+                    localStorage.removeItem('login');
+                    window.location.href = '/Register/Logoff';
+                }
+            };
         }()
     };
 }();

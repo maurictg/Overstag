@@ -40,8 +40,15 @@
 </div>
 
 <script>
+    var User = {
+        init: function () {
+            $('#_ainfo, #_mainfo').addClass('active');
+            OverstagJS.Security.init();
+        },
+    }
+
     $(function () {
-        $('#_ainfo, #_mainfo').addClass('active');
+        User.init();
     });
 
     $(document).ready(function(){

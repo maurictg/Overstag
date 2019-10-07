@@ -58,7 +58,7 @@ namespace AspNetCore
 #line default
 #line hidden
             BeginContext(518, 6267, false);
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("body", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "634f90133dc54b5d978dbd3e2b6396ec", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("body", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "96b851ef7e104571a31e76eafde29660", async() => {
                 BeginContext(524, 1860, true);
                 WriteLiteral(@"
     <div class=""row center-align"">
@@ -83,7 +83,7 @@ namespace AspNetCore
                     ");
                 EndContext();
                 BeginContext(2384, 103, false);
-                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "9673552f65664b0ea0cd686a59945a47", async() => {
+                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "42a5e5a9daa7474592c9e32d79a2bfaf", async() => {
                 }
                 );
                 __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();
@@ -147,7 +147,7 @@ namespace AspNetCore
                 <div class=""col m4 s12""><a target=""_blank"" href=""https://www.spar.nl/winkels/spar-de-neve-993/"">");
                 EndContext();
                 BeginContext(6273, 71, false);
-                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "c64196248ae84504ac9d2b37889643b9", async() => {
+                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "731b5c1f22e545839e196a820ae24ec4", async() => {
                 }
                 );
                 __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();
@@ -167,7 +167,7 @@ namespace AspNetCore
                 WriteLiteral("</a></div>\r\n                <div class=\"col m4 s12\"><a target=\"_blank\" href=\"https://www.zandbaan.nl\">");
                 EndContext();
                 BeginContext(6446, 82, false);
-                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "bee1ea282bc64e77a7966aba7e6738aa", async() => {
+                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "afb7f14e3c844397a113cc06e90b7668", async() => {
                 }
                 );
                 __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();
@@ -187,7 +187,7 @@ namespace AspNetCore
                 WriteLiteral("</a></div>\r\n                <div class=\"col m4 s12\"><a target=\"_blank\" href=\"https://www.reimerswaal.nl\">");
                 EndContext();
                 BeginContext(6633, 85, false);
-                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "7f60857f7e4c4ecca07f3353431a3c8e", async() => {
+                __tagHelperExecutionContext = __tagHelperScopeManager.Begin("img", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.SelfClosing, "e67856e4c1ca49a5ba88f885fdb91ef9", async() => {
                 }
                 );
                 __Microsoft_AspNetCore_Mvc_Razor_TagHelpers_UrlResolutionTagHelper = CreateTagHelper<global::Microsoft.AspNetCore.Mvc.Razor.TagHelpers.UrlResolutionTagHelper>();

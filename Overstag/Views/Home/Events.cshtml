@@ -30,7 +30,7 @@
                     <td>@Html.Raw((iss) ? "(<b class=\"red-text\">te laat</b>) " : "")@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                    <td><a class="btn green waves-effect" onclick="Events.sub();">Inschrijven</a></td>
+                    <td><a class="btn green waves-effect" id="btnsub" onclick="Events.sub();">Inschrijven</a></td>
                 </tr>
             }
         }
@@ -46,6 +46,8 @@
     var Events = {
         init: function () {
             $('#_events, #_mevents').addClass('active');
+            if (Overstag.type == 1)
+                $('#btnsub').addClass('disabled');
         },
         sub: function () {
             if (!Overstag.loggedin) {
@@ -55,8 +57,6 @@
                 $(location).attr('href', '/User/Events');
             }
         }
-        
     }
-
     Events.init();
 </script>

@@ -21,6 +21,14 @@
                             <a href="#memailreset" class="modal-trigger" id="forgotpass">Wachtwoord vergeten?</a>
                         </div>
                         <a href="/Register/Register"><b>Geen account? Maak er hier een</b></a>
+
+                        <p class="center-align">
+                            <label>
+                                <input type="checkbox" class="filled-in" id="remember">
+                                <span>Onthoud mij</span>
+                            </label>
+                        </p>
+
                         <div class="card-action center-align">
                             <br />
                             <div class="progress" id="progbar"><div class="indeterminate"></div></div>
@@ -175,7 +183,13 @@
         post: function () {
             $('#btnlogin').addClass('disabled');
             $('#progbar').show();
-            $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
+
+            if ($('#remember').prop('checked'))
+                localStorage.setItem('remember', 'yes');
+            else
+                localStorage.removeItem('remember');
+
+            $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val()}, function (response) {
                 if (response.status == 'success') {
                     if (response.type == 3)
                         localStorage.setItem('redirect', '/Admin');
@@ -234,7 +248,7 @@
             else {
                 var now = new Date();
                 var timestring = now.getDate().toString().padStart(2, '0')+'-'+(now.getMonth() + 1).toString().padStart(2, '0')+'-'+now.getFullYear()+' '+now.getHours().toString().padStart(2, '0')+':'+now.getMinutes().toString().padStart(2, '0')+':'+now.getSeconds().toString().padStart(2, '0');
-                $.post('/Register/Validate2FA', { token: token, code: $('#2facode').val(), datetime: timestring }, function (response) {
+                $.post('/Register/Validate2FA', { token: token, code: $('#2facode').val(), datetime: timestring}, function (response) {
                     if (response.status == 'success') {
                         Login.redirect();
                         M.Modal.getInstance($('#tfa')).close();

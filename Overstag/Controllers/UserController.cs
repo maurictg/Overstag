@@ -693,5 +693,68 @@ namespace Overstag.Controllers
             return tickets;
         }
 
+        /// <summary>
+        /// Remember the login and get the remember token
+        /// </summary>
+        /// <returns>The remember token</returns>
+        public IActionResult setRemember()
+            => Json(Uri.EscapeDataString(Core.Auth.Register(HttpContext.Connection.RemoteIpAddress.ToString(), currentuser().Id)));
+
+        /// <summary>
+        /// Remove rememberance with specified token
+        /// </summary>
+        /// <returns>json, success or error</returns>
+        [HttpGet("User/removeRemember/{token}")]
+        public IActionResult removeRemember(string token)
+        {
+            if (Core.Auth.UnRegister(Uri.UnescapeDataString(token)))
+                return Json(new { status = "success" });
+            else
+                return Json(new { status = "error" });
+        }
+
+        public IActionResult removeAuth()
+        {
+            int cnt = Core.Auth.ClearUser(currentuser().Id);
+            return Json(new { status = "success", cnt });
+        }
+
+        /// <summary>
+        /// Try to log in with a specified token
+        /// </summary>
+        /// <param name="token">The auth token</param>
+        /// <returns>json, success or error</returns>
+        [HttpGet("Register/tryRestore/{token}")]
+        public IActionResult tryRestore(string token)
+        {
+            token = Uri.UnescapeDataString(token);
+            if (Core.Auth.IsAuthenticated(token))
+            {
+                try
+                {
+                    int id = Core.Auth.getUserID(token);
+                    Core.Auth.UnRegister(token);
+                    string newtoken = Core.Auth.Register(HttpContext.Connection.RemoteIpAddress.ToString(), id);
+                    using (var context = new OverstagContext())
+                    {
+                        var account = context.Accounts.First(f => f.Id == id);
+                        HttpContext.Session.SetString("Token", account.Token);
+                        HttpContext.Session.SetInt32("Type", account.Type);
+                        HttpContext.Session.SetString("Name", account.Username);
+                    }
+                    return Json(new { status = "success", newtoken});
+                }
+                catch
+                {
+                    return Json(new { status = "error", error = "Er is iets fout gegaan" });
+                }
+                
+            }
+            else
+                return Json(new { status = "error", error = "Token is onjuist" });
+        }
+
+        public JsonResult getAuth()
+            => Json(Core.Auth.getAuth(currentuser().Id));
     }
 }

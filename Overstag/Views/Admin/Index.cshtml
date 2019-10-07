@@ -10,14 +10,9 @@
     <h3>Snelle acties</h3>
     <br />
     <button class="btn btn-primary" onclick="location.href='/Admin/initdb'">Database initialiseren</button>
-    <button class="btn btn-danger" onclick="deletedb()">Database verwijderen</button>
+    <button class="btn btn-secondary" onclick="location.href='/User'">Mijn account</button>
+    <button class="btn btn-success" onclick="location.href='/Mentor'">Overstag bestuur</button>
 </div>
 <script>
     $('#_ahome').addClass('active');
-
-    function deletedb() {
-        if (confirm('Weet u zeker dat u de database wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt!'))
-            if (confirm('Zeker weten? Alle data gaat verloren!'))
-                location.href='/Admin/deletedb'
-    }
 </script>

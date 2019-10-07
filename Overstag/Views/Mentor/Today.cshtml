@@ -3,6 +3,7 @@
     ViewBag.Title = "Deze avond";
     Layout = "~/Views/_MentorLayout.cshtml";
     int totald = 0;
+    Model.Participators.RemoveAll(f => f.account.Type != 0);
 }
 
     <div>
@@ -201,7 +202,7 @@
             if (count >= 0 && id > 0 && count <= 15) {
                 $.get('/Mentor/setDrink/' + id + '/' + count, function (r) {
                     if (r.status == 'success') {
-                        M.toast({ html: 'Drankje ' + (add > 0 ? 'toegevoegd!' : 'verwijderd!'), classes: 'green' });
+                        M.toast({ html: 'Drankje ' + (add > 0 ? 'toegevoegd!' : 'verwijderd!'), classes: (add > 0 ? 'green' : 'yellow darken-3') });
                         $('#' + id + '-cc').text(count);
                         $('#aantald').text(Number($('#aantald').text()) + add);
                     } else {

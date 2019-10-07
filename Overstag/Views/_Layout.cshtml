@@ -20,10 +20,13 @@
             init: function(){
                 //Check if user is logged in
                 if (Overstag.loggedin) {
-                    $('#_reg a').attr('href', '/Register/Logoff');
+                    $('#_reg a').attr('href', '#');
                     $('#_reg a').text('Uitloggen');
-                    $('#_mreg a').attr('href', '/Register/Logoff');
+                    $('#_mreg a').attr('href', '#');
                     $('#_mreg a').text('Uitloggen');
+                    $('#_reg a').attr('onclick', 'OverstagJS.Security.Logout();');
+                    $('#_mreg a').attr('onclick', 'OverstagJS.Security.Logout();');
+
                     $('.hidden').show();
 
                     if (Overstag.type != 1) {
@@ -32,6 +35,9 @@
                         $('#_events a').text('Mijn agenda');
                         $('#_mevents a').text('Mijn agenda');
                     }
+                }
+                else {
+                    OverstagJS.Security.Login();
                 }
 
                 OverstagJS.General.detectIE();

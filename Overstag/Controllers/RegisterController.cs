@@ -156,7 +156,7 @@ namespace Overstag.Controllers
                     string ip = HttpContext.Connection.RemoteIpAddress.ToString();
                     try
                     {
-                        var account = context.Accounts.FirstOrDefault(e => e.Username == a.Username || e.Email == a.Username);
+                        var account = context.Accounts.FirstOrDefault(e => e.Username.Equals(a.Username,StringComparison.CurrentCultureIgnoreCase) || e.Email.Equals(a.Username, StringComparison.CurrentCultureIgnoreCase));
                         if (account == null)
                             return Json(new { status = "error", error = "Gebruiker bestaat niet" });
 
@@ -375,11 +375,16 @@ namespace Overstag.Controllers
                     else
                     {
                         var user = context.Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
-                        user.Family = family;
-                        context.Accounts.Update(user);
-                        context.SaveChanges();
-                        content = "<h1 style=\"color: green;\">Gelukt!!!</h1><h1>U bent nu lid van de famillie</h1>" +
-                            "<br><a href=\"/User\">Klik hier om verder te gaan</a>";
+                        if(user.Id == family.ParentID)
+                            content = "<h1 style=\"color: red;\">U kunt niet uzelf koppelen aan uw eigen gezin.</h1><br><p><a href=\"/Register/Logoff\">Log mijzelf uit</a>, en probeer de link opnieuw te openen</p>";
+                        else
+                        {
+                            user.Family = family;
+                            context.Accounts.Update(user);
+                            context.SaveChanges();
+                            content = "<h1 style=\"color: green;\">Gelukt!!!</h1><h1>U bent nu lid van de famillie</h1>" +
+                                "<br><a href=\"/User\">Klik hier om verder te gaan</a>";
+                        }
                     }
 
                     return new ContentResult()
@@ -390,6 +395,5 @@ namespace Overstag.Controllers
                 }
             }
         }
-
     }
 }
