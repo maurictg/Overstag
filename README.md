@@ -6,7 +6,7 @@
 
 Call the login function and check response using the WebClient class
 ```c#
-var url = "http://localhost:5000/Register/postLogin";
+var url = "https://stoverstag.nl/Register/postLogin";
 var request = (HttpWebRequest)WebRequest.Create(url);
 
 var postData = "Username=" + "test" + "&Password=" + "password";
