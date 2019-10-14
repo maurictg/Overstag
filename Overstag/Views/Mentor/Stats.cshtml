@@ -36,7 +36,10 @@
     foreach (var e in after)
     {
         e.Sub.RemoveAll(f => f.account.Type != 0);
-        aadata.Add(Math.Round(e.Sub.Select(f => Overstag.Core.General.getAge(f.account.Birthdate)).Average(),1).ToString().Replace(",","."));
+        if (e.Sub.Count() > 0)
+        {
+            aadata.Add(Math.Round(e.Sub.Select(f => Overstag.Core.General.getAge(f.account.Birthdate)).Average(),1).ToString().Replace(",","."));
+        }
 
         int ttm = e.Sub.Where(f => f.account.Sex == 0).Count();
         int ttv = e.Sub.Where(f => f.account.Sex == 1).Count();
