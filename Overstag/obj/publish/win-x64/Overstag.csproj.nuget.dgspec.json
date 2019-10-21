@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj": {}
+    "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj": {}
   },
   "projects": {
-    "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj": {
+    "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
+        "projectUniqueName": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
         "projectName": "Overstag",
-        "projectPath": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
+        "projectPath": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
         "packagesPath": "C:\\Users\\maurict\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\obj\\publish\\win-x64\\",
+        "outputPath": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\obj\\publish\\win-x64\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",
@@ -44,6 +44,14 @@
       "frameworks": {
         "netcoreapp3.0": {
           "dependencies": {
+            "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.AspNetCore.Razor.Runtime": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[3.0.0, )"
@@ -67,6 +75,18 @@
               "version": "[3.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer.Design": {
+              "target": "Package",
+              "version": "[1.1.6, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite.Core": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite.Design": {
               "target": "Package",
               "version": "[1.1.6, )"
             },

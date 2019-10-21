@@ -225,7 +225,7 @@ namespace Overstag.Controllers
                             }
                         }
                     }
-                    catch(Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e }); }
+                    catch(Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                 }
             }
         }

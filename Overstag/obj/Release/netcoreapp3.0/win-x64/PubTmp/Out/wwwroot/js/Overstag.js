@@ -88,78 +88,37 @@
                         M.toast({ html: '<b>Overstag support geen Internet Explorer</b>', classes: 'red', displayLength: 10000 });
                         M.toast({ html: 'Gebruik in plaats van dit Edge, Chrome of beter: Firefox', classes: 'blue' });
                     }
-                }
-            };
-        }(),
-        Security: function () {
-            return {
-                init: function () {
-                    if (localStorage.getItem('remember')) {
-                        if (localStorage.getItem('remember') === 'yes') {
-                            this.setRemember();
-                        }
-                    }
                 },
-                Login: function () {
-                    if (localStorage.getItem('remember')) {
-                        var r = localStorage.getItem('remember');
-                        if (r.length > 3) {
-                            $.get('/Register/tryRestore/' + r, function (res) {
-                                if (res.status === 'success') {
-                                    console.log('Welcome back!');
-                                    localStorage.setItem('remember', res.newtoken);
-                                    window.location.href = '/User';
-                                } else {
-                                    console.log(res.error);
-                                    localStorage.removeItem('remember');
-                                }
-                            }, 'json');
-                        }
-                    }
-                },
-                Logout: function () {
-                    console.log('Logging out...');
-                    this.removeRemember();
-                },
-                setRemember: function () {
-                    console.log('Ill remember you');
-                    $.get('/User/setRemember', function (r) {
-                        localStorage.setItem('remember', r);
-                    }, 'json');
-                },
-                removeRemember: function () {
-                    if (localStorage.getItem('remember')) {
-                        var r = localStorage.getItem('remember');
-                        if (r !== 'yes' && r !== '') {
-                            $.get('/User/removeRemember/' + r, function (res) {
-                                if (res.status === 'success') {
-                                    console.log('Bye!');
-                                    localStorage.removeItem('remember');
-                                } else {
-                                    console.log('Error status');
-                                }
-                            }).fail(function() {
-                                M.toast({ html: 'Er gaat iets fout', classes: 'red' });
-                                localStorage.removeItem('remember');
-                            }).always(function () {
-                                OverstagJS.Security.redirect();
-                            });
+                rememberMe: function (token) {
+                    $.post('/Auth/Register', { token: token }, function (r) {
+                        if (r.status === 'success') {
+                            localStorage.setItem('remember', r.token);
+                            console.log('Ill remember you');
                         } else {
-                            localStorage.removeItem('remember');
+                            console.log('Remembering failed');
                         }
-                    }
-                    else {
-                        this.redirect();
-                    }
-
+                    });
                 },
-                redirect: function () {
-                    localStorage.setItem('logout', '1');
-                    localStorage.removeItem('login');
+                restoreMe: function () {
+                    if (localStorage.getItem('remember')) {
+                        $.post('/Auth/Login', { token: localStorage.getItem('remember') }, function (r) {
+                            if (r.status === 'success') {
+                                window.location.href = '/User';
+                            } else {
+                                console.log('Cant restore login');
+                                localStorage.removeItem('remember');
+                            }
+                        });
+                    }
+                    return true;
+                },
+                logout: function () {
+                    localStorage.removeItem('remember');
+                    localStorage.setItem('logout', true);
                     window.location.href = '/Register/Logoff';
                 }
             };
-        }()
+        }(),
     };
 }();
 
