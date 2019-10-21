@@ -101,7 +101,6 @@
             $("#_reg, #_mreg").addClass("active");
             $('#progbar2, #mailhelper').hide();
             Login.mapEvents();
-            $('#Username').focus();
 
             if(OverstagJS.General.restoreMe())
                 Login.toggle(true);
@@ -195,6 +194,7 @@
                 $('#btnlogin').removeClass('disabled');
                 $('#Username').removeAttr('disabled');
                 $('#Password').removeAttr('disabled');
+                $('#Username').focus();
             }
         },
 

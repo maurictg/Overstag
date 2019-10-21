@@ -1,0 +1,45 @@
+﻿@model List<Overstag.Models.Account>
+@{
+    ViewBag.Title = "Leden";
+    Layout = "~/Views/_MentorLayout.cshtml";
+}
+
+<h2 class="blue-middle-text center-align">Gebruikersoverzicht</h2>
+
+<div>
+    <table class="responsive-table highlight">
+        <thead>
+            <tr>
+                <th>Voornaam</th>
+                <th>Achternaam</th>
+                <th>Adres</th>
+                <th>Leeftijd</th>
+                <th>Geboortedatum</th>
+                <th>Telefoonnummer</th>
+                <th>Email</th>
+                <th>Geslacht</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var u in Model)
+            {
+                <tr>
+                    <td>@u.Firstname</td>
+                    <td>@u.Lastname</td>
+                    <td>@u.Adress @u.Postalcode @u.Residence</td>
+                    <td><b>@Overstag.Core.General.getAge(u.Birthdate)</b></td>
+                    <td>@u.Birthdate.ToString("dd-MM-yyyy")</td>
+                    <td>@Html.Raw(u.Phone != null ? u.Phone : "-")</td>
+                    <th><a href="mailto:@u.Email">@u.Email</a></th>
+                    <td>@Html.Raw((u.Sex==1)?"<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(function () {
+        $('#_users, #_musers').addClass('active');
+    });
+</script>

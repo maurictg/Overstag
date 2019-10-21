@@ -120,8 +120,8 @@
                         @if (ViewBag.Payment != null)
                         {
                             Overstag.Models.Payment p = ViewBag.Payment;
-                            DateTime dt = p.PayedAt ?? new DateTime(0, 0, 0);
-                            bool validated = (Model.Invoice.Payed == (p.PayedAt != null && !string.IsNullOrEmpty(p.PaymentID) && p.InvoiceID == Model.Invoice.PayID));
+                            DateTime dt = p.PayedAt ?? new DateTime(2000, 1, 1);
+                            bool validated = (Model.Invoice.Payed == (p.PayedAt != null && !string.IsNullOrEmpty(p.PaymentID) && p.InvoiceID == Model.Invoice.PayID && Convert.ToInt32(p.Status) == 6));
                             <br />
                             <table class="responsive-table">
                                 <thead>

@@ -32,23 +32,32 @@
 <body>
     <nav>
         <div class="nav-wrapper green darken-4">
-            <a href="#" id="title" class="brand-logo">&nbsp;Stichtingsbestuur</a>
+            <a href="#" id="_title" class="brand-logo">&nbsp;Stichtingsbestuur</a>
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="/Home">Home</a></li>
                 <li id="_home"><a href="/Mentor">Bestuur home</a></li>
-                <li id="_stats"><a href="/Mentor/Stats">Statistieken</a></li>
                 <li id="_pres"><a href="/Mentor/Today">Vandaag</a></li>
+                <li id="_users"><a href="/Mentor/Users">Gebruikers</a></li>
+                <li id="_events"><a href="/Mentor/Events">Activiteiten</a></li>
+                <li id="_ideas"><a href="/Mentor/Votes">Votes</a></li>
+                <li id="_stats"><a href="/Mentor/Stats">Statistieken</a></li>
                 <li><a href="/User">Mijn account</a></li>
                 <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
             </ul>
+            <div class="progress" id="_progbar" style="display: none;">
+                <div class="indeterminate"></div>
+            </div>
         </div>
     </nav>
     <ul class="sidenav" id="mobile-demo">
         <li><a href="/Home">Home</a></li>
         <li id="_mhome"><a href="/Mentor">Bestuur home</a></li>
-        <li id="_mstats"><a href="/Mentor/Stats">Statistieken</a></li>
         <li id="_mpres"><a href="/Mentor/Today">Vandaag</a></li>
+        <li id="_musers"><a href="/Mentor/Users">Gebruikers</a></li>
+        <li id="_mevents"><a href="/Mentor/Events">Activiteiten</a></li>
+        <li id="_mideas"><a href="/Mentor/Votes">Votes</a></li>
+        <li id="_mstats"><a href="/Mentor/Stats">Statistieken</a></li>
         <li><a href="/User">Mijn account</a></li>
         <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
     </ul>

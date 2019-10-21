@@ -3,6 +3,28 @@
         init: function () {
             this.Theme.init();
         },
+        useHelper: function () {
+            $.getScript('/js/Helper.js', function () {
+                return true;
+            });
+        },
+        useMoment: function () {
+            $.getScript('/js/moment.min.js', function () {
+                return true;
+            });
+        },
+        useChart: function () {
+            $.getScript('/js/chart.min.js', function () {
+                return true;
+            });
+        },
+        useBSG: function () {
+            $.getScript('/js/BootstrapGrowl.js', function () {
+                return true;
+            });
+        },
+        
+
         Loader: function () {
             return {
                 init: function () {
@@ -119,6 +141,14 @@
                 }
             };
         }(),
+    };
+}();
+
+var Core = function(){
+    return {
+        doReload: function (interval) {
+            setTimeout(window.location.reload.bind(window.location), interval);
+        }
     };
 }();
 

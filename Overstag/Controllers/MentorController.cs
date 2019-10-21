@@ -162,5 +162,90 @@ namespace Overstag.Controllers
 
         public IActionResult Users()
             => View(new OverstagContext().Accounts.Where(f => f.Type == 0).OrderBy(g => g.Firstname).ToList());
+
+        public IActionResult Events()
+            => View(new OverstagContext().Events.OrderBy(e => e.When).ToList());
+
+        [HttpGet("/Mentor/getEvent/{id}")]
+        public JsonResult GetEvent(int id)
+            => Json(new { status = "success", data = new OverstagContext().Events.First(f => f.Id == id) });
+
+        [HttpPost]
+        public IActionResult postEvent(Event e)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var eve = new Event();
+
+                    if (e.Id != -1)
+                        eve = context.Events.First(f => f.Id == e.Id);
+
+                    eve.Title = e.Title;
+                    eve.Description = e.Description;
+                    eve.When = e.When;
+                    eve.Cost = e.Cost;
+
+                    if (e.Id == -1)
+                        context.Events.Add(eve);
+                    else
+                        context.Events.Update(eve);
+
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch(Exception ex)
+            {
+                return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = ex.ToString() });
+            }
+        }
+
+        [HttpGet("/Mentor/deleteEvent/{id}")]
+        public IActionResult deleteEvent(int id)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var e = context.Events.First(f => f.Id == id);
+                    context.Events.Remove(e);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch(Exception ex)
+            {
+                return Json(new { status = "error", error = "Verwijderen mislukt", debuginfo = ex.ToString() });
+            }
+        }
+
+        /// <summary>
+        /// Get all ideas sorted by votes
+        /// </summary>
+        /// <returns>View with sorted ideas</returns>
+        public IActionResult Votes()
+            => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote == 1) - b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
+
+
+        [HttpGet("Mentor/deleteVote/{id}")]
+        public IActionResult deleteVote(int id)
+        {
+            using (var context = new OverstagContext())
+            {
+                try
+                {
+                    var idea = context.Ideas.First(i => i.Id == id);
+                    context.Ideas.Remove(idea);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch (Exception e)
+                {
+                    return Json(new { status = "error", error = e.ToString() });
+                }
+            }
+        }
     }
 }
