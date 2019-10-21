@@ -22,13 +22,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>List(Event)</returns>
         public IActionResult Events()
-        {
-            using (var context = new OverstagContext())
-            {
-                //Return sorted list
-                return View(context.Events.Where(e => !Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray());
-            }
-        }
-        
+            => View(new OverstagContext().Events.ToList().Where(e => !Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray());
+
     }
 }

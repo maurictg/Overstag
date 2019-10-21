@@ -100,7 +100,7 @@ namespace Overstag.Controllers
 
                             try
                             {
-                                if(account.Type < 2)
+                                /*if(account.Type < 2)
                                 {
                                     CustomerRequest cr = new CustomerRequest()
                                     {
@@ -114,7 +114,7 @@ namespace Overstag.Controllers
                                     CustomerResponse cs = await client.CreateCustomerAsync(cr);
 
                                     account.MollieID = cs.Id;
-                                }
+                                }*/
                             }
                             catch(Exception e)
                             {
@@ -156,7 +156,7 @@ namespace Overstag.Controllers
                     string ip = HttpContext.Connection.RemoteIpAddress.ToString();
                     try
                     {
-                        var account = context.Accounts.FirstOrDefault(e => e.Username.Equals(a.Username,StringComparison.CurrentCultureIgnoreCase) || e.Email.Equals(a.Username, StringComparison.CurrentCultureIgnoreCase));
+                        var account = context.Accounts.FirstOrDefault(e => e.Username.ToLower().Equals(a.Username.ToLower()) || e.Email.ToLower().Equals(a.Username.ToLower()));
                         if (account == null)
                             return Json(new { status = "error", error = "Gebruiker bestaat niet" });
 

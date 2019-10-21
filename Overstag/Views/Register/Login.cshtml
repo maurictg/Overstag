@@ -22,12 +22,12 @@
                         </div>
                         <a href="/Register/Register"><b>Geen account? Maak er hier een</b></a>
 
-                        <p class="center-align">
+                        <!--p class="center-align">
                             <label>
                                 <input type="checkbox" class="filled-in" id="remember">
                                 <span>Onthoud mij</span>
                             </label>
-                        </p>
+                        </p-->
 
                         <div class="card-action center-align">
                             <br />
@@ -139,11 +139,19 @@
                 }
             });
 
+            $("#2facode").on("paste", function (e) {
+                var text = e.originalEvent.clipboardData.getData('text');
+                if (text == undefined || text == null || text.length < 1)
+                    text = $('#2facode').val();
+
+                if (text.length >= 6)
+                    Login.validate2fa();
+            });
+
             $('#2facode').on('keyup', function () {
                 if ($('#2facode').val().length >= 6)
                     Login.validate2fa();
             });
-
         },
 
         sendmail: function () {
@@ -182,6 +190,8 @@
 
         post: function () {
             $('#btnlogin').addClass('disabled');
+            $('#Username').attr('disabled',true);
+            $('#Password').attr('disabled',true);
             $('#progbar').show();
 
             if ($('#remember').prop('checked'))
@@ -189,7 +199,7 @@
             else
                 localStorage.removeItem('remember');
 
-            $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val()}, function (response) {
+            $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
                     if (response.type == 3)
                         localStorage.setItem('redirect', '/Admin');
@@ -215,6 +225,11 @@
             ).done(function () {
                 $('#progbar').hide();
                 $('#btnlogin').removeClass('disabled');
+                $('#Username').removeAttr('disabled');
+                $('#Password').removeAttr('disabled');
+            }).fail(function () {
+                $('#progbar').hide();
+                M.toast({html: 'Inloggen mislukt door interne fout', classes: 'red'});
             });
         },
 

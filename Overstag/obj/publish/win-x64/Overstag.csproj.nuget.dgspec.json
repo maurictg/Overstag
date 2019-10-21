@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj": {}
+    "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj": {}
   },
   "projects": {
-    "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj": {
+    "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
+        "projectUniqueName": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
         "projectName": "Overstag",
-        "projectPath": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\Overstag.csproj",
+        "projectPath": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\Overstag.csproj",
         "packagesPath": "C:\\Users\\maurict\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\maurict\\Documents\\GitHub\\Overstag\\Overstag\\obj\\publish\\win-x64\\",
+        "outputPath": "C:\\Users\\maurict\\source\\repos\\Overstag\\Overstag\\obj\\publish\\win-x64\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Microsoft\\Xamarin\\NuGet\\",
@@ -23,7 +23,7 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "netcoreapp2.1"
+          "netcoreapp3.0"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
@@ -31,7 +31,7 @@
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "netcoreapp2.1": {
+          "netcoreapp3.0": {
             "projectReferences": {}
           }
         },
@@ -42,33 +42,41 @@
         }
       },
       "frameworks": {
-        "netcoreapp2.1": {
+        "netcoreapp3.0": {
           "dependencies": {
-            "Microsoft.AspNetCore.All": {
-              "target": "Package",
-              "version": "[2.1.12, )"
-            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[2.2.6, )"
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Abstractions": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.Relational": {
               "target": "Package",
-              "version": "[2.2.6, )"
+              "version": "[3.0.0, )"
             },
-            "Microsoft.NETCore.App": {
-              "suppressParent": "All",
+            "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[2.1.0, )",
-              "autoReferenced": true
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer.Design": {
+              "target": "Package",
+              "version": "[1.1.6, )"
+            },
+            "Microsoft.Extensions.PlatformAbstractions": {
+              "target": "Package",
+              "version": "[1.1.0, )"
             },
             "Mollie.Api": {
               "target": "Package",
               "version": "[2.0.6, )"
-            },
-            "MySql.Data.EntityFrameworkCore": {
-              "target": "Package",
-              "version": "[8.0.17, )"
             },
             "QRCoder": {
               "target": "Package",
@@ -76,7 +84,7 @@
             },
             "System.Drawing.Common": {
               "target": "Package",
-              "version": "[4.5.1, )"
+              "version": "[4.6.0, )"
             }
           },
           "imports": [
@@ -89,6 +97,14 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
         }
       },

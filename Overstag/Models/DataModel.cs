@@ -21,8 +21,7 @@ namespace Overstag.Models
         {
             //Connection string
 #if DEBUG
-            optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
-            //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
+            optionsBuilder.UseSqlite("Data Source=db.sqlite");
 #else
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlConnectionString);
 #endif

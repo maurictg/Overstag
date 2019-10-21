@@ -54,7 +54,7 @@ namespace Overstag.Controllers
         {
             using (var context = new OverstagContext())
             {
-                var events = context.Events.Include(f => f.Participators).OrderBy(f => f.When);
+                var events = context.Events.Include(f => f.Participators).OrderBy(f => f.When).ToList();
                 List<SSubEvent> sse = new List<SSubEvent>();
                 foreach (var e in events)
                 {

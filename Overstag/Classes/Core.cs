@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System.Net.Mail;
 
 namespace Overstag.Core
@@ -24,12 +24,12 @@ namespace Overstag.Core
         /// </summary>
         /// <returns>Credentials object</returns>
         public Credentials Get()
-            => JsonConvert.DeserializeObject<Credentials>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "credentials.json")));
+            => JsonSerializer.Deserialize<Credentials>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "credentials.json")));
     }
 
     public static class Auth
     {
-        private static List<Models.NoDB.Auth> Auths = new List<Models.NoDB.Auth>();
+        private static List<Models.Auth> Auths = new List<Models.Auth>();
 
         public static bool IsAuthenticated(string token)
         {
@@ -56,7 +56,7 @@ namespace Overstag.Core
             if (Auths.Count() > 50)
                 Clear();
 
-            var auth = new Models.NoDB.Auth { IP = ip, UserID = id, FirstLogin = DateTime.Now, LastSeen = DateTime.Now, Token = Overstag.Encryption.Random.rString(Encryption.Random.rInt(15, 30)) };
+            var auth = new Models.Auth { IP = ip, UserID = id, FirstLogin = DateTime.Now, LastSeen = DateTime.Now, Token = Overstag.Encryption.Random.rString(Encryption.Random.rInt(15, 30)) };
             Auths.Add(auth);
             return auth.Token;
         }
@@ -67,7 +67,7 @@ namespace Overstag.Core
         public static bool UnRegister(string token)
            => Auths.Remove(Auths.First(f => f.Token == token));
 
-        public static List<Models.NoDB.Auth> getAuth(int userid = -1)
+        public static List<Models.Auth> getAuth(int userid = -1)
             => (userid == -1) ? Auths : Auths.Where(f => f.UserID == userid).ToList();
 
         public static int ClearUser(int userid)
@@ -81,8 +81,6 @@ namespace Overstag.Core
 
             return outdated.Count();
         }
-
-        
     }
 
     public static class General
