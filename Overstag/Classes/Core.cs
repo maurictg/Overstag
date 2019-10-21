@@ -27,62 +27,6 @@ namespace Overstag.Core
             => JsonSerializer.Deserialize<Credentials>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "credentials.json")));
     }
 
-    public static class Auth
-    {
-        private static List<Models.Auth> Auths = new List<Models.Auth>();
-
-        public static bool IsAuthenticated(string token)
-        {
-            if (!Auths.Any(f => f.Token == token))
-                return false;
-
-            var auth = Auths.First(f => f.Token == token);
-            int index = Auths.IndexOf(auth);
-            if (DateTime.Now.AddMonths(-1) > auth.LastSeen)
-            {
-                Auths.Remove(auth);
-                return false;
-            }
-            else
-            {
-                auth.LastSeen = DateTime.Now;
-                Auths[index] = auth;
-                return true;
-            }
-        }
-
-        public static string Register(string ip, int id)
-        {
-            if (Auths.Count() > 50)
-                Clear();
-
-            var auth = new Models.Auth { IP = ip, UserID = id, FirstLogin = DateTime.Now, LastSeen = DateTime.Now, Token = Overstag.Encryption.Random.rString(Encryption.Random.rInt(15, 30)) };
-            Auths.Add(auth);
-            return auth.Token;
-        }
-
-        public static int getUserID(string authtoken)
-            => Auths.First(f => f.Token == authtoken).UserID;
-
-        public static bool UnRegister(string token)
-           => Auths.Remove(Auths.First(f => f.Token == token));
-
-        public static List<Models.Auth> getAuth(int userid = -1)
-            => (userid == -1) ? Auths : Auths.Where(f => f.UserID == userid).ToList();
-
-        public static int ClearUser(int userid)
-            => Auths.RemoveAll(f => f.UserID == userid);
-
-        public static int Clear()
-        {
-            var outdated = Auths.Where(f => DateTime.Now.AddMonths(-1) > f.LastSeen);
-            foreach (var o in outdated)
-                Auths.Remove(o);
-
-            return outdated.Count();
-        }
-    }
-
     public static class General
     {
         public static Credentials Credentials = new Credentials().Get();

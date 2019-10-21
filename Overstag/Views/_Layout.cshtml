@@ -24,8 +24,8 @@
                     $('#_reg a').text('Uitloggen');
                     $('#_mreg a').attr('href', '#');
                     $('#_mreg a').text('Uitloggen');
-                    $('#_reg a').attr('onclick', 'OverstagJS.Security.Logout();');
-                    $('#_mreg a').attr('onclick', 'OverstagJS.Security.Logout();');
+                    $('#_reg a').attr('onclick', 'OverstagJS.General.logout();');
+                    $('#_mreg a').attr('onclick', 'OverstagJS.General.logout();');
 
                     $('.hidden').show();
 
@@ -36,22 +36,8 @@
                         $('#_mevents a').text('Mijn agenda');
                     }
                 }
-                else {
-                    OverstagJS.Security.Login();
-                }
-
+                
                 OverstagJS.General.detectIE();
-                Overstag.mapevents();
-            },
-            mapevents: function () {
-                if (Overstag.loggedin) {
-                    $('#_reg a').click(function () {
-                        localStorage.setItem("logout",true);
-                    });
-                    $('#_mreg a').click(function () {
-                        localStorage.setItem("logout",true);
-                    });
-                }
             },
 
             //IMPORTANT VARIABLES
@@ -64,8 +50,8 @@
 </head>
 <body>
     <nav>
-        <div class="nav-wrapper red">
-            <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag Bèta</a>
+        <div class="nav-wrapper blue-light">
+            <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li id="_home"><a href="/Home">Home</a></li>
@@ -75,6 +61,9 @@
                 <li id="_ainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
                 <li id="_reg"><a href="/Register">Aanmelden</a></li>
             </ul>
+            <div class="progress" id="_progbar" style="display: none;">
+                <div class="indeterminate"></div>
+            </div>
         </div>
     </nav>
     <ul class="sidenav" id="mobile-demo">

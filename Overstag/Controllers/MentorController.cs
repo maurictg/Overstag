@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Text.Json;
 using Overstag.Models;
 using Overstag.Models.NoDB;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Overstag.Controllers
@@ -18,6 +20,7 @@ namespace Overstag.Controllers
         /// <returns>View</returns>
         public IActionResult Index()
         {
+            ViewBag.Token = HttpContext.Session.GetString("Token");
             return View();
         }
 
@@ -85,7 +88,7 @@ namespace Overstag.Controllers
         [HttpPost]
         public IActionResult postPresence([FromForm]string absentids)
         {
-            int[] absentIDS = JsonConvert.DeserializeObject<int[]>(absentids);
+            int[] absentIDS = System.Text.Json.JsonSerializer.Deserialize<int[]>(absentids);
             
             using(var context = new OverstagContext())
             {
@@ -95,7 +98,7 @@ namespace Overstag.Controllers
                 {
                     foreach (int id in absentIDS)
                     {
-                        var parti = eve.Participators;
+                        var parti = eve.Participators.ToList();
                         var e = eve.Participators.First(f => f.UserID == id);
                         if (e.Payed == 0)
                         {
@@ -140,6 +143,9 @@ namespace Overstag.Controllers
                 try
                 {
                     var user = eve.Participators.First(f => f.UserID == userid);
+                    if (user.Payed == 1)
+                        return Json(new { status = "error", error = "Gebruiker heeft al betaald" });
+
                     user.ConsumptionCount = (count >= 0) ? count : 0;
                     user.ConsumptionTax = user.ConsumptionCount * 100;
                     context.Events.Update(eve);

@@ -50,15 +50,6 @@ namespace Overstag.Models
         public string Ip { get; set; }
     }
 
-    public class Auth
-    {
-        public int UserID { get; set; }
-        public string Token { get; set; }
-        public DateTime FirstLogin { get; set; }
-        public DateTime LastSeen { get; set; }
-        public string IP { get; set; }
-    }
-
     //NO DATABASE CLASS
     public class Login
     {

@@ -11,28 +11,19 @@
                     <form method="post" action="/Register/postLogin" class="login-form" id="frmlogin">
                         <div class="input-field">
                             <i class="material-icons prefix">account_circle</i>
-                            <input type="text" class="checki" id="Username" placeholder="Gebruikersnaam of email" />
+                            <input type="text" disabled class="checki" id="Username" placeholder="Gebruikersnaam of email" />
                             <label class="active" for="Username">Gebruikersnaam of email</label>
                         </div>
                         <div class="input-field">
                             <i class="material-icons prefix">lock</i>
-                            <input type="password" class="checki" id="Password" placeholder="Wachtwoord" />
+                            <input type="password" disabled class="checki" id="Password" placeholder="Wachtwoord" />
                             <label for="Password">Wachtwoord</label>
                             <a href="#memailreset" class="modal-trigger" id="forgotpass">Wachtwoord vergeten?</a>
                         </div>
                         <a href="/Register/Register"><b>Geen account? Maak er hier een</b></a>
-
-                        <!--p class="center-align">
-                            <label>
-                                <input type="checkbox" class="filled-in" id="remember">
-                                <span>Onthoud mij</span>
-                            </label>
-                        </p-->
-
                         <div class="card-action center-align">
                             <br />
-                            <div class="progress" id="progbar"><div class="indeterminate"></div></div>
-                            <a class="btn btn-large blue-light waves-effect" id="btnlogin">Inloggen</a><br />
+                            <a class="btn btn-large blue-light waves-effect disabled" id="btnlogin">Inloggen</a><br />
                         </div>
                     </form>
                 </div>
@@ -106,9 +97,14 @@
 
     Login = {
         init: function () {
+            $('#_progbar').show();
             $("#_reg, #_mreg").addClass("active");
-            $('#progbar, #progbar2, #mailhelper').hide();
+            $('#progbar2, #mailhelper').hide();
             Login.mapEvents();
+            $('#Username').focus();
+
+            if(OverstagJS.General.restoreMe())
+                Login.toggle(true);
         },
 
         mapEvents: function () {
@@ -188,11 +184,22 @@
             }
         },
 
+        toggle: function (enable) {
+            if (!enable) {
+                $('#btnlogin').addClass('disabled');
+                $('#Username').attr('disabled',true);
+                $('#Password').attr('disabled',true);
+                $('#_progbar').show();
+            } else {
+                $('#_progbar').hide();
+                $('#btnlogin').removeClass('disabled');
+                $('#Username').removeAttr('disabled');
+                $('#Password').removeAttr('disabled');
+            }
+        },
+
         post: function () {
-            $('#btnlogin').addClass('disabled');
-            $('#Username').attr('disabled',true);
-            $('#Password').attr('disabled',true);
-            $('#progbar').show();
+            Login.toggle(false);
 
             if ($('#remember').prop('checked'))
                 localStorage.setItem('remember', 'yes');
@@ -212,23 +219,22 @@
                         $('#2facode').focus();
                         token = response.token;
                     }
-                    else
+                    else {
                         Login.redirect();
+                        localStorage.setItem('remember', response.remember);
+                    }
                 }
                 else {
                     //status = error
                     M.toast({ html: response.error, classes: 'red ' });
                     $('.checki').val('');
-                    $('#Username').focus();
                 }
             }, 'json'
             ).done(function () {
-                $('#progbar').hide();
-                $('#btnlogin').removeClass('disabled');
-                $('#Username').removeAttr('disabled');
-                $('#Password').removeAttr('disabled');
+                Login.toggle(true);
+                $('#Username').focus();
             }).fail(function () {
-                $('#progbar').hide();
+                $('#_progbar').hide();
                 M.toast({html: 'Inloggen mislukt door interne fout', classes: 'red'});
             });
         },
@@ -265,6 +271,7 @@
                 var timestring = now.getDate().toString().padStart(2, '0')+'-'+(now.getMonth() + 1).toString().padStart(2, '0')+'-'+now.getFullYear()+' '+now.getHours().toString().padStart(2, '0')+':'+now.getMinutes().toString().padStart(2, '0')+':'+now.getSeconds().toString().padStart(2, '0');
                 $.post('/Register/Validate2FA', { token: token, code: $('#2facode').val(), datetime: timestring}, function (response) {
                     if (response.status == 'success') {
+                        localStorage.setItem('remember', response.remember);
                         Login.redirect();
                         M.Modal.getInstance($('#tfa')).close();
                         $('#2facode').val('');
@@ -309,7 +316,7 @@
                     M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
                 });
             }
-        }
+        },
     }
 
     //call init function

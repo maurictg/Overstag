@@ -53,7 +53,28 @@ namespace Overstag.Controllers
             }
         }
 
-        public void Logoff() { HttpContext.Session.Remove("Token"); HttpContext.Session.Remove("Name"); HttpContext.Session.Remove("Type"); Response.Redirect("/Home/Index"); }
+        public void Logoff()
+        {
+            HttpContext.Session.Remove("Token"); 
+            HttpContext.Session.Remove("Name"); 
+            HttpContext.Session.Remove("Type");
+
+            if (HttpContext.Session.GetString("Remember") != null)
+            {
+                string token = HttpContext.Session.GetString("Remember");
+                using (var context = new OverstagContext())
+                {
+                    if (context.Auths.Any(f => f.Token == token))
+                    {
+                        var auth = context.Auths.First(f => f.Token == token);
+                        context.Auths.Remove(auth);
+                        context.SaveChanges();
+                    }
+                }
+            }
+
+            Response.Redirect("/Home/Index");
+        }
 
         /// <summary>
         /// Register a new user to the system
@@ -189,7 +210,12 @@ namespace Overstag.Controllers
                                     context.SaveChanges();
                                 }
 
-                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
+                                string remember = (no2fa) ? Security.Auth.Register(account.Token) : "";
+
+                                if (no2fa)
+                                    HttpContext.Session.SetString("Remember", remember);
+
+                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
                             }
                             else
                             {
@@ -319,8 +345,10 @@ namespace Overstag.Controllers
                     HttpContext.Session.SetString("Token", a.Token);
                     HttpContext.Session.SetInt32("Type", a.Type);
                     HttpContext.Session.SetString("Name", a.Username);
+                    string remember = Security.Auth.Register(a.Token);
+                    HttpContext.Session.SetString("Remember", remember);
+                    return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                 }
-                return Json(new { status = "success" });
             }                
             else
                 return Json(new { status = "error" });
@@ -341,8 +369,6 @@ namespace Overstag.Controllers
             else
                 return Json(new { status = "error" });
         }
-         
-
 
         /// <summary>
         /// Join a family by its token
@@ -395,5 +421,6 @@ namespace Overstag.Controllers
                 }
             }
         }
+
     }
 }

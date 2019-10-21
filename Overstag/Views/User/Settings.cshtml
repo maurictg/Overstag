@@ -142,23 +142,7 @@
                         <a class="waves-effect waves-light btn orange center" onclick="User.leaveFamily();">Gezin verlaten</a>
                     }
 
-                    <br />
-                    <h5>Opgeslagen logins</h5>
-                    <div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Laatst ingelogd op</th>
-                                    <th>IP-adres</th>
-                                    <th>Acties</th>
-                                </tr>
-                            </thead>
-                            <tbody id="logins">
-
-                            </tbody>
-                        </table>
-                    </div>
-                    <br />
+                    <br /><br />
                     <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(3);">Annuleren</a>
 
                 </div>
@@ -352,36 +336,14 @@
                         }, 'json');
                     }
                 },
-                getLogins: function () {
-                    $.getJSON('/User/getAuth', function (r) {
-                        var html = '';
-                        $.each(r, function (i, e) {
-                            moment.locale('nl');
-                            var dt = moment(Date.parse(e.lastSeen));
-                            html += `
-                             <tr><td>${dt.format('DD-MM-YYYY')+' om '+dt.format('HH:mm:ss')}</td><td>${e.ip}</td><td><button class="btn orange" onclick="User.logOut('${encodeURIComponent(e.token)}')">Verwijderen</button></td></tr>
-                            `;
-                        })
-                        $('#logins').html(html);
-                    });
-                },
-                logOut: function (token) {
-                    $.get('/User/removeRemember/' + token, function (res) {
-                        if (res.status === 'success') {
-                            User.getLogins();
-                        } else {
-                            M.toast({ html: 'Uitloggen mislukt', classes: 'red' });
-                        }
-                    })
-                }
-
+                
             }
 
             User.init();
 
-    $(document).ready(function () {
-        $('.materialboxed').materialbox();
-    });
+        $(document).ready(function () {
+            $('.materialboxed').materialbox();
+        });
     </script>
 </div>
 

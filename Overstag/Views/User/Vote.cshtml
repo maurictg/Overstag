@@ -7,6 +7,13 @@
 <div id="ideas">
     <p>Laden...</p>
 </div>
+<div class="row">
+    <div class="col m1 offset-m11 s2 offset-s10">
+        <button class="btn transparent waves-effect" onclick="Vote.load();">
+            <i class="material-icons blue-light-text">refresh</i>
+        </button>
+    </div>
+</div>
 <table class="responsive-table">
     <tr><td colspan="3" class="center-align"><h6 style="font-weight: bold;">Idee toevoegen</h6></td></tr>
     <tr>
@@ -71,7 +78,13 @@
         saveLike: function (id, like) {
             $.get('/User/Vote/Like/' + id + '/' + like, function (r) {
                 if (r.status == 'success') {
-                    Vote.load();
+                    if (like == 1) {
+                        $('#like-' + id).removeClass('grey').addClass('green');
+                        $('#dislike-' + id).removeClass('red').addClass('grey');
+                    } else {
+                        $('#dislike-' + id).removeClass('grey').addClass('red');
+                        $('#like-' + id).removeClass('green').addClass('grey');
+                    }
                 }else {
                     M.toast({ html: r.error, classes: 'red' });
                     return false;

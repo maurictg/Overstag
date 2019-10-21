@@ -7,7 +7,7 @@
     <body>
         <div class="row">
             <div class="col s12 m8 offset-m2">
-                <h4 class="blue-light-text center-align"><b>Registreren</b></h4><br />
+                <h4 class="blue-light-text center-align"><b id="rtitle">Registreren</b></h4><br />
                 <div class="card-panel" style="display: block; margin-left: auto; margin-right: auto">
                     <a href="/Register/Login"><b>Al een account? Log hier in</b></a>
                     <br /><br />
@@ -105,7 +105,6 @@
                         </div>
                         <div class="card-action center-align">
                             <br />
-                            <div class="progress" id="progbar"><div class="indeterminate"></div></div>
                             <p>
                                 <label>
                                     <input type="checkbox" class="filled-in" checked="checked" id="autologin" />
@@ -129,7 +128,6 @@
     Register = {
         init: function () {
             $("#_reg, #_mreg").addClass("active");
-            $('#progbar').hide();
             Register.mapEvents();
         },
 
@@ -187,7 +185,10 @@
                 Birthdate: $('#Birthdate').val(),
                 Phone: $('#Phone').val()
             };
-            $('#progbar').show();
+            $('#_progbar').show();
+            $('#rtitle').text('Registeren...');
+            $('.checki').attr('disabled',true);
+            $(window).scrollTop(0);
             $.post("/Register/postRegister",data , function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Registratie successvol!!', classes: 'green' });
@@ -209,13 +210,15 @@
                 }
                 }, 'json'
             ).done(function(){
-                $('#progbar').hide();
+                $('#_progbar').hide();
                 $('#register').removeClass('disabled');
+                $('#rtitle').text('Registeren');
+                $('.checki').removeAttr('disabled');
             });
         },
 
         postlogin: function () {
-            $('#progbar').show();
+            $('#_progbar').show();
             $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
                     localStorage.setItem("login",true);
@@ -229,7 +232,7 @@
                 }
                 }, 'json'
             ).done(function(){
-                $('#progbar').hide();
+                $('#_progbar').hide();
             });
         }
     }
