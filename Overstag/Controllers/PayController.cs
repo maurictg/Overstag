@@ -41,7 +41,7 @@ namespace Overstag.Controllers
                     var iinvoice = new IInvoice {
                         Amount = invoice.Amount,
                         UserID = invoice.UserID,
-                        Payed = invoice.Payed==1,
+                        Payed = (invoice.Payed==1),
                         PayID = invoice.PayID,
                         Timestamp = invoice.Timestamp,
                         Events = events.OrderBy(e => e.When).ToList(),
@@ -54,7 +54,7 @@ namespace Overstag.Controllers
                     if(iinvoice.Payed)
                     {
                         //Validate payment
-                        var payment = context.Payments.FirstOrDefault(f => f.InvoiceID == invoice.PayID);
+                        var payment = context.Payments.ToList().FirstOrDefault(f => f.InvoiceID == invoice.PayID);
                         if (payment == null || string.IsNullOrEmpty(payment.PaymentID))
                             ViewBag.Info = "Payment not validated";
                         else

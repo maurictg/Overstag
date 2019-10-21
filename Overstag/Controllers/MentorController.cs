@@ -159,5 +159,8 @@ namespace Overstag.Controllers
                 
             }
         }
+
+        public IActionResult Users()
+            => View(new OverstagContext().Accounts.Where(f => f.Type == 0).OrderBy(g => g.Firstname).ToList());
     }
 }

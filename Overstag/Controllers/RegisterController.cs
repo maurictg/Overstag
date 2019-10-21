@@ -121,7 +121,7 @@ namespace Overstag.Controllers
 
                             try
                             {
-                                /*if(account.Type < 2)
+                                if(account.Type < 2)
                                 {
                                     CustomerRequest cr = new CustomerRequest()
                                     {
@@ -135,11 +135,11 @@ namespace Overstag.Controllers
                                     CustomerResponse cs = await client.CreateCustomerAsync(cr);
 
                                     account.MollieID = cs.Id;
-                                }*/
+                                }
                             }
                             catch(Exception e)
                             {
-                                return Json(new { status = "error", error = "Mollie integratie voor het verwerken van betalingen mislukt, neem contact op met ons.", debuginfo = e });
+                                return Json(new { status = "error", error = "Mollie integratie voor het verwerken van betalingen mislukt, neem contact op met ons.", debuginfo = e.ToString() });
                             }
                             
                             context.Accounts.Add(account);
