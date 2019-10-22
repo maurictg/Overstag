@@ -227,7 +227,7 @@ namespace Overstag.Controllers
             }
             catch (Exception e)
             {
-                return Json(new { status = "error", error = e });
+                return Json(new { status = "error", error = e.ToString() });
             }
         }
 

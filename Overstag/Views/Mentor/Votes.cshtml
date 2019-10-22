@@ -12,6 +12,7 @@
             <tr>
                 <th>Titel</th>
                 <th>Omschrijving</th>
+                <th>Geschatte kosten</th>
                 <th>Actie</th>
             </tr>
         </thead>
@@ -27,6 +28,7 @@
                         </div>
                     </td>
                     <td>@idea.Description</td>
+                    <td>@Html.Raw((idea.Cost == null) ? "?" : idea.Cost)</td>
                     <td>
                         <button type="button" class="btn red waves-effect btndelete" data-id="@idea.Id">Verwijderen</button>
                     </td>
@@ -63,7 +65,7 @@
             $.get('/Mentor/deleteVote/' + $('#btndelete').data('id'), function (r) {
                 if (r.status == "success") {
                     M.toast({ html: 'Successvol verwijderd', classes: 'green' });
-                    Core.doReload();
+                    Core.doReload(500);
                 }
                 else
                     M.toast({ html: 'Interne serverfout.', classes: 'red' });

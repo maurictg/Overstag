@@ -247,5 +247,61 @@ namespace Overstag.Controllers
                 }
             }
         }
+
+        public IActionResult Payments()
+        {
+            List<MPayment> payments = new List<MPayment>();
+            using (var context = new OverstagContext())
+            {
+                var pms = context.Payments.OrderBy(f => f.PayedAt == null).OrderBy(f => f.PlacedAt).ToList();
+                foreach(var pm in pms)
+                {
+                    var user = context.Accounts.First(f => f.Id == pm.UserID);
+                    var invoice = context.Invoices.First(f => f.PayID == pm.InvoiceID);
+                    payments.Add(new MPayment()
+                    {
+                        Invoice = invoice,
+                        User = user,
+                        Payment = pm
+                    });
+                }
+            }
+            return View(payments);
+        }
+
+        [HttpPost]
+        public JsonResult markAsPayed([FromForm]int payed, [FromForm]int payid, [FromForm]int invoiceid)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var invoice = context.Invoices.First(f => f.Id == invoiceid);
+                    var payment = context.Payments.First(f => f.Id == payid);
+
+                    if (payed == 0 || payed == 1)
+                    {
+                        DateTime? nd = null;
+                        Mollie.Api.Models.Payment.PaymentStatus? np = null;
+
+                        invoice.Payed = payed;
+                        payment.PayedAt = (payed == 1) ? DateTime.Now : nd;
+                        payment.PaymentID = (payed == 1) ? Encryption.Random.rCode(10) : null;
+                        payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
+                        context.Invoices.Update(invoice);
+                        context.Payments.Update(payment);
+                        context.SaveChanges();
+                        return Json(new { status = "success", payid = payment.PaymentID });
+                    }
+                    else
+                        return Json(new { status = "error", error = "BOOL payed moet 0 of 1 zijn" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                }
+            }
+        }
+            
     }
 }

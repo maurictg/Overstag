@@ -21,6 +21,9 @@
             <ul id="nav-mobile" class="left hide-on-med-and-down">
                 <li><a href="/Home">Home</a></li>
             </ul>
+            <div class="progress" style="display: none;" id="progbar">
+                <div class="indeterminate"></div>
+            </div>
         </div>
     </nav>
     <div class="center-align">
@@ -30,8 +33,14 @@
 
         <div id="statuscontrol">
             <p><b>De status van uw betaling wordt gecontroleerd...</b><br />(het kan even duren voor uw betaling is verwerkt, meestal 1 minuut)</p>
-            <button class="btn blue waves-effect" onclick="Pay.updateStatus()">Verversen</button>
             <p class="grey-text">Verversen gaat automatisch om de 10 seconden</p>
+            <div class="row">
+                <div class="progress col s12 m4 offset-m4">
+                    <div id="refreshbar" data-value="100" class="determinate" style="width: 100%"></div>
+                </div>
+            </div>
+            <button class="btn blue waves-effect" onclick="Pay.updateStatus()">Verversen</button>
+
         </div>
         
         <div id="payedcontrol" style="display: none;">
@@ -49,43 +58,66 @@
             return {
                 init: function () {
                     this.getStatus();
-                    timeout = setTimeout(this.getStatus, 10000);
+                    timeout = setInterval(Pay.updateBar, 1000);
+                },
+                updateBar: function () {
+                    var val = Number($('#refreshbar').data('value'));
+
+                    if (val != 0) {
+                        val -= 10;
+                    } else {
+                        val = 100;
+                        Pay.getStatus();
+                    }
+
+                    $('#refreshbar').data('value', val);
+                    $('#refreshbar').css('width', val + '%');
                 },
                 updateStatus: function () {
+                    $('#refreshbar').data('value', 100);
+                    $('#progbar').show();
                     $.get('/Pay/UpdatePayment/' + payid, function (r) {
                         if (r.status == 'success') {
                             console.log(r.data);
                             Pay.getStatus();
                         }
                     }, 'json').fail(function () {
+                        $('#progbar').hide();
                         M.toast({ html: 'Er is een interne fout opgetreden', classes: 'red' });
                     });
                 },
                 getStatus: function () {
+                    
                     if (count > 10) {
                         count = 0;
                         this.updateStatus();
                         return;
                     }
 
+                    $('#progbar').show();
                     $.get('/Pay/GetPayment/' + payid, function (r) {
                         if (r.status == 'success') {
+                            $('#progbar').hide();
                             console.log(r.data);
                             var status = Pay.parseStatus(r.data.status);
                             $('#status').text(status[0]);
                             $('#status').removeClass().addClass(status[1] + '-text');
 
                             if (r.data.status == 6) {
-                                clearTimeout(timeout);
+                                clearInterval(timeout);
                                 $('#statuscontrol').hide();
                                 $('#hrefbtn').attr('href', '/Pay/Direct/' + r.data.invoiceID);
 
                                 $('#payedcontrol').show();
                             }
                         } else {
+                            $('#progbar').hide();
                             M.toast({ html: r.error, classes: 'red' });
                         }
-                    }, 'json');
+                    }, 'json').fail(function () {
+                        M.toast({ html: 'Betaling niet gevonden. Is de betaling wel geplaatst?', classes: 'orange' });
+                        $('#progbar').hide();
+                    });
                 },
                 parseStatus: function (code) {
                     switch (code) {

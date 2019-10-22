@@ -74,4 +74,11 @@ namespace Overstag.Models.NoDB
         public int ConsumptionCount;
         public int ConsumptionCost;
     }
+
+    public struct MPayment
+    {
+        public Account User;
+        public Invoice Invoice;
+        public Payment Payment;
+    }
 }

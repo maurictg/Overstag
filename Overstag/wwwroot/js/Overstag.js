@@ -3,27 +3,13 @@
         init: function () {
             this.Theme.init();
         },
-        useHelper: function () {
+        /*useHelper: function(callback) {
             $.getScript('/js/Helper.js', function () {
-                return true;
+                if (callback !== undefined && callback !== null)
+                    callback();
             });
-        },
-        useMoment: function () {
-            $.getScript('/js/moment.min.js', function () {
-                return true;
-            });
-        },
-        useChart: function () {
-            $.getScript('/js/chart.min.js', function () {
-                return true;
-            });
-        },
-        useBSG: function () {
-            $.getScript('/js/BootstrapGrowl.js', function () {
-                return true;
-            });
-        },
-        
+        },*/
+
 
         Loader: function () {
             return {
@@ -121,7 +107,7 @@
                         }
                     });
                 },
-                restoreMe: function () {
+                restoreMe: function (callback, params) {
                     if (localStorage.getItem('remember')) {
                         $.post('/Auth/Login', { token: localStorage.getItem('remember') }, function (r) {
                             if (r.status === 'success') {
@@ -130,9 +116,18 @@
                                 console.log('Cant restore login');
                                 localStorage.removeItem('remember');
                             }
+                        }).done(function () {
+                            if (callback !== undefined && callback !== null) {
+                                callback(params);
+                            }
+                            return true;
                         });
                     }
-                    return true;
+                    else {
+                        if (callback !== undefined && callback !== null)
+                            callback(params);
+                        return false;
+                    }
                 },
                 logout: function () {
                     localStorage.removeItem('remember');

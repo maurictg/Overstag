@@ -93,10 +93,12 @@
             M.Modal.getInstance($('#uitschrijven')).open();
         },
         Subscribe: function (id) {
+            $('#_progbar').show();
             //Inschrijven
             $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
+                    $('#_progbar').hide();
                     User.loadcontent();
                 }
                 else {
@@ -109,9 +111,11 @@
             if (!(id > 0))
                 id = $('#btnunsub').data('id');
             //Uitschrijven
+            $('#_progbar').show();
             $.post("/User/postDeleteEvent", { EventId: id }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Successvol uitgeschreven', classes: 'orange' });
+                    $('#_progbar').hide();
                     User.loadcontent();
                 }
                 else {

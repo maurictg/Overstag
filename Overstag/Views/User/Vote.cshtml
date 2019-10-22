@@ -3,7 +3,7 @@
     Layout = "~/Views/_UserLayout.cshtml";
 }
 
-<h3>Ideeën voor activiteiten</h3>
+<h2 class="center-align blue-middle-text">Ideeën voor activiteiten</h2>
 <div id="ideas">
     <p>Laden...</p>
 </div>
@@ -15,13 +15,25 @@
     </div>
 </div>
 <table class="responsive-table">
-    <tr><td colspan="3" class="center-align"><h6 style="font-weight: bold;">Idee toevoegen</h6></td></tr>
+    <tr><td colspan="4" class="center-align"><h6 style="font-weight: bold;">Idee toevoegen</h6></td></tr>
     <tr>
         <td>
-            <input placeholder="Titel" id="tbtitle" type="text" class="validate">
+            <div class="input-field">
+                <input placeholder="Titel" id="tbtitle" type="text" class="validate">
+                <label for="tbtitle">Titel</label>
+            </div>
         </td>
         <td>
-            <input placeholder="Omschrijving" id="tbdesc" type="text" class="validate">
+            <div class="input-field">
+                <input placeholder="Omschrijving" id="tbdesc" type="text" class="validate">
+                <label for="tbdesc">Omschrijving</label>
+            </div>
+        </td>
+        <td>
+            <div class="input-field">
+                <input placeholder="Geschatte kosten in €" id="tbcost" type="text">
+                <label for="tbcost">Geschatte kosten in €</label>
+            </div>
         </td>
         <td>
             <a class="waves-effect waves-light btn blue-dark" onclick="Vote.addIdea();">Toevoegen</a>
@@ -45,9 +57,11 @@
             Vote.load();  
         },
         load: function () {
+            $('#_progbar').show();
             $.get('/User/Ideas', function (r) {
                 $('#ideas').html(r);
             }).done(function () {
+                $('#_progbar').hide();
                 Vote.mapEvents();
             });
         },
@@ -64,11 +78,15 @@
                 M.toast({ html: 'Vul a.u.b. alle velden in', classes: 'orange' });
             }
             else {
-                $.post('/User/Vote/postIdea', { Title: $('#tbtitle').val(), Description: $('#tbdesc').val() }, function (r) {
+                $('#_progbar').show();
+                $.post('/User/Vote/postIdea', { Title: $('#tbtitle').val(), Description: $('#tbdesc').val(), Cost: $('#tbcost').val() }, function (r) {
                     if (r.status == 'success') {
-                        Vote.load();
+                        setTimeout(Vote.load, 300);
+                        M.toast({html: 'Idee toegevoegd!', classes: 'green'})
                         $('#tbtitle').val('');
                         $('#tbdesc').val('');
+                        $('#tbcost').val('');
+                        $('#_progbar').hide();
                     } else {
                         M.toast({ html: r.error, classes: 'red' });
                     }

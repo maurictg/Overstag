@@ -853,3 +853,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Over
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Events.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Users.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Votes.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Payments.cshtml.g.cs

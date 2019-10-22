@@ -101,9 +101,7 @@
             $("#_reg, #_mreg").addClass("active");
             $('#progbar2, #mailhelper').hide();
             Login.mapEvents();
-
-            if(OverstagJS.General.restoreMe())
-                Login.toggle(true);
+            OverstagJS.General.restoreMe(Login.toggle, true);
         },
 
         mapEvents: function () {
