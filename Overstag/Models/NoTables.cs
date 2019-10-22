@@ -3,15 +3,6 @@ using System.Collections.Generic;
 
 namespace Overstag.Models.NoDB
 {
-    public struct Auth
-    {
-        public int UserID;
-        public string Token;
-        public DateTime FirstLogin;
-        public DateTime LastSeen;
-        public string IP;
-    }
-
     public struct ISubscription
     {
         public Event Event;
@@ -82,5 +73,12 @@ namespace Overstag.Models.NoDB
         public int FriendCount;
         public int ConsumptionCount;
         public int ConsumptionCost;
+    }
+
+    public struct MPayment
+    {
+        public Account User;
+        public Invoice Invoice;
+        public Payment Payment;
     }
 }

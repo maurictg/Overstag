@@ -61,7 +61,7 @@ namespace Overstag.Controllers
                     foreach (var s in user.Subscriptions.Where(s => s.Payed == 0))
                     {
                         ccnt += s.ConsumptionCount;
-                        cc += (s.ConsumptionTax * s.ConsumptionCount);
+                        cc += s.ConsumptionTax;
                         var e = context.Events.First(f => f.Id == s.EventID);
 
                         fc += s.FriendCount;

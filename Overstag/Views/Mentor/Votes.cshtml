@@ -1,0 +1,79 @@
+﻿@model List<Overstag.Models.Idea>
+@{
+    ViewBag.Title = "Ideeen";
+    Layout = "~/Views/_MentorLayout.cshtml";
+}
+
+<div>
+    <br />
+    <h2 class="center-align blue-middle-text">Ideeën voor avonden</h2>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Titel</th>
+                <th>Omschrijving</th>
+                <th>Geschatte kosten</th>
+                <th>Actie</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var idea in Model)
+            {
+                <tr>
+                    <td>
+                        <b>@idea.Title</b>
+                        <div class="right">
+                            <span class="new badge green" data-badge-caption="likes">@idea.Votes.Count(i => i.Upvote == 1) </span>
+                            <span class="new badge red" data-badge-caption="dislikes">@idea.Votes.Count(i => i.Upvote == 0) </span>
+                        </div>
+                    </td>
+                    <td>@idea.Description</td>
+                    <td>@Html.Raw((idea.Cost == null) ? "?" : idea.Cost)</td>
+                    <td>
+                        <button type="button" class="btn red waves-effect btndelete" data-id="@idea.Id">Verwijderen</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="areusure" class="modal">
+    <div class="modal-content">
+        <h4>Weet je zeker dat je dit idee wilt verwijderen?</h4>
+        <p>Dit kan niet ongedaan worden gemaakt!</p>
+    </div>
+    <div class="modal-footer">
+        <button class="modal-close btn green waves-effect">Annuleren</button>
+        <button id="btndelete" onclick="Ideas.Delete();" class="btn red waves-effect">Verwijderen</button>
+    </div>
+</div>
+
+<script>
+    var Ideas = {
+        init: function () {
+            $('#_ideas, #_mideas').addClass('active');
+
+            $('.btndelete').click(function () {
+                $('#btndelete').data('id', $(this).data('id'));
+                M.Modal.getInstance($('#areusure')).open();
+            });
+        },
+        Delete: function () {
+            $('#_progbar').show();
+            M.Modal.getInstance($('#areusure')).close();
+            $.get('/Mentor/deleteVote/' + $('#btndelete').data('id'), function (r) {
+                if (r.status == "success") {
+                    M.toast({ html: 'Successvol verwijderd', classes: 'green' });
+                    Core.doReload(500);
+                }
+                else
+                    M.toast({ html: 'Interne serverfout.', classes: 'red' });
+            }, 'json');
+        }
+    }
+
+    $(function () {
+        Ideas.init();
+    });
+</script>

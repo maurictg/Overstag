@@ -7,6 +7,7 @@
         <tr>
             <th>Titel</th>
             <th>Omschrijving</th>
+            <th>Geschatte kosten p.p.</th>
             <th>Vote</th>
         </tr>
     </thead>
@@ -15,23 +16,24 @@
         {
             <tr>
                 <td>
-                    <b>@idea.Title</b>
+                    <b>@idea.Title&nbsp;</b>
                     <div class="right">
-                        <span class="new badge green" data-badge-caption="likes"><b>@idea.Votes.Count(i => i.Upvote == 1)</b></span>
-                        <span class="new badge red" data-badge-caption="dislikes"><b>@idea.Votes.Count(i => i.Upvote == 0)</b></span>
+                        <span class="new badge green" data-badge-caption="likes"><b id="likes-@idea.Id">@idea.Votes.Count(i => i.Upvote == 1)</b></span>
+                        <span class="new badge red" data-badge-caption="dislikes"><b id="dislikes-@idea.Id">@idea.Votes.Count(i => i.Upvote == 0)</b></span>
                     </div>
                 </td>
                 <td>@idea.Description</td>
+                <th>@Html.Raw((idea.Cost == null) ? "?" : idea.Cost)</th>
                 <td>
                     @if (idea.Votes.Any(i => i.UserID == ViewBag.UserID))
                     {
-                        <a data-id="@idea.Id" class="likebtn btn-floating waves-effect waves-green @Html.Raw((idea.Votes.First(i => i.UserID == ViewBag.UserID).Upvote == 1)?"green":"grey")"><i class="material-icons">thumb_up</i></a>
-                        <a data-id="@idea.Id" class="dislikebtn btn-floating waves-effect waves-red @Html.Raw((idea.Votes.First(i => i.UserID == ViewBag.UserID).Upvote == 0)?"red":"grey")"><i class="material-icons">thumb_down</i></a>
+                        <a id="like-@idea.Id" data-id="@idea.Id" class="likebtn btn-floating waves-effect waves-green @Html.Raw((idea.Votes.First(i => i.UserID == ViewBag.UserID).Upvote == 1)?"green":"grey")"><i class="material-icons">thumb_up</i></a>
+                        <a id="dislike-@idea.Id" data-id="@idea.Id" class="dislikebtn btn-floating waves-effect waves-red @Html.Raw((idea.Votes.First(i => i.UserID == ViewBag.UserID).Upvote == 0)?"red":"grey")"><i class="material-icons">thumb_down</i></a>
                     }
                     else
                     {
-                        <a data-id="@idea.Id" class="likebtn btn-floating waves-effect waves-green grey"><i class="material-icons">thumb_up</i></a>
-                        <a data-id="@idea.Id" class="dislikebtn btn-floating waves-effect waves-red grey"><i class="material-icons">thumb_down</i></a>
+                        <a id="like-@idea.Id" data-id="@idea.Id" class="likebtn btn-floating waves-effect waves-green grey"><i class="material-icons">thumb_up</i></a>
+                        <a id="dislike-@idea.Id" data-id="@idea.Id" class="dislikebtn btn-floating waves-effect waves-red grey"><i class="material-icons">thumb_down</i></a>
                     }
                 </td>
             </tr>

@@ -418,5 +418,27 @@ namespace Overstag.Security
         }
     }
 
+    public static class Auth
+    {
+        public static string Register(string token)
+        {
+            using (var context = new OverstagContext())
+            {
+                int userid = context.Accounts.First(f => f.Token == token).Id;
+                string ttoken = Encryption.Random.rString(Encryption.Random.rInt(10, 30), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789");
+
+                context.Auths.Add(new Overstag.Models.Auth
+                {
+                    UserID = userid,
+                    Registered = DateTime.Now,
+                    Token = ttoken
+                });
+
+                context.SaveChanges();
+
+                return ttoken;
+            }
+        }
+    }
 
 }

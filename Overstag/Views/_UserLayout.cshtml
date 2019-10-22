@@ -15,23 +15,11 @@
     <script>
         Overstag = {
             init: function(){
-                Overstag.mapevents();
-
                 if (Overstag.type == 1) {
                     $('#_mfamily').show();
                     $('#_family').show();
                     $('#_aevent').hide();
                     $('#_maevent').hide();
-                }
-            },
-            mapevents: function () {
-                if (Overstag.loggedin) {
-                    $('#_reg a').click(function () {
-                        localStorage.setItem("logout",true);
-                    });
-                    $('#_mreg a').click(function () {
-                        localStorage.setItem("logout",true);
-                    });
                 }
             },
 
@@ -46,7 +34,7 @@
 <body>
     <nav>
         <div class="nav-wrapper blue-dark">
-            <a href="#" id="title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
+            <a href="#" id="_title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li id="_home"><a href="/Home">Home</a></li>
@@ -56,8 +44,9 @@
                 <li id="_aevent"><a href="/User/Events">Activiteiten</a></li>
                 <li id="_apay"><a href="/User/Payment">Betalingen</a></li>
                 <li id="_tickets"><a href="/Tickets">Tickets</a></li>
-                <li id="_reg"><a href="#" onclick="OverstagJS.Security.Logout();"><b>Uitloggen</b></a></li>
+                <li id="_reg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
             </ul>
+            <div class="progress" id="_progbar" style="display: none"><div class="indeterminate"></div></div>
         </div>
     </nav>
     <ul class="sidenav" id="mobile-demo">
@@ -68,7 +57,7 @@
         <li id="_maevent"><a href="/User/Events">Activiteiten</a></li>
         <li id="_mapay"><a href="/User/Payment">Betalingen</a></li>
         <li id="_mtickets"><a href="/Tickets">Tickets</a></li>
-        <li id="_mreg"><a href="#" onclick="OverstagJS.Security.Logout();"><b>Uitloggen</b></a></li>
+        <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
     </ul>
 
     @RenderBody()

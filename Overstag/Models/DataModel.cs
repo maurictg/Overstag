@@ -16,12 +16,13 @@ namespace Overstag.Models
         public DbSet<Idea> Ideas { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<Auth> Auths { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Connection string
 #if DEBUG
-            optionsBuilder.UseMySQL(Core.General.Credentials.mySqlConnectionString);
+            optionsBuilder.UseSqlite("Data Source=db.sqlite");
             //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
 #else
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlConnectionString);

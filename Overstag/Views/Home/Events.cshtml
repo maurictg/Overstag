@@ -4,8 +4,10 @@
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
     ViewBag.Description = "Stichting Overstag's activiteiten. Bekijk onze agenda en schrijf je in voor een van onze activiteiten!";
     ViewBag.Keywords = "Overstag, stichting overstag, Rilland, Reimerswaal, jongerenavonden rilland, jongerenavonden reimerswaal, overstag inschrijven, overstag meedoen";
+    Overstag.Models.Event[] Passed = ViewBag.Passed;
 }
 
+<h1 class="blue-middle-text center-align">Agenda</h1>
 <h5 class="blue-middle-text">&nbsp;Komende evenementen, onder het voorbehoud van <a href="https://herzienestatenvertaling.nl/teksten/jakobus/4#15" target="_blank">Jakobus 4:15</a></h5>
 
 <table class="responsive-table">
@@ -15,7 +17,6 @@
             <th>Wanneer</th>
             <th>Omschrijving</th>
             <th>Kosten</th>
-            <th>Meedoen?</th>
         </tr>
     </thead>
     <tbody>
@@ -30,7 +31,6 @@
                     <td>@Html.Raw((iss) ? "(<b class=\"red-text\">te laat</b>) " : "")@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
                     <td>@e.Description</td>
                     <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
-                    <td><a class="btn green waves-effect" id="btnsub" onclick="Events.sub();">Inschrijven</a></td>
                 </tr>
             }
         }
@@ -42,6 +42,42 @@
         }
     </tbody>
 </table>
+
+<br />
+<h3 class="center-align blue-middle-text">Afgelopen activiteiten</h3>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Wat</th>
+            <th>Wanneer</th>
+            <th>Omschrijving</th>
+            <th>Kosten</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Passed.Length > 0)
+        {
+            @foreach (var e in Passed)
+            {
+                double c = (double)e.Cost;
+                <tr>
+                    <td>@e.Title</td>
+                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                    <td>@e.Description</td>
+                    <td>&euro;@Math.Round(c / 100, 2).ToString("F")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5"><h5>Nog geen activiteiten</h5></td>
+            </tr>
+        }
+    </tbody>
+</table>
+<br />
 <script>
     var Events = {
         init: function () {

@@ -214,7 +214,7 @@ namespace Overstag.Controllers
                 }
                 catch(Exception e)
                 {
-                    return Json(new { status = "error", error = e });
+                    return Json(new { status = "error", error = e.ToString() });
                 }
             }
         }
@@ -277,7 +277,7 @@ namespace Overstag.Controllers
 
             using (var context = new OverstagContext())
             {
-                foreach (var user in context.Accounts.Include(f => f.Subscriptions))
+                foreach (var user in context.Accounts.Include(f => f.Subscriptions).ToList())
                 {
                     List<Event> events = new List<Event>();
                     var parti = user.Subscriptions;

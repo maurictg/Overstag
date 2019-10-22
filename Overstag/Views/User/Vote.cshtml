@@ -3,26 +3,45 @@
     Layout = "~/Views/_UserLayout.cshtml";
 }
 
-<h3>Ideeën voor activiteiten</h3>
+<h2 class="center-align blue-middle-text">Ideeën voor activiteiten</h2>
 <div id="ideas">
     <p>Laden...</p>
 </div>
-<table class="responsive-table">
-    <tr><td colspan="3" class="center-align"><h6 style="font-weight: bold;">Idee toevoegen</h6></td></tr>
-    <tr>
-        <td>
+<div class="row">
+    <div class="col m1 offset-m11 s2 offset-s10">
+        <button class="btn transparent waves-effect" onclick="Vote.load();">
+            <i class="material-icons blue-light-text">refresh</i>
+        </button>
+    </div>
+</div>
+
+<h3 class="blue-middle-text center-align">Idee toevoegen</h3>
+
+<div class="row">
+    <div class="col s12 m3">
+        <div class="input-field">
             <input placeholder="Titel" id="tbtitle" type="text" class="validate">
-        </td>
-        <td>
+            <span class="helper-text blue-light-text">Titel</span>
+        </div>
+    </div>
+    <div class="col s12 m6">
+        <div class="input-field">
             <input placeholder="Omschrijving" id="tbdesc" type="text" class="validate">
-        </td>
-        <td>
-            <a class="waves-effect waves-light btn blue-dark" onclick="Vote.addIdea();">Toevoegen</a>
-        </td>
-    </tr>
-</table>
-
-
+            <span class="helper-text blue-light-text">Omschrijving</span>
+        </div>
+    </div>
+    <div class="col s12 m3">
+        <div class="input-field">
+            <i class="material-icons prefix">euro</i>
+            <input data-regex="[0-9]+(\,[0-9][0-9])" placeholder="10,00" class="validate" id="tbcost" type="text">
+            <span id="spancost" class="helper-text blue-light-text" data-error="Vul een geldig bedrag in op deze manier: €10,00 Dus met 2 decimalen">Geschatte kosten in € p.p. Als je het niet weet laat dan leeg</span>
+        </div>
+    </div>
+    <div class="col s12 center-align">
+        <button class="waves-effect waves-light btn blue-dark" id="btnadd" onclick="Vote.addIdea();">Toevoegen</button>
+    </div>
+    <br />
+</div>
 
 <div class="fixed-action-btn">
     <a class="btn-floating btn-large blue-dark waves-effect" href="/User/Events">
@@ -35,44 +54,72 @@
         init: function () {
             $('#_aevent, #_maevent').addClass('active');
             //Load partial
-            Vote.load();  
+            Vote.load();
         },
         load: function () {
+            $('#_progbar').show();
             $.get('/User/Ideas', function (r) {
                 $('#ideas').html(r);
             }).done(function () {
+                $('#_progbar').hide();
                 Vote.mapEvents();
             });
         },
         mapEvents: function () {
-            $('.likebtn').off().on('click',function() {
+            $('.likebtn').off().on('click', function () {
                 Vote.saveLike($(this).data('id'), 1);
             });
-            $('.dislikebtn').off().on('click',function() {
+            $('.dislikebtn').off().on('click', function () {
                 Vote.saveLike($(this).data('id'), 0);
             });
         },
         addIdea: function () {
             if ($('#tbtitle').val() == '' || $('#tbdesc').val() == '') {
                 M.toast({ html: 'Vul a.u.b. alle velden in', classes: 'orange' });
+                return;
             }
-            else {
-                $.post('/User/Vote/postIdea', { Title: $('#tbtitle').val(), Description: $('#tbdesc').val() }, function (r) {
-                    if (r.status == 'success') {
-                        Vote.load();
-                        $('#tbtitle').val('');
-                        $('#tbdesc').val('');
-                    } else {
-                        M.toast({ html: r.error, classes: 'red' });
-                    }
-                },'json');
+
+            var regex = new RegExp($('#tbcost').data('regex'));
+            if (!regex.test($('#tbcost').val()) && !($('#tbcost').val() == '' || $('#tbcost').val() == '€')) {
+                $('#tbcost').addClass("invalid");
+                $('#tbcost').prop("aria-invalid", "true");
+                $('#spancost').text('');
+                return;
+            } else {
+                $('#spancost').text('Geschatte kosten in € p.p. Als je het niet weet laat dan leeg');
             }
+
+            $('#btnadd').addClass('disabled');
+            $('#_progbar').show();
+            if ($('#tbcost').val() != '')
+                $('#tbcost').val('€' + $('#tbcost').val());
+
+            $.post('/User/Vote/postIdea', { Title: $('#tbtitle').val(), Description: $('#tbdesc').val(), Cost: $('#tbcost').val() }, function (r) {
+                if (r.status == 'success') {
+                    setTimeout(Vote.load, 300);
+                    M.toast({ html: 'Idee toegevoegd!', classes: 'green' })
+                    $('#tbtitle').val('');
+                    $('#tbdesc').val('');
+                    $('#tbcost').val('');
+                    $('#_progbar').hide();
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                }
+            }, 'json').done(function () {
+                $('#btnadd').removeClass('disabled');
+            });
         },
         saveLike: function (id, like) {
             $.get('/User/Vote/Like/' + id + '/' + like, function (r) {
                 if (r.status == 'success') {
-                    Vote.load();
-                }else {
+                    if (like == 1) {
+                        $('#like-' + id).removeClass('grey').addClass('green');
+                        $('#dislike-' + id).removeClass('red').addClass('grey');
+                    } else {
+                        $('#dislike-' + id).removeClass('grey').addClass('red');
+                        $('#like-' + id).removeClass('green').addClass('grey');
+                    }
+                } else {
                     M.toast({ html: r.error, classes: 'red' });
                     return false;
                 }
