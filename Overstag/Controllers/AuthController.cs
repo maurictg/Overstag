@@ -29,7 +29,7 @@ namespace Overstag.Controllers
                 if(context.Auths.Any(f => f.Token == token))
                 {
                     var auth = context.Auths.First(f => f.Token == token);
-                    if(auth.Registered > DateTime.Now.AddMonths(-1))
+                    if(auth.Registered > DateTime.Now.AddMonths(-2))
                     {
                         var user = context.Accounts.First(f => f.Id == auth.UserID);
                         HttpContext.Session.SetString("Token", user.Token);
@@ -37,6 +37,17 @@ namespace Overstag.Controllers
                         HttpContext.Session.SetString("Name", user.Username);
                         HttpContext.Session.SetString("Remember", token);
                         return Json(new { status = "success" });
+                    }
+                    else
+                    {
+                        try
+                        {
+                            context.Auths.Remove(auth);
+                            context.SaveChanges();
+                        }
+                        catch(Exception e) {
+                            return Json(new { status = "error", error = e.Message });
+                        }
                     }
                 }
 
