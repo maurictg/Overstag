@@ -514,3 +514,8 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Ov
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Overstag.csproj.CopyComplete
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Overstag.dll
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Overstag.pdb
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Events.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Payments.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Users.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Votes.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Invoices.cshtml.g.cs

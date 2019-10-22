@@ -351,6 +351,18 @@ namespace Overstag.Controllers
                         context.Accounts.Update(cuser);
                         await context.SaveChangesAsync();
                         HttpContext.Session.SetString("Token", cuser.Token);
+                        try
+                        {
+                            #if !DEBUG
+                            Core.General.SendMail("Wachtwoord gewijzigd",
+                                $"<h1>Iemand heeft uw wachtwoord veranderd</h1><h4>Beste {cuser.Firstname}, <br>Op {DateTime.Now.ToString("dd-MM-yyyy")} om {DateTime.Now.ToString("HH:mm:ss")} heeft iemand uw wachtwoord veranderd.<br><b>Was u dit zelf? Beschouw deze mail dan als niet verzonden</b>.<br>Als je deze activiteit niet herkent, neem dan contact met ons op.</h4>", cuser.Email);
+                            #endif
+                        }
+                        catch(Exception e)
+                        {
+                            return Json(new { status = "warning", error = "Mail verzonden mislukt", debuginfo = e.ToString() });
+                        }
+
                         return Json(new { status = "success" });
                     }
                     catch(Exception e)

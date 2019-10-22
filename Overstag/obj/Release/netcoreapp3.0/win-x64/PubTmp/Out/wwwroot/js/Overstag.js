@@ -3,6 +3,14 @@
         init: function () {
             this.Theme.init();
         },
+        /*useHelper: function(callback) {
+            $.getScript('/js/Helper.js', function () {
+                if (callback !== undefined && callback !== null)
+                    callback();
+            });
+        },*/
+
+
         Loader: function () {
             return {
                 init: function () {
@@ -99,7 +107,7 @@
                         }
                     });
                 },
-                restoreMe: function () {
+                restoreMe: function (callback, params) {
                     if (localStorage.getItem('remember')) {
                         $.post('/Auth/Login', { token: localStorage.getItem('remember') }, function (r) {
                             if (r.status === 'success') {
@@ -108,9 +116,18 @@
                                 console.log('Cant restore login');
                                 localStorage.removeItem('remember');
                             }
+                        }).done(function () {
+                            if (callback !== undefined && callback !== null) {
+                                callback(params);
+                            }
+                            return true;
                         });
                     }
-                    return true;
+                    else {
+                        if (callback !== undefined && callback !== null)
+                            callback(params);
+                        return false;
+                    }
                 },
                 logout: function () {
                     localStorage.removeItem('remember');
@@ -119,6 +136,14 @@
                 }
             };
         }(),
+    };
+}();
+
+var Core = function(){
+    return {
+        doReload: function (interval) {
+            setTimeout(window.location.reload.bind(window.location), interval);
+        }
     };
 }();
 

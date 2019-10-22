@@ -160,16 +160,34 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all accounts
+        /// </summary>
+        /// <returns>View with users</returns>
         public IActionResult Users()
             => View(new OverstagContext().Accounts.Where(f => f.Type == 0).OrderBy(g => g.Firstname).ToList());
 
+        /// <summary>
+        /// Get all events
+        /// </summary>
+        /// <returns>View with events</returns>
         public IActionResult Events()
             => View(new OverstagContext().Events.OrderBy(e => e.When).ToList());
 
+        /// <summary>
+        /// Get event in JSON by ID
+        /// </summary>
+        /// <param name="id">The event's id</param>
+        /// <returns>Status = success and data: Event object in JSON</returns>
         [HttpGet("/Mentor/getEvent/{id}")]
         public JsonResult GetEvent(int id)
             => Json(new { status = "success", data = new OverstagContext().Events.First(f => f.Id == id) });
 
+        /// <summary>
+        /// Add an event to the database
+        /// </summary>
+        /// <param name="e">The event form object</param>
+        /// <returns>Json: status = success or status = error</returns>
         [HttpPost]
         public IActionResult postEvent(Event e)
         {
@@ -202,6 +220,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete an event by it's id
+        /// </summary>
+        /// <param name="id">The event's id</param>
+        /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("/Mentor/deleteEvent/{id}")]
         public IActionResult deleteEvent(int id)
         {
@@ -228,7 +251,11 @@ namespace Overstag.Controllers
         public IActionResult Votes()
             => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote == 1) - b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
 
-
+        /// <summary>
+        /// Delete an idea
+        /// </summary>
+        /// <param name="id">The idea its id</param>
+        /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("Mentor/deleteVote/{id}")]
         public IActionResult deleteVote(int id)
         {
@@ -248,6 +275,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Get view with payments
+        /// </summary>
+        /// <returns>View with all payments in the database</returns>
         public IActionResult Payments()
         {
             List<MPayment> payments = new List<MPayment>();
@@ -269,6 +300,13 @@ namespace Overstag.Controllers
             return View(payments);
         }
 
+        /// <summary>
+        /// Mark a payment as payed
+        /// </summary>
+        /// <param name="payed">0 or 1: not payed or payed</param>
+        /// <param name="payid">The payment's id</param>
+        /// <param name="invoiceid">The id of the invoice</param>
+        /// <returns>JSON, status = success or status = error</returns>
         [HttpPost]
         public JsonResult markAsPayed([FromForm]int payed, [FromForm]int payid, [FromForm]int invoiceid)
         {
@@ -299,6 +337,106 @@ namespace Overstag.Controllers
                 catch(Exception e)
                 {
                     return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                }
+            }
+        }
+
+        public IActionResult Invoices()
+            => View();
+
+        /// <summary>
+        /// Automatize invoicing for all users
+        /// </summary>
+        /// <returns></returns>
+        public JsonResult autoInvoice()
+        {
+            int usercount = 0;
+            int particount = 0;
+            int moneycount = 0;
+            int failedmails = 0;
+
+            //ontvanger, mail
+            List<Tuple<string, string>> Emails = new List<Tuple<string, string>>();
+
+            using (var context = new OverstagContext())
+            {
+                var users = context.Accounts.Include(p => p.Subscriptions).ToList();
+
+                try
+                {
+                    foreach (var user in users)
+                    {
+                        var parti = user.Subscriptions.Where(f => f.Payed == 0).ToList();
+
+                        List<int> eventIDS = new List<int>();
+
+                        int bill = 0;
+                        int additions = 0;
+                        int eventcount = 0;
+
+                        foreach (var part in parti)
+                        {
+                            var eve = context.Events.First(f => f.Id == part.EventID);
+                            if (Core.General.DateIsPassed(eve.When))
+                            {
+                                eventcount++;
+
+                                bill += (eve.Cost * (part.FriendCount + 1));
+
+                                additions += part.ConsumptionCount;
+                                bill += part.ConsumptionTax;
+
+                                for (int i = 0; i < part.FriendCount + 1; i++)
+                                    eventIDS.Add(eve.Id);
+                            }
+                        }
+
+                        var facture = new Invoice()
+                        {
+                            UserID = user.Id,
+                            Amount = bill,
+                            EventIDs = string.Join(',', eventIDS),
+                            Payed = 0,
+                            Timestamp = DateTime.Now,
+                            PayID = Encryption.Random.rHash(user.Token),
+                            AdditionsCount = additions
+                        };
+
+                        if(eventIDS.Count() > 4)
+                        {
+                            context.Invoices.Add(facture);
+                            parti.ForEach(f => f.Payed = 1);
+                            user.Subscriptions = parti;
+                            context.Accounts.Update(user);
+                            context.SaveChanges();
+                            moneycount += bill;
+                            usercount++;
+                            particount += eventcount;
+                        }
+
+                        Emails.Add(new Tuple<string, string>(user.Email,
+                            $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
+                    }
+
+                    #if !DEBUG
+                    foreach(var email in Emails)
+                    {
+                        try
+                        {
+                            Core.General.SendMail("Factuur gemaakt", email.Item2, email.Item1);
+                        }
+                        catch
+                        {
+                            failedmails++;
+                            continue;
+                        }
+                    }
+                    #endif
+                    return Json(new { status = "success", usercount, particount, moneycount, failedmails });
+                }
+                catch(Exception ex)
+                {
+                    return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = ex.ToString() });
                 }
             }
         }
