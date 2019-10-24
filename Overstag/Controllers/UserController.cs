@@ -36,6 +36,37 @@ namespace Overstag.Controllers
             => View(new OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == HttpContext.Session.GetString("Token")));
 
         /// <summary>
+        /// Get saved logins
+        /// </summary>
+        /// <returns>Logins object</returns>
+        public IActionResult getLogins()
+            => Json(new OverstagContext().Auths.Where(f => f.UserID == currentuser().Id).ToList());
+
+        /// <summary>
+        /// Remove login by its id
+        /// </summary>
+        /// <param name="id">The id</param>
+        /// <returns>JSON, status = success or status = error</returns>
+        [HttpGet("User/removeLogin/{id}")]
+        public IActionResult removeLogin(int id)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var login = context.Auths.First(f => f.Id == id);
+                    context.Auths.Remove(login);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Verwijderen mislukt door interne fout", debuginfo = e.ToString() });
+                }
+            }
+        }
+
+        /// <summary>
         /// Get events page with all subscriptions
         /// </summary>
         /// <returns>View</returns>

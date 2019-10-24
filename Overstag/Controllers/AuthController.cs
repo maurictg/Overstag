@@ -16,7 +16,7 @@ namespace Overstag.Controllers
         {
             token = Uri.UnescapeDataString(token);
 
-            string ttoken = Overstag.Security.Auth.Register(token);
+            string ttoken = Overstag.Security.Auth.Register(token,HttpContext.Connection.RemoteIpAddress.ToString());
             return Json(new { status = "success", token = Uri.EscapeDataString(ttoken) });
         }
 

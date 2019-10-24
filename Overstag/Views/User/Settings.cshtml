@@ -88,7 +88,7 @@
                     </div>
                     <span id="pwhelper" style="color: red; visibility: hidden;">Wachtwoorden komen niet overeen</span>
                     <br /><br />
-                    <a class="waves-effect waves-light btn orange center" onclick="M.Collapsible.getInstance($('.collapsible')).close(1); $('.checki').val('');">Annuleren</a>
+                    <a class="waves-effect waves-light btn orange center" onclick="M.Collapsible.getInstance($('.collapsible')).close(1); $('.checki').val(''); $('#pwhelper').hide();">Annuleren</a>
                     <a class="waves-effect waves-light btn green center" id="savepass">Opslaan</a>
 
                 </div>
@@ -128,6 +128,46 @@
                 </div>
             </li>
             <li>
+                <div class="collapsible-header" id="loginsheader" onclick="User.toggleLogins();"><i class="material-icons">settings_applications</i>Logins beheren</div>
+                <div class="collapsible-body">
+                    <h5>Logins beheren</h5>
+                    <div>
+                        <table class="responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>Ingelogd op</th>
+                                    <th>Verloopt op</th>
+                                    <th>IP-adres</th>
+                                    <th>Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logins">
+                                <tr>
+                                    <td colspan="4">Laden...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header"><i class="material-icons">brush</i>Website instellingen</div>
+                <div class="collapsible-body">
+                    <h5>Thema aanpassen</h5>
+                    <br />
+                    <h6>Donker thema inschakelen</h6>
+                    <div class="switch">
+                        <label>
+                            Uit
+                            <input type="checkbox" id="theme">
+                            <span class="lever"></span>
+                            Aan
+                        </label>
+                    </div>
+                    <br />
+                </div>
+            </li>
+            <li>
                 <div class="collapsible-header"><i class="material-icons">person</i>Account</div>
                 <div class="collapsible-body col s12 m6 center-align">
                     <h5>Account</h5>
@@ -143,7 +183,7 @@
                     }
 
                     <br /><br />
-                    <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(3);">Annuleren</a>
+                    <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(5);">Annuleren</a>
 
                 </div>
             </li>
@@ -183,6 +223,10 @@
 
                     $('#qr').hide();
                     User.mapEvents();
+
+                    if (localStorage.getItem('darktheme') == 'true') {
+                        $('#theme').attr('checked', true);
+                    }
                 },
                 mapEvents: function () {
                     $('#savechanges').click(function () {
@@ -226,6 +270,14 @@
                         if ($('#tbpw3').val() != $('#tbpw2').val()) {
                             $('#pwhelper').css('visibility', 'visible');
                         } else { $('#pwhelper').css('visibility', 'hidden'); }
+                    });
+
+                    $('#theme').change(function () {
+                        if ($(this).prop('checked') == false) {
+                            OverstagJS.Theme.setLight();
+                        } else {
+                            OverstagJS.Theme.setDark();
+                        }
                     });
                 },
                 savechanges: function () {
@@ -341,7 +393,41 @@
                         }, 'json');
                     }
                 },
-                
+                toggleLogins: function () {
+                    if ($('#loginsheader').data('loaded') == undefined) {
+                        User.getLogins();
+                        $('#loginsheader').data('loaded', 'yes');
+                    }
+                },
+                getLogins: function () {
+                    $('#_progbar').show();
+                    $.getJSON('/User/getLogins', function(r) {
+                        $('#_progbar').hide();
+                        var html = '';
+                        moment.locale('nl');
+                        $.each(r, function (i, e) {
+                            var date = moment(new Date(Date.parse(e.registered)));
+                            var date2 = moment(new Date(Date.parse(e.registered))).add(2, 'M');
+                             html += `<tr><td>${date.format('DD-MM-YYYY')} om ${date.format('HH:mm')}</td><td>${date2.format('DD-MM-YYYY')} om ${date2.format('HH:mm')}</td><td>${e.ip}</td><td><button class="btn orange waves-effect" onclick="User.removeLogin('${e.id}')">Uitloggen</button></td></tr>`;
+                        });
+
+                        $('#logins').html(html);
+                    }).fail(function() {
+                        M.toast({ html: 'Ophalen mislukt door interne fout', classes: 'red' });
+                    });
+                },
+                removeLogin: function(id) {
+                    $('#_progbar').show();
+                    $.get('/User/removeLogin/' + id, function (r) {
+                        if (r.status == 'success') {
+                            M.toast({ html: 'Successvol uitgelogd', classes: 'green' });
+                            User.getLogins();
+                        } else {
+                            $('#_progbar').hide();
+                            M.toast({ html: r.error, classes: 'red' });
+                        }
+                    }, 'json');
+                }
             }
 
             User.init();

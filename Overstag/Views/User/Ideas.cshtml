@@ -2,12 +2,12 @@
 @{
     Layout = null;
 }
-<table class="responsive-table">
+<table>
     <thead>
         <tr>
             <th>Titel</th>
             <th>Omschrijving</th>
-            <th>Geschatte kosten p.p.</th>
+            <th>~Kosten p.p.</th>
             <th>Vote</th>
         </tr>
     </thead>
@@ -16,9 +16,10 @@
         {
             <tr>
                 <td>
-                    <b>@idea.Title&nbsp;</b>
+                    <b>@idea.Title&nbsp;</b><br />
                     <div class="right">
                         <span class="new badge green" data-badge-caption="likes"><b id="likes-@idea.Id">@idea.Votes.Count(i => i.Upvote == 1)</b></span>
+                        
                         <span class="new badge red" data-badge-caption="dislikes"><b id="dislikes-@idea.Id">@idea.Votes.Count(i => i.Upvote == 0)</b></span>
                     </div>
                 </td>

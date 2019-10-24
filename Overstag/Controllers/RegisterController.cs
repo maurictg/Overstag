@@ -210,7 +210,7 @@ namespace Overstag.Controllers
                                     context.SaveChanges();
                                 }
 
-                                string remember = (no2fa) ? Security.Auth.Register(account.Token) : "";
+                                string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
 
                                 if (no2fa)
                                     HttpContext.Session.SetString("Remember", remember);
@@ -345,7 +345,7 @@ namespace Overstag.Controllers
                     HttpContext.Session.SetString("Token", a.Token);
                     HttpContext.Session.SetInt32("Type", a.Type);
                     HttpContext.Session.SetString("Name", a.Username);
-                    string remember = Security.Auth.Register(a.Token);
+                    string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString());
                     HttpContext.Session.SetString("Remember", remember);
                     return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                 }

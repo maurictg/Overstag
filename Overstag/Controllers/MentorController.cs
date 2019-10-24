@@ -412,10 +412,9 @@ namespace Overstag.Controllers
                             moneycount += bill;
                             usercount++;
                             particount += eventcount;
+                            Emails.Add(new Tuple<string, string>(user.Email,
+                                $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
                         }
-
-                        Emails.Add(new Tuple<string, string>(user.Email,
-                            $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
                     }
 
                     #if !DEBUG
