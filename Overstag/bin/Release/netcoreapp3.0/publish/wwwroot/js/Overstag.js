@@ -121,6 +121,11 @@
                                 callback(params);
                             }
                             return true;
+                        }).fail(function () {
+                            if (callback !== undefined && callback !== null) {
+                                callback(params);
+                            }
+                            return false;
                         });
                     }
                     else {
