@@ -799,8 +799,6 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.0\runt
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.csprojAssemblyReference.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\staticwebassets\Overstag.StaticWebAssets.Manifest.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\staticwebassets\Overstag.StaticWebAssets.xml
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.RazorAssemblyInfo.cache
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.RazorAssemblyInfo.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.AssemblyInfoInputs.cache
@@ -855,3 +853,6 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razo
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Votes.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Payments.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Invoices.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Overstag.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Error\Default.cshtml.g.cs

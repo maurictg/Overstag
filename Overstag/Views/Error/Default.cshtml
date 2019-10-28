@@ -1,0 +1,51 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Error @ViewBag.Code</title>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <script src="~/js/jquery-3.4.1.min.js"></script>
+    <script src="~/js/materialize.min.js"></script>
+    <script src="~/js/Overstag.js"></script>
+    <style>
+        body{
+            background-image: url("/img/error.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        @@media only screen and (max-width: 768px) {
+            body {
+                background-position: bottom;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper red">
+            <a href="/" class="brand-logo center">Error @ViewBag.Code</a>
+        </div>
+    </nav>
+    <div class="center-align">
+        <h1><b class="red-text">@Html.Raw(ViewBag.Message)</b></h1>
+        <br /><br />
+        <h4><b class="grey-text text-darken-2">@Html.Raw(ViewBag.Description)</b></h4>
+        <br />
+        <a href="#" onclick="window.history.back();" class="btn btn-large blue waves-effect">&larr; Terug</a>
+        @if (ViewBag.showHome == true)
+        {
+            <a href="/Home" class="btn btn-large green waves-effect">Naar homepage</a>
+        }
+        @if (ViewBag.showLogin == true)
+        {
+            <a href="/Register/Login" class="btn btn-large red waves-effect">Inloggen &rarr;</a>
+        }
+    </div>
+    <br /><br />
+    <h6 style="bottom: 0px; position: fixed;">(<b>@ViewBag.Code - @ViewBag.English</b>)</h6>
+</body>
+</html>

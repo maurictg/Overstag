@@ -34,9 +34,11 @@ namespace Overstag
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
+            else
+                app.UseExceptionHandler("/Error/500");
+
+            app.UseStatusCodePagesWithRedirects("/Error/{0}");
 
             //Settings
             app.UseHttpsRedirection();
@@ -44,7 +46,7 @@ namespace Overstag
             app.UseResponseCompression();
             app.UseSession();
             app.UseStaticFiles();
-            app.UseMiddleware<Overstag.Middleware.Authentication>();
+            app.UseMiddleware<Overstag.Middlewares.Authentication>();
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
