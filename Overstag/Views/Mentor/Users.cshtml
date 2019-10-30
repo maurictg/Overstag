@@ -31,7 +31,7 @@
                     <td>@u.Birthdate.ToString("dd-MM-yyyy")</td>
                     <td>@Html.Raw(u.Phone != null ? u.Phone : "-")</td>
                     <th><a href="mailto:@u.Email">@u.Email</a></th>
-                    <td>@Html.Raw((u.Sex==1)?"<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                    <td>@Html.Raw((u.Sex==0)?"<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
                 </tr>
             }
         </tbody>

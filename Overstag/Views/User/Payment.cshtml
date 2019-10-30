@@ -142,6 +142,11 @@
                             </li>
                         }
                     </ul>
+
+                    @if(Model.Invoices.Where(f => f.Payed == false).Count()>1)
+                    {
+                        @Html.Raw("&nbsp;")<button class="btn orange waves-effect modal-trigger" data-target="minvoice" >Facturen samenvoegen</button>
+                    }
                 }
                 else
                 {
@@ -180,6 +185,17 @@
     </div>
 </div>
 
+<div id="minvoice" class="modal">
+    <div class="modal-content">
+        <h4>Facturen samenvoegen</h4>
+        <h6>Als je de facturen samenvoegd worden alle tot nu toe niet-betaalde/openstaande facturen samengevoegd tot 1 factuur.</h6>
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="waves-effect waves-light btn modal-close orange">Annuleren</a>
+        <a href="#!" onclick="Payment.mergeInvoices();" class="waves-effect waves-light btn modal-close green">Oké doen!</a>
+    </div>
+</div>
+
 <!--Script -->
 <script>
     var Payment = {
@@ -208,6 +224,18 @@
             $('#payid').select();
             document.execCommand("copy");
             M.toast({ html: 'Link gekopieërd!', classes: 'blue' });
+        },
+        mergeInvoices: function () {
+            $('#_progbar').show();
+            $.getJSON('/User/MergeInvoices', function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Facturen successvol samengevoegd', classes: 'green' });
+                    Core.doReload(500);
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                    $('#_progbar').hide();
+                }
+            });
         }
     }
 

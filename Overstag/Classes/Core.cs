@@ -78,7 +78,11 @@ namespace Overstag.Core
                     mail.Subject = title;
                     mail.IsBodyHtml = true;
                     mail.Body = body;
+
+#if !DEBUG
                     client.Send(mail);
+#endif
+
                     return "OK";
                 }
                 else

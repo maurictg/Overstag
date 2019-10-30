@@ -20,7 +20,7 @@
                     </div>
                     <div class="card-action center-align">
                         <br />
-                        <a class="btn blue-light waves-effect" id="btnsubmit">Opslaan</a><br />
+                        <a class="btn blue-light btn-large waves-effect" id="btnsubmit">Opslaan</a><br />
                         <span id="tbhelper" style="color: red;">Vul alle velden in</span>
                     </div>
                 </div>
@@ -54,19 +54,26 @@
                 }
             });
             if (isValid) {
+                $('#_progbar').show();
+                $('#btnsubmit').addClass('disabled');
                 $.post("/Register/postPassreset", { Token: '@Uri.EscapeDataString(Model.Token)', Password: $('#Password1').val() }, function (response) {
                     if (response.status == 'success') {
                         $('.checki').val('');
                         M.toast({ html: 'Wachtwoord successvol opgeslagen.<br> U kunt nu opnieuw inloggen via het tabje &quot;Aanmelden&quot;', classes: 'green' });
-                        $('#btnsubmit').addClass('disabled');
                     }
                     else {
                         //status = error
                         M.toast({ html: response.error, classes: 'red' });
+                        $('#btnsubmit').removeClass('disabled');
                         $('.checki').val('');
                     }
-                }, 'json'
-                );
+                },'json').fail(function () {
+                    M.toast({ html: 'Er gaat iets fout en we weten niet wat', classes: 'red' });
+                    $('#_progbar').hide();
+                    $('#btnsubmit').removeClass('disabled');
+                }).done(function() {
+                    $('#_progbar').hide();
+                });
             }
         }
     }

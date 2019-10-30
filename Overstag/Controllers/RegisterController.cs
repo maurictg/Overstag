@@ -286,38 +286,32 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Changes the user password
+        /// Change password with token.
         /// </summary>
-        /// <param name="a">Account info (token and new password)</param>
-        /// <returns>JSON result, status = "error" or status = "success"</returns>
+        /// <param name="Token">User's token</param>
+        /// <param name="Password">User's new password</param>
+        /// <returns></returns>
         [HttpPost]
-        public JsonResult postPassreset(Account a)
+        public JsonResult postPassreset([FromForm]string Token, [FromForm]string Password)
         {
-            if (!ModelState.IsValid)
+            using (var context = new OverstagContext())
             {
-                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
-            }
-            else
-            {
-                using (var context = new OverstagContext())
+                try
                 {
-                    try
-                    {
-                        a.Token = Uri.UnescapeDataString(a.Token);
-                        var account = context.Accounts.FirstOrDefault(e => e.Token == a.Token);
+                    Token = Uri.UnescapeDataString(Token);
+                    var account = context.Accounts.ToList().FirstOrDefault(e => e.Token == Token);
 
-                        if (account == null)
-                            return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
+                    if (account == null)
+                        return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
 
-                        account.Password = Encryption.PBKDF2.Hash(a.Password); //<--NULLexception
-                        account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                        context.Accounts.Update(account);
-                        context.SaveChangesAsync();
+                    account.Password = Encryption.PBKDF2.Hash(Password); //<--NULLexception
+                    account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
+                    context.Accounts.Update(account);
+                    context.SaveChanges();
 
-                        return Json(new { status = "success" });
-                    }
-                    catch (Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
+                    return Json(new { status = "success" });
                 }
+                catch (Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
             }
         }
 

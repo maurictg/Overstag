@@ -360,7 +360,7 @@ namespace Overstag.Controllers
 
             using (var context = new OverstagContext())
             {
-                var users = context.Accounts.Include(p => p.Subscriptions).ToList();
+                var users = context.Accounts.Include(p => p.Subscriptions).Include(f => f.Family).ToList();
 
                 try
                 {
@@ -393,7 +393,7 @@ namespace Overstag.Controllers
 
                         var facture = new Invoice()
                         {
-                            UserID = user.Id,
+                            UserID = (user.Family == null) ? user.Id : user.Family.ParentID,
                             Amount = bill,
                             EventIDs = string.Join(',', eventIDS),
                             Payed = 0,
@@ -417,7 +417,6 @@ namespace Overstag.Controllers
                         }
                     }
 
-                    #if !DEBUG
                     foreach(var email in Emails)
                     {
                         try
@@ -430,7 +429,6 @@ namespace Overstag.Controllers
                             continue;
                         }
                     }
-                    #endif
                     return Json(new { status = "success", usercount, particount, moneycount, failedmails });
                 }
                 catch(Exception ex)

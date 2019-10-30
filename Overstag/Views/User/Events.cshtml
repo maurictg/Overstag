@@ -98,14 +98,15 @@
             $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
-                    $('#_progbar').hide();
                     User.loadcontent();
                 }
                 else {
                     //status = error
                     M.toast({ html: response.error, classes: 'red' });
                 }
-            }, 'json');
+            }, 'json').done(function () {
+                $('#_progbar').hide();
+            });
         },
         Unsubscribe: function (id) {
             if (!(id > 0))
@@ -115,14 +116,15 @@
             $.post("/User/postDeleteEvent", { EventId: id }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Successvol uitgeschreven', classes: 'orange' });
-                    $('#_progbar').hide();
                     User.loadcontent();
                 }
                 else {
                     //status = error
                     M.toast({ html: response.error, classes: 'red' });
                 }
-            }, 'json');
+            }, 'json').done(function () {
+                $('#_progbar').hide();
+            });
         },
         OpenSetting: function(sender) {
             $('#ssetting').data('sender', sender);

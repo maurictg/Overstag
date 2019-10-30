@@ -268,7 +268,7 @@ namespace Overstag.Controllers
                     var eve = context.Events.First(e => e.Id == p.EventID);
 
                     if (DateTime.Today > eve.When.Date)
-                        return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
+                        return Json(new { status = "error", error = "Deze activiteit is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
 
                     var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
                     if(part == null)
@@ -311,7 +311,7 @@ namespace Overstag.Controllers
                         var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
                         if (part == null)
                         {
-                            return Json(new { status = "error", error = "U bent al uitgeschreven voor deze activiteit" });
+                            return Json(new { status = "error", error = "Je bent al uitgeschreven voor deze activiteit" });
                         }
                         else
                         {
@@ -384,10 +384,8 @@ namespace Overstag.Controllers
                         HttpContext.Session.SetString("Token", cuser.Token);
                         try
                         {
-                            #if !DEBUG
                             Core.General.SendMail("Wachtwoord gewijzigd",
                                 $"<h1>Iemand heeft uw wachtwoord veranderd</h1><h4>Beste {cuser.Firstname}, <br>Op {DateTime.Now.ToString("dd-MM-yyyy")} om {DateTime.Now.ToString("HH:mm:ss")} heeft iemand uw wachtwoord veranderd.<br><b>Was u dit zelf? Beschouw deze mail dan als niet verzonden</b>.<br>Als je deze activiteit niet herkent, neem dan contact met ons op.</h4>", cuser.Email);
-                            #endif
                         }
                         catch(Exception e)
                         {
@@ -576,6 +574,53 @@ namespace Overstag.Controllers
                 }
                 catch (Exception e) { return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message }); }
 
+            }
+        }
+
+        public JsonResult MergeInvoices()
+        {
+            using(var context = new OverstagContext())
+            {
+                var invoices = context.Invoices.Where(f => f.UserID == currentuser().Id && f.Payed == 0).ToList();
+                if (invoices.Count() > 1)
+                {
+                    Invoice i = new Invoice();
+                    i.UserID = currentuser().Id;
+
+                    int additions = 0;
+                    int bill = 0;
+                    List<string> EventIDS = new List<string>();
+                    
+                    foreach(var invoice in invoices)
+                    {
+                        additions += invoice.AdditionsCount;
+                        bill += invoice.Amount;
+                        i.PayID = invoice.PayID;
+                        EventIDS.AddRange(invoice.EventIDs.Split(',').ToList());
+                    }
+
+                    i.EventIDs = string.Join(',', EventIDS);
+                    i.Amount = bill;
+                    i.AdditionsCount = additions;
+                    i.Payed = 0;
+                    i.Timestamp = DateTime.Now;
+
+                    try
+                    {
+                        context.Invoices.RemoveRange(invoices);
+                        context.Invoices.Add(i);
+                        context.SaveChanges();
+                        return Json(new { status = "success" });
+                    }
+                    catch(Exception e)
+                    {
+                        return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = e.ToString() });
+                    }
+                }
+                else
+                {
+                    return Json(new { status = "error", error = "Om samen te voegen heb je meer dan 1 openstaande factuur nodig" });
+                }
             }
         }
 

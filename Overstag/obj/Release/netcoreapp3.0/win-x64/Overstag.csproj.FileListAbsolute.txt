@@ -493,3 +493,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\wi
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\Mentor\Votes.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\Mentor\Invoices.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Overstag.csprojAssemblyReference.cache
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\Error\Default.cshtml.g.cs

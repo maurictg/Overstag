@@ -519,3 +519,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Ra
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Users.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Votes.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Mentor\Invoices.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Error\Default.cshtml.g.cs

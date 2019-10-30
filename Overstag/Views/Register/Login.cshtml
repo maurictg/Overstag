@@ -94,6 +94,7 @@
     let wrong2fa = 0;
     var token = "";
     let redirecturl = '@Model';
+    let errorcnt = 0;
 
     Login = {
         init: function () {
@@ -286,7 +287,11 @@
                         }
                     }
                 },'json').fail(function () {
-                    M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
+                    console.log('Er gaat iets fout');
+                    errorcnt++;
+                    if (errorcnt > 3) {
+                        M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
+                    }
                 });
             }
         },

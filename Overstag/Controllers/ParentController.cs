@@ -133,64 +133,7 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or status = error with details)</returns>
         public IActionResult GenerateInvoice()
         {
-            /*
-            try
-            {
-                using (var context = new OverstagContext())
-                {
-                    var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id);
-                    List<Account> Members = new List<Account>();
-
-                    //Get accounts
-                    foreach (var user in family.Members)
-                        Members.Add(context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == user.Id));
-
-                    List<int> EventIDS = new List<int>();
-                    int bill = 0;
-                    int ccnt = 0;
-
-                    //Get events that are unfactured per user
-                    foreach (var member in Members)
-                    {
-                        foreach (var sub in member.Subscriptions.Where(p => p.Payed == 0))
-                        {
-                            var eve = context.Events.First(f => f.Id == sub.EventID);
-                            if (Core.General.DateIsPassed(eve.When))
-                            {
-                                sub.Payed = 1;
-                                bill += (sub.ConsumptionTax * sub.ConsumptionCount);
-                                bill += (eve.Cost * (sub.FriendCount + 1));
-                                ccnt += sub.ConsumptionCount;
-
-                                for (int i = 0; i < sub.FriendCount + 1; i++)
-                                    EventIDS.Add(eve.Id);
-                            }
-                        }
-
-                        context.Accounts.Update(member);
-                    }
-
-
-                    var facture = new Invoice()
-                    {
-                        UserID = currentuser().Id,
-                        Amount = bill,
-                        EventIDs = string.Join(',', EventIDS),
-                        Payed = 0,
-                        Timestamp = DateTime.Now,
-                        PayID = Encryption.Random.rHash(currentuser().Token),
-                        AdditionsCount = ccnt
-                    };
-
-                    context.Invoices.Add(facture);
-                    context.SaveChanges();
-                    return Json(new { status = "success" });
-                }
-            }
-            catch(Exception e)
-            {
-                return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message });
-            }*/
+            //Zet ID's om van kind naar ouder
             using (var context = new OverstagContext())
             {
                 var me = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
@@ -218,11 +161,7 @@ namespace Overstag.Controllers
                 {
                     return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message });
                 }
-
-
             }
         }
-
-
     }
 }
