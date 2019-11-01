@@ -1,7 +1,7 @@
 ﻿@model List<Overstag.Models.Ticket>
 @{
     ViewBag.Title = "Tickets";
-    Layout = "~/Views/_UserLayout.cshtml";
+    Layout = "_UserLayout";
 }
 
 &nbsp;<h2>@Html.Raw(((bool)ViewBag.All) ? "Alle " : "")Tickets</h2>

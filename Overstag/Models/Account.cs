@@ -14,7 +14,6 @@ namespace Overstag.Models
         //0 user, 1 parent, 2 mentor, 3 admin
         public string Username { get; set; }
         public string Password { get; set; }
-        [EmailAddress(ErrorMessage = "Emailadres is niet geldig")]
         public string Email { get; set; }
         public string Phone { get; set; }
 
@@ -48,19 +47,5 @@ namespace Overstag.Models
         public int Type { get; set; }
         public DateTime Date { get; set; }
         public string Ip { get; set; }
-    }
-
-    //NO DATABASE CLASS
-    public class Login
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
-
-    //NO DATABASE CLASS
-    public class Password
-    {
-        public string Oldpass { get; set; }
-        public string Newpass { get; set; }
     }
 }

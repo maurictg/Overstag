@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Http
 @using Microsoft.EntityFrameworkCore;
 @{
-    Layout = "~/Views/_UserLayout.cshtml";
+    Layout = "_UserLayout";
     ViewBag.Title = "Betalingen";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
     var currentuser = new Overstag.Models.OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == Context.Session.GetString("Token"));
@@ -11,7 +11,7 @@
     <div>
         @if (currentuser.Family != null)
         {
-            <h4 class="red-text center-align" style="font-weight: bold;">De facturering wordt beheert door uw ouder.</h4>
+            <h4 class="red-text center-align" style="font-weight: bold;">De facturering wordt beheerd door het gezin waarbij je aangesloten bent</h4>
         }
         else
         {
@@ -38,28 +38,28 @@
                                 double c = (double)e.Cost;
                                 topay += c * (p.FriendCount + 1);
                                 topay += p.ConsumptionTax;
-                            <tr>
-                                <td>@e.Title</td>
-                                <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                                <td>@e.Description</td>
-                                @if (p.ConsumptionCount > 0)
-                                {
-                                    <td>@p.ConsumptionCount (<b>+&euro;@Math.Round(Convert.ToDouble(p.ConsumptionTax) / 100,2).ToString("F")</b>)</td>
-                                }
-                                else
-                                {
-                                    <td>-</td>
-                                }
-                                @if (p.FriendCount > 0)
-                                {
-                                    <td>@p.FriendCount (<b>+&euro;@Math.Round(c * (p.FriendCount) / 100, 2).ToString("F")</b>)</td>
-                                }
-                                else
-                                {
-                                    <td>-</td>
-                                }
-                                <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
-                            </tr>
+                                <tr>
+                                    <td>@e.Title</td>
+                                    <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                    <td>@e.Description</td>
+                                    @if (p.ConsumptionCount > 0)
+                                    {
+                                        <td>@p.ConsumptionCount (<b>+&euro;@Math.Round(Convert.ToDouble(p.ConsumptionTax) / 100, 2).ToString("F")</b>)</td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+                                    }
+                                    @if (p.FriendCount > 0)
+                                    {
+                                        <td>@p.FriendCount (<b>+&euro;@Math.Round(c * (p.FriendCount) / 100, 2).ToString("F")</b>)</td>
+                                    }
+                                    else
+                                    {
+                                        <td>-</td>
+                                    }
+                                    <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
+                                </tr>
                             }
                             <tr class="grey lighten-4">
                                 <td colspan="6" class="center">
@@ -68,6 +68,10 @@
                             </tr>
                         </tbody>
                     </table>
+                    <br />
+
+                    @Html.Raw("&nbsp;")<a href="#ginvoice" class="waves-effect waves-light btn modal-trigger">Factuur genereren</a>
+                    <br /><br />
                 }
                 else
                 {
@@ -76,12 +80,6 @@
             </div>
             <h3>Facturen</h3>
             <div id="factures">
-                @if (Model.UnfacturedEvents.Count() > 0)
-                {
-                    <h6>&nbsp;Factuur genereren van ongefactureerde avonden</h6>
-                    <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger">Factuur genereren</a>
-                    <br /><br />
-                }
                 @if (Model.Invoices.Count() > 0)
                 {
                     <ul class="collapsible">

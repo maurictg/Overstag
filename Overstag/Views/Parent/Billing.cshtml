@@ -1,6 +1,6 @@
 ﻿@model List<Overstag.Models.NoDB.FUnpayed>
 @{
-    Layout = "~/Views/_UserLayout.cshtml";
+    Layout = "_UserLayout";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
     int eventcnt = 0;
 }
@@ -98,7 +98,7 @@
                 $('#progress').show();
                 $.get('/Parent/GenerateInvoice', function (r) {
                     if (r.status == 'success') {
-                        M.toast({ html: 'Factuur successvol gemaakt!', classes: 'green' })
+                        M.toast({ html: 'Activiteiten successvol verwerkt!', classes: 'green' })
                         setTimeout(window.location.reload.bind(window.location), 1000);
                     } else {
                         M.toast({ html: 'Er is iets fout gegaan. Probeer het later opnieuw', classes: 'red' })

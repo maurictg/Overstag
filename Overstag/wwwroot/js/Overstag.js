@@ -13,11 +13,15 @@
 
         Loader: function () {
             return {
-                init: function () {
-                    $.get('/html/loader.html', function (r) {
+                init: function(callback) {
+                    $.get('/html/loader.html', function(r) {
                         $('#_data').html(r);
                     }).done(function () {
                         $('.modal').modal();
+                        if (callback !== undefined && callback !== null)
+                            callback();
+                    }).fail(function () {
+                        console.log('Failed to load!');
                     });
                 },
                 show: function () {
@@ -107,11 +111,14 @@
                         }
                     });
                 },
-                restoreMe: function (callback, params) {
+                restoreMe: function (callback, params, successcallback) {
                     if (localStorage.getItem('remember')) {
                         $.post('/Auth/Login', { token: localStorage.getItem('remember') }, function (r) {
                             if (r.status === 'success') {
-                                window.location.href = '/User';
+                                if (successcallback !== undefined && successcallback !== null) {
+                                    successcallback();
+                                }
+                                console.log('Login restored!');
                             } else {
                                 console.log('Cant restore login');
                                 localStorage.removeItem('remember');

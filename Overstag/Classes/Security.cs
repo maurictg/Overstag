@@ -425,7 +425,7 @@ namespace Overstag.Security
             using (var context = new OverstagContext())
             {
                 int userid = context.Accounts.First(f => f.Token == token).Id;
-                string ttoken = Encryption.Random.rString(Encryption.Random.rInt(20, 50), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345678901234567890123456789");
+                string ttoken = Encryption.Random.rString(Encryption.Random.rInt(15, 45), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890123456789");
 
                 context.Auths.Add(new Overstag.Models.Auth
                 {

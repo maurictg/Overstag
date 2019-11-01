@@ -1,0 +1,124 @@
+﻿@model List<Overstag.Accountancy.Transaction>
+@{
+    Layout = "_AccountancyLayout";
+
+
+    List<string> ddata = new List<string>();
+    List<string> mdata = new List<string>();
+    int balance = 0;
+    double _out = Math.Round((double)Model.Where(g => g.Amount < 0).Sum(f => f.Amount)/-100, 2);
+    double _in = Math.Round((double)Model.Where(g => g.Amount > 0).Sum(f => f.Amount)/100, 2);
+
+    //Generate line stats
+    foreach(var item in Model.ToArray().Reverse())
+    {
+        ddata.Add(item.When.ToString("dd-MM-yyyy"));
+        balance += item.Amount;
+        mdata.Add(Math.Round((double)balance / 100, 2).ToString("F").Replace(",", "."));
+    }
+}
+
+    <div>
+        <!--Boekhouding overzicht-->
+        <h2 class="red-text text-darken-4 center-align">Boekhouding</h2>
+
+        <h5 class="center-align">Transactieoverzicht</h5>
+        <br />
+        <table>
+            <tr>
+                <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)balance / 100, 2).ToString("F")</b></td>
+            </tr>
+        </table>
+        <table class="responsive-table">
+            <thead>
+                <tr>
+                    <th>Bedrag</th>
+                    <th>Datum</th>
+                    <th>Omschrijving</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@Html.Raw((t.Amount > 0) ? $"<b class=\"green-text text-accent-4\">+ &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F")}</b>" : $"<b class=\"red-text\">- &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F").Replace("-", "")}</b>")</td>
+                        <td>@t.When.ToString("dd-MM-yyyy") om @t.When.ToString("HH:mm")</td>
+                        <td>@t.Description</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <br />
+        <h5 class="center-align">Statistieken</h5>
+        <div class="row">
+            <div class="col s12 m4">
+                <canvas id="pie" style="height: 1em; width: 1em"></canvas>
+            </div>
+            <div class="col s12 m4">
+                <canvas id="stat" style="height: 1em; width: 1em"></canvas>
+            </div>
+        </div>
+    </div>
+<!--^(-?)([0-9]*),([0-9][0-9])-->
+<script>
+    var Transactions = {
+        init: function () {
+            $('#_acc, #_macc').addClass('active');
+            Transactions.createLineChart();
+            Transactions.createPieChart();
+        },
+        createLineChart: function () {
+            var data = {
+                labels: [@Html.Raw("'"+string.Join(',', ddata).Replace(",","','")+"'")],
+                datasets: [
+                {
+                    label: 'Inhoud kas',
+                    backgroundColor: 'rgba(50, 137, 168, 0.5)',
+                    data: [
+                        @Html.Raw(string.Join(',', mdata))
+                    ]
+                }]
+            };
+
+            var options = {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            };
+
+            var tc = new Chart($('#stat'), {
+                type: 'line',
+                data: data,
+                options: options
+            });
+        },
+        createPieChart: function () {
+            var data = {
+                datasets: [{
+                    data: [@_in.ToString("F").Replace(",", "."), @_out.ToString("F").Replace(",", ".")],
+                    backgroundColor: [
+                        'rgb(75, 133, 227)',
+                        'rgb(227, 75, 141)'
+                    ],
+                }],
+
+                labels: [
+                   'Inkomsten', 'Uitgaven'
+                ]
+            };
+
+            var MVChart = new Chart($('#pie'), {
+                type: 'pie',
+                data: data
+            });
+        }
+    }
+
+    $(function () {
+        Transactions.init();
+    });
+</script>

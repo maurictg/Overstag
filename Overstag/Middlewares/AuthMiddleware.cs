@@ -17,13 +17,13 @@ namespace Overstag.Middlewares
         {
             {0, "/User,/Photo,/Tickets" },
             {1, "/Parent" },
-            {2, "/Mentor" },
+            {2, "/Mentor,/Accountancy" },
             {3, "/Admin" }
         };
 
         private readonly string[] allpaths =
         {
-            "/Home", "/Register", "/Admin/initdb", "/Pay", "/html", "/Auth", "/User", "/Photo", "/Tickets", "/Parent", "/Mentor", "/Admin"
+            "/Home", "/Register", "/Admin/initdb", "/Pay", "/html", "/Auth", "/User", "/Photo", "/Tickets", "/Parent", "/Mentor", "/Admin", "/Accountancy"
         };
 
         public Authentication(RequestDelegate next)

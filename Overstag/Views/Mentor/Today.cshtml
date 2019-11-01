@@ -1,7 +1,7 @@
 ﻿@model Overstag.Models.NoDB.UserEvent
 @{
     ViewBag.Title = "Deze avond";
-    Layout = "~/Views/_MentorLayout.cshtml";
+    Layout = "_MentorLayout";
     int totald = 0;
     Model.Participators.RemoveAll(f => f.account.Type != 0);
 }

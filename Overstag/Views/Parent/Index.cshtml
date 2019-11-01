@@ -1,43 +1,50 @@
 ﻿@model Overstag.Models.Family
 @{
     ViewBag.Title = "Mijn gezin";
-    Layout = "~/Views/_UserLayout.cshtml";
+    Layout = "_UserLayout";
 }
 
-    <div>
-        <h3>Mijn gezin</h3>
-        <table class="responsive-table">
-            <thead>
+<div>
+    <h3>Mijn gezin</h3>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Naam</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Members)
+            {
                 <tr>
-                    <th>Naam</th>
-                    <th>Acties</th>
+                    <td>@user.Firstname</td>
+                    <td>
+                        <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model.Members)
-                {
-                    <tr>
-                        <td>@user.Firstname</td>
-                        <td>
-                            <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
-                        </td>
-                    </tr>
-                }
-                @if (Model.Members.Count() == 0)
-                {
-                    <tr><td colspan="2" class="center-align"><h5><b>Geen gezinsleden</b>.</h5> Klik op de + om iemand uit te nodigen</td></tr>
-                }
-            </tbody>
-        </table>
-        <div class="center-align">
-            <br />
-            <a href="/Parent/Billing" class="waves-effect waves-light btn blue-dark">Betalingen en facturering</a>
-        </div>
+            }
+            @if (Model.Members.Count() == 0)
+            {
+                <tr><td colspan="2" class="center-align"><h5><b>Geen gezinsleden</b>.</h5> Klik op de + om iemand uit te nodigen</td></tr>
+            }
+        </tbody>
+    </table>
+    <div class="center-align">
         <br />
+        <a href="/Parent/Billing" class="waves-effect waves-light btn blue-dark">Betalingen en facturering</a>
     </div>
+    <br />
+</div>
+
+<div class="tap-target blue-dark" id="tt" data-target="fab">
+    <div class="tap-target-content">
+        <h5>Gezinsleden toevoegen</h5>
+        <p>Klik hier om gezinsleden toe te voegen</p>
+    </div>
+</div>
 
 <div class="fixed-action-btn">
-    <a class="btn-floating btn-large blue-dark waves-effect" onclick="Parent.openLink()">
+    <a id="fab" class="btn-floating btn-large blue-dark waves-effect" onclick="Parent.openLink()">
         <i class="large material-icons">add</i>
     </a>
 </div>
@@ -47,7 +54,7 @@
     <div class="modal-content">
         <h4>Uitnodiging</h4>
         <h6>Via deze uitnodiging kan iemand zich voegen bij uw gezin</h6>
-        <input id="familyid" type="text" placeholder="familyid"/>
+        <input id="familyid" type="text" placeholder="familyid" />
         <a class="btn btn-small" onclick="Parent.copyLink()">Link kopiëren</a>
     </div>
     <div class="modal-footer">
@@ -67,10 +74,14 @@
 </div>
 
 <script>
+    var familyCount = @Model.Members.Count();
     var Parent = {
         init: function() {
             $('#_family, #_mfamily').addClass('active');
             this.mapEvents();
+            if (familyCount == 0) {
+                M.TapTarget.getInstance($('#tt')).open();
+            }
         },
         mapEvents: function() {
             $('#btndelete').click(function() {
@@ -103,7 +114,8 @@
         }
     }
 
-    $(document).ready(function() {
+    $(document).ready(function () {
+        $('.tap-target').tapTarget();
         Parent.init();
     });
 </script>

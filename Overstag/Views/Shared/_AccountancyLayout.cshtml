@@ -1,0 +1,64 @@
+﻿@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<!-- OVERSTAG (C) @DateTime.Now.Year MaurICT (github.com/maurictg/Overstag) -->
+<html lang="nl-nl">
+<head>
+    <title>@ViewBag.Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="~/js/materialize.min.js"></script>
+    <script type="text/javascript" src="~/js/Overstag.js"></script>
+    <script type="text/javascript" src="~/js/moment.min.js"></script>
+    <script type="text/javascript" src="~/js/chart.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/chart.min.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="~/css/Overstag.css" />
+</head>
+<body>
+    <nav>
+        <div class="nav-wrapper red darken-4">
+            <a href="#" id="_title" class="brand-logo">&nbsp;Financiën</a>
+            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="/Home">Home</a></li>
+                <li id="_home"><a href="/Mentor">Bestuur home</a></li>
+                <li id="_acc"><a href="/Accountancy">Financiën home</a></li>
+                <li id="_invoices"><a href="/Accountancy/Invoices">Facturering</a></li>
+                <li id="_pay"><a href="/Accountancy/Payments">Betalingen</a></li>
+                <li><a href="/User">Mijn account</a></li>
+                <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
+            </ul>
+            <div class="progress" id="_progbar" style="display: none;">
+                <div class="indeterminate"></div>
+            </div>
+        </div>
+    </nav>
+    <ul class="sidenav" id="mobile-demo">
+        <li><a href="/Home">Home</a></li>
+        <li id="_mhome"><a href="/Mentor">Bestuur home</a></li>
+        <li id="_macc"><a href="/Accountancy">Financiën home</a></li>
+        <li id="_minvoice"><a href="/Accountancy/Invoices">Facturering</a></li>
+        <li id="_mpay"><a href="/Accountancy/Payments">Betalingen</a></li>
+        <li><a href="/User">Mijn account</a></li>
+        <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
+    </ul>
+
+    @RenderBody()
+
+    <script>
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('.collapsible').collapsible();
+            $('.modal').modal();
+        });
+    </script>
+
+    <div id="_data"></div>
+</body>
+</html>
+
+<!-- COLOR SCHEME LOGO:
+licht:  #3096D3
+middel: #0B86CF
+donker: #04507D-->

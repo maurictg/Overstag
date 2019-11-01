@@ -1,4 +1,5 @@
-﻿@{
+﻿@model string
+@{
     ViewBag.Title = "Inloggen bij Overstag";
     ViewBag.Description = "Log in met jouw Overstag Account om je in te schrijven voor onze avonden en om te kunnen stemmen.";
     ViewBag.Keywords = "stichting overstag, overstag rilland, overstag reimerswaal, overstag inloggen, meedoen";
@@ -102,7 +103,7 @@
             $("#_reg, #_mreg").addClass("active");
             $('#progbar2, #mailhelper').hide();
             Login.mapEvents();
-            OverstagJS.General.restoreMe(Login.toggle, true);
+            OverstagJS.General.restoreMe(Login.toggle, true, Login.redirect);
         },
 
         mapEvents: function () {
