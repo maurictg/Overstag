@@ -860,3 +860,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razo
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Accountancy\Index.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Accountancy\Invoices.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\Mentor\Accountancy\Payments.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.0\Razor\Views\User\Declaration.cshtml.g.cs

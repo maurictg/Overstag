@@ -83,6 +83,7 @@ namespace Overstag.Controllers
             using(var context = new OverstagContext())
             {
                 var user = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
+                ViewBag.Age = Core.General.getAge(user.Birthdate);
 
                 List<Event> events = context.Events.ToList();
                 List<Event> unpayedEvents = new List<Event>();
@@ -169,7 +170,11 @@ namespace Overstag.Controllers
             return View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote==1)- b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
         }
 
-        public IActionResult Vote() => View();
+        public IActionResult Vote() 
+            => View();
+
+        public IActionResult Declaration()
+            => View(new OverstagContext().Requests.Where(f => f.UserID == currentuser().Id).OrderBy(g => g.Timestamp).ToList());
 
         /// <summary>
         /// Post a new idea to the server

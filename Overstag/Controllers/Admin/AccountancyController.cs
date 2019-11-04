@@ -11,11 +11,20 @@ namespace Overstag.Controllers
 {
     public class AccountancyController : Controller
     {
-        public IActionResult Index()
+        [Route("Accountancy/Index/{amount?}")]
+        public IActionResult Index(int? amount)
         {
             using(var context = new OverstagContext())
             {
-                var pms = context.Transactions.OrderByDescending(f => f.When).ToList();
+                var pms = new List<Accountancy.Transaction>();
+                if(amount != null)
+                {
+                    pms = context.Transactions.OrderByDescending(f => f.When).Take(Convert.ToInt32(amount)).ToList();
+                    ViewBag.Limit = Convert.ToInt32(amount);
+                }
+                else
+                    pms = context.Transactions.OrderByDescending(f => f.When).ToList();
+
                 return View("~/Views/Mentor/Accountancy/Index.cshtml",pms);
             }
         }
@@ -43,6 +52,25 @@ namespace Overstag.Controllers
                 }
             }
             return View("~/Views/Mentor/Accountancy/Payments.cshtml",payments);
+        }
+
+        [HttpPost]
+        public IActionResult addTransaction(Accountancy.Transaction t)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    t.When = DateTime.Now;
+                    context.Transactions.Add(t);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Interne fout", debuginfo = e.ToString() });
+            }
         }
 
         /// <summary>
@@ -73,7 +101,7 @@ namespace Overstag.Controllers
                         payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"Betaling (#{payment.PaymentID}) van factuur #{invoice.PayID}", When = DateTime.Now });
+                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur #{invoice.PayID}", When = DateTime.Now });
                         context.SaveChanges();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }

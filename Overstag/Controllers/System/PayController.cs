@@ -119,23 +119,23 @@ namespace Overstag.Controllers
 
                     pr.SetMetadata(Uri.EscapeDataString(invoice.PayID));
 
-                    //PaymentResponse ps = await pc.CreatePaymentAsync(pr); <--temp
+                    //PaymentResponse ps = await pc.CreatePaymentAsync(pr); //<--temp
                    
 
                     context.Payments.Add(new Payment(){
                         InvoiceID = invoice.PayID,
-                        //PaymentID = ps.Id, <--temp
+                        //PaymentID = ps.Id, //<--temp
                         UserID = invoice.UserID,
                         PlacedAt = DateTime.Now,
-                        //Status = ps.Status <--temp
+                        //Status = ps.Status //<--temp
                     });
 
                     context.SaveChanges();
 
-                    //string paylink = ps.Links.Checkout.Href; <--temp
+                    //string paylink = ps.Links.Checkout.Href; //<--temp
 
                     //Set session for check
-                    //HttpContext.Session.SetString("PayUrl", paylink); <--temp
+                    //HttpContext.Session.SetString("PayUrl", paylink); //<--temp
                     HttpContext.Session.SetString("PayUrl", "/Home");
                     return Json(new { status = "success"/*, href = Uri.EscapeDataString(paylink)*/ }); //<--temp
                 }
@@ -213,7 +213,10 @@ namespace Overstag.Controllers
                         if (invoice != null)
                         {
                             if (payment.Status == PaymentStatus.Paid)
+                            {
                                 invoice.Payed = 1;
+                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[AUTO] Betaling (#{payment.PaymentID}) van factuur #{invoice.PayID}", When = DateTime.Now });
+                            }
                             
                             if(payment.Status != PaymentStatus.Open)
                                 HttpContext.Session.Remove("PayUrl");

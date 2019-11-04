@@ -1,0 +1,163 @@
+﻿@model List<Overstag.Accountancy.Request>
+@{
+    ViewBag.Title = "Declaraties";
+    Layout = "_UserLayout";
+}
+<div>
+    <h2 class="blue-dark-text center-align">Declaratie</h2>
+</div>
+
+@if (Model.Count() > 0)
+{
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Datum</th>
+                <th>Ingediend op</th>
+                <th>Bedrag</th>
+                <th>Omschrijving</th>
+                <th>Uitbetaald</th>
+                <!--Metadata...?-->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model)
+            {
+                <tr>
+                    <td>@d.When.ToString("dd-MM-yyyy")</td>
+                    <td>@d.Timestamp.ToString("dd-MM-yyyy") om @d.Timestamp.ToString("HH:mm:ss")</td>
+                    <td>&euro;@Math.Round((double)d.Amount / 100, 2).ToString("F")</td>
+                    <td>@d.Description</td>
+                    <td>@Html.Raw((d.Payed == 1) ? "<b class=\"green-text\">Ja</b>" : "<b class=\"green-text\">Nee</b>")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h5 class="center-align">Geen ingediende declaraties gevonden</h5>
+}
+
+<div class="center-align">
+    <button class="btn btn-large waves-effect blue-dark" id="btnshow" onclick="Payment.showField()">Toevoegen</button>
+</div>
+
+<br />
+<div id="add" class="center-align" style="display: none; border: 1px solid black;">
+    <br />
+    <h4>Declaratie indienen</h4>
+    <p>Beantwoord de volgende vragen:</p>
+    <br />
+    <div class="row">
+        <div class="input-field col m6 offset-m3 s12">
+            <input id="when" type="text" class="datepicker validate">
+            <label for="when">1. Wanneer heeft u de kosten gemaakt?</label>
+            <span class="helper-text" data-error="Vul a.u.b. een datum in"></span>
+        </div>
+        <div class="input-field col m6 offset-m3 s12">
+            <input id="amount" type="text" class="validate">
+            <label for="amount">2. Wat is het bedrag in €</label>
+            <span class="helper-text" data-error="Vul a.u.b. een bedrag in (kommagetal, 2 decimalen)"></span>
+        </div>
+        <div class="input-field col m6 offset-m3 s12">
+            <textarea id="desc" type="text" class="validate materialize-textarea"></textarea>
+            <label for="desc">3. Omschrijving</label>
+            <span class="helper-text" data-error="Vul a.u.b. een omschrijving in"></span>
+        </div>
+        <div class="col s12">
+            Type: 
+            <p>
+                <label>
+                    <input class="with-gap" value="Brandstof" name="type" type="radio" checked="checked" />
+                    <span>Brandstof</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" value="Boodschappen" name="type" type="radio" />
+                    <span>Boodschappen</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" value="Activiteiten" name="type" type="radio" />
+                    <span>Activiteiten</span>
+                </label>
+            </p>
+            <p>
+                <label>
+                    <input class="with-gap" value="Overige" name="type" type="radio" />
+                    <span>Overige</span>
+                </label>
+            </p>
+        </div>
+        <div class="col m6 offset-m3 s12">
+            <p>
+                <label>
+                    <input type="checkbox" id="check" class="filled-in" />
+                    <span>Ik heb alles naar waarheid ingevuld</span>
+                </label>
+            </p>
+        </div>
+    </div>
+    <button class="btn waves-effect" onclick="Payment.hideField();">Annuleren</button>
+    <button class="btn green waves-effect disabled" id="btnsend" onclick="Payment.post();">Verzenden</button>
+    <br />
+    <br />
+</div>
+
+
+<script>
+    var Payment = {
+        init: function () {
+            $('#_apay, #_mapay').addClass('active');
+            Payment.mapEvents();
+        },
+        mapEvents: function () {
+            $('#check').change(function () {
+                if (this.checked) {
+                    $('#btnsend').removeClass('disabled');
+                } else {
+                    $('#btnsend').addClass('disabled');
+                }
+            });
+        },
+        showField: function () {
+            $('#add').show();
+            $('#btnshow').hide();
+        },
+        hideField: function () {
+            $('#add').hide();
+            $('#btnshow').show();
+        },
+        validate: function () {
+            var valid = true;
+            if (!/^([0-9]*),([0-9][0-9])/.test($('#amount').val())) {
+                $('#amount').addClass("invalid");
+                $('#amount').prop("aria-invalid", "true");
+                valid = false;
+            }
+            $.each($('.validate'), function (i, e) {
+                if ($(e).val() == '') {
+                    $(e).addClass("invalid");
+                    $(e).prop("aria-invalid", "true");
+                    valid = false;
+                }
+            });
+            return valid;
+        },
+        post: function () {
+            if (Payment.validate()) {
+                $('_progbar').show();
+            }
+        }
+    }
+
+    $(function () {
+        $('.datepicker').datepicker({
+            format: 'dd-mm-yyyy'
+        });
+        Payment.init();
+    });
+</script>

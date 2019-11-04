@@ -141,9 +141,9 @@
                         }
                     </ul>
 
-                    @if(Model.Invoices.Where(f => f.Payed == false).Count()>1)
+                    @if (Model.Invoices.Where(f => f.Payed == false).Count() > 1)
                     {
-                        @Html.Raw("&nbsp;")<button class="btn orange waves-effect modal-trigger" data-target="minvoice" >Facturen samenvoegen</button>
+                        @Html.Raw("&nbsp;")<button class="btn orange waves-effect modal-trigger" data-target="minvoice">Facturen samenvoegen</button>
                     }
                 }
                 else
@@ -151,6 +151,13 @@
                     <h5>Geen facturen gevonden</h5><br />
                 }
             </div>
+            
+            @if (ViewBag.Age >= 18)
+            {
+                <h3>Kosten declareren</h3>
+                @Html.Raw("&nbsp;")<a class="btn blue-dark waves-effect" href="/User/Declaration">Klik hier</a>
+            }
+
         }
     </div>
 

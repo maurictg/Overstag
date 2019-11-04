@@ -9,21 +9,40 @@
     double _out = Math.Round((double)Model.Where(g => g.Amount < 0).Sum(f => f.Amount)/-100, 2);
     double _in = Math.Round((double)Model.Where(g => g.Amount > 0).Sum(f => f.Amount)/100, 2);
 
+
+    var results = Model.ToArray().Reverse().GroupBy(a => a.When.Date, b => b.Amount,
+        (c, d) => new { When = c, Amount = d.Sum() });
+
     //Generate line stats
-    foreach(var item in Model.ToArray().Reverse())
+    foreach(var item in results)
     {
         ddata.Add(item.When.ToString("dd-MM-yyyy"));
         balance += item.Amount;
         mdata.Add(Math.Round((double)balance / 100, 2).ToString("F").Replace(",", "."));
     }
+
+    int limit = (ViewBag.Limit != null) ? (int)ViewBag.Limit : 1000;
 }
 
     <div>
         <!--Boekhouding overzicht-->
-        <h2 class="red-text text-darken-4 center-align">Boekhouding</h2>
+        <h2 class="red-text text-darken-4 center-align">Kasboek</h2>
 
         <h5 class="center-align">Transactieoverzicht</h5>
-        <br />
+        <div class="row">
+            <div class="col s12">
+                <div class="col s12">
+                    Toon nieuwste:
+                    &nbsp;
+                    <div class="input-field inline">
+                        <input id="limit" type="number" max="1000" style="width: 5em" value="@limit">
+                    </div>&nbsp;
+                    <button class="btn inline red darken-4 waves-effect" onclick="Transactions.filter()">Go</button>
+                    &nbsp;
+                    <button class="btn red darken-4 waves-effect modal-trigger" data-target="add">Transactie toevoegen</button>
+                </div>
+            </div>
+        </div>
         <table>
             <tr>
                 <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)balance / 100, 2).ToString("F")</b></td>
@@ -59,7 +78,42 @@
             </div>
         </div>
     </div>
-<!--^(-?)([0-9]*),([0-9][0-9])-->
+
+    <div id="add" class="modal">
+        <div class="modal-content">
+            <h4>Betaling toevoegen</h4>
+            <br />
+            <div class="row">
+                <div class="input-field col s6">
+                    <input id="amount" type="text" class="validate" />
+                    <label for="amount">Bedrag in €</label>
+                    <span class="helper-text" data-error="Vul a.u.b. een geldig bedrag in (kommagetal)"></span>
+                </div>
+                <div class="col s6">
+                    <p>
+                        <label>
+                            <input class="with-gap" value="plus" checked="checked" name="mode" type="radio" />
+                            <span>Bij</span>
+                        </label>
+                        &nbsp;&nbsp;
+                        <label>
+                            <input class="with-gap" value="min" name="mode" type="radio" />
+                            <span>Af</span>
+                        </label>
+                    </p>
+                </div>
+                <div class="input-field col s12">
+                    <input id="desc" type="text" class="validate" />
+                    <label for="desc">Omschrijving</label>
+                    <span class="helper-text" data-error="Vul a.u.b. dit veld in"></span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn modal-close waves-effect" onclick="$('#amount, #desc').val('');">Annuleren</button>
+            <button class="btn waves-effect green" onclick="Transactions.addTransaction()">Toevoegen</button>
+        </div>
+    </div>
 <script>
     var Transactions = {
         init: function () {
@@ -73,7 +127,7 @@
                 datasets: [
                 {
                     label: 'Inhoud kas',
-                    backgroundColor: 'rgba(50, 137, 168, 0.5)',
+                    backgroundColor: '#B71C1C',
                     data: [
                         @Html.Raw(string.Join(',', mdata))
                     ]
@@ -101,8 +155,8 @@
                 datasets: [{
                     data: [@_in.ToString("F").Replace(",", "."), @_out.ToString("F").Replace(",", ".")],
                     backgroundColor: [
-                        'rgb(75, 133, 227)',
-                        'rgb(227, 75, 141)'
+                        '#00C853',
+                        '#F44336'
                     ],
                 }],
 
@@ -115,6 +169,43 @@
                 type: 'pie',
                 data: data
             });
+        },
+        validate: function () {
+            var valid = true;
+            if (!/^([0-9]*),([0-9][0-9])/.test($('#amount').val())) {
+                $('#amount').addClass("invalid");
+                $('#amount').prop("aria-invalid", "true");
+                valid = false;
+            }
+            if ($('#desc').val() == '') {
+                $('#desc').addClass("invalid");
+                $('#desc').prop("aria-invalid", "true");
+                valid = false;
+            }
+            return valid;
+        },
+        addTransaction: function () {
+            if (Transactions.validate()) {
+                M.Modal.getInstance($('#add')).close();
+                var amount = Math.round(Number($('#amount').val().replace(",",".")) * 100);
+                if ($("input[name='mode']:checked").val() == 'min') {
+                    amount *= -1;
+                }
+                $('#_progbar').show();
+                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val() }, function (r) {
+                    if (r.status == 'success') {
+                        M.toast({ html: 'Transactie toegevoegd', classes: 'green' });
+                        Core.doReload(500);
+                    } else {
+                        M.toast({ html: r.error, classes: 'red' });
+                        $('#_progbar').hide();
+                    }
+                });
+            }
+        },
+        filter: function () {
+            $('#_progbar').show();
+            window.location.href = '/Accountancy/Index/' + $('#limit').val();
         }
     }
 
