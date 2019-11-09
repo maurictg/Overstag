@@ -31,10 +31,29 @@ namespace Overstag.Controllers
             }
         }
 
-        [HttpPost("Files/uploadFile")]
-        [RequestSizeLimit(1000000000)] //1GB
-        public async Task<IActionResult> UploadFile(IList<IFormFile> files)
+        [HttpGet]
+        [Route("Files/serve/{token}/{type}")]
+        public IActionResult Serve(string token, string type)
         {
+            string file = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", Uri.UnescapeDataString(token));
+            if (!System.IO.File.Exists(file))
+                return Json(new { status = "error", error = "Bestand niet gevonden" });
+
+            try
+            {
+                return File(System.IO.File.ReadAllBytes(file), Uri.UnescapeDataString(type)); //example: "image%2Fjpeg"
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Interne fout", debuginfo = e.ToString() });
+            }
+        }
+
+        [HttpPost("Files/uploadFiles")]
+        [RequestSizeLimit(1000000000)] //1GB MAX
+        public async Task<IActionResult> UploadFiles(IList<IFormFile> files)
+        {
+            List<string> fileIDS = new List<string>();
             if (Request.ContentLength > 1000000000)
                 return Json(new { status = "error", error = "Bestand is te groot" });
 
@@ -45,17 +64,19 @@ namespace Overstag.Controllers
             {
                 if (file.Length > 0 && file != null)
                 {
+                    string fileID = Encryption.Random.rHash(file.FileName + file.Name);
                     Console.WriteLine($"{file.Name} - {file.FileName} - {file.Length} - {file.ContentType}");
-                    var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", file.FileName);
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", fileID);
                     using (var stream = new FileStream(path, FileMode.Create))
                     {
                         await file.CopyToAsync(stream);
                     }
+                    fileIDS.Add(fileID);
                 }
                 else
                     return Json(new { status = "error", error = "Interne fout", debuginfo = "Een van de bestanden is NULL" });
             }
-            return Json(new { status = "success" });
+            return Json(new { status = "success", fileIDS });
 
         }
     }

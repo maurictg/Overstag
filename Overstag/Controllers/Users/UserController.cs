@@ -355,6 +355,27 @@ namespace Overstag.Controllers
             }
         }
 
+        [HttpPost]
+        public IActionResult postDeclaration(Accountancy.Request request)
+        {
+            try
+            {
+                request.Timestamp = DateTime.Now;
+                request.Payed = 0;
+                request.UserID = currentuser().Id;
+                using (var context = new OverstagContext())
+                {
+                    context.Requests.Add(request);
+                    context.SaveChanges();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "success", error = "Interne fout", debuginfo = e.ToString() });
+            }
+        }
+
         /// <summary>
         /// Changes the password of the user
         /// </summary>

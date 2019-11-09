@@ -498,3 +498,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\wi
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\Shared\_Layout.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\Shared\_MentorLayout.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\Shared\_UserLayout.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\win-x64\Razor\Views\User\Declaration.cshtml.g.cs

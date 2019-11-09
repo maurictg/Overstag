@@ -524,3 +524,4 @@ C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Ra
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Shared\_Layout.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Shared\_MentorLayout.cshtml.g.cs
 C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\Shared\_UserLayout.cshtml.g.cs
+C:\Users\maurict\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.0\Razor\Views\User\Declaration.cshtml.g.cs

@@ -122,7 +122,8 @@ namespace Overstag.Controllers
         /// Automatize invoicing for all users
         /// </summary>
         /// <returns></returns>
-        public JsonResult autoInvoice()
+        [HttpPost]
+        public JsonResult autoInvoice([FromForm]int amount)
         {
             int usercount = 0;
             int particount = 0;
@@ -176,7 +177,7 @@ namespace Overstag.Controllers
                             AdditionsCount = additions
                         };
 
-                        if (eventIDS.Count() > 4)
+                        if (eventIDS.Count() > (amount-1))
                         {
                             context.Invoices.Add(facture);
                             parti.ForEach(f => f.Payed = 1);

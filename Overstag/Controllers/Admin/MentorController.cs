@@ -87,7 +87,7 @@ namespace Overstag.Controllers
         [HttpPost]
         public IActionResult postPresence([FromForm]string absentids)
         {
-            int[] absentIDS = System.Text.Json.JsonSerializer.Deserialize<int[]>(absentids);
+            int[] absentIDS = JsonSerializer.Deserialize<int[]>(absentids);
             
             using(var context = new OverstagContext())
             {
