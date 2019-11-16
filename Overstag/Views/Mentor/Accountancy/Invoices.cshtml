@@ -6,14 +6,11 @@
     <div class="center-align">
         <h2 class="blue-middle-text">Automatisch factureren</h2>
         <h6 class="blue-dark-text">
-            Het algoritme op deze pagina brengt automatisch voor alle gebruikers die <b>x</b> of meer ongefactureerde activiteiten hebben staan de activiteiten in rekening dmv een factuur.
+            Het algoritme op deze pagina brengt automatisch voor alle gebruikers die <input style="width: 3em" type="number" max="10" min="1" id="amount" value="5" class="col s1 center-align centered" /> of meer ongefactureerde activiteiten hebben staan de activiteiten in rekening dmv een factuur.
             <br />Ook wordt naar alle betreffende gebruikers een email gestuurd met een link naar de factuur.
         </h6>
         <br /><br />
-        <div class="row">
-            <p>Minimaal aantal avonden (x)</p>
-            <input type="number" max="10" min="1" id="amount" value="5" class="col s1 center-align centered" />
-        </div>
+
         <a class="btn btn-large red darken-4 waves-effect disabled" id="btngenerate" onclick="M.Modal.getInstance($('#areusure')).open()">Facturen maken</a>
         <p class="red-text">Let op: Dit kan even duren</p>
         <br />
