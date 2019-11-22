@@ -1,4 +1,8 @@
-﻿using System;
+﻿#define MOLLIE_ENABLED
+
+//COMMENT this to enable mollie
+//#undef MOLLIE_ENABLED
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
@@ -101,7 +105,8 @@ namespace Overstag.Controllers
                 string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
 
                 //Create payment
-                PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
+                PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);               
+
                 PaymentRequest pr = new PaymentRequest()
                 {
                     Amount = new Amount(Currency.EUR, cost),
@@ -109,25 +114,27 @@ namespace Overstag.Controllers
                     RedirectUrl = url,
                     Locale = "nl_NL",
                     CustomerId = user.MollieID,
-                    #if !DEBUG
+#if !DEBUG
                     WebhookUrl = webhook
-                    #endif
+#endif
                 };
 
-
                 pr.SetMetadata(Uri.EscapeDataString(invoice.PayID));
-                //PaymentResponse ps = await pc.CreatePaymentAsync(pr); //<--temp
-
+#if MOLLIE_ENABLED
+                PaymentResponse ps = await pc.CreatePaymentAsync(pr);
+                ViewBag.PayLink = ps.Links.Checkout.Href;
+#endif
                 context.Payments.Add(new Payment()
                 {
                     InvoiceID = invoice.PayID,
-                    //PaymentID = ps.Id, //<--temp
                     UserID = invoice.UserID,
                     PlacedAt = DateTime.Now,
-                    //Status = ps.Status //<--temp
+#if MOLLIE_ENABLED
+                    PaymentID = ps.Id,
+                    Status = ps.Status
+#endif
                 });
 
-                //ViewBag.PayLink = ps.Links.Checkout.Href; //<--temp
                 await context.SaveChangesAsync();
 
                 //Viewbag info
@@ -160,10 +167,17 @@ namespace Overstag.Controllers
                 {
                     try
                     {
+#if MOLLIE_ENABLED
                         PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
-                        await pc.DeletePaymentAsync(payment.PaymentID);
+
+                        var t = await pc.GetPaymentAsync(payment.PaymentID);
+                        if(t.IsCancelable)
+                            await pc.DeletePaymentAsync(payment.PaymentID);
+                        else
+                            return Json(new { status = "warning", error = "Jij mag niet verwijderen." });
+#endif
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         return Json(new { status = "warning", error = "IDeal betaling verwijderen mislukt.", debuginfo = e.Message });
                     }
@@ -191,7 +205,7 @@ namespace Overstag.Controllers
         { 
             using(var context = new OverstagContext())
             {
-                var payment = context.Payments.FirstOrDefault(f => f.InvoiceID == Uri.UnescapeDataString(id));
+                var payment = context.Payments.OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.InvoiceID == Uri.UnescapeDataString(id));
                 if (payment == null)
                 {
                     string[] error = { "Betaling niet gevonden", "Waarschijnlijk is de URL onjuist.<br/><i>Als het probleem blijft optreden neem dan contact met ons op.</i>" };

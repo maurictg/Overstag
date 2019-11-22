@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col s12 m10 offset-m1">
                 <div class="card-panel">
-                    @if (ViewBag.PayURL == null)
+                    @if (ViewBag.PayLink == null)
                     {
                         <h6 class="red-text">IDeal is niet in werking. Annuleer a.u.b. de betaling en neem contact op via WhatsApp.</h6>
                         <br />
@@ -22,7 +22,7 @@
                     {
                         <h6>Betaal met IDeal bij uw eigen bank met Mollie</h6>
                         <br />
-                        <button class="btn btn-large green waves-effect" onclick="Checkout.checkout('@ViewBag.PayURL');" id="btncheckout">Betaling afrekenen</button>
+                        <button class="btn btn-large green waves-effect" onclick="Checkout.checkout('@ViewBag.PayLink');" id="btncheckout">Betaling afrekenen</button>
                     }
                     <button class="btn btn-large orange waves-effect" onclick="Checkout.cancel('@Model.Id');" id="btncancel">Betaling annuleren</button>
                     <br />
@@ -40,7 +40,7 @@
                     <img class="responsive-img" src="~/img/ideal.gif" />
                 </div>
                 <div class="col s12 m6">
-                    <img class="responsive-img" src="~/img/mollie.png" style="height: 8em; " />
+                    <img class="responsive-img" src="~/img/mollie.png" style="height: 6em; " />
                 </div>
             </div>
         </div>

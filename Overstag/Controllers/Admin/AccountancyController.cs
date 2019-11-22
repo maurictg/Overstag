@@ -42,14 +42,21 @@ namespace Overstag.Controllers
                 var pms = context.Payments.OrderBy(f => f.PayedAt == null).OrderBy(f => f.PlacedAt).ToList();
                 foreach (var pm in pms)
                 {
-                    var user = context.Accounts.First(f => f.Id == pm.UserID);
-                    var invoice = context.Invoices.First(f => f.PayID == pm.InvoiceID);
-                    payments.Add(new MPayment()
+                    try
                     {
-                        Invoice = invoice,
-                        User = user,
-                        Payment = pm
-                    });
+                        var user = context.Accounts.First(f => f.Id == pm.UserID);
+                        var invoice = context.Invoices.First(f => f.PayID == pm.InvoiceID);
+                        payments.Add(new MPayment()
+                        {
+                            Invoice = invoice,
+                            User = user,
+                            Payment = pm
+                        });
+                    }
+                    catch
+                    {
+                        continue;
+                    }
                 }
             }
             return View("~/Views/Mentor/Accountancy/Payments.cshtml",payments);

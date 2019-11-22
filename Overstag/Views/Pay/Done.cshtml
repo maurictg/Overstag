@@ -22,7 +22,7 @@
     </div>
 
     <div id="payedcontrol" style="display: none;">
-        <a class="btn btn-large green waves-effect" id="hrefbtn">Terug</a>
+        <a class="btn btn-large green waves-effect" id="hrefbtn">&larr; Terug</a>
     </div>
 
 
@@ -56,7 +56,7 @@ var Pay = function () {
             $('#_progbar').show();
             $.get('/Pay/UpdatePayment/' + payid, function (r) {
                 if (r.status == 'success') {
-                    console.log(r.data);
+                    //console.log(r.data);
                     Pay.getStatus();
                 }
             }, 'json').fail(function () {
@@ -66,7 +66,7 @@ var Pay = function () {
         },
         getStatus: function () {
 
-            if (count > 10) {
+            if (count > 5) {
                 count = 0;
                 this.updateStatus();
                 return;
@@ -76,12 +76,12 @@ var Pay = function () {
             $.get('/Pay/GetPayment/' + payid, function (r) {
                 if (r.status == 'success') {
                     $('#_progbar').hide();
-                    console.log(r.data);
+                    //console.log(r.data);
                     var status = Pay.parseStatus(r.data.status);
                     $('#status').text(status[0]);
                     $('#status').removeClass().addClass(status[1] + '-text');
 
-                    if (r.data.status == 6) {
+                    if (Number(r.data.status) > 3) {
                         clearInterval(timeout);
                         $('#statuscontrol').hide();
                         $('#hrefbtn').attr('href', '/Pay/Direct/' + r.data.invoiceID);

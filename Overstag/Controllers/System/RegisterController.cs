@@ -1,4 +1,8 @@
-﻿using System;
+﻿#define MOLLIE_ENABLED
+
+//COMMENT this to enable mollie
+#undef MOLLIE_ENABLED
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -131,6 +135,7 @@ namespace Overstag.Controllers
                             {
                                 if (account.Type < 2)
                                 {
+#if MOLLIE_ENABLED
                                     CustomerRequest cr = new CustomerRequest()
                                     {
                                         Name = $"{account.Firstname} {account.Lastname}",
@@ -143,6 +148,7 @@ namespace Overstag.Controllers
                                     CustomerResponse cs = await client.CreateCustomerAsync(cr);
 
                                     account.MollieID = cs.Id;
+#endif
                                 }
                             }
                             catch (Exception e)
