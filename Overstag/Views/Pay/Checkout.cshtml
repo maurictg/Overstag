@@ -1,0 +1,104 @@
+﻿@model Overstag.Models.Payment
+@{
+    Layout = "_PayLayout";
+    ViewBag.Title = "Betalen";
+    ViewBag.InvoiceURL = Model.InvoiceID;
+    int amount = (ViewBag.Amount != null) ? Convert.ToInt32(ViewBag.Amount) : 0;
+}
+
+<div>
+    <div class="center-align">
+        <h2 class="green-text">Betaling afrekenen</h2>
+        <br />
+        <div class="row">
+            <div class="col s12 m10 offset-m1">
+                <div class="card-panel">
+                    @if (ViewBag.PayURL == null)
+                    {
+                        <h6 class="red-text">IDeal is niet in werking. Annuleer a.u.b. de betaling en neem contact op via WhatsApp.</h6>
+                        <br />
+                    }
+                    else
+                    {
+                        <h6>Betaal met IDeal bij uw eigen bank met Mollie</h6>
+                        <br />
+                        <button class="btn btn-large green waves-effect" onclick="Checkout.checkout('@ViewBag.PayURL');" id="btncheckout">Betaling afrekenen</button>
+                    }
+                    <button class="btn btn-large orange waves-effect" onclick="Checkout.cancel('@Model.Id');" id="btncancel">Betaling annuleren</button>
+                    <br />
+                    <h5>Bedrag: <b>&euro;@Math.Round((double)amount / 100, 2).ToString("F")</b></h5>
+                    <br />
+                </div>
+                <div class="col s12 m10 offset-m1 card-panel green" id="warning">
+                    <h5 class="white-text">&rarr; Verlaat deze pagina niet zonder de betaling te annuleren of af te ronden!</h5>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="s12 m8 offset-m2">
+                <div class="col s12 m6">
+                    <img class="responsive-img" src="~/img/ideal.gif" />
+                </div>
+                <div class="col s12 m6">
+                    <img class="responsive-img" src="~/img/mollie.png" style="height: 8em; " />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let cancelPayment = true;
+
+
+    var Checkout = {
+        init: function () {
+            Checkout.mapEvents();
+        },
+        mapEvents: function () {
+            $(window).on("beforeunload", function () {
+                if (cancelPayment) {
+                    //Doe iets.
+
+                    return "Ga niet weg voordat je de betaling hebt geannuleerd!";
+                }
+            });
+        },
+        checkout: function (url) {
+            $('#_progbar').show();
+            cancelPayment = false;
+            window.location.href = url;
+        },
+        cancel: function (id) {
+            $('#_progbar').show();
+            $('#btncancel, #btncheckout').addClass('disabled');
+
+            $.post('/Pay/Cancel', { id: id }, function (r) {
+                if (r.status == 'error') {
+                    $('#btncancel, #btncheckout').removeClass('disabled');
+                    M.toast({ html: r.error, classes: 'red' });
+                } else if (r.status == 'warning') {
+                    $('#btncancel').removeClass('disabled');
+                    M.toast({ html: r.error, classes: 'orange' });
+                } else if (r.status == 'success') {
+                    M.toast({ html: 'Betaling geannuleerd! U kunt nu dit tabblad sluiten.', classes: 'blue' });
+                    $('#warning').hide();
+                } else if (r.status == 'payed') {
+                    M.toast({ html: r.error, classes: 'blue' });
+                    setTimeout(Checkout.done, 700);
+                }
+            }).done(function () {
+                $('#_progbar').hide();
+            });
+
+            cancelPayment = false;
+        },
+        done: function () {
+            window.location.href = '/Pay/Done/@Uri.EscapeDataString(Model.InvoiceID)';
+        }
+    }
+
+    $(function () {
+        Checkout.init();
+    });
+</script>

@@ -21,6 +21,7 @@ namespace Overstag.Controllers
                 {
                     pms = context.Transactions.OrderByDescending(f => f.When).Take(Convert.ToInt32(amount)).ToList();
                     ViewBag.Limit = Convert.ToInt32(amount);
+                    ViewBag.Total = context.Transactions.Sum(f => f.Amount);
                 }
                 else
                     pms = context.Transactions.OrderByDescending(f => f.When).ToList();
@@ -101,7 +102,7 @@ namespace Overstag.Controllers
                         payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur #{invoice.PayID}", When = DateTime.Now });
+                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == invoice.UserID).Firstname}", When = DateTime.Now });
                         context.SaveChanges();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }
@@ -116,7 +117,7 @@ namespace Overstag.Controllers
         }
 
         public IActionResult Invoices()
-            => View("~/Views/Mentor/Accountancy/Invoices.cshtml");
+            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => f.Payed == 0).OrderByDescending(g => g.Timestamp).ToList());
 
         /// <summary>
         /// Automatize invoicing for all users

@@ -219,11 +219,11 @@
         },
         getPay: function (payid) {
             $('#payid').data('pid', payid);
-            $('#payid').val(window.location.origin+'/Pay/Direct/' + payid);
+            $('#payid').val(window.location.origin+'/Pay/Invoice/' + payid);
             M.Modal.getInstance($('#pay')).open();
         },
         gotoPay: function () {
-            window.location.href = '/Pay/Direct/' + $('#payid').data('pid');
+            window.location.href = '/Pay/Invoice/' + $('#payid').data('pid');
         },
         copyPay: function () {
             $('#payid').select();

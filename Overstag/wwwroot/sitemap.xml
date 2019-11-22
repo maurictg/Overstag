@@ -4,48 +4,36 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
 
 <url>
-  <loc>https://stoverstag.nl/Home</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
+  <loc>https://stoverstag.nl/home</loc>
+  <lastmod>2019-11-22T20:04:56+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://stoverstag.nl/Home/About</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
+  <loc>https://stoverstag.nl/over-ons</loc>
+  <lastmod>2019-11-22T20:04:56+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://stoverstag.nl/Home/Contact</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
+  <loc>https://stoverstag.nl/contact</loc>
+  <lastmod>2019-11-22T20:04:56+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://stoverstag.nl/Home/Events</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
+  <loc>https://stoverstag.nl/agenda</loc>
+  <lastmod>2019-11-22T20:04:56+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://stoverstag.nl/Register</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
+  <loc>https://stoverstag.nl/inloggen</loc>
+  <lastmod>2019-11-22T20:04:56+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://stoverstag.nl/pdf/uitnodiging_jongeren.pdf</loc>
-  <lastmod>2019-10-22T19:29:47+00:00</lastmod>
+  <loc>https://stoverstag.nl/aanmelden</loc>
+  <lastmod>2019-11-22T20:04:56+00:00</lastmod>
   <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://stoverstag.nl/Register/Register</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
-  <priority>0.64</priority>
-</url>
-<url>
-  <loc>https://stoverstag.nl/Register/Login</loc>
-  <lastmod>2019-10-22T20:04:56+00:00</lastmod>
-  <priority>0.51</priority>
 </url>
 
 

@@ -6,6 +6,7 @@
     List<string> ddata = new List<string>();
     List<string> mdata = new List<string>();
     int balance = 0;
+    int total = (int)ViewBag.Total;
     double _out = Math.Round((double)Model.Where(g => g.Amount < 0).Sum(f => f.Amount)/-100, 2);
     double _in = Math.Round((double)Model.Where(g => g.Amount > 0).Sum(f => f.Amount)/100, 2);
 
@@ -45,7 +46,7 @@
         </div>
         <table>
             <tr>
-                <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)balance / 100, 2).ToString("F")</b></td>
+                <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)total / 100, 2).ToString("F")</b></td>
             </tr>
         </table>
         <table class="responsive-table">

@@ -20,9 +20,13 @@ namespace Overstag.Controllers
         public IActionResult Index()
             => View("Login");
 
+        [Route("Register/Login")]
+        [Route("inloggen")]
         public IActionResult Login()
             => View("Login", "");
 
+        [Route("Register/Register")]
+        [Route("aanmelden")]
         public IActionResult Register()
             => View();
 
@@ -303,7 +307,7 @@ namespace Overstag.Controllers
                 try
                 {
                     Token = Uri.UnescapeDataString(Token);
-                    var account = context.Accounts.ToList().FirstOrDefault(e => e.Token == Token);
+                    var account = context.Accounts./*ToList().*/FirstOrDefault(e => e.Token == Token);
 
                     if (account == null)
                         return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });

@@ -7,16 +7,25 @@ namespace Overstag.Controllers
 {
     public class HomeController : Controller
     {
+        [Route("")]
+        [Route("home")]
+        [Route("Home/Index")]
         public IActionResult Index() 
             => View();
 
+        [Route("Home/About")]
+        [Route("over-ons")]
         public IActionResult About() 
             => View();
 
+        [Route("Home/Contact")]
+        [Route("contact")]
         public IActionResult Contact() 
             => View();
 
 
+        [Route("Home/Events")]
+        [Route("agenda")]
         /// <summary>
         /// Get all events from the database
         /// </summary>

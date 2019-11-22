@@ -9,6 +9,7 @@ namespace Overstag.Accountancy
     {
         public int Id { get; set; }
         public int Amount { get; set; }
+        public int? Type { get; set; }
         public DateTime When { get; set; }
         public string Description { get; set; }
     }
