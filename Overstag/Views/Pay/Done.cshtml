@@ -5,26 +5,28 @@
 }
 
 <div class="center-align">
-    <h3>Status van uw betaling</h3>
-    <h3><b><span id="status"></span></b></h3>
-    <br />
+    <br/>
+    <div class="card-panel">
+        <h3>Status van uw betaling</h3>
+        <h3><b><span id="status"></span></b></h3>
+        <br />
 
-    <div id="statuscontrol">
-        <p><b>De status van uw betaling wordt gecontroleerd...</b><br />(het kan even duren voor uw betaling is verwerkt, meestal 1 minuut)</p>
-        <p class="grey-text">Verversen gaat automatisch om de 10 seconden</p>
-        <div class="row">
-            <div class="progress col s12 m4 offset-m4">
-                <div id="refreshbar" data-value="100" class="determinate" style="width: 100%"></div>
+        <div id="statuscontrol">
+            <p><b>De status van uw betaling wordt gecontroleerd...</b><br />(het kan even duren voor uw betaling is verwerkt, maar meer dan 2 minuten zou het niet moeten duren.)</p>
+            <p class="grey-text">Verversen gaat automatisch om de 10 seconden</p>
+            <div class="row">
+                <div class="progress col s12 m4 offset-m4">
+                    <div id="refreshbar" data-value="100" class="determinate" style="width: 100%"></div>
+                </div>
             </div>
+            <button class="btn blue waves-effect" onclick="Pay.updateStatus()">Verversen</button>
+
         </div>
-        <button class="btn blue waves-effect" onclick="Pay.updateStatus()">Verversen</button>
 
+        <div id="payedcontrol" style="display: none;">
+            <a class="btn btn-large green waves-effect" id="hrefbtn">&larr; Terug</a>
+        </div>
     </div>
-
-    <div id="payedcontrol" style="display: none;">
-        <a class="btn btn-large green waves-effect" id="hrefbtn">&larr; Terug</a>
-    </div>
-
 
 </div>
 <script>
@@ -37,6 +39,7 @@ var Pay = function () {
         init: function () {
             this.getStatus();
             timeout = setInterval(Pay.updateBar, 1000);
+            $('#_progbar').show();
         },
         updateBar: function () {
             var val = Number($('#refreshbar').data('value'));
@@ -70,6 +73,8 @@ var Pay = function () {
                 count = 0;
                 this.updateStatus();
                 return;
+            } else {
+                count++;
             }
 
             $('#_progbar').show();
@@ -81,7 +86,7 @@ var Pay = function () {
                     $('#status').text(status[0]);
                     $('#status').removeClass().addClass(status[1] + '-text');
 
-                    if (Number(r.data.status) > 3) {
+                    if (Number(r.data.status) > 3 || r.data.status == 1) {
                         clearInterval(timeout);
                         $('#statuscontrol').hide();
                         $('#hrefbtn').attr('href', '/Pay/Direct/' + r.data.invoiceID);

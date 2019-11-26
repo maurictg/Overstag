@@ -1,7 +1,7 @@
 ﻿#define MOLLIE_ENABLED
 
 //COMMENT this to enable mollie
-//#undef MOLLIE_ENABLED
+#undef MOLLIE_ENABLED
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,7 +59,7 @@ namespace Overstag.Controllers
                     if(iinvoice.Payed)
                     {
                         //Validate payment
-                        var payment = context.Payments.FirstOrDefault(f => f.InvoiceID == invoice.PayID);
+                        var payment = context.Payments.OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.InvoiceID == invoice.PayID);
                         if (payment != null && !string.IsNullOrEmpty(payment.PaymentID))
                             ViewBag.Payment = payment;
                     }
@@ -107,7 +107,7 @@ namespace Overstag.Controllers
                 //Create payment
                 PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);               
 
-                PaymentRequest pr = new PaymentRequest()
+                IdealPaymentRequest pr = new IdealPaymentRequest()
                 {
                     Amount = new Amount(Currency.EUR, cost),
                     Description = $"Overstag factuur #{invoice.Id}",
@@ -163,7 +163,7 @@ namespace Overstag.Controllers
 
                 context.Payments.Remove(payment);
 
-                if(!string.IsNullOrEmpty(payment.PaymentID))
+                /*if(!string.IsNullOrEmpty(payment.PaymentID))
                 {
                     try
                     {
@@ -174,14 +174,14 @@ namespace Overstag.Controllers
                         if(t.IsCancelable)
                             await pc.DeletePaymentAsync(payment.PaymentID);
                         else
-                            return Json(new { status = "warning", error = "Jij mag niet verwijderen." });
+                            return Json(new { status = "warning", error = "Betaling kan niet verwijderd worden." });
 #endif
                     }
                     catch (Exception e)
                     {
                         return Json(new { status = "warning", error = "IDeal betaling verwijderen mislukt.", debuginfo = e.Message });
                     }
-                }
+                }*/
 
                 try
                 {
@@ -249,13 +249,6 @@ namespace Overstag.Controllers
                         payment.Status = ps.Status;
                         payment.PayedAt = ps.PaidAt;
 
-                        /*
-                        string iid = Uri.UnescapeDataString(ps.GetMetadata<string>());
-
-                        var invoice = context.Invoices.First(f => f.PayID == iid);
-                        if (payment.Status == PaymentStatus.Paid)
-                            invoice.Payed = 1;
-                        */
                         var invoice = context.Invoices.FirstOrDefault(f => f.PayID == payment.InvoiceID);
                         if (invoice != null)
                         {
@@ -265,12 +258,12 @@ namespace Overstag.Controllers
                                 context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == payment.UserID).Firstname}", When = DateTime.Now });
                             }
                             
-                            if(payment.Status != PaymentStatus.Open)
-                                HttpContext.Session.Remove("PayUrl");
+                            //if(payment.Status != PaymentStatus.Open)
+                            //HttpContext.Session.Remove("PayUrl");
 
                             context.Invoices.Update(invoice);
                             context.Payments.Update(payment);
-                            context.SaveChanges();
+                            await context.SaveChangesAsync();
                         }
                         else
                             return Json(new { status = "warning", warning = "Factuur niet gevonden in de database", ps });

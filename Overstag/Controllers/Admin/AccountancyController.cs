@@ -1,4 +1,8 @@
-﻿using System;
+﻿#define MOLLIE_ENABLED
+
+//COMMENT this to enable mollie
+#undef MOLLIE_ENABLED
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,6 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 using Overstag.Models;
 using Overstag.Models.NoDB;
 using Microsoft.EntityFrameworkCore;
+using Mollie.Api.Client;
+using Mollie.Api.Models.Payment.Response;
+using Mollie.Api.Models.Payment;
 
 namespace Overstag.Controllers
 {
@@ -31,6 +38,55 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
+        /// Sync payments with mollie server
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> UpdatePayments()
+        {
+#if !MOLLIE_ENABLED
+            return Json(new { status = "error", error = "IDeal is uitgeschakeld. Kan betalingen niet verversen" });
+#endif
+
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    foreach (var payment in context.Payments)
+                    {
+                        if (payment.Status != null)
+                        {
+                            if (new List<int>() { 0, 2, 3}.Contains((int)payment.Status))
+                            {
+                                PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
+                                PaymentResponse ps = await pc.GetPaymentAsync(payment.PaymentID);
+
+                                payment.PayedAt = ps.PaidAt;
+                                payment.Status = ps.Status;
+
+                                if ((int)payment.Status == 6)
+                                {
+                                    var invoice = context.Invoices.FirstOrDefault(f => f.PayID == payment.InvoiceID);
+                                    if (invoice != null)
+                                    {
+                                        invoice.Payed = 1;
+                                        context.Invoices.Update(invoice);
+                                        await context.SaveChangesAsync();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    return Json(new { status = "success" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.ToString() });
+                }
+            }
+        }
+
+        /// <summary>
         /// Get view with payments
         /// </summary>
         /// <returns>View with all payments in the database</returns>
@@ -39,7 +95,7 @@ namespace Overstag.Controllers
             List<MPayment> payments = new List<MPayment>();
             using (var context = new OverstagContext())
             {
-                var pms = context.Payments.OrderBy(f => f.PayedAt == null).OrderBy(f => f.PlacedAt).ToList();
+                var pms = context.Payments.OrderBy(f => f.PayedAt == null).OrderByDescending(f => f.PlacedAt).ToList();
                 foreach (var pm in pms)
                 {
                     try
@@ -63,7 +119,7 @@ namespace Overstag.Controllers
         }
 
         [HttpPost]
-        public IActionResult addTransaction(Accountancy.Transaction t)
+        public async Task<IActionResult> addTransaction(Accountancy.Transaction t)
         {
             try
             {
@@ -71,7 +127,7 @@ namespace Overstag.Controllers
                 {
                     t.When = DateTime.Now;
                     context.Transactions.Add(t);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -89,7 +145,7 @@ namespace Overstag.Controllers
         /// <param name="invoiceid">The id of the invoice</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpPost]
-        public JsonResult markAsPayed([FromForm]int payed, [FromForm]int payid, [FromForm]int invoiceid)
+        public async Task<JsonResult> markAsPayed([FromForm]int payed, [FromForm]int payid, [FromForm]int invoiceid)
         {
             using (var context = new OverstagContext())
             {
@@ -110,7 +166,7 @@ namespace Overstag.Controllers
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
                         context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == invoice.UserID).Firstname}", When = DateTime.Now });
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }
                     else
@@ -123,6 +179,29 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Removes payment by it's id
+        /// </summary>
+        /// <param name="payid">The payment its id</param>
+        /// <returns>Json, status = success or error</returns>
+        public async Task<IActionResult> removePayment([FromForm]int payid)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    var payment = context.Payments.First(f => f.Id == payid);
+                    context.Payments.Remove(payment);
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = e.Message });
+                }
+            }
+        }
+
         public IActionResult Invoices()
             => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => f.Payed == 0).OrderByDescending(g => g.Timestamp).ToList());
 
@@ -131,7 +210,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult autoInvoice([FromForm]int amount)
+        public async Task<JsonResult> autoInvoice([FromForm]int amount)
         {
             int usercount = 0;
             int particount = 0;
@@ -149,7 +228,7 @@ namespace Overstag.Controllers
                 {
                     foreach (var user in users)
                     {
-                        var parti = user.Subscriptions.Where(f => f.Payed == 0).ToList();
+                        var parti = user.Subscriptions.ToList();
 
                         List<int> eventIDS = new List<int>();
 
@@ -157,7 +236,7 @@ namespace Overstag.Controllers
                         int additions = 0;
                         int eventcount = 0;
 
-                        foreach (var part in parti)
+                        foreach (var part in parti.Where(f => f.Payed == 0))
                         {
                             var eve = context.Events.First(f => f.Id == part.EventID);
                             if (Core.General.DateIsPassed(eve.When))
@@ -191,7 +270,7 @@ namespace Overstag.Controllers
                             parti.ForEach(f => f.Payed = 1);
                             user.Subscriptions = parti;
                             context.Accounts.Update(user);
-                            context.SaveChanges();
+                            await context.SaveChangesAsync();
                             moneycount += bill;
                             usercount++;
                             particount += eventcount;
@@ -225,7 +304,7 @@ namespace Overstag.Controllers
         /// Process unpayed events per family
         /// </summary>
         /// <returns>json with info</returns>
-        public JsonResult processPUE()
+        public async Task<JsonResult> processPUE()
         {
             //Zet ID's om van kind naar ouder
             using (var context = new OverstagContext())
@@ -259,7 +338,7 @@ namespace Overstag.Controllers
                     {
                         context.Accounts.Update(parent);
                         context.Accounts.UpdateRange(members);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         succeed++;
                     }
                     catch (Exception e)
