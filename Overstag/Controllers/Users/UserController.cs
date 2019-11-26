@@ -48,7 +48,7 @@ namespace Overstag.Controllers
         /// <param name="id">The id</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("User/removeLogin/{id}")]
-        public IActionResult removeLogin(int id)
+        public async Task<IActionResult> removeLogin(int id)
         {
             using(var context = new OverstagContext())
             {
@@ -56,7 +56,7 @@ namespace Overstag.Controllers
                 {
                     var login = context.Auths.First(f => f.Id == id);
                     context.Auths.Remove(login);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -182,7 +182,7 @@ namespace Overstag.Controllers
         /// <param name="idea">The formencoded Idea</param>
         /// <returns>JSON (status = "success" or "error")</returns>
         [HttpPost("User/Vote/postIdea")]
-        public IActionResult postIdea(Idea idea)
+        public async Task<IActionResult> postIdea(Idea idea)
         {
             if (currentuser().Type == 1)
                 return Json(new { status = "error", error = "Als ouder kunt u niet een idee indienen." });
@@ -192,7 +192,7 @@ namespace Overstag.Controllers
                 using (var context = new OverstagContext())
                 {
                     context.Ideas.Add(idea);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 return Json(new { status = "success" });
             }
@@ -209,7 +209,7 @@ namespace Overstag.Controllers
         /// <param name="like">Upvote (1) or Downvote (0)</param>
         /// <returns>Json, status = success or error with details</returns>
         [HttpGet("User/Vote/Like/{id}/{like}")]
-        public IActionResult Like(int id, byte like)
+        public async Task<IActionResult> Like(int id, byte like)
         {
             if (currentuser().Type == 1)
                 return Json(new { status = "error", error = "Als ouder kunt u niet stemmen voor een activiteit." });
@@ -232,7 +232,7 @@ namespace Overstag.Controllers
                         });
                     }
                     context.Accounts.Update(user);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -335,7 +335,7 @@ namespace Overstag.Controllers
         /// <param name="incr">The incrementer</param>
         /// <returns>JSON result, status=error or status=success</returns>
         [HttpPost]
-        public IActionResult SubscribeFriends([FromForm]int id, [FromForm]int amount)
+        public async Task<IActionResult> SubscribeFriends([FromForm]int id, [FromForm]int amount)
         {
             using(var context = new OverstagContext())
             {
@@ -345,7 +345,7 @@ namespace Overstag.Controllers
                     var part = user.Subscriptions.First(f => f.EventID == id);
                     part.FriendCount = (amount>0) ? amount : 0;
                     context.Accounts.Update(user);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -356,7 +356,7 @@ namespace Overstag.Controllers
         }
 
         [HttpPost]
-        public IActionResult postDeclaration(Accountancy.Request request)
+        public async Task<IActionResult> postDeclaration(Accountancy.Request request)
         {
             try
             {
@@ -366,7 +366,7 @@ namespace Overstag.Controllers
                 using (var context = new OverstagContext())
                 {
                     context.Requests.Add(request);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -534,12 +534,12 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>Json (status = success or status = error with details)</returns>
         [HttpGet]
-        public JsonResult GenerateInvoice()
+        public async Task<JsonResult> GenerateInvoice()
         {
             using (var context = new OverstagContext())
             {
                 var user = context.Accounts.Include(p => p.Subscriptions).First(f => f.Id == currentuser().Id);
-                var parti = user.Subscriptions.Where(f => f.Payed == 0).ToList();
+                var parti = user.Subscriptions.ToList();
 
                 if (parti.Count() < 1)
                     return Json(new { status = "error", error = "Geen openstaande events gevonden" });
@@ -551,7 +551,7 @@ namespace Overstag.Controllers
 
                 try {
 
-                    foreach (var part in parti)
+                    foreach (var part in parti.Where(f => f.Payed == 0))
                     {
                         var eve = context.Events.First(f => f.Id == part.EventID);
                         if (Core.General.DateIsPassed(eve.When))
@@ -583,7 +583,7 @@ namespace Overstag.Controllers
                     user.Subscriptions = parti;
                     context.Accounts.Update(user);
 
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch (Exception e) { return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message }); }
@@ -591,7 +591,7 @@ namespace Overstag.Controllers
             }
         }
 
-        public JsonResult MergeInvoices()
+        public async Task<JsonResult> MergeInvoices()
         {
             using(var context = new OverstagContext())
             {
@@ -623,7 +623,7 @@ namespace Overstag.Controllers
                     {
                         context.Invoices.RemoveRange(invoices);
                         context.Invoices.Add(i);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         return Json(new { status = "success" });
                     }
                     catch(Exception e)

@@ -104,7 +104,7 @@ namespace Overstag.Controllers
         /// <param name="e">The event</param>
         /// <returns>Json, success or error</returns>
         [HttpPost]
-        public IActionResult UpdateEvent(Event e)
+        public async Task<IActionResult> UpdateEvent(Event e)
         {
             using(var context = new OverstagContext())
             {
@@ -116,7 +116,7 @@ namespace Overstag.Controllers
                     eve.Cost = e.Cost;
                     eve.When = e.When;
                     context.Events.Update(eve);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception ex)
@@ -201,7 +201,7 @@ namespace Overstag.Controllers
         /// <param name="id">The ID of the idea</param>
         /// <returns>JSON (status = success or status = error with details)</returns>
         [HttpGet("Admin/Ideas/Delete/{id}")]
-        public IActionResult DeleteIdea(int id)
+        public async Task<IActionResult> DeleteIdea(int id)
         {
             using(var context = new OverstagContext())
             {
@@ -209,7 +209,7 @@ namespace Overstag.Controllers
                 {
                     var idea = context.Ideas.First(i => i.Id == id);
                     context.Ideas.Remove(idea);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success"});
                 }
                 catch(Exception e)
@@ -335,7 +335,7 @@ namespace Overstag.Controllers
         /// <param name="id">The user's id</param>
         /// <returns>JSON(status=success)</returns>
         [HttpGet("Admin/upgrade/{grade}/{id}")]
-        public IActionResult Upgrade(int grade, int id)
+        public async Task<IActionResult> Upgrade(int grade, int id)
         {
             int inc = (grade == 0) ? -1 : 1;
             using(var context = new OverstagContext())
@@ -345,7 +345,7 @@ namespace Overstag.Controllers
                     user.Type += inc;
 
                 context.Accounts.Update(user);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
                 return Json(new { status = "success" });
             }
@@ -376,7 +376,7 @@ namespace Overstag.Controllers
         /// <param name="id">The ticket's id</param>
         /// <returns>JSON (status=success or status=error)</returns>
         [HttpPost("Admin/deleteTicket/{id}")]
-        public IActionResult DeleteTicket(int id)
+        public async Task<IActionResult> DeleteTicket(int id)
         {
             try
             {
@@ -384,7 +384,7 @@ namespace Overstag.Controllers
                 {
                     var ticket = context.Tickets.First(f => f.Id == id);
                     context.Tickets.Remove(ticket);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 return Json(new { status = "success" });
             }
@@ -395,7 +395,7 @@ namespace Overstag.Controllers
         }
 
         [Route("Admin/blockTicketSender/{id}/{allow}")]
-        public IActionResult blockTicketSender(int id, int allow)
+        public async Task<IActionResult> blockTicketSender(int id, int allow)
         {
             try
             {
@@ -403,7 +403,7 @@ namespace Overstag.Controllers
                 {
                     var user = context.Accounts.First(f => f.Id == id);
                     user.DenyTickets = (allow > 0) ? 1 : 0;
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 return Json(new { status = "success" });
             }

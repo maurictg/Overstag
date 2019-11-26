@@ -85,7 +85,7 @@ namespace Overstag.Controllers
         /// <param name="absentids">Array with absent ids (json)</param>
         /// <returns>JSON, success error or warning</returns>
         [HttpPost]
-        public IActionResult postPresence([FromForm]string absentids)
+        public async Task<IActionResult> postPresence([FromForm]string absentids)
         {
             int[] absentIDS = JsonSerializer.Deserialize<int[]>(absentids);
             
@@ -108,7 +108,7 @@ namespace Overstag.Controllers
                     try
                     {
                         context.Events.Update(eve);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         return Json(new { status = "success" });
                     }
                     catch (Exception e)
@@ -130,7 +130,7 @@ namespace Overstag.Controllers
         /// <param name="count">The amount of drinks</param>
         /// <returns>JSON, success or error</returns>
         [HttpGet("/Mentor/setDrink/{userid}/{count}")]
-        public IActionResult setDrink(int userid, int count)
+        public async Task<IActionResult> setDrink(int userid, int count)
         {
             using(var context = new OverstagContext())
             {
@@ -148,7 +148,7 @@ namespace Overstag.Controllers
                     user.ConsumptionCount = (count >= 0) ? count : 0;
                     user.ConsumptionTax = user.ConsumptionCount * 100;
                     context.Events.Update(eve);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -188,7 +188,7 @@ namespace Overstag.Controllers
         /// <param name="e">The event form object</param>
         /// <returns>Json: status = success or status = error</returns>
         [HttpPost]
-        public IActionResult postEvent(Event e)
+        public async Task<IActionResult> postEvent(Event e)
         {
             try
             {
@@ -209,7 +209,7 @@ namespace Overstag.Controllers
                     else
                         context.Events.Update(eve);
 
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -225,7 +225,7 @@ namespace Overstag.Controllers
         /// <param name="id">The event's id</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("/Mentor/deleteEvent/{id}")]
-        public IActionResult deleteEvent(int id)
+        public async Task<IActionResult> deleteEvent(int id)
         {
             try
             {
@@ -233,7 +233,7 @@ namespace Overstag.Controllers
                 {
                     var e = context.Events.First(f => f.Id == id);
                     context.Events.Remove(e);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -256,7 +256,7 @@ namespace Overstag.Controllers
         /// <param name="id">The idea its id</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("Mentor/deleteVote/{id}")]
-        public IActionResult deleteVote(int id)
+        public async Task<IActionResult> deleteVote(int id)
         {
             using (var context = new OverstagContext())
             {
@@ -264,7 +264,7 @@ namespace Overstag.Controllers
                 {
                     var idea = context.Ideas.First(i => i.Id == id);
                     context.Ideas.Remove(idea);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch (Exception e)

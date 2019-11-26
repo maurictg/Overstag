@@ -28,7 +28,7 @@
                         <td>@item.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
                         <td>&euro;@Math.Round((double)item.Amount/100, 2).ToString("F")</td>
                         <td>
-                            <a class="btn red darken-4" href="/Pay/Invoice/@Uri.UnescapeDataString(item.PayID)" target="_blank">Openen</a>
+                            <a class="btn red darken-4 waves-effect" href="/Pay/Invoice/@Uri.UnescapeDataString(item.PayID)" target="_blank">Openen</a>
                         </td>
                     </tr>
                 }
