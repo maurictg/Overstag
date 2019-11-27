@@ -35,19 +35,19 @@
 
     foreach (var e in after)
     {
-        e.Sub.RemoveAll(f => f.account.Type != 0);
+        //e.Sub.RemoveAll(f => f.account.Type != 0);
         if (e.Sub.Count() > 0)
         {
             aadata.Add(Math.Round(e.Sub.Select(f => Overstag.Core.General.getAge(f.account.Birthdate)).Average(),1).ToString().Replace(",","."));
         }
 
-        int ttm = e.Sub.Where(f => f.account.Sex == 0).Count();
-        int ttv = e.Sub.Where(f => f.account.Sex == 1).Count();
+        int ttm = e.Sub.Count(f => f.account.Sex == 0);
+        int ttv = e.Sub.Count(f => f.account.Sex == 1);
         tm += ttm;
         tv += ttv;
         mdata.Add(ttm);
         vdata.Add(ttv);
-        tdata.Add(ttm + ttv);
+        tdata.Add(ttm + ttv + e.Sub.Sum(f => f.part.FriendCount));
         ddata.Add(e.Event.When.ToString("dd-MM-yyyy"));
     }
 

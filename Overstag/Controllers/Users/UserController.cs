@@ -161,6 +161,31 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
+        /// Get all subscribers of an event
+        /// </summary>
+        /// <param name="eventID">The event's id</param>
+        /// <returns>JSON serialized</returns>
+        [Route("User/getSubscribers/{eventID}")]
+        public JsonResult getSubscribers(int eventID)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    List<int> subs = context.Events.Include(f => f.Participators)
+                        .First(g => g.Id == eventID).Participators.Select(f => f.UserID).ToList();
+                    subs.Remove(currentuser().Id);
+                    List<string> Users = context.Accounts.Where(f => subs.Contains(f.Id)).Select(f => $"{f.Firstname} {f.Lastname}").ToList();
+                    return Json(new { status = "success", data = Users.ToArray() });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", debuginfo = e.Message });
+                }
+            }
+        }
+
+        /// <summary>
         /// Renders all ideas with up and downvotes from user
         /// </summary>
         /// <returns>A View with votes</returns>
