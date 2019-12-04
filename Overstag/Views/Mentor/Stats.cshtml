@@ -179,6 +179,7 @@
                     <div class="collapsible-body">
                         <h6><b>Omschrijving:</b> @e.Event.Description</h6>
                         <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
+                        <a class="btn-small blue" href="/Mentor/Event/@e.Event.Id" target="_blank">Openen</a>
                         <table class="responsive-table">
                             <thead>
                                 <tr>

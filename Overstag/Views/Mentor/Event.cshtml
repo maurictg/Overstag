@@ -1,0 +1,259 @@
+﻿@model Overstag.Models.NoDB.UserEvent
+@{
+    ViewBag.Title = "Deze avond";
+    Layout = "_MentorLayout";
+    int totald = 0;
+    Model.Participators.RemoveAll(f => f.account.Type != 0);
+    List<Overstag.Models.Account> users = new Overstag.Models.OverstagContext().Accounts.Where(f => f.Type == 0).OrderBy(f => f.Firstname).ToList();
+}
+
+<div>
+    @if (Model.Event == null)
+    {
+        <div class="center-align">
+            <h3 class="red-text"><b>Activiteit niet gevonden</b></h3>
+            <p>Aanwezigheid melden etc. kan natuurlijk alleen als er aanwezigen zijn ;). Misschien is er geen activiteit vandaag</p>
+        </div>
+    }
+    else
+    {
+        <h4 class="center-align"><i>&quot;@Model.Event.Title&quot; - @Model.Event.When.ToString("dd-MM-yyyy HH:mm")</i></h4>
+        <h3 class="green-text text-darken-4">Statistieken</h3>
+        <div class="row">
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Aantal mannen</span>
+                    <h3><b class="blue-text" id="aantalm">@Model.Participators.Count(f => f.account.Sex == 0)</b></h3>
+                </div>
+            </div>
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Aantal vrouwen</span>
+                    <h3><b class="red-text" id="aantalv">@Model.Participators.Count(f => f.account.Sex == 1)</b></h3>
+                </div>
+            </div>
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Totaal present/absent</span>
+                    <h3><b id="aantal">@Model.Participators.Count()</b> / <span id="aantala">0</span></h3>
+                </div>
+            </div>
+            @{
+                Model.Participators.ForEach(f => totald += f.part.ConsumptionCount);
+            }
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Totaal aantal drankjes</span>
+                    <h3><b class="green-text" id="aantald">@totald</b></h3>
+                </div>
+            </div>
+        </div>
+
+        <br />
+        <h3 class="green-text text-darken-4">Aanwezigheid</h3>
+        <p class="flow-text">
+            &nbsp;Vink de mensen uit die er niet zijn en druk op &quot;Opslaan&quot;<br />
+        </p>
+
+
+        <ul class="collection">
+            @foreach (var p in Model.Participators.OrderBy(f => f.account.Firstname).OrderBy(g => g.account.Lastname))
+            {
+                <li class="collection-item">
+                    <p>
+                        <label>
+                            <input type="checkbox" class="filled-in checki" checked="checked" data-id="@p.account.Id" data-sx="@p.account.Sex" />
+                            <span style="font-size: large;"><b>@p.account.Firstname @p.account.Lastname</b> (@Html.Raw((p.account.Sex == 0) ? "<b class=\"blue-text\">m</b>" : "<b class=\"red-text\">v</b>"))</span>
+                        </label>
+                    </p>
+                </li>
+            }
+        </ul>
+        @Html.Raw("&nbsp;")<a id="btnasave" class="btn btn-large green waves-effect waves-light modal-trigger" href="#areusure"><b>Opslaan</b></a>
+        <br />
+        <small>&nbsp;Staat er iemand niet tussen? <a href="#" onclick="M.Modal.getInstance($('#addperson')).open()">Voeg iemand toe</a></small>
+        <br />
+
+        <h3 class="green-text text-darken-4">Drankjes</h3>
+        <div class="row">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Voornaam</th>
+                        <th>Achternaam</th>
+                        <th>Vriend(inn)en mee?</th>
+                        <th>Aantal drankjes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Participators)
+                    {
+                        <tr>
+                            <td>@user.account.Firstname</td>
+                            <td>@user.account.Lastname</td>
+                            <td>@Html.Raw((user.part.FriendCount > 0) ? "Ja, <b>" + user.part.FriendCount + "</b>" : "Nee")</td>
+                            <td>
+                                <div class="row">
+                                    <div class="col s6 center-align">
+                                        <h5 id="@user.account.Id-cc">@user.part.ConsumptionCount</h5>
+                                    </div>
+                                    <div class="col s6 left-align">
+                                        <a onclick="Presence.setDrink('@user.account.Id',1)" class="btn btn-flat green waves-effect white-text"><i class="material-icons">add_circle</i></a>
+                                        <a onclick="Presence.setDrink('@user.account.Id',-1)" class="btn btn-flat red waves-effect white-text"><i class="material-icons">remove_circle</i></a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<div id="areusure" class="modal">
+    <div class="modal-content">
+        <h4>Zeker weten??</h4>
+        <p>
+            <b>Controleer of de gegevens juist zijn.</b> <br />Als u iemand absent meldt die er toch is, dan wordt dit niet verrekend. Als u iemand present meldt die er niet is, krijgt diegene alsnog een factuur.<br />
+            Zorg er daarom voor dat de gegevens kloppen voor u op opslaan klikt.
+        </p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn green darken-4 modal-close">Annuleren</button>
+        <button id="btnsave" class="btn green modal-close">Opslaan</button>
+    </div>
+</div>
+<div id="addperson" class="modal">
+    <div class="modal-content">
+        <h4>Iemand toevoegen</h4>
+        <div class="input-field col s12">
+            <select id="seluser">
+                @foreach (var user in users)
+                {
+                    <option value="@user.Id">@user.Firstname @user.Lastname</option>
+                }
+            </select>
+            <label>Voeg iemand toe</label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn green darken-4 modal-close waves-effect">Annuleren</button>
+        <button id="btnadduser" class="btn green modal-close waves-effect">Toevoegen</button>
+    </div>
+</div>
+<br />
+
+
+@if (Model.Event != null)
+{
+<script>
+     var afwezigen = [];
+
+     var Presence = {
+        init: function () {
+            $('#_pres, #_apres').addClass('active');
+
+            $('.checki').off().on('change', function () {
+                Presence.calculateAbsence();
+            });
+
+            $('#btnsave').click(Presence.saveAbsence);
+
+            $('#btndrink').click(function () {
+                if ($(this).data('confirm') == 'yes') {
+                    $(this).removeClass('red').addClass('green disabled').text('Opslaan...');
+                    $(this).data('confirm', '');
+                    Presence.addDrink();
+                } else {
+                    $(this).removeClass('green').addClass('red').text('Zeker weten?');
+                    $(this).data('confirm', 'yes');
+                    $(this).fadeOut(4000);
+                    setTimeout(Presence.resetbtn, 4000, $(this));
+                }
+            });
+
+             $('#btnadduser').click(function () {
+                 $.getJSON('/Mentor/addUser/{eventid}/{userid}')
+                 $('#seluser').val();
+                 @Model.Event.Id
+             });
+
+            $('select').formSelect();
+        },
+        calculateAbsence: function () {
+            var totaal = 0;
+            var totaala = 0;
+            var mannen = 0;
+            var vrouwen = 0;
+            afwezigen = [];
+
+            $.each($("input:checkbox:checked"), function (i, e) {
+                totaal++;
+                if ($(e).data('sx') == '0')
+                    mannen++;
+                else
+                    vrouwen++;
+            });
+
+            $.each($("input:checkbox:not(:checked)"), function (i, e) {
+                totaala++;
+                afwezigen.push($(e).data('id'));
+            });
+
+            $('#aantalm').text(mannen);
+            $('#aantalv').text(vrouwen);
+            $('#aantal').text(totaal);
+            $('#aantala').text(totaala);
+        },
+        saveAbsence: function () {
+            Presence.calculateAbsence();
+            var afw = JSON.stringify(afwezigen);
+            $.post('/Mentor/postPresence', { absentids: afw, eventID: @Model.Event.Id }, function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Opgeslagen!', classes: 'green' });
+                    $('#btnasave').addClass('disabled');
+                    $.each($("input:checkbox"), function (i, e) {
+                        $(e).attr('disabled', 'disabled');
+                    });
+                } else if (r.status == 'warning') {
+                    M.toast({ html: r.warning, classes: 'orange' });
+                } else {
+                    M.toast({ html: 'Er is iets fout gegaan.', classes: 'red' });
+                }
+            },'json');
+        },
+        resetbtn: function(el) {
+            $(el).removeClass('red').addClass('green').text('Opslaan');
+            $(el).data('confirm', '');
+            $(el).fadeIn();
+        },
+        setDrink: function(id, add) {
+            var count = Number($('#' + id + '-cc').text()) + add;
+            if (count >= 0 && id > 0 && count <= 15) {
+                $.get('/Mentor/setDrink/@Model.Event.Id/' + id + '/' + count, function (r) {
+                    if (r.status == 'success') {
+                        M.toast({ html: 'Drankje ' + (add > 0 ? 'toegevoegd!' : 'verwijderd!'), classes: (add > 0 ? 'green' : 'yellow darken-3') });
+                        $('#' + id + '-cc').text(count);
+                        $('#aantald').text(Number($('#aantald').text()) + add);
+                    } else {
+                        M.toast({ html: r.error, classes: 'red' });
+                    }
+                }, 'json');
+            }
+        }
+    }
+
+    $(function () {
+        Presence.init();
+    });
+
+    $(document).ready(function () {
+        $('select').formSelect();
+    });
+</script>
+}
+
+
