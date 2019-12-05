@@ -18,6 +18,11 @@ namespace Overstag.Controllers
 {
     public class AccountancyController : Controller
     {
+        /// <summary>
+        /// Get a range of transactions
+        /// </summary>
+        /// <param name="amount">A range. Default 500</param>
+        /// <returns>View with transactions</returns>
         [Route("Accountancy/Index/{amount?}")]
         public IActionResult Index(int? amount)
         {
@@ -118,6 +123,11 @@ namespace Overstag.Controllers
             return View("~/Views/Mentor/Accountancy/Payments.cshtml",payments);
         }
 
+        /// <summary>
+        /// Add transaction to database
+        /// </summary>
+        /// <param name="t">Transaction object</param>
+        /// <returns>JSON, status=success or error</returns>
         [HttpPost]
         public async Task<IActionResult> addTransaction(Accountancy.Transaction t)
         {
@@ -125,13 +135,37 @@ namespace Overstag.Controllers
             {
                 using (var context = new OverstagContext())
                 {
-                    t.When = DateTime.Now;
+                    t.When = (t.When < DateTime.Now.AddYears(-25)) ? DateTime.Now : t.When;
                     context.Transactions.Add(t);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
             catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Interne fout", debuginfo = e.ToString() });
+            }
+        }
+
+        /// <summary>
+        /// Remove transaction by its ID
+        /// </summary>
+        /// <param name="id">The transaction's id</param>
+        /// <returns>JSON, status=success <or error/returns>
+        [HttpPost]
+        public async Task<IActionResult> removeTransaction([FromForm]int id)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var t = context.Transactions.First(f => f.Id == id);
+                    context.Transactions.Remove(t);
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch (Exception e)
             {
                 return Json(new { status = "error", error = "Interne fout", debuginfo = e.ToString() });
             }
@@ -165,7 +199,7 @@ namespace Overstag.Controllers
                         payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == invoice.UserID).Firstname}", When = DateTime.Now });
+                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == invoice.UserID).Firstname}", When = DateTime.Now, Type = 1 });
                         await context.SaveChangesAsync();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }

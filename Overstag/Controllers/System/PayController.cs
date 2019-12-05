@@ -255,7 +255,7 @@ namespace Overstag.Controllers
                             if (payment.Status == PaymentStatus.Paid)
                             {
                                 invoice.Payed = 1;
-                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == payment.UserID).Firstname}", When = DateTime.Now });
+                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == payment.UserID).Firstname}", When = DateTime.Now, Type = 1 });
                             }
                             
                             //if(payment.Status != PaymentStatus.Open)

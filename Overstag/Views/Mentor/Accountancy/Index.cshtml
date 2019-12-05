@@ -23,6 +23,27 @@
     }
 
     int limit = (ViewBag.Limit != null) ? (int)ViewBag.Limit : 1000;
+
+    Dictionary<int, string> Types = new Dictionary<int, string>()
+    {
+        //Inkomsten
+        {1, "Activiteiten"},
+        {2, "Subsidie"},
+        {3, "Sponsor (bedrijf)"},
+        {4, "Sponsor (particulier)"},
+        {5, "Sponsor (kerk)"},
+        {6, "Overige"},
+
+        //Uitgaven
+        {21, "Boodschappen"},
+        {22, "Huur gebouw"},
+        {23, "Website"},
+        {24, "Activiteiten"},
+        {25, "Drukwerk"},
+        {26, "Inboedel"},
+        {27, "Reiskosten"},
+        {28, "Overige" }
+    };
 }
 
     <div>
@@ -40,7 +61,7 @@
                     </div>&nbsp;
                     <button class="btn inline red darken-4 waves-effect" onclick="Transactions.filter()">Go</button>
                     &nbsp;
-                    <button class="btn red darken-4 waves-effect modal-trigger" data-target="add">Transactie toevoegen</button>
+                    <button class="btn red darken-4 waves-effect modal-trigger" onclick="Transactions.updateDD()" data-target="add">Transactie toevoegen</button>
                 </div>
             </div>
         </div>
@@ -55,6 +76,8 @@
                     <th>Bedrag</th>
                     <th>Datum</th>
                     <th>Omschrijving</th>
+                    <th>Type</th>
+                    <th>Acties</th>
                 </tr>
             </thead>
             <tbody>
@@ -64,6 +87,8 @@
                         <td>@Html.Raw((t.Amount > 0) ? $"<b class=\"green-text text-accent-4\">+ &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F")}</b>" : $"<b class=\"red-text\">- &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F").Replace("-", "")}</b>")</td>
                         <td>@t.When.ToString("dd-MM-yyyy") om @t.When.ToString("HH:mm")</td>
                         <td>@t.Description</td>
+                        <td>@Html.Raw((t.Type!=null)? Types[Convert.ToInt32(t.Type)] : "-")</td>
+                        <td><button class="btn-small red waves-effect modal-trigger" data-target="areusure" onclick="$('#btndelete').data('id','@t.Id')">Verwijderen</button></td>
                     </tr>
                 }
             </tbody>
@@ -108,6 +133,37 @@
                     <label for="desc">Omschrijving</label>
                     <span class="helper-text" data-error="Vul a.u.b. dit veld in"></span>
                 </div>
+                <div class="input-field col s12 m8">
+                    <input id="when" type="text" class="datepicker" />
+                    <label for="when">Datum</label>
+                </div>
+                <br /><br />
+                <div class="row">
+                    <div class="input-field col s12 m8" id="bij">
+                        <select id="selbij">
+                            <option value="1" selected>Activiteiten</option>
+                            <option value="2">Subsidie</option>
+                            <option value="3">Sponsor (bedrijf)</option>
+                            <option value="4">Sponsor (particulier)</option>
+                            <option value="5">Sponsor (kerk)</option>
+                            <option value="6">Overige</option>
+                        </select>
+                        <label>Selecteer inkomst</label>
+                    </div>
+                    <div class="input-field col s12 m8" id="af" style="display: none;">
+                        <select id="selaf">
+                            <option value="21" selected>Boodschappen</option>
+                            <option value="22">Huur gebouw</option>
+                            <option value="23">Website</option>
+                            <option value="24">Activiteiten</option>
+                            <option value="25">Drukwerk</option>
+                            <option value="26">Inboedel</option>
+                            <option value="27">Reiskosten</option>
+                            <option value="28">Overige</option>
+                        </select>
+                        <label>Selecteer uitgave</label>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -115,12 +171,40 @@
             <button class="btn waves-effect green" onclick="Transactions.addTransaction()">Toevoegen</button>
         </div>
     </div>
+
+    <div id="areusure" class="modal">
+        <div class="modal-content">
+            <h4>Weet je zeker dat je deze transactie wilt verwijderen?</h4>
+            <p>Dit kan niet ongedaan worden gemaakt!</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close btn green waves-effect">Annuleren</button>
+            <button id="btndelete" onclick="Transactions.delete($('#btndelete').data('id'));" class="btn red waves-effect modal-close">Verwijderen</button>
+        </div>
+    </div>
+
 <script>
     var Transactions = {
         init: function () {
             $('#_acc, #_macc').addClass('active');
             Transactions.createLineChart();
             Transactions.createPieChart();
+            Transactions.mapEvents();
+        },
+        mapEvents: function () {
+            $("input[name='mode']").change(function () {
+                Transactions.updateDD();
+            });
+        },
+        updateDD: function () {
+            //Select dropdown
+            if ($("input[name='mode']:checked").val() == 'min') {
+                $('#bij').hide();
+                $('#af').show();
+            } else {
+                $('#bij').show();
+                $('#af').hide();
+            }
         },
         createLineChart: function () {
             var data = {
@@ -188,12 +272,14 @@
         addTransaction: function () {
             if (Transactions.validate()) {
                 M.Modal.getInstance($('#add')).close();
-                var amount = Math.round(Number($('#amount').val().replace(",",".")) * 100);
+                var amount = Math.round(Number($('#amount').val().replace(",", ".")) * 100);
+                var type = $('#selbij option:selected').val();
                 if ($("input[name='mode']:checked").val() == 'min') {
                     amount *= -1;
+                    type = $('#selaf option:selected').val();
                 }
                 $('#_progbar').show();
-                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val() }, function (r) {
+                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val(), Type: type, When: $('#when').val() }, function (r) {
                     if (r.status == 'success') {
                         M.toast({ html: 'Transactie toegevoegd', classes: 'green' });
                         Core.doReload(500);
@@ -204,6 +290,18 @@
                 });
             }
         },
+        delete: function (id) {
+            $('#_progbar').show();
+            $.post('/Accountancy/removeTransaction', { id: id }, function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Transactie verwijderd!', classes: 'green' });
+                    Core.doReload(500);
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                    $('#_progbar').hide();
+                }
+            });
+        },
         filter: function () {
             $('#_progbar').show();
             window.location.href = '/Accountancy/Index/' + $('#limit').val();
@@ -212,5 +310,7 @@
 
     $(function () {
         Transactions.init();
+        $('select').formSelect();
+        $('.datepicker').datepicker({ format: 'dd-mm-yyyy' });
     });
 </script>

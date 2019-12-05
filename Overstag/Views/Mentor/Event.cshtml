@@ -141,7 +141,7 @@
     </div>
     <div class="modal-footer">
         <button class="btn green darken-4 modal-close waves-effect">Annuleren</button>
-        <button id="btnadduser" class="btn green modal-close waves-effect">Toevoegen</button>
+        <button onclick="Presence.addUser();" class="btn green modal-close waves-effect">Toevoegen</button>
     </div>
 </div>
 <br />
@@ -174,12 +174,6 @@
                     setTimeout(Presence.resetbtn, 4000, $(this));
                 }
             });
-
-             $('#btnadduser').click(function () {
-                 $.getJSON('/Mentor/addUser/{eventid}/{userid}')
-                 $('#seluser').val();
-                 @Model.Event.Id
-             });
 
             $('select').formSelect();
         },
@@ -224,6 +218,18 @@
                     M.toast({ html: 'Er is iets fout gegaan.', classes: 'red' });
                 }
             },'json');
+        },
+         addUser: function () {
+           $('#_progbar').show();
+           $.getJSON('/Mentor/addUser/@Model.Event.Id/' + $('#seluser').val(), function(r) {
+               if (r.status == 'success') {
+                   M.toast({ html: 'Gebruiker toegevoegd!', classes: 'green' });
+                   Core.doReload(500);
+               } else {
+                   M.toast({ html: r.error, classes: 'red' });
+                   $('#_progbar').hide();
+               }
+           });
         },
         resetbtn: function(el) {
             $(el).removeClass('red').addClass('green').text('Opslaan');
