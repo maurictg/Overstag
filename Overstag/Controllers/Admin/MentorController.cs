@@ -42,11 +42,17 @@ namespace Overstag.Controllers
 
                 eid = (eventid == null) ? eid : Convert.ToInt32(eventid);
                 var now = context.Events.Include(f => f.Participators).OrderBy(h => h.When).FirstOrDefault(g => g.Id == eid);
-                
+
                 List<SSub> Users = new List<SSub>();
 
                 if(now != null)
                 {
+                    if (now.When < DateTime.Now.AddDays(-7))
+                    {
+                        string[] error = { "Geen toegang.", "Deze activiteit was al meer dan een week geleden. <br/>Het is niet toegestaan om nu nog wijzigingen aan te brengen." };
+                        return View("~/Views/Error/Custom.cshtml", error);
+                    }
+
                     foreach (var p in now.Participators)
                         Users.Add(new SSub { account = context.Accounts.First(f => f.Id == p.UserID), part = p});
                 }
@@ -150,7 +156,7 @@ namespace Overstag.Controllers
                 var eve = context.Events.Include(f => f.Participators).FirstOrDefault(f => f.Id == eventid);
 
                 if (eve == null)
-                    return Json(new { status = "error", error = "Er is geen activiteit vandaag" });
+                    return Json(new { status = "error", error = "Activiteit niet gevonden" });
 
                 try
                 {

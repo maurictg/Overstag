@@ -22,7 +22,7 @@
                         <td>
                         @{
                             var user = new Overstag.Models.OverstagContext().Accounts.First(f => f.Id == item.UserID);
-                            @Html.Raw(user.Firstname) @Html.Raw(user.Lastname)
+                            @Html.Raw(user.Firstname+"&nbsp;")@Html.Raw(user.Lastname)
                         }
                         </td>
                         <td>@item.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
