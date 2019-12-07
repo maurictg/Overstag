@@ -35,7 +35,7 @@
                                 <td>@Model.User.Firstname</td>
                                 <td>@Model.User.Lastname</td>
                                 <td><i>@Model.User.Email</i></td>
-                                <td>@Model.User.Adress&nbsp;@Model.User.Postalcode&nbsp;@Model.User.Residence</b></td>
+                                <td>@Model.User.Adress&nbsp;@Model.User.Postalcode&nbsp;@Model.User.Residence</td>
                             </tr>
                         </tbody>
                     </table>
@@ -155,7 +155,7 @@
 </form>
 
 <script>
-    let invoiceid = '@Uri.EscapeDataString(Model.Invoice.PayID)';
+    var invoiceid = '@Uri.EscapeDataString(Model.Invoice.PayID)';
     var cancelPayment = true;
 
     var Invoice = {

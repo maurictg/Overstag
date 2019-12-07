@@ -24,6 +24,9 @@
 
     int limit = (ViewBag.Limit != null) ? (int)ViewBag.Limit : 1000;
 
+    Dictionary<int, int> TypeCountU = new Dictionary<int, int>();
+    Dictionary<int, int> TypeCountI = new Dictionary<int, int>();
+    
     Dictionary<int, string> Types = new Dictionary<int, string>()
     {
         //Inkomsten
@@ -44,6 +47,24 @@
         {27, "Reiskosten"},
         {28, "Overige" }
     };
+    
+    List<string> catuit = new List<string>();
+    List<string> catin = new List<string>();
+
+
+    foreach (var type in Types)
+    {
+        if (type.Key < 20)
+        {
+            catin.Add(type.Value);
+            TypeCountI.Add(type.Key, Model.Where(g => g.Type == type.Key).Sum(f => f.Amount));
+        }
+        else
+        {
+            catuit.Add(type.Value);
+            TypeCountU.Add(type.Key, Model.Where(g => g.Type == type.Key).Sum(f => f.Amount));
+        }
+    }
 }
 
     <div>
@@ -102,6 +123,16 @@
             <div class="col s12 m4">
                 <canvas id="stat" style="height: 1em; width: 1em"></canvas>
             </div>
+        </div>
+        <div class="row">
+            <div class="col s12 m4">
+                <canvas id="pie2a" style="height: 1em; width: 1em"></canvas>
+            </div>
+            
+            <div class="col s12 m4">
+                <canvas id="pie2b" style="height: 1em; width: 1em"></canvas>
+            </div>
+            
         </div>
     </div>
 
@@ -189,6 +220,8 @@
             $('#_acc, #_macc').addClass('active');
             Transactions.createLineChart();
             Transactions.createPieChart();
+            Transactions.createPieChart2a();
+            Transactions.createPieChart2b();
             Transactions.mapEvents();
         },
         mapEvents: function () {
@@ -251,6 +284,50 @@
             };
 
             var MVChart = new Chart($('#pie'), {
+                type: 'pie',
+                data: data
+            });
+        },
+        createPieChart2a: function(){
+            var data = {
+                datasets: [{
+                    data: [
+                        @string.Join(",",TypeCountI.Values.Select(f => Math.Round((double)f/100,2).ToString("F").Replace(",",".")))
+                    ],
+                    backgroundColor: [
+                        '#dc3042', '#108a19', '#ba197d', '#84db3f', '#0c86bf', '#741a93', '#bc506d', '#d47bdb', '#0aaff5', '#062ed3',
+                        '#ad923a', '#908281', '#9505ed', '#06a157', '#6b3a63', '#a1f613', '#1c36b3'
+                    ]
+                }],
+
+                labels: [
+                   @Html.Raw(string.Join(",",catin.Select(f => "'"+f+"'")))
+                ]
+            };
+
+            var MVChart = new Chart($('#pie2a'), {
+                type: 'pie',
+                data: data
+            });
+        },
+        createPieChart2b: function(){
+            var data = {
+                datasets: [{
+                    data: [
+                        @string.Join(",",TypeCountU.Values.Select(f => Math.Round((double)f/100,2).ToString("F").Replace(",",".")))
+                    ],
+                    backgroundColor: [
+                        '#dc3042', '#108a19', '#ba197d', '#84db3f', '#0c86bf', '#741a93', '#bc506d', '#d47bdb', '#0aaff5', '#062ed3',
+                        '#ad923a', '#908281', '#9505ed', '#06a157', '#6b3a63', '#a1f613', '#1c36b3'
+                    ]
+                }],
+
+                labels: [
+                   @Html.Raw(string.Join(",",catuit.Select(f => "'"+f+"'")))
+                ]
+            };
+
+            var MVChart = new Chart($('#pie2b'), {
                 type: 'pie',
                 data: data
             });
