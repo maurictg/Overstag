@@ -35,19 +35,19 @@
 
     foreach (var e in after)
     {
-        e.Sub.RemoveAll(f => f.account.Type != 0);
+        //e.Sub.RemoveAll(f => f.account.Type != 0);
         if (e.Sub.Count() > 0)
         {
             aadata.Add(Math.Round(e.Sub.Select(f => Overstag.Core.General.getAge(f.account.Birthdate)).Average(),1).ToString().Replace(",","."));
         }
 
-        int ttm = e.Sub.Where(f => f.account.Sex == 0).Count();
-        int ttv = e.Sub.Where(f => f.account.Sex == 1).Count();
+        int ttm = e.Sub.Count(f => f.account.Sex == 0);
+        int ttv = e.Sub.Count(f => f.account.Sex == 1);
         tm += ttm;
         tv += ttv;
         mdata.Add(ttm);
         vdata.Add(ttv);
-        tdata.Add(ttm + ttv);
+        tdata.Add(ttm + ttv + e.Sub.Sum(f => f.part.FriendCount));
         ddata.Add(e.Event.When.ToString("dd-MM-yyyy"));
     }
 
@@ -67,145 +67,152 @@
 
 <div>
     <div class="row">
-        <h2 class="blue-middle-text center-align">Statistieken</h2>
-        <hr />
-
-        <div class="col s6 m3">
-            <div class="card-panel center-align">
-                <span class="flow-text">Aantal activiteiten afgelopen</span>
-                <h3><b class="black-text">@after.Count()</b></h3>
-            </div>
-        </div>
-
-        <div class="col s6 m3">
-            <div class="card-panel center-align">
-                <span class="flow-text">Aantal deelnemers geweest</span>
-                <h3><b class="blue-text">@tm</b> m & <b class="red-text">@tv</b> v</h3>
-            </div>
-        </div>
-
-        <div class="col s6 m3">
-            <div class="card-panel center-align">
-                <span class="flow-text">Aantal komende evenementen</span>
-                <h3><b class="green-text">@upcoming.Count()</b></h3>
-            </div>
-        </div>
-
-        <div class="col s6 m3">
-            <div class="card-panel center-align">
-                <span class="flow-text">Aantal deelnemers al ingeschreven</span>
-                <h3><b class="grey-text">@tt</b></h3>
-            </div>
-        </div>
-
         <div class="row">
-            <div class="col s12 m6">
-                <div class="row">
-                    <div class="card-panel col s12 m6">
-                        <h5 class="center-align">Gemiddelde aantal m/v</h5>
-                        <canvas id="gmvchart" style="height: 1em; width: 1em"></canvas>
-                    </div>
-                    <div class="card-panel col s12 m6">
-                        <h5 class="center-align">Totaal aantal m/v</h5>
-                        <canvas id="tmvchart" style="height: 1em; width: 1em"></canvas>
-                    </div>
-                    <div class="card-panel col s12 m6">
-                        <h5 class="center-align">Trend deelnemers</h5>
-                        <canvas id="trendchart" style="height: 1em; width: 1em"></canvas>
-                    </div>
-                    <div class="card-panel col s12 m6">
-                        <h5 class="center-align">Gemiddelde leeftijd</h5>
-                        <canvas id="agechart" style="height: 1em; width: 1em"></canvas>
-                    </div>
+            <ul class="tabs tabs-transparent tabs-fixed-width green darken-4">
+                <li class="tab"><a class="active" href="#subscriptions">Inschrijvingen</a></li>
+                <li class="tab"><a href="#statistics">Statistieken</a></li>
+            </ul>
+            <br />
+        </div>
+
+        <div class="row" id="statistics">
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Aantal activiteiten afgelopen</span>
+                    <h3><b class="black-text">@after.Count()</b></h3>
                 </div>
             </div>
-            <div class="col s12 m6">
-                <div class="row">
-                    <div class="card-panel col s12">
-                        <canvas id="mvchart" style="height: 1em; width: 1em"></canvas>
+
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Aantal deelnemers geweest</span>
+                    <h3><b class="blue-text">@tm</b> m & <b class="red-text">@tv</b> v</h3>
+                </div>
+            </div>
+
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Aantal komende evenementen</span>
+                    <h3><b class="green-text">@upcoming.Count()</b></h3>
+                </div>
+            </div>
+
+            <div class="col s6 m3">
+                <div class="card-panel center-align">
+                    <span class="flow-text">Aantal deelnemers al ingeschreven</span>
+                    <h3><b class="grey-text">@tt</b></h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col s12 m6">
+                    <div class="row">
+                        <div class="card-panel col s12 m6">
+                            <h5 class="center-align">Gemiddelde aantal m/v</h5>
+                            <canvas id="gmvchart" style="height: 1em; width: 1em"></canvas>
+                        </div>
+                        <div class="card-panel col s12 m6">
+                            <h5 class="center-align">Totaal aantal m/v</h5>
+                            <canvas id="tmvchart" style="height: 1em; width: 1em"></canvas>
+                        </div>
+                        <div class="card-panel col s12 m6">
+                            <h5 class="center-align">Trend deelnemers</h5>
+                            <canvas id="trendchart" style="height: 1em; width: 1em"></canvas>
+                        </div>
+                        <div class="card-panel col s12 m6">
+                            <h5 class="center-align">Gemiddelde leeftijd</h5>
+                            <canvas id="agechart" style="height: 1em; width: 1em"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12 m6">
+                    <div class="row">
+                        <div class="card-panel col s12">
+                            <canvas id="mvchart" style="height: 1em; width: 1em"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <hr />
+        <div class="row" id="subscriptions">
 
-        <h2 class="blue-middle-text center-align" id="inschrijvingen">Inschrijvingen</h2>
-
-        <h4>Eerstvolgende activiteiten</h4>
-
-        <ul class="collapsible">
-            @foreach (var e in upcoming.OrderBy(f => f.Event.When))
-            {
-                <li>
-                    <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
-                    <div class="collapsible-body">
-                        <h6><b>Omschrijving:</b> @e.Event.Description</h6>
-                        <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
-                        <table class="responsive-table">
-                            <thead>
-                                <tr>
-                                    <th>Naam</th>
-                                    <th>Achternaam</th>
-                                    <th>Leeftijd</th>
-                                    <th>Geslacht</th>
-                                    <th>Vriend(inn)en mee?</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var a in e.Sub.Where(f => f.account.Type < 3))
-                                {
+            <h4>Eerstvolgende activiteiten</h4>
+            <ul class="collapsible">
+                @foreach (var e in upcoming.OrderBy(f => f.Event.When))
+                {
+                    <li>
+                        <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
+                        <div class="collapsible-body">
+                            <h6><b>Omschrijving:</b> @e.Event.Description</h6>
+                            <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
+                            <table class="responsive-table">
+                                <thead>
                                     <tr>
-                                        <td>@a.account.Firstname</td>
-                                        <td>@a.account.Lastname</td>
-                                        <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
-                                        <td>@Html.Raw((a.account.Sex == 0) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
-                                        <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
+                                        <th>Naam</th>
+                                        <th>Achternaam</th>
+                                        <th>Leeftijd</th>
+                                        <th>Geslacht</th>
+                                        <th>Vriend(inn)en mee?</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </li>
-            }
-        </ul>
+                                </thead>
+                                <tbody>
+                                    @foreach (var a in e.Sub.Where(f => f.account.Type < 3))
+                                    {
+                                        <tr>
+                                            <td>@a.account.Firstname</td>
+                                            <td>@a.account.Lastname</td>
+                                            <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
+                                            <td>@Html.Raw((a.account.Sex == 0) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                                            <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                }
+            </ul>
 
-        <h4>Afgelopen activiteiten</h4>
-        <ul class="collapsible">
-            @foreach (var e in after.OrderBy(f => f.Event.When).ToArray().Reverse())
-            {
-                <li>
-                    <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
-                    <div class="collapsible-body">
-                        <h6><b>Omschrijving:</b> @e.Event.Description</h6>
-                        <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
-                        <table class="responsive-table">
-                            <thead>
-                                <tr>
-                                    <th>Naam</th>
-                                    <th>Achternaam</th>
-                                    <th>Leeftijd</th>
-                                    <th>Geslacht</th>
-                                    <th>Vriend(inn)en mee?</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var a in e.Sub)
-                                {
+            <h4>Afgelopen activiteiten</h4>
+            <ul class="collapsible">
+                @foreach (var e in after.OrderBy(f => f.Event.When).ToArray().Reverse())
+                {
+                    <li>
+                        <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
+                        <div class="collapsible-body">
+                            <h6><b>Omschrijving:</b> @e.Event.Description</h6>
+                            <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
+                            <a class="btn-small blue" href="/Mentor/Event/@e.Event.Id">Openen</a>
+                            <table class="responsive-table">
+                                <thead>
                                     <tr>
-                                        <td>@a.account.Firstname</td>
-                                        <td>@a.account.Lastname</td>
-                                        <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
-                                        <td>@Html.Raw((a.account.Sex == 0) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
-                                        <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
+                                        <th>Naam</th>
+                                        <th>Achternaam</th>
+                                        <th>Leeftijd</th>
+                                        <th>Geslacht</th>
+                                        <th>Vriend(inn)en mee?</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </li>
-            }
-        </ul>
+                                </thead>
+                                <tbody>
+                                    @foreach (var a in e.Sub)
+                                    {
+                                        <tr>
+                                            <td>@a.account.Firstname</td>
+                                            <td>@a.account.Lastname</td>
+                                            <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
+                                            <td>@Html.Raw((a.account.Sex == 0) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                                            <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+        
     </div>
 
 
@@ -375,6 +382,7 @@
 
     $(document).ready(function () {
         $('.collapsible').collapsible();
+        $('.tabs').tabs();
         Stats.init();
     });
 

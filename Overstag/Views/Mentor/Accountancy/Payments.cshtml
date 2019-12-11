@@ -8,8 +8,11 @@
 
 <h2 class="center-align blue-middle-text">Betalingen</h2>
 
+<button class="btn transparent waves-effect right" onclick="Payment.syncPayments();">
+    <i class="material-icons blue-light-text">refresh</i>
+</button>
 <div>
-    @if (Model.Count() > 0)
+    @if (Model.Any())
     {
         <table class="responsive-table highlight">
             <thead>
@@ -40,10 +43,19 @@
                     <td>@Convert.ToDateTime(i.Payment.PayedAt).ToString("dd-MM-yyyy HH:mm:ss")</td>
                     <td>&euro;@Math.Round((double)i.Invoice.Amount / 100, 2).ToString("F")</td>
                     <th>
-                        <a class="btn blue" target="_blank" href="/Pay/Direct/@Uri.EscapeDataString(i.Invoice.PayID)">Factuur openen</a>
-                        @if (i.Payment.PayedAt == null)
+                        @if (i.Payment.Status == null || (int)i.Payment.Status == 0)
                         {
-                            <a class="btn orange setpayed" data-iid="@i.Invoice.Id" data-pid="@i.Payment.Id" href="#">Markeren als betaald</a>
+                            <a class="btn orange setpayed waves-effect" data-iid="@i.Invoice.Id" data-pid="@i.Payment.Id" href="#">Markeren als betaald</a>
+                        }
+
+                        @if (i.Payment.Status == null || (int)i.Payment.Status == 0 || (int)i.Payment.Status == 6)
+                        {
+                            <a class="btn blue waves-effect" target="_blank" href="/Pay/Direct/@Uri.EscapeDataString(i.Invoice.PayID)">Factuur openen</a>
+                        }
+
+                        @if (i.Payment.Status == null || ((int)i.Payment.Status < 6 && (int)i.Payment.Status != 0))
+                        {
+                            <a class="btn red removepayed waves-effect" data-pid="@i.Payment.Id" href="#">Verwijderen</a>
                         }
                     </th>
                 </tr>
@@ -64,7 +76,18 @@
     </div>
     <div class="modal-footer">
         <button class="modal-close btn green waves-effect">Annuleren</button>
-        <button id="btndelete" onclick="Payment.setPayed();" class="btn modal-close red waves-effect">Markeren als betaald</button>
+        <button onclick="Payment.setPayed();" class="btn modal-close red waves-effect">Markeren als betaald</button>
+    </div>
+</div>
+
+<div id="suredelete" class="modal">
+    <div class="modal-content">
+        <h4>Weet je zeker dat je deze betaling wilt verwijderen?</h4>
+        <b> Dit kan niet meer ongedaan worden gemaakt!</b><
+    </div>
+    <div class="modal-footer">
+        <button class="modal-close btn green waves-effect">Annuleren</button>
+        <button onclick="Payment.delete();" class="btn modal-close red waves-effect">Verwijderen</button>
     </div>
 </div>
 
@@ -83,6 +106,10 @@
                 pid = $(this).data('pid');
                 M.Modal.getInstance($('#areusure')).open();
             });
+            $('.removepayed').off().on('click', function () {
+                pid = $(this).data('pid');
+                M.Modal.getInstance($('#suredelete')).open();
+            });
         },
         setPayed: function () {
             $('#_progbar').show();
@@ -92,6 +119,31 @@
                     Core.doReload(500);
                 } else {
                     M.toast({ html: r.error, classes: 'red' });
+                    $('#_progbar').hide();
+                }
+            });
+        },
+        delete: function() {
+            $('#_progbar').show();
+            $.post('/Accountancy/removePayment', { payid: pid }, function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Betaling verwijderd', classes: 'green' });
+                    Core.doReload(500);
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                    $('#_progbar').hide();
+                }
+            });
+        },
+        syncPayments: function() {
+            $('#_progbar').show();
+            $.getJSON('/Accountancy/UpdatePayments', function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Betalingen bijgewerkt.', classes: 'blue' });
+                    Core.doReload(500);
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                    $('#_progbar').hide();
                 }
             });
         }

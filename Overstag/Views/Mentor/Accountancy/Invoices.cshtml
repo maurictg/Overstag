@@ -1,9 +1,40 @@
-﻿@{
+﻿@model List<Overstag.Models.Invoice>
+@{
     ViewBag.Title = "Facturering";
     Layout = "_AccountancyLayout";
 }
 
     <div class="center-align">
+        <h2 class="blue-middle-text">Openstaande facturen</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Naam</th>
+                    <th>Datum</th>
+                    <th>Bedrag</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                        @{
+                            var user = new Overstag.Models.OverstagContext().Accounts.First(f => f.Id == item.UserID);
+                            @Html.Raw(user.Firstname+"&nbsp;")@Html.Raw(user.Lastname)
+                        }
+                        </td>
+                        <td>@item.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
+                        <td>&euro;@Math.Round((double)item.Amount/100, 2).ToString("F")</td>
+                        <td>
+                            <a class="btn red darken-4 waves-effect" href="/Pay/Invoice/@Uri.UnescapeDataString(item.PayID)" target="_blank">Openen</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
         <h2 class="blue-middle-text">Automatisch factureren</h2>
         <h6 class="blue-dark-text">
             Het algoritme op deze pagina brengt automatisch voor alle gebruikers die <input style="width: 3em" type="number" max="10" min="1" id="amount" value="5" class="col s1 center-align centered" /> of meer ongefactureerde activiteiten hebben staan de activiteiten in rekening dmv een factuur.
@@ -50,27 +81,41 @@
 </div>
 
 <script>
+    var generateSucceed = false;
+    var preGenerateSucceed = false;
+
     var Invoice = {
         init: function () {
             $('#_invoices, #_minvoices').addClass('active');
             $('#btngenerate').removeClass('disabled');
+
+            if (sessionStorage.getItem('disablegenerate') == 1) {
+                $('#btngenerate').addClass('disabled');
+                if (sessionStorage.getItem('info')) {
+                    $('#info').html(sessionStorage.getItem('info'));
+                    $('#info').show();
+                }
+            }
         },
         generate: function () {
             $.post('/Accountancy/autoInvoice', {amount: $('#amount').val()}, function (r) {
                 if (r.status == 'success') {
+                    generateSucceed = true;
                     M.toast({ html: 'Automatisch factureren gelukt', classes: 'green' });
+                    sessionStorage.setItem('disablegenerate', 1);
                     $('#info').show();
                     $('#uc').text(r.usercount);
                     $('#ec').text(r.particount);
                     $('#mc').text((r.moneycount / 100).toLocaleString("nl-NL", { style: "currency", currency: "EUR" }))
                     $('#fmc').text(r.failedmails);
+                    sessionStorage.setItem('info', $('#info').html());
                 } else {
                     console.log(r);
                     M.toast({ html: r.error, classes: 'red' });
                 }
             }).done(function () {
                 setTimeout(OverstagJS.Loader.hide, 200);
-                $('#_progbar').hide();
+                Core.doReload(500);
             }).fail(function () {
                 OverstagJS.Loader.hide();
                 $('#_progbar').hide();
@@ -85,6 +130,7 @@
             $.getJSON('/Accountancy/processPUE', function (r) {
                 if (r.succeed >= 0) {
                     M.toast({ html: 'Automatisch verwerken families voltooid:<br> ' + r.count + ' inschrijvingen verwerkt', classes: 'blue' });
+                    preGenerateSucceed = true;
                     if (r.failed > 0) {
                         M.toast({ html: 'Verwerken van ' + r.failed + ' mislukt', classes: 'orange' });
                     }

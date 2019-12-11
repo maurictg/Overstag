@@ -148,6 +148,11 @@
                     M.toast({ html: 'Opslaan mislukt', classes: 'red' });
                 }
             });
+        },
+        GetSubs: function () {
+            $.getJSON('/User/getSubscribers/' + $($('#ssetting').data('sender')).data('id'), function (r) {
+                console.log(r);
+            });            
         }
     }
 

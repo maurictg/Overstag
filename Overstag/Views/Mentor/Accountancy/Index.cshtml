@@ -1,87 +1,112 @@
-﻿@model List<Overstag.Accountancy.Transaction>
+﻿@model Overstag.Models.NoDB._Transactions
 @{
     Layout = "_AccountancyLayout";
-
-
-    List<string> ddata = new List<string>();
-    List<string> mdata = new List<string>();
-    int balance = 0;
-    double _out = Math.Round((double)Model.Where(g => g.Amount < 0).Sum(f => f.Amount)/-100, 2);
-    double _in = Math.Round((double)Model.Where(g => g.Amount > 0).Sum(f => f.Amount)/100, 2);
-
-
-    var results = Model.ToArray().Reverse().GroupBy(a => a.When.Date, b => b.Amount,
-        (c, d) => new { When = c, Amount = d.Sum() });
-
-    //Generate line stats
-    foreach(var item in results)
+    
+    Dictionary<int, string> Types = new Dictionary<int, string>()
     {
-        ddata.Add(item.When.ToString("dd-MM-yyyy"));
-        balance += item.Amount;
-        mdata.Add(Math.Round((double)balance / 100, 2).ToString("F").Replace(",", "."));
-    }
+        //Inkomsten
+        {1, "Activiteiten"},
+        {2, "Subsidie"},
+        {3, "Sponsor (bedrijf)"},
+        {4, "Sponsor (particulier)"},
+        {5, "Sponsor (kerk)"},
+        {6, "Overige"},
 
-    int limit = (ViewBag.Limit != null) ? (int)ViewBag.Limit : 1000;
+        //Uitgaven
+        {21, "Boodschappen"},
+        {22, "Huur gebouw"},
+        {23, "Website"},
+        {24, "Activiteiten"},
+        {25, "Drukwerk"},
+        {26, "Inboedel"},
+        {27, "Reiskosten"},
+        {28, "Overige" }
+    };
 }
 
-    <div>
+    <div class="row">
         <!--Boekhouding overzicht-->
-        <h2 class="red-text text-darken-4 center-align">Kasboek</h2>
-
-        <h5 class="center-align">Transactieoverzicht</h5>
         <div class="row">
+            <ul class="tabs tabs-transparent tabs-fixed-width red darken-4">
+                <li class="tab"><a class="active" href="#transactions">Transactieoverzicht</a></li>
+                <li class="tab"><a href="#stats">Statistieken</a></li>
+                <li class="tab disabled"><a href="#accountancy">Boekhouding</a></li>
+            </ul>
+        </div>
+
+        <div id="transactions">
             <div class="col s12">
                 <div class="col s12">
                     Toon nieuwste:
                     &nbsp;
                     <div class="input-field inline">
-                        <input id="limit" type="number" max="1000" style="width: 5em" value="@limit">
+                        <input id="limit" type="number" max="1000" style="width: 5em" value="@Html.Raw((Model.Limit == -1) ? 1000 : Model.Limit)">
                     </div>&nbsp;
                     <button class="btn inline red darken-4 waves-effect" onclick="Transactions.filter()">Go</button>
                     &nbsp;
-                    <button class="btn red darken-4 waves-effect modal-trigger" data-target="add">Transactie toevoegen</button>
+                    <button class="btn red darken-4 waves-effect modal-trigger" onclick="Transactions.updateDD()" data-target="add">Transactie toevoegen</button>
+                    <br />
                 </div>
             </div>
-        </div>
-        <table>
-            <tr>
-                <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)balance / 100, 2).ToString("F")</b></td>
-            </tr>
-        </table>
-        <table class="responsive-table">
-            <thead>
+            <table>
                 <tr>
-                    <th>Bedrag</th>
-                    <th>Datum</th>
-                    <th>Omschrijving</th>
+                    <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)Model.Balance / 100, 2).ToString("F")</b></td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var t in Model)
-                {
+            </table>
+            <table class="responsive-table">
+                <thead>
                     <tr>
-                        <td>@Html.Raw((t.Amount > 0) ? $"<b class=\"green-text text-accent-4\">+ &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F")}</b>" : $"<b class=\"red-text\">- &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F").Replace("-", "")}</b>")</td>
-                        <td>@t.When.ToString("dd-MM-yyyy") om @t.When.ToString("HH:mm")</td>
-                        <td>@t.Description</td>
+                        <th>Bedrag</th>
+                        <th>Datum</th>
+                        <th>Omschrijving</th>
+                        <th>Type</th>
+                        <th>Acties</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-        <br />
-        <h5 class="center-align">Statistieken</h5>
-        <div class="row">
-            <div class="col s12 m4">
-                <canvas id="pie" style="height: 1em; width: 1em"></canvas>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.Transactions)
+                    {
+                        <tr>
+                            <td>@Html.Raw((t.Amount > 0) ? $"<b class=\"green-text text-accent-4\">+ &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F")}</b>" : $"<b class=\"red-text\">- &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F").Replace("-", "")}</b>")</td>
+                            <td>@t.When.ToString("dd-MM-yyyy")</td>
+                            <td>@t.Description</td>
+                            <td>@Html.Raw((t.Type != null) ? Types[Convert.ToInt32(t.Type)] : "-")</td>
+                            <td><button class="btn-small red waves-effect modal-trigger" data-target="areusure" onclick="$('#btndelete').data('id','@t.Id')">Verwijderen</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div id="stats">
+            <div class="row">
+                <div class="col s12 m4">
+                    <canvas id="pie" style="height: 1em; width: 1em"></canvas>
+                </div>
+                <div class="col s12 m4">
+                    <canvas id="pie2a" style="height: 1em; width: 1em"></canvas>
+                </div>
+                <div class="col s12 m4">
+                    <canvas id="pie2b" style="height: 1em; width: 1em"></canvas>
+                </div>
             </div>
-            <div class="col s12 m4">
-                <canvas id="stat" style="height: 1em; width: 1em"></canvas>
+            <br/>
+            <div class="row">
+                <div class="col s12 m8 offset-m2">
+                    <canvas id="stat" style="height: 1em; width: 1em"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- In aanbouw -->
+    <div id="accountancy">
+
+    </div>
+
     <div id="add" class="modal">
         <div class="modal-content">
-            <h4>Betaling toevoegen</h4>
+            <h4>Transactie toevoegen</h4>
             <br />
             <div class="row">
                 <div class="input-field col s6">
@@ -107,6 +132,37 @@
                     <label for="desc">Omschrijving</label>
                     <span class="helper-text" data-error="Vul a.u.b. dit veld in"></span>
                 </div>
+                <div class="input-field col s12 m8">
+                    <input id="when" type="text" class="datepicker" />
+                    <label for="when">Datum</label>
+                </div>
+                <br /><br />
+                <div class="row">
+                    <div class="input-field col s12 m8" id="bij">
+                        <select id="selbij">
+                            <option value="1" selected>Activiteiten</option>
+                            <option value="2">Subsidie</option>
+                            <option value="3">Sponsor (bedrijf)</option>
+                            <option value="4">Sponsor (particulier)</option>
+                            <option value="5">Sponsor (kerk)</option>
+                            <option value="6">Overige</option>
+                        </select>
+                        <label>Selecteer inkomst</label>
+                    </div>
+                    <div class="input-field col s12 m8" id="af" style="display: none;">
+                        <select id="selaf">
+                            <option value="21" selected>Boodschappen</option>
+                            <option value="22">Huur gebouw</option>
+                            <option value="23">Website</option>
+                            <option value="24">Activiteiten</option>
+                            <option value="25">Drukwerk</option>
+                            <option value="26">Inboedel</option>
+                            <option value="27">Reiskosten</option>
+                            <option value="28">Overige</option>
+                        </select>
+                        <label>Selecteer uitgave</label>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -114,22 +170,54 @@
             <button class="btn waves-effect green" onclick="Transactions.addTransaction()">Toevoegen</button>
         </div>
     </div>
+
+    <div id="areusure" class="modal">
+        <div class="modal-content">
+            <h4>Weet je zeker dat je deze transactie wilt verwijderen?</h4>
+            <p>Dit kan niet ongedaan worden gemaakt!</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close btn green waves-effect">Annuleren</button>
+            <button id="btndelete" onclick="Transactions.delete($('#btndelete').data('id'));" class="btn red waves-effect modal-close">Verwijderen</button>
+        </div>
+    </div>
+
 <script>
     var Transactions = {
         init: function () {
             $('#_acc, #_macc').addClass('active');
             Transactions.createLineChart();
             Transactions.createPieChart();
+            Transactions.createPieChart2a();
+            Transactions.createPieChart2b();
+            Transactions.mapEvents();
+        },
+        mapEvents: function () {
+            $("input[name='mode']").change(function () {
+                Transactions.updateDD();
+            });
+        },
+        updateDD: function () {
+            //Select dropdown
+            if ($("input[name='mode']:checked").val() == 'min') {
+                $('#bij').hide();
+                $('#af').show();
+            } else {
+                $('#bij').show();
+                $('#af').hide();
+            }
         },
         createLineChart: function () {
             var data = {
-                labels: [@Html.Raw("'"+string.Join(',', ddata).Replace(",","','")+"'")],
+                labels: [@Html.Raw("'"+string.Join(',', Model.Transactions_.Select(f => f.When)).Replace(",","','")+"'")],
                 datasets: [
                 {
                     label: 'Inhoud kas',
+                    borderColor: '#B71C1C',
                     backgroundColor: '#B71C1C',
+                    fill: false,
                     data: [
-                        @Html.Raw(string.Join(',', mdata))
+                        @Html.Raw(string.Join(',', Model.Transactions_.Select(f => f.Amount)))
                     ]
                 }]
             };
@@ -153,7 +241,7 @@
         createPieChart: function () {
             var data = {
                 datasets: [{
-                    data: [@_in.ToString("F").Replace(",", "."), @_out.ToString("F").Replace(",", ".")],
+                    data: [@Html.Raw((Math.Round(Model.In/100,2)).ToString("F").Replace(",", ".")), @Html.Raw((Math.Round(Model.Out/100,2)).ToString("F").Replace(",", "."))],
                     backgroundColor: [
                         '#00C853',
                         '#F44336'
@@ -166,6 +254,50 @@
             };
 
             var MVChart = new Chart($('#pie'), {
+                type: 'pie',
+                data: data
+            });
+        },
+        createPieChart2a: function(){
+            var data = {
+                datasets: [{
+                    data: [
+                        @string.Join(",", Model.InPerType.Values.Select(f => Math.Round((double)f/100,2).ToString("F").Replace(",",".")))
+                    ],
+                    backgroundColor: [
+                        '#dc3042', '#108a19', '#ba197d', '#84db3f', '#0c86bf', '#741a93', '#bc506d', '#d47bdb', '#0aaff5', '#062ed3',
+                        '#ad923a', '#908281', '#9505ed', '#06a157', '#6b3a63', '#a1f613', '#1c36b3'
+                    ]
+                }],
+
+                labels: [
+                   @Html.Raw(string.Join(",", Types.Where(g => g.Key <= 20).Select(f => "'"+f.Value+"'")))
+                ]
+            };
+
+            var MVChart = new Chart($('#pie2a'), {
+                type: 'pie',
+                data: data
+            });
+        },
+        createPieChart2b: function(){
+            var data = {
+                datasets: [{
+                    data: [
+                        @string.Join(",", Model.OutPerType.Values.Select(f => Math.Round((double)f/100,2).ToString("F").Replace(",",".")))
+                    ],
+                    backgroundColor: [
+                        '#dc3042', '#108a19', '#ba197d', '#84db3f', '#0c86bf', '#741a93', '#bc506d', '#d47bdb', '#0aaff5', '#062ed3',
+                        '#ad923a', '#908281', '#9505ed', '#06a157', '#6b3a63', '#a1f613', '#1c36b3'
+                    ]
+                }],
+
+                labels: [
+                   @Html.Raw(string.Join(",", Types.Where(g => g.Key > 20).Select(f => "'"+f.Value+"'")))
+                ]
+            };
+
+            var MVChart = new Chart($('#pie2b'), {
                 type: 'pie',
                 data: data
             });
@@ -187,12 +319,14 @@
         addTransaction: function () {
             if (Transactions.validate()) {
                 M.Modal.getInstance($('#add')).close();
-                var amount = Math.round(Number($('#amount').val().replace(",",".")) * 100);
+                var amount = Math.round(Number($('#amount').val().replace(",", ".")) * 100);
+                var type = $('#selbij option:selected').val();
                 if ($("input[name='mode']:checked").val() == 'min') {
                     amount *= -1;
+                    type = $('#selaf option:selected').val();
                 }
                 $('#_progbar').show();
-                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val() }, function (r) {
+                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val(), Type: type, When: $('#when').val() }, function (r) {
                     if (r.status == 'success') {
                         M.toast({ html: 'Transactie toegevoegd', classes: 'green' });
                         Core.doReload(500);
@@ -203,6 +337,18 @@
                 });
             }
         },
+        delete: function (id) {
+            $('#_progbar').show();
+            $.post('/Accountancy/removeTransaction', { id: id }, function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Transactie verwijderd!', classes: 'green' });
+                    Core.doReload(500);
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                    $('#_progbar').hide();
+                }
+            });
+        },
         filter: function () {
             $('#_progbar').show();
             window.location.href = '/Accountancy/Index/' + $('#limit').val();
@@ -210,6 +356,9 @@
     }
 
     $(function () {
+        $('.tabs').tabs();
         Transactions.init();
+        $('select').formSelect();
+        $('.datepicker').datepicker({ format: 'dd-mm-yyyy' });
     });
 </script>

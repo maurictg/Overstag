@@ -48,7 +48,7 @@ namespace Overstag.Controllers
         /// <param name="id">The id</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("User/removeLogin/{id}")]
-        public IActionResult removeLogin(int id)
+        public async Task<IActionResult> removeLogin(int id)
         {
             using(var context = new OverstagContext())
             {
@@ -56,7 +56,7 @@ namespace Overstag.Controllers
                 {
                     var login = context.Auths.First(f => f.Id == id);
                     context.Auths.Remove(login);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -161,6 +161,31 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
+        /// Get all subscribers of an event
+        /// </summary>
+        /// <param name="eventID">The event's id</param>
+        /// <returns>JSON serialized</returns>
+        [Route("User/getSubscribers/{eventID}")]
+        public JsonResult getSubscribers(int eventID)
+        {
+            using(var context = new OverstagContext())
+            {
+                try
+                {
+                    List<int> subs = context.Events.Include(f => f.Participators)
+                        .First(g => g.Id == eventID).Participators.Select(f => f.UserID).ToList();
+                    subs.Remove(currentuser().Id);
+                    List<string> Users = context.Accounts.Where(f => subs.Contains(f.Id)).Select(f => $"{f.Firstname} {f.Lastname}").ToList();
+                    return Json(new { status = "success", data = Users.ToArray() });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", debuginfo = e.Message });
+                }
+            }
+        }
+
+        /// <summary>
         /// Renders all ideas with up and downvotes from user
         /// </summary>
         /// <returns>A View with votes</returns>
@@ -182,7 +207,7 @@ namespace Overstag.Controllers
         /// <param name="idea">The formencoded Idea</param>
         /// <returns>JSON (status = "success" or "error")</returns>
         [HttpPost("User/Vote/postIdea")]
-        public IActionResult postIdea(Idea idea)
+        public async Task<IActionResult> postIdea(Idea idea)
         {
             if (currentuser().Type == 1)
                 return Json(new { status = "error", error = "Als ouder kunt u niet een idee indienen." });
@@ -192,7 +217,7 @@ namespace Overstag.Controllers
                 using (var context = new OverstagContext())
                 {
                     context.Ideas.Add(idea);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                 }
                 return Json(new { status = "success" });
             }
@@ -209,7 +234,7 @@ namespace Overstag.Controllers
         /// <param name="like">Upvote (1) or Downvote (0)</param>
         /// <returns>Json, status = success or error with details</returns>
         [HttpGet("User/Vote/Like/{id}/{like}")]
-        public IActionResult Like(int id, byte like)
+        public async Task<IActionResult> Like(int id, byte like)
         {
             if (currentuser().Type == 1)
                 return Json(new { status = "error", error = "Als ouder kunt u niet stemmen voor een activiteit." });
@@ -232,7 +257,7 @@ namespace Overstag.Controllers
                         });
                     }
                     context.Accounts.Update(user);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -335,7 +360,7 @@ namespace Overstag.Controllers
         /// <param name="incr">The incrementer</param>
         /// <returns>JSON result, status=error or status=success</returns>
         [HttpPost]
-        public IActionResult SubscribeFriends([FromForm]int id, [FromForm]int amount)
+        public async Task<IActionResult> SubscribeFriends([FromForm]int id, [FromForm]int amount)
         {
             using(var context = new OverstagContext())
             {
@@ -345,7 +370,7 @@ namespace Overstag.Controllers
                     var part = user.Subscriptions.First(f => f.EventID == id);
                     part.FriendCount = (amount>0) ? amount : 0;
                     context.Accounts.Update(user);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -356,7 +381,7 @@ namespace Overstag.Controllers
         }
 
         [HttpPost]
-        public IActionResult postDeclaration(Accountancy.Request request)
+        public async Task<IActionResult> postDeclaration(Accountancy.Request request)
         {
             try
             {
@@ -366,7 +391,7 @@ namespace Overstag.Controllers
                 using (var context = new OverstagContext())
                 {
                     context.Requests.Add(request);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -534,12 +559,12 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>Json (status = success or status = error with details)</returns>
         [HttpGet]
-        public JsonResult GenerateInvoice()
+        public async Task<JsonResult> GenerateInvoice()
         {
             using (var context = new OverstagContext())
             {
                 var user = context.Accounts.Include(p => p.Subscriptions).First(f => f.Id == currentuser().Id);
-                var parti = user.Subscriptions.Where(f => f.Payed == 0).ToList();
+                var parti = user.Subscriptions.ToList();
 
                 if (parti.Count() < 1)
                     return Json(new { status = "error", error = "Geen openstaande events gevonden" });
@@ -551,7 +576,7 @@ namespace Overstag.Controllers
 
                 try {
 
-                    foreach (var part in parti)
+                    foreach (var part in parti.Where(f => f.Payed == 0))
                     {
                         var eve = context.Events.First(f => f.Id == part.EventID);
                         if (Core.General.DateIsPassed(eve.When))
@@ -583,7 +608,7 @@ namespace Overstag.Controllers
                     user.Subscriptions = parti;
                     context.Accounts.Update(user);
 
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch (Exception e) { return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message }); }
@@ -591,7 +616,7 @@ namespace Overstag.Controllers
             }
         }
 
-        public JsonResult MergeInvoices()
+        public async Task<JsonResult> MergeInvoices()
         {
             using(var context = new OverstagContext())
             {
@@ -623,7 +648,7 @@ namespace Overstag.Controllers
                     {
                         context.Invoices.RemoveRange(invoices);
                         context.Invoices.Add(i);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         return Json(new { status = "success" });
                     }
                     catch(Exception e)
@@ -708,91 +733,6 @@ namespace Overstag.Controllers
             }
             
         }
-
-        /// <summary>
-        /// Create a new ticket
-        /// </summary>
-        /// <param name="ticket">The ticket object</param>
-        /// <returns>json, status: success or status:error</returns>
-        [HttpPost("Tickets/createTicket")]
-        public IActionResult CreateTicket(Ticket ticket)
-        {
-            try
-            {
-                Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
-                using (var context = new OverstagContext())
-                {
-                    ticket.Timestamp = DateTime.Now;
-                    ticket.UserID = currentuser().Id;
-                    ticket.Message = e.Encrypt(ticket.Message);
-                    context.Tickets.Add(ticket);
-                    context.SaveChanges();
-                    return Json(new { status = "success" });
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { status = "error", error = e });
-            }
-        }
-
-        /// <summary>
-        /// Get tickets in View
-        /// </summary>
-        /// <param name="all">defines if top(4) or all (enter random number)</param>
-        /// <returns>View with tickets</returns>
-        [Route("Tickets/{all?}")]
-        public IActionResult Tickets(int? all)
-        {
-            var user = currentuser();
-            ViewBag.Type = user.Type;
-            if (user == null)
-                return Content("<h1 style=\"color: red;\">Je moet ingelogd zijn</h1>", "text/html");
-            try
-            {
-                ViewBag.AllowTickets = (user.DenyTickets == 0);
-                if (all == null)
-                {
-                    ViewBag.All = false;
-                    return View(getTickets(user.Type));
-                }
-                else
-                {
-                    ViewBag.All = true;
-                    return View(getTickets(user.Type, true));
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { status = "error", error = e });
-            }
-        }
-
-        /// <summary>
-        /// Create a list with tickets
-        /// </summary>
-        /// <param name="usertype">The type</param>
-        /// <param name="all">defines if you want top(4) or all records. Default false</param>
-        /// <returns>List(Ticket)</returns>
-        private List<Ticket> getTickets(int usertype, bool all = false)
-        {
-            List<Ticket> tickets = new List<Ticket>();
-            Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
-            using (var context = new OverstagContext())
-            {
-                var ticketss = new List<Ticket>();
-                if (!all)
-                    ticketss = context.Tickets.Where(f => f.Type == usertype).OrderBy(f => f.Timestamp).ToArray().Reverse().ToList().Take(4).ToList();
-                else
-                    ticketss = context.Tickets.Where(f => f.Type == usertype).OrderBy(f => f.Timestamp).ToArray().Reverse().ToList().ToList();
-
-                foreach (var ticket in ticketss)
-                {
-                    ticket.Message = e.Decrypt(ticket.Message);
-                    tickets.Add(ticket);
-                }
-            }
-            return tickets;
-        }
+        
     }
 }

@@ -104,7 +104,7 @@ namespace Overstag.Controllers
         /// <param name="e">The event</param>
         /// <returns>Json, success or error</returns>
         [HttpPost]
-        public IActionResult UpdateEvent(Event e)
+        public async Task<IActionResult> UpdateEvent(Event e)
         {
             using(var context = new OverstagContext())
             {
@@ -116,7 +116,7 @@ namespace Overstag.Controllers
                     eve.Cost = e.Cost;
                     eve.When = e.When;
                     context.Events.Update(eve);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception ex)
@@ -201,7 +201,7 @@ namespace Overstag.Controllers
         /// <param name="id">The ID of the idea</param>
         /// <returns>JSON (status = success or status = error with details)</returns>
         [HttpGet("Admin/Ideas/Delete/{id}")]
-        public IActionResult DeleteIdea(int id)
+        public async Task<IActionResult> DeleteIdea(int id)
         {
             using(var context = new OverstagContext())
             {
@@ -209,7 +209,7 @@ namespace Overstag.Controllers
                 {
                     var idea = context.Ideas.First(i => i.Id == id);
                     context.Ideas.Remove(idea);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success"});
                 }
                 catch(Exception e)
@@ -335,7 +335,7 @@ namespace Overstag.Controllers
         /// <param name="id">The user's id</param>
         /// <returns>JSON(status=success)</returns>
         [HttpGet("Admin/upgrade/{grade}/{id}")]
-        public IActionResult Upgrade(int grade, int id)
+        public async Task<IActionResult> Upgrade(int grade, int id)
         {
             int inc = (grade == 0) ? -1 : 1;
             using(var context = new OverstagContext())
@@ -345,73 +345,13 @@ namespace Overstag.Controllers
                     user.Type += inc;
 
                 context.Accounts.Update(user);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
                 return Json(new { status = "success" });
             }
         }
 
-        /// <summary>
-        /// Get all tickets
-        /// </summary>
-        /// <returns>View with tickets</returns>
-        public IActionResult Tickets()
-        {
-            using (var context = new OverstagContext())
-            {
-                Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
-                List<Ticket> tickets = new List<Ticket>();
-                foreach(var ticket in context.Tickets.ToList())
-                {
-                    ticket.Message = e.Decrypt(ticket.Message);
-                    tickets.Add(ticket);
-                }
-                return View(tickets.OrderBy(f => f.Timestamp).ToList());
-            }
-        }
-
-        /// <summary>
-        /// Remove a ticket from the database
-        /// </summary>
-        /// <param name="id">The ticket's id</param>
-        /// <returns>JSON (status=success or status=error)</returns>
-        [HttpPost("Admin/deleteTicket/{id}")]
-        public IActionResult DeleteTicket(int id)
-        {
-            try
-            {
-                using (var context = new OverstagContext())
-                {
-                    var ticket = context.Tickets.First(f => f.Id == id);
-                    context.Tickets.Remove(ticket);
-                    context.SaveChanges();
-                }
-                return Json(new { status = "success" });
-            }
-            catch(Exception e)
-            {
-                return Json(new {status = "error", error = e.Message });
-            }
-        }
-
-        [Route("Admin/blockTicketSender/{id}/{allow}")]
-        public IActionResult blockTicketSender(int id, int allow)
-        {
-            try
-            {
-                using (var context = new OverstagContext())
-                {
-                    var user = context.Accounts.First(f => f.Id == id);
-                    user.DenyTickets = (allow > 0) ? 1 : 0;
-                    context.SaveChanges();
-                }
-                return Json(new { status = "success" });
-            }
-            catch(Exception e)
-            {
-                return Json(new { status = "error", error = e.Message });
-            }
-        }
+        
 
 
     }

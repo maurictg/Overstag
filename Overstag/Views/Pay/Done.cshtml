@@ -1,38 +1,18 @@
 ﻿@model string
 @{
-    Layout = null;
+    Layout = "_PayLayout";
     ViewBag.Title = "Betaling voltooid";
 }
 
-<html>
-<head>
-    <title>Overstag Pay</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-    <script type="text/javascript" src="~/js/Overstag.js"></script>
-</head>
-<body>
-    <nav>
-        <div class="nav-wrapper blue">
-            <a href="#" class="brand-logo center">Overstag Pay</a>
-            <ul id="nav-mobile" class="left hide-on-med-and-down">
-                <li><a href="/Home">Home</a></li>
-            </ul>
-            <div class="progress" style="display: none;" id="progbar">
-                <div class="indeterminate"></div>
-            </div>
-        </div>
-    </nav>
-    <div class="center-align">
+<div class="center-align">
+    <br/>
+    <div class="card-panel">
         <h3>Status van uw betaling</h3>
         <h3><b><span id="status"></span></b></h3>
         <br />
 
         <div id="statuscontrol">
-            <p><b>De status van uw betaling wordt gecontroleerd...</b><br />(het kan even duren voor uw betaling is verwerkt, meestal 1 minuut)</p>
+            <p><b>De status van uw betaling wordt gecontroleerd...</b><br />(het kan even duren voor uw betaling is verwerkt, maar meer dan 2 minuten zou het niet moeten duren.)</p>
             <p class="grey-text">Verversen gaat automatisch om de 10 seconden</p>
             <div class="row">
                 <div class="progress col s12 m4 offset-m4">
@@ -42,107 +22,108 @@
             <button class="btn blue waves-effect" onclick="Pay.updateStatus()">Verversen</button>
 
         </div>
-        
+
         <div id="payedcontrol" style="display: none;">
-            <a class="btn btn-large green waves-effect" id="hrefbtn">Terug</a>
+            <a class="btn btn-large green waves-effect" id="hrefbtn">&larr; Terug</a>
         </div>
-
-
     </div>
-    <script>
-        let payid = '@Model';
-        var timeout;
-        let count = 0;
 
-        var Pay = function () {
-            return {
-                init: function () {
-                    this.getStatus();
-                    timeout = setInterval(Pay.updateBar, 1000);
-                },
-                updateBar: function () {
-                    var val = Number($('#refreshbar').data('value'));
+</div>
+<script>
+let payid = '@Model';
+var timeout;
+let count = 0;
 
-                    if (val != 0) {
-                        val -= 10;
-                    } else {
-                        val = 100;
-                        Pay.getStatus();
-                    }
+var Pay = function () {
+    return {
+        init: function () {
+            this.getStatus();
+            timeout = setInterval(Pay.updateBar, 1000);
+            $('#_progbar').show();
+        },
+        updateBar: function () {
+            var val = Number($('#refreshbar').data('value'));
 
-                    $('#refreshbar').data('value', val);
-                    $('#refreshbar').css('width', val + '%');
-                },
-                updateStatus: function () {
-                    $('#refreshbar').data('value', 100);
-                    $('#progbar').show();
-                    $.get('/Pay/UpdatePayment/' + payid, function (r) {
-                        if (r.status == 'success') {
-                            console.log(r.data);
-                            Pay.getStatus();
-                        }
-                    }, 'json').fail(function () {
-                        $('#progbar').hide();
-                        M.toast({ html: 'Er is een interne fout opgetreden', classes: 'red' });
-                    });
-                },
-                getStatus: function () {
-                    
-                    if (count > 10) {
-                        count = 0;
-                        this.updateStatus();
-                        return;
-                    }
+            if (val != 0) {
+                val -= 10;
+            } else {
+                val = 100;
+                Pay.getStatus();
+            }
 
-                    $('#progbar').show();
-                    $.get('/Pay/GetPayment/' + payid, function (r) {
-                        if (r.status == 'success') {
-                            $('#progbar').hide();
-                            console.log(r.data);
-                            var status = Pay.parseStatus(r.data.status);
-                            $('#status').text(status[0]);
-                            $('#status').removeClass().addClass(status[1] + '-text');
-
-                            if (r.data.status == 6) {
-                                clearInterval(timeout);
-                                $('#statuscontrol').hide();
-                                $('#hrefbtn').attr('href', '/Pay/Direct/' + r.data.invoiceID);
-
-                                $('#payedcontrol').show();
-                            }
-                        } else {
-                            $('#progbar').hide();
-                            M.toast({ html: r.error, classes: 'red' });
-                        }
-                    }, 'json').fail(function () {
-                        M.toast({ html: 'Betaling niet gevonden. Is de betaling wel geplaatst?', classes: 'orange' });
-                        $('#progbar').hide();
-                    });
-                },
-                parseStatus: function (code) {
-                    switch (code) {
-                        case 0:
-                            return ['Openstaand', 'darken-3 blue'];
-                        case 1:
-                            return ['Geannuleerd', 'orange'];
-                        case 2:
-                            return ['In afwachting', 'green'];
-                        case 3:
-                            return ['Geauthenticeerd', 'darken-1 blue'];
-                        case 4:
-                            return ['Verlopen', 'darken-1 red'];
-                        case 5:
-                            return ['Mislukt', 'red'];
-                        case 6:
-                            return ['Betaald', 'accent-3 green'];
-                    }
+            $('#refreshbar').data('value', val);
+            $('#refreshbar').css('width', val + '%');
+        },
+        updateStatus: function () {
+            $('#refreshbar').data('value', 100);
+            $('#_progbar').show();
+            $.get('/Pay/UpdatePayment/' + payid, function (r) {
+                if (r.status == 'success') {
+                    //console.log(r.data);
+                    Pay.getStatus();
                 }
-            };
-        }();
+            }, 'json').fail(function () {
+                $('#_progbar').hide();
+                M.toast({ html: 'Er is een interne fout opgetreden', classes: 'red' });
+            });
+        },
+        getStatus: function () {
 
-        $(function () {
-            Pay.init();
-        });
-    </script>
-</body>
-</html>
+            if (count > 5) {
+                count = 0;
+                this.updateStatus();
+                return;
+            } else {
+                count++;
+            }
+
+            $('#_progbar').show();
+            $.get('/Pay/GetPayment/' + payid, function (r) {
+                if (r.status == 'success') {
+                    $('#_progbar').hide();
+                    //console.log(r.data);
+                    var status = Pay.parseStatus(r.data.status);
+                    $('#status').text(status[0]);
+                    $('#status').removeClass().addClass(status[1] + '-text');
+
+                    if (Number(r.data.status) > 3 || r.data.status == 1) {
+                        clearInterval(timeout);
+                        $('#statuscontrol').hide();
+                        $('#hrefbtn').attr('href', '/Pay/Direct/' + r.data.invoiceID);
+
+                        $('#payedcontrol').show();
+                    }
+                } else {
+                    $('#_progbar').hide();
+                    M.toast({ html: r.error, classes: 'red' });
+                }
+            }, 'json').fail(function () {
+                M.toast({ html: 'Betaling niet gevonden. Is de betaling wel geplaatst?', classes: 'orange' });
+                $('#_progbar').hide();
+            });
+        },
+        parseStatus: function (code) {
+            switch (code) {
+                case 0:
+                    return ['Openstaand', 'darken-3 blue'];
+                case 1:
+                    return ['Geannuleerd', 'orange'];
+                case 2:
+                    return ['In afwachting', 'green'];
+                case 3:
+                    return ['Geauthenticeerd', 'darken-1 blue'];
+                case 4:
+                    return ['Verlopen', 'darken-1 red'];
+                case 5:
+                    return ['Mislukt', 'red'];
+                case 6:
+                    return ['Betaald', 'accent-3 green'];
+            }
+        }
+    };
+}();
+
+$(function () {
+    Pay.init();
+});
+</script>

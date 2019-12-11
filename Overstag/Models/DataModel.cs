@@ -15,8 +15,8 @@ namespace Overstag.Models
         public DbSet<Family> Families { get; set; }
         public DbSet<Idea> Ideas { get; set; }
         public DbSet<Payment> Payments { get; set; }
-        public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Auth> Auths { get; set; }
+        public DbSet<Files> Files { get; set; }
         public DbSet<Accountancy.Transaction> Transactions { get; set; }
         public DbSet<Accountancy.Request> Requests { get; set; }
 

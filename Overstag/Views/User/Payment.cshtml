@@ -69,8 +69,9 @@
                         </tbody>
                     </table>
                     <br />
-
-                    @Html.Raw("&nbsp;")<a href="#ginvoice" class="waves-effect waves-light btn modal-trigger">Factuur genereren</a>
+                    <div class="center-align">
+                        <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger blue-dark">Factuur genereren</a>
+                    </div>
                     <br /><br />
                 }
                 else
@@ -83,31 +84,32 @@
                 @if (Model.Invoices.Count() > 0)
                 {
                     <ul class="collapsible">
-                        @foreach (var item in Model.Invoices)
+                        @foreach (var item in Model.Invoices.OrderByDescending(f => f.Timestamp))
                         {
                             <li>
-                                <div class="collapsible-header">
-                                    <table>
-                                        <tbody>
-                                            <tr>
-                                                <td><i class="material-icons">calendar_today</i>@item.Timestamp.ToString("d", culture)</td>
-                                                <td>Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
-                                                <td>Betaald: @Html.Raw((item.Payed) ? "<b class='green-text'>Ja</b>" : "<b class='red-text'>Nee</b>")</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="collapsible-header row hoverable">
+                                    <div class="col s4">
+                                        <h6><i class="material-icons">calendar_today</i>@item.Timestamp.ToString("d", culture)</h6>
+                                    </div>
+                                    <div class="col s4">
+                                        <h6>Totaal: <b>&euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</b></h6>
+                                    </div>
+                                    <div class="col s4">
+                                        <h6>Betaald: @Html.Raw((item.Payed) ? "<b class='green-text'>Ja</b>" : "<b class='red-text'>Nee</b>")</h6>
+                                    </div>
                                 </div>
                                 <div class="collapsible-body">
-                                    @if (!item.Payed)
-                                    {
-                                        <a class="waves-effect waves-light btn blue" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen</a>
-                                        <br />
-                                    }
-                                    else
-                                    {
-                                        <a class="waves-effect waves-light btn green" target="_blank" href="/Pay/Direct/@Uri.EscapeDataString(item.PayID)">Factuur openen</a>
-                                    }
-
+                                    <div class="col s3">
+                                        @if (!item.Payed)
+                                        {
+                                            <a class="waves-effect waves-light btn green" onclick="Payment.getPay('@Uri.EscapeDataString(item.PayID)')">Betalen &rarr;</a>
+                                            <br />
+                                        }
+                                        else
+                                        {
+                                            <a class="waves-effect waves-light btn blue-dark" target="_blank" href="/Pay/Direct/@Uri.EscapeDataString(item.PayID)">Factuur openen &rarr;</a>
+                                        }
+                                    </div>
                                     <table class="responsive-table">
                                         <thead>
                                             <tr>
@@ -143,7 +145,7 @@
 
                     @if (Model.Invoices.Where(f => f.Payed == false).Count() > 1)
                     {
-                        @Html.Raw("&nbsp;")<button class="btn orange waves-effect modal-trigger" data-target="minvoice">Facturen samenvoegen</button>
+                        @Html.Raw("&nbsp;")<button class="btn blue-dark waves-effect modal-trigger" data-target="minvoice">&rarr; Facturen samenvoegen &larr;</button><br /><br />
                     }
                 }
                 else
@@ -219,11 +221,11 @@
         },
         getPay: function (payid) {
             $('#payid').data('pid', payid);
-            $('#payid').val(window.location.origin+'/Pay/Direct/' + payid);
+            $('#payid').val(window.location.origin+'/Pay/Invoice/' + payid);
             M.Modal.getInstance($('#pay')).open();
         },
         gotoPay: function () {
-            window.location.href = '/Pay/Direct/' + $('#payid').data('pid');
+            window.location.href = '/Pay/Invoice/' + $('#payid').data('pid');
         },
         copyPay: function () {
             $('#payid').select();

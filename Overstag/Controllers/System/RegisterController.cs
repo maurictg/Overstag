@@ -1,4 +1,8 @@
-﻿using System;
+﻿#define MOLLIE_ENABLED
+
+//COMMENT this to enable mollie
+#undef MOLLIE_ENABLED
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 using System.Globalization;
-using Newtonsoft.Json;
 
 using Mollie.Api;
 using Mollie.Api.Models.Customer;
@@ -20,9 +23,13 @@ namespace Overstag.Controllers
         public IActionResult Index()
             => View("Login");
 
+        [Route("Register/Login")]
+        [Route("inloggen")]
         public IActionResult Login()
             => View("Login", "");
 
+        [Route("Register/Register")]
+        [Route("aanmelden")]
         public IActionResult Register()
             => View();
 
@@ -97,14 +104,11 @@ namespace Overstag.Controllers
                     string testem = "";
                     try { testun = context.Accounts.Where(a => a.Username == account.Username).FirstOrDefault().Username; } catch { testun = ""; }
                     try { testem = context.Accounts.Where(a => a.Email == account.Email).FirstOrDefault().Email; } catch { testem = ""; }
+                    
                     if (!string.IsNullOrEmpty(testun))
-                    {
                         return Json(new { status = "error", error = "Gebruikersnaam bestaat al!", code = 0 });
-                    }
                     else if (!string.IsNullOrEmpty(testem))
-                    {
                         return Json(new { status = "error", error = "Emailadres is al in gebruik!", code = 1 });
-                    }
                     else
                     {
                         try
@@ -121,12 +125,12 @@ namespace Overstag.Controllers
                             account.Password = Encryption.PBKDF2.Hash(account.Password);
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
-                            account.DenyTickets = 0;
 
                             try
                             {
                                 if (account.Type < 2)
                                 {
+#if MOLLIE_ENABLED
                                     CustomerRequest cr = new CustomerRequest()
                                     {
                                         Name = $"{account.Firstname} {account.Lastname}",
@@ -139,6 +143,7 @@ namespace Overstag.Controllers
                                     CustomerResponse cs = await client.CreateCustomerAsync(cr);
 
                                     account.MollieID = cs.Id;
+#endif
                                 }
                             }
                             catch (Exception e)
@@ -168,13 +173,9 @@ namespace Overstag.Controllers
         /// <param name="a">The login info</param>
         /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
-        public JsonResult postLogin([FromForm]string Username, [FromForm]string Password)
+        public async Task<JsonResult> postLogin([FromForm]string Username, [FromForm]string Password)
         {
-            if (!ModelState.IsValid)
-            {
-                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
-            }
-            else
+            return await Task.Run(() =>
             {
                 using (var context = new OverstagContext())
                 {
@@ -186,7 +187,7 @@ namespace Overstag.Controllers
                             return Json(new { status = "error", error = "Gebruiker bestaat niet" });
 
                         //Controleren op onjuiste inlogpogingen
-                        if(context.Logging.Count(i=>i.Ip==ip && i.Date == DateTime.Now.Date && i.Username==Username) > 15)
+                        if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
                         {
                             return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
                         }
@@ -211,7 +212,7 @@ namespace Overstag.Controllers
                                     foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == Username))
                                         context.Logging.Remove(log);
 
-                                    context.SaveChanges();
+                                    context.SaveChangesAsync();
                                 }
 
                                 string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
@@ -224,14 +225,15 @@ namespace Overstag.Controllers
                             else
                             {
                                 context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
-                                context.SaveChanges();
+                                context.SaveChangesAsync();
                                 return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
                             }
                         }
                     }
-                    catch(Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
+                    catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                 }
-            }
+
+            });
         }
 
         /// <summary>
@@ -296,14 +298,14 @@ namespace Overstag.Controllers
         /// <param name="Password">User's new password</param>
         /// <returns></returns>
         [HttpPost]
-        public JsonResult postPassreset([FromForm]string Token, [FromForm]string Password)
+        public async Task<JsonResult> postPassreset([FromForm]string Token, [FromForm]string Password)
         {
             using (var context = new OverstagContext())
             {
                 try
                 {
                     Token = Uri.UnescapeDataString(Token);
-                    var account = context.Accounts.ToList().FirstOrDefault(e => e.Token == Token);
+                    var account = context.Accounts./*ToList().*/FirstOrDefault(e => e.Token == Token);
 
                     if (account == null)
                         return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
@@ -311,7 +313,7 @@ namespace Overstag.Controllers
                     account.Password = Encryption.PBKDF2.Hash(Password); //<--NULLexception
                     account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                     context.Accounts.Update(account);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
 
                     return Json(new { status = "success" });
                 }
@@ -374,7 +376,7 @@ namespace Overstag.Controllers
         /// <param name="token">The family token</param>
         /// <returns>HTML content</returns>
         [HttpGet("Register/joinFamily/{token}")]
-        public IActionResult JoinFamily(string token)
+        public async Task<IActionResult> JoinFamily(string token)
         {
             if(string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
             {
@@ -410,7 +412,7 @@ namespace Overstag.Controllers
                         {
                             user.Family = family;
                             context.Accounts.Update(user);
-                            context.SaveChanges();
+                            await context.SaveChangesAsync();
                             string[] success = { "Successvol aangemeld bij de familie", "", "<a class=\"btn btn-large blue waves-effect center-align\" href=\"/User\">Klik hier om verder te gaan</a>" };
                             return View("~/Views/Error/Success.cshtml", success);
                         }

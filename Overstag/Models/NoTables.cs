@@ -81,4 +81,24 @@ namespace Overstag.Models.NoDB
         public Invoice Invoice;
         public Payment Payment;
     }
+
+    public struct _Transaction
+    {
+        public string When;
+        public string Amount;
+    }
+
+    public struct _Transactions
+    {
+        public List<_Transaction> Transactions_;
+        public List<Accountancy.Transaction> Transactions;
+        public Dictionary<int, int> OutPerType;
+        public Dictionary<int, int> InPerType;
+        public double Balance;
+        public double Out;
+        public double In;
+        public int Limit;
+    }
+
+    
 }

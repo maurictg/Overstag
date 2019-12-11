@@ -27,15 +27,38 @@ namespace Overstag.Controllers
         /// Get event and subscription of the current event
         /// </summary>
         /// <returns>View with info</returns>
-        public IActionResult Today()
+        [Route("Mentor/Today")]
+        [Route("Mentor/Event/{eventid}")]
+        public IActionResult Event(int? eventid)
         {
             using (var context = new OverstagContext())
             {
-                var now = context.Events.Include(f => f.Participators).OrderBy(h => h.When).FirstOrDefault(g => g.When.Date == DateTime.Today);
+                int eid = -1;
+                try
+                {
+                    eid = context.Events.FirstOrDefault(f => f.When.Date == DateTime.Today).Id;
+                }
+                catch { }
+
+                eid = (eventid == null) ? eid : Convert.ToInt32(eventid);
+                var now = context.Events.Include(f => f.Participators).OrderBy(h => h.When).FirstOrDefault(g => g.Id == eid);
+
                 List<SSub> Users = new List<SSub>();
 
                 if(now != null)
                 {
+                    if (now.When < DateTime.Now.AddDays(-7))
+                    {
+                        string[] error = { "Geen toegang.", "Deze activiteit was al meer dan een week geleden. <br/>Het is niet toegestaan om nu nog wijzigingen aan te brengen." };
+                        return View("~/Views/Error/Custom.cshtml", error);
+                    }
+
+                    if(now.When.Date > DateTime.Now.Date)
+                    {
+                        string[] error = { "Geen toegang.", "Deze activiteit is in de toekomst. <br/>Het is niet toegestaan wijzigingen van te voren aan te brengen." };
+                        return View("~/Views/Error/Custom.cshtml", error);
+                    }
+
                     foreach (var p in now.Participators)
                         Users.Add(new SSub { account = context.Accounts.First(f => f.Id == p.UserID), part = p});
                 }
@@ -83,15 +106,16 @@ namespace Overstag.Controllers
         /// Deletes all subscriptions from absent people
         /// </summary>
         /// <param name="absentids">Array with absent ids (json)</param>
+        /// <param name="eventID">The event's identifier</param>
         /// <returns>JSON, success error or warning</returns>
         [HttpPost]
-        public IActionResult postPresence([FromForm]string absentids)
+        public async Task<IActionResult> postPresence([FromForm]string absentids, [FromForm]int eventID)
         {
             int[] absentIDS = JsonSerializer.Deserialize<int[]>(absentids);
             
             using(var context = new OverstagContext())
             {
-                var eve = context.Events.Include(f => f.Participators).FirstOrDefault(f => f.When.Date == DateTime.Today);
+                var eve = context.Events.Include(f => f.Participators).FirstOrDefault(f => f.Id == eventID);
                 
                 if(eve != null)
                 {
@@ -108,7 +132,7 @@ namespace Overstag.Controllers
                     try
                     {
                         context.Events.Update(eve);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         return Json(new { status = "success" });
                     }
                     catch (Exception e)
@@ -118,7 +142,7 @@ namespace Overstag.Controllers
                 }
                 else
                 {
-                    return Json(new { status = "warning", warning = "Er is geen activiteit vandaag" });
+                    return Json(new { status = "warning", warning = "Activiteit niet gevonden" });
                 }
             }
         }
@@ -128,16 +152,17 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="userid">The user's id</param>
         /// <param name="count">The amount of drinks</param>
+        /// <param name="eventid">The event's identifier</param>
         /// <returns>JSON, success or error</returns>
-        [HttpGet("/Mentor/setDrink/{userid}/{count}")]
-        public IActionResult setDrink(int userid, int count)
+        [HttpGet("/Mentor/setDrink/{eventid}/{userid}/{count}")]
+        public async Task<IActionResult> setDrink(int eventid, int userid, int count)
         {
             using(var context = new OverstagContext())
             {
-                var eve = context.Events.Include(f => f.Participators).FirstOrDefault(f => f.When.Date == DateTime.Today);
+                var eve = context.Events.Include(f => f.Participators).FirstOrDefault(f => f.Id == eventid);
 
                 if (eve == null)
-                    return Json(new { status = "error", error = "Er is geen activiteit vandaag" });
+                    return Json(new { status = "error", error = "Activiteit niet gevonden" });
 
                 try
                 {
@@ -148,7 +173,7 @@ namespace Overstag.Controllers
                     user.ConsumptionCount = (count >= 0) ? count : 0;
                     user.ConsumptionTax = user.ConsumptionCount * 100;
                     context.Events.Update(eve);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -156,6 +181,37 @@ namespace Overstag.Controllers
                     return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = e.Message });
                 }
                 
+            }
+        }
+
+        [HttpGet("Mentor/addUser/{eventid}/{userid}")]
+        public async Task<IActionResult> addUser(int eventid, int userid)
+        {
+            using (var context = new OverstagContext())
+            {
+                try
+                {
+                    var user = context.Accounts.Include(f => f.Subscriptions).First(a => a.Id == userid);
+                    var eve = context.Events.First(e => e.Id == eventid);
+
+                    if (DateTime.Today > eve.When.Date.AddDays(3))
+                        return Json(new { status = "error", error = "Het is nu te lang geleden. U kunt geen mensen meer inschrijven." });
+
+                    var part = user.Subscriptions.Where(e => e.EventID == eventid).FirstOrDefault();
+                    if (part == null)
+                    {
+                        user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id });
+                        await context.SaveChangesAsync();
+                        return Json(new { status = "success" });
+                    }
+                    else
+                        return Json(new { status = "error", error = "Deze gebruiker is al ingeschreven!" });
+                }
+                catch (Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                }
+
             }
         }
 
@@ -188,7 +244,7 @@ namespace Overstag.Controllers
         /// <param name="e">The event form object</param>
         /// <returns>Json: status = success or status = error</returns>
         [HttpPost]
-        public IActionResult postEvent(Event e)
+        public async Task<IActionResult> postEvent(Event e)
         {
             try
             {
@@ -209,7 +265,7 @@ namespace Overstag.Controllers
                     else
                         context.Events.Update(eve);
 
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -225,7 +281,7 @@ namespace Overstag.Controllers
         /// <param name="id">The event's id</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("/Mentor/deleteEvent/{id}")]
-        public IActionResult deleteEvent(int id)
+        public async Task<IActionResult> deleteEvent(int id)
         {
             try
             {
@@ -233,7 +289,7 @@ namespace Overstag.Controllers
                 {
                     var e = context.Events.First(f => f.Id == id);
                     context.Events.Remove(e);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
             }
@@ -256,7 +312,7 @@ namespace Overstag.Controllers
         /// <param name="id">The idea its id</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpGet("Mentor/deleteVote/{id}")]
-        public IActionResult deleteVote(int id)
+        public async Task<IActionResult> deleteVote(int id)
         {
             using (var context = new OverstagContext())
             {
@@ -264,7 +320,7 @@ namespace Overstag.Controllers
                 {
                     var idea = context.Ideas.First(i => i.Id == id);
                     context.Ideas.Remove(idea);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch (Exception e)

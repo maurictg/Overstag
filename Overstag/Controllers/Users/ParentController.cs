@@ -108,7 +108,7 @@ namespace Overstag.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Parent/Remove/{id}")]
-        public IActionResult Remove(int id)
+        public async Task<IActionResult> Remove(int id)
         {
             using(var context = new OverstagContext())
             {
@@ -117,7 +117,7 @@ namespace Overstag.Controllers
                     var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id);
                     family.Members.Remove(context.Accounts.First(f => f.Id == id));
                     context.Families.Update(family);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch(Exception e)
@@ -131,7 +131,7 @@ namespace Overstag.Controllers
         /// Generate a invoice for all members of the family
         /// </summary>
         /// <returns>Json (status = success or status = error with details)</returns>
-        public IActionResult GenerateInvoice()
+        public async Task<IActionResult> GenerateInvoice()
         {
             //Zet ID's om van kind naar ouder
             using (var context = new OverstagContext())
@@ -154,7 +154,7 @@ namespace Overstag.Controllers
                 {
                     context.Accounts.Update(me);
                     context.Accounts.UpdateRange(members);
-                    context.SaveChanges();
+                    await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
                 catch (Exception e)
