@@ -332,7 +332,6 @@ namespace Overstag.Security
         private List<Family> Families { get; set; }
         private List<Idea> Ideas { get; set; }
         private List<Payment> Payments { get; set; }
-        private List<Ticket> Tickets { get; set; }
 
 
         public Backup(string folder)
@@ -390,11 +389,6 @@ namespace Overstag.Security
                 Payments = null;
                 GC.Collect();
 
-                Tickets = context.Tickets.ToList();
-                Write(Tickets, "Tickets");
-                Tickets.Clear();
-                Tickets = null;
-                GC.Collect();
             }
 
             errorcount = _errors;

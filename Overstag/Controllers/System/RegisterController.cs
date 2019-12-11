@@ -125,7 +125,6 @@ namespace Overstag.Controllers
                             account.Password = Encryption.PBKDF2.Hash(account.Password);
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
-                            account.DenyTickets = 0;
 
                             try
                             {

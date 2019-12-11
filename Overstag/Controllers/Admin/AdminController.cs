@@ -351,67 +351,7 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// Get all tickets
-        /// </summary>
-        /// <returns>View with tickets</returns>
-        public IActionResult Tickets()
-        {
-            using (var context = new OverstagContext())
-            {
-                Classes.Cryptography.Encryption e = new Classes.Cryptography.Encryption(Aes.Create(), Core.General.Credentials.mailPass, "Over$tagSALT");
-                List<Ticket> tickets = new List<Ticket>();
-                foreach(var ticket in context.Tickets.ToList())
-                {
-                    ticket.Message = e.Decrypt(ticket.Message);
-                    tickets.Add(ticket);
-                }
-                return View(tickets.OrderBy(f => f.Timestamp).ToList());
-            }
-        }
-
-        /// <summary>
-        /// Remove a ticket from the database
-        /// </summary>
-        /// <param name="id">The ticket's id</param>
-        /// <returns>JSON (status=success or status=error)</returns>
-        [HttpPost("Admin/deleteTicket/{id}")]
-        public async Task<IActionResult> DeleteTicket(int id)
-        {
-            try
-            {
-                using (var context = new OverstagContext())
-                {
-                    var ticket = context.Tickets.First(f => f.Id == id);
-                    context.Tickets.Remove(ticket);
-                    await context.SaveChangesAsync();
-                }
-                return Json(new { status = "success" });
-            }
-            catch(Exception e)
-            {
-                return Json(new {status = "error", error = e.Message });
-            }
-        }
-
-        [Route("Admin/blockTicketSender/{id}/{allow}")]
-        public async Task<IActionResult> blockTicketSender(int id, int allow)
-        {
-            try
-            {
-                using (var context = new OverstagContext())
-                {
-                    var user = context.Accounts.First(f => f.Id == id);
-                    user.DenyTickets = (allow > 0) ? 1 : 0;
-                    await context.SaveChangesAsync();
-                }
-                return Json(new { status = "success" });
-            }
-            catch(Exception e)
-            {
-                return Json(new { status = "error", error = e.Message });
-            }
-        }
+        
 
 
     }

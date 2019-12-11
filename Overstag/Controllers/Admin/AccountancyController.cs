@@ -26,19 +26,46 @@ namespace Overstag.Controllers
         [Route("Accountancy/Index/{amount?}")]
         public IActionResult Index(int? amount)
         {
-            using(var context = new OverstagContext())
+            using (var context = new OverstagContext())
             {
-                var pms = new List<Accountancy.Transaction>();
-                if(amount != null)
-                {
-                    pms = context.Transactions.OrderByDescending(f => f.When).Take(Convert.ToInt32(amount)).ToList();
-                    ViewBag.Limit = Convert.ToInt32(amount);
-                    ViewBag.Total = context.Transactions.Sum(f => f.Amount);
-                }
-                else
-                    pms = context.Transactions.OrderByDescending(f => f.When).ToList();
+                var trans = context.Transactions.OrderByDescending(f => f.When).ToList();
+                
+                int[] typesIn = { 1, 2, 3, 4, 5, 6 };
+                int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28 };
 
-                return View("~/Views/Mentor/Accountancy/Index.cshtml",pms);
+                Dictionary<int, int> OPT = new Dictionary<int, int>();
+                Dictionary<int, int> IPT = new Dictionary<int, int>();
+                typesIn.ToList().ForEach(f => IPT.Add(f, trans.Where(g => g.Type == f).Sum(h => h.Amount)));
+                typesOut.ToList().ForEach(f => OPT.Add(f, trans.Where(g => g.Type == f).Sum(h => h.Amount)));
+
+                List<_Transaction> ts = new List<_Transaction>();
+                int balance = 0;
+
+                var results = trans.ToArray().Reverse().GroupBy(a => a.When.Date, b => b.Amount,
+                    (c, d) => new { When = c, Amount = d.Sum() });
+
+                foreach (var item in results)
+                {
+                    balance += item.Amount;
+
+                    ts.Add(new _Transaction()
+                    {
+                        When = item.When.ToString("dd-MM-yyyy"),
+                        Amount = Math.Round((double)balance / 100, 2).ToString("F").Replace(",", ".")
+                    });
+                }
+
+                return View("~/Views/Mentor/Accountancy/Index.cshtml", new _Transactions()
+                {
+                    Balance = trans.Sum(f => f.Amount),
+                    In = trans.Where(f => f.Amount > 0).Sum(g => g.Amount),
+                    Out = trans.Where(f => f.Amount < 0).Sum(g => g.Amount),
+                    OutPerType = OPT,
+                    InPerType = IPT,
+                    Transactions_ = ts,
+                    Transactions = trans.Take((amount != null) ? Convert.ToInt32(amount) : trans.Count()).ToList(),
+                    Limit = (amount != null) ? Convert.ToInt32(amount) : -1
+                });
             }
         }
 
@@ -309,7 +336,7 @@ namespace Overstag.Controllers
                             usercount++;
                             particount += eventcount;
                             Emails.Add(new Tuple<string, string>(user.Email,
-                                $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Direct/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
+                                $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
                         }
                     }
 

@@ -53,6 +53,12 @@ namespace Overstag.Controllers
                         return View("~/Views/Error/Custom.cshtml", error);
                     }
 
+                    if(now.When.Date > DateTime.Now.Date)
+                    {
+                        string[] error = { "Geen toegang.", "Deze activiteit is in de toekomst. <br/>Het is niet toegestaan wijzigingen van te voren aan te brengen." };
+                        return View("~/Views/Error/Custom.cshtml", error);
+                    }
+
                     foreach (var p in now.Participators)
                         Users.Add(new SSub { account = context.Accounts.First(f => f.Id == p.UserID), part = p});
                 }

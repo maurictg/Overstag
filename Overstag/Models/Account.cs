@@ -32,7 +32,6 @@ namespace Overstag.Models
         public string TwoFactorCodes { get; set; }
         
         //Policies
-        public int DenyTickets { get; set; }
 
         //Relations
         public Family Family { get; set; }
