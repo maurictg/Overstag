@@ -887,3 +887,4 @@ C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Overst
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Overstag.csproj.CopyComplete
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Overstag.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Overstag.pdb
+C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\credentials.json

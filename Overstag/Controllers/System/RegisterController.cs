@@ -177,68 +177,62 @@ namespace Overstag.Controllers
         {
             return await Task.Run(() =>
             {
-                if (!ModelState.IsValid)
+                using (var context = new OverstagContext())
                 {
-                    return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
-                }
-                else
-                {
-                    using (var context = new OverstagContext())
+                    string ip = HttpContext.Connection.RemoteIpAddress.ToString();
+                    try
                     {
-                        string ip = HttpContext.Connection.RemoteIpAddress.ToString();
-                        try
-                        {
-                            var account = context.Accounts.FirstOrDefault(e => e.Username.ToLower().Equals(Username.ToLower()) || e.Email.ToLower().Equals(Username.ToLower()));
-                            if (account == null)
-                                return Json(new { status = "error", error = "Gebruiker bestaat niet" });
+                        var account = context.Accounts.FirstOrDefault(e => e.Username.ToLower().Equals(Username.ToLower()) || e.Email.ToLower().Equals(Username.ToLower()));
+                        if (account == null)
+                            return Json(new { status = "error", error = "Gebruiker bestaat niet" });
 
-                            //Controleren op onjuiste inlogpogingen
-                            if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
+                        //Controleren op onjuiste inlogpogingen
+                        if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
+                        {
+                            return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
+                        }
+                        else
+                        {
+                            if (Encryption.PBKDF2.Verify(account.Password, Password))
                             {
-                                return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
+                                bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
+                                //Login is juist, redirect naar page, zet sessie variablen
+
+
+                                if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
+                                {
+                                    HttpContext.Session.SetString("Token", account.Token);
+                                    HttpContext.Session.SetInt32("Type", account.Type);
+                                    HttpContext.Session.SetString("Name", account.Username);
+                                }
+
+                                //Eventuele foute pogingen verwijderen
+                                if (context.Logging.Count(i => i.Ip == ip && i.Username == Username) > 0)
+                                {
+                                    foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == Username))
+                                        context.Logging.Remove(log);
+
+                                    context.SaveChangesAsync();
+                                }
+
+                                string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
+
+                                if (no2fa)
+                                    HttpContext.Session.SetString("Remember", remember);
+
+                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
                             }
                             else
                             {
-                                if (Encryption.PBKDF2.Verify(account.Password, Password))
-                                {
-                                    bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
-                                    //Login is juist, redirect naar page, zet sessie variablen
-
-
-                                    if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
-                                    {
-                                        HttpContext.Session.SetString("Token", account.Token);
-                                        HttpContext.Session.SetInt32("Type", account.Type);
-                                        HttpContext.Session.SetString("Name", account.Username);
-                                    }
-
-                                    //Eventuele foute pogingen verwijderen
-                                    if (context.Logging.Count(i => i.Ip == ip && i.Username == Username) > 0)
-                                    {
-                                        foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == Username))
-                                            context.Logging.Remove(log);
-
-                                        context.SaveChangesAsync();
-                                    }
-
-                                    string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
-
-                                    if (no2fa)
-                                        HttpContext.Session.SetString("Remember", remember);
-
-                                    return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
-                                }
-                                else
-                                {
-                                    context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
-                                    context.SaveChangesAsync();
-                                    return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
-                                }
+                                context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
+                                context.SaveChangesAsync();
+                                return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
                             }
                         }
-                        catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                     }
+                    catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                 }
+
             });
         }
 
