@@ -118,8 +118,8 @@
                             <br />
                             <p>
                                 <label>
-                                    <input type="checkbox" class="filled-in" checked="checked" id="autologin" />
-                                    <span>Automatisch inloggen</span>
+                                    <input type="checkbox" class="filled-in" id="avg" />
+                                    <span>Ik ga akkoord met de <a href="~/pdf/voorwaarden.pdf" target="_blank">privacyvoorwaarden</a></span>
                                 </label>
                             </p>
                             <a class="btn btn-large blue-light waves-effect" id="register">Registreren</a><br />
@@ -186,7 +186,12 @@
             var passMatch = ($('#Password').val() == $('#Passwordrep').val());
 
             if (isValid && passMatch) {
-                Register.post();
+                if ($('#avg').prop('checked')) {
+                    Register.post();
+                } else {
+                    M.toast({ html: 'U moet akkoord gaan met de voorwaarden', classes: 'blue' });
+                }
+                
             }
             else {
                 M.toast({ html: 'Vul a.u.b. alle velden correct in', classes: 'orange' });
@@ -213,14 +218,12 @@
             $('#rtitle').text('Registeren...');
             $('.checki').attr('disabled',true);
             $(window).scrollTop(0);
-            $.post("/Register/postRegister",data , function (response) {
+            $.post("/Register/postRegister", data, function (response) {
                 if (response.status == 'success') {
+                    localStorage.setItem('remember', response.remember);
                     M.toast({ html: 'Registratie successvol!!', classes: 'green' });
-                    if ($('#autologin').prop('checked')) {
-                        Register.postlogin();
-                    } else {
-                        $('.checki').val('');
-                    }
+                    $('.checki').val('');
+                    setTimeout(Register.redirect, 500);
                 }
                 else {
                     //status = error
@@ -232,32 +235,15 @@
                         $('#Email').val('');
                     }
                 }
-                }, 'json'
-            ).done(function(){
+            }, 'json').done(function(){
                 $('#_progbar').hide();
                 $('#register').removeClass('disabled');
                 $('#rtitle').text('Registeren');
                 $('.checki').removeAttr('disabled');
             });
         },
-
-        postlogin: function () {
-            $('#_progbar').show();
-            $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
-                if (response.status == 'success') {
-                    localStorage.setItem("login",true);
-                    $(location).attr('href', '/User');
-                    $('.checki').val('');
-                }
-                else {
-                    //status = error
-                    M.toast({ html: response.error, classes: 'red' });
-                    $('.checki').val('');
-                }
-                }, 'json'
-            ).done(function(){
-                $('#_progbar').hide();
-            });
+        redirect: function () {
+            window.location.href = '/User';
         }
     }
 

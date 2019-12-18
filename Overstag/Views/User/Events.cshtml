@@ -1,12 +1,52 @@
-﻿@{
+﻿@model List<Overstag.Models.NoDB.ISubscription>
+@{
     Layout = "_UserLayout";
     ViewBag.Title = "Evenementen";
+    System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
 }
-    <div>
-        <h3 class="center-align">Agenda &amp; inschrijvingen</h3>
-        <h5 class="blue-middle-text center-align">&nbsp;Komende evenementen, onder het voorbehoud van <a href="https://herzienestatenvertaling.nl/teksten/jakobus/4#15" target="_blank">Jakobus 4:15</a></h5>
-        <div id="partial"></div>
+<div>
+    <h3 class="center-align">Agenda &amp; inschrijvingen</h3>
+    <h5 class="blue-middle-text center-align">&nbsp;Komende evenementen, onder het voorbehoud van <a href="https://herzienestatenvertaling.nl/teksten/jakobus/4#15" target="_blank">Jakobus 4:15</a></h5>
+    <div id="partial">
+        <br />
+
+        @if (Model.Count() > 0)
+        {
+            int cnt = 0;
+            @foreach (var item in Model)
+            {
+                bool iss = Overstag.Core.General.DateIsPassed(item.Event.When);
+                <div class="row" style="display: none;" id="event-@cnt">
+                    <div class="col s12 center-align">
+                        <h4><b>@item.Event.Title</b></h4>
+                        <br />
+                        <h5><i class="material-icons">calendar_today</i><span>&nbsp;@item.Event.When.ToString("dddd dd MMMM yyyy", culture) om @item.Event.When.ToString("HH:mm")</span></h5>
+                        <h6>@item.Event.Description</h6>
+                        <h5>&euro;@Math.Round((double)item.Event.Cost / 100, 2).ToString("F")</h5>
+                        <br />
+                    </div>
+                    <div class="col s12 center-align">
+                        <button class="btn btn-large @((iss)?"red":"green") waves-effect" @Html.Raw((item.Subscribed) ? "style=\"display: none;\"" : "") onclick="Events.Subscribe(@item.Event.Id);" id="sub-@item.Event.Id">@((iss) ? "Alsnog" : "") Inschrijven</button>
+                        <div id="unsub-@item.Event.Id" @Html.Raw((!item.Subscribed) ? "style=\"display: none;\"" : "")>
+                            <a class="btn btn-large orange waves-effect @Html.Raw((iss)?"disabled":"")" onclick="Events.DoUnsubscribe(@item.Event.Id);">Uitschrijven</a><a class="btn btn-flat transparent waves-effect btn-large btnsetting @Html.Raw((iss)?"disabled":"")" data-id="@item.Event.Id" data-fc="@item.Friends"><i class="material-icons">settings</i></a>
+                        </div>
+                    </div>
+                </div>
+                cnt++;
+            }
+            <div class="center-align">
+                <div class="row">
+                    <button class="btn btn-large waves-effect transparent black-text disabled" id="btnprev"><i class="material-icons">arrow_back</i></button>
+                    <button class="btn btn-large waves-effect transparent black-text @((Model.Count()<2)?"disabled":"")" id="btnnext"><i class="material-icons">arrow_forward</i></button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="center-align"><h4 class="orange-text">Op dit moment zijn er geen activiteiten.</h4></div>
+        }
     </div>
+</div>
 
 
 <br />
@@ -70,15 +110,15 @@
 
 
 <script>
-    let eventtoremove;
+    var eventtoremove;
+    var emax = @(Model.Count()-1);
+    var ecurrent = 0;
+
     var User = {
         init: function () {
             $('#_aevent, #_maevent').addClass('active');
-            User.loadcontent();
-        },
-        loadcontent: function () {
-            $('#partial').html('<h3>&nbsp;Laden...</h3>');
-            $('#partial').load('/User/Subscriptions');
+            $('#event-0').show();
+            Events.MapEvents();
         }
     }
 
@@ -86,7 +126,15 @@
         MapEvents: function () {
             $('.btnsetting').off().on('click', function () {
                 Events.OpenSetting(this);
-            })
+            });
+
+            $('#btnnext').off().on('click', function () {
+                Events.ShowNext(true);
+            });
+
+            $('#btnprev').off().on('click', function () {
+                Events.ShowNext(false);
+            });
         },
         DoUnsubscribe: function (id) {
             $('#btnunsub').data('id', id);
@@ -98,7 +146,8 @@
             $.post("/User/postSubscribeEvent", { EventId: id }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Inschrijving gelukt! Leuk dat je komt!', classes: 'green' });
-                    User.loadcontent();
+                    $('#sub-' + id).hide();
+                    $('#unsub-' + id).show();
                 }
                 else {
                     //status = error
@@ -116,7 +165,9 @@
             $.post("/User/postDeleteEvent", { EventId: id }, function (response) {
                 if (response.status == 'success') {
                     M.toast({ html: 'Successvol uitgeschreven', classes: 'orange' });
-                    User.loadcontent();
+                    $(`.btnsetting[data-id='${id}']`).data('fc', 0);
+                    $('#sub-' + id).show();
+                    $('#unsub-' + id).hide();
                 }
                 else {
                     //status = error
@@ -126,7 +177,26 @@
                 $('#_progbar').hide();
             });
         },
-        OpenSetting: function(sender) {
+        ShowNext: function (next) {
+            if (next && (ecurrent + 1 <= emax)) {
+                $('#event-' + ecurrent).hide();
+                $('#event-' + ++ecurrent).show();
+                $('#btnprev').removeClass('disabled');
+                if (ecurrent == emax) {
+                    $('#btnnext').addClass('disabled');
+                }
+            } else {
+                if (ecurrent - 1 >= 0) {
+                    $('#event-' + ecurrent).hide();
+                    $('#event-' + --ecurrent).show();
+                    $('#btnnext').removeClass('disabled');
+                    if (ecurrent == 0) {
+                        $('#btnprev').addClass('disabled');
+                    }
+                }
+            }
+        },
+        OpenSetting: function (sender) {
             $('#ssetting').data('sender', sender);
             M.Modal.getInstance($('#ssetting')).open();
             $('#fcount').text($(sender).data('fc'));
@@ -139,7 +209,7 @@
         },
         SaveSetting: function () {
             var sender = $('#ssetting').data('sender');
-            $(sender).data('fc',$('#fcount').text());
+            $(sender).data('fc', $('#fcount').text());
             $.post('/User/SubscribeFriends', { id: $(sender).data('id'), amount: $(sender).data('fc') }, function (r) {
                 if (r.status == 'success') {
                     M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
@@ -152,7 +222,7 @@
         GetSubs: function () {
             $.getJSON('/User/getSubscribers/' + $($('#ssetting').data('sender')).data('id'), function (r) {
                 console.log(r);
-            });            
+            });
         }
     }
 

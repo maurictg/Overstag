@@ -11,6 +11,7 @@ namespace Overstag.Controllers.Users
 {
     public class FilesController : Controller
     {
+       
         [HttpGet]
         [Route("Files/Serve/{token}")]
         public IActionResult Serve(string token)

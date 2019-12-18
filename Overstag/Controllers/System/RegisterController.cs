@@ -55,36 +55,41 @@ namespace Overstag.Controllers
             }
         }
 
-        public void Logoff()
+        public async Task<IActionResult> Logout([FromQuery]string token)
         {
             HttpContext.Session.Remove("Token");
             HttpContext.Session.Remove("Name");
             HttpContext.Session.Remove("Type");
 
-            if (HttpContext.Session.GetString("Remember") != null)
+            if (!string.IsNullOrEmpty(token))
             {
                 try
                 {
-                    string token = HttpContext.Session.GetString("Remember");
                     using (var context = new OverstagContext())
                     {
+                        token = Uri.UnescapeDataString(token);
                         if (context.Auths.Any(f => f.Token == token))
                         {
                             var auth = context.Auths.First(f => f.Token == token);
                             context.Auths.Remove(auth);
-                            context.SaveChanges();
-                            HttpContext.Session.Remove("Remember");
+                            await context.SaveChangesAsync();
+                            return Json(new { status = "success" });
+                        }
+                        else
+                        {
+                            return Json(new { status = "succes", msg = "Token not found." });
                         }
                     }
                 }
                 catch
                 {
-                    if (HttpContext.Session.GetString("Remember") != null)
-                        HttpContext.Session.Remove("Remember");
+                    return Json(new { status = "error" });
                 }
             }
-
-            Response.Redirect("/Home/Index");
+            else
+            {
+                return Json(new { status = "succes", msg = "Token null." });
+            }
         }
 
         /// <summary>
@@ -153,7 +158,15 @@ namespace Overstag.Controllers
 
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
-                            return Json(new { status = "success" });
+
+                            //Register variables for login
+                            HttpContext.Session.SetString("Token", account.Token);
+                            HttpContext.Session.SetInt32("Type", account.Type);
+                            HttpContext.Session.SetString("Name", account.Username);
+
+                            string remember = Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
+
+                            return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                         }
                         catch (Exception e)
                         {
@@ -216,9 +229,6 @@ namespace Overstag.Controllers
                                 }
 
                                 string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
-
-                                if (no2fa)
-                                    HttpContext.Session.SetString("Remember", remember);
 
                                 return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
                             }

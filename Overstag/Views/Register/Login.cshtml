@@ -201,12 +201,6 @@
 
         post: function () {
             Login.toggle(false);
-
-            if ($('#remember').prop('checked'))
-                localStorage.setItem('remember', 'yes');
-            else
-                localStorage.removeItem('remember');
-
             $.post("/Register/postLogin", { Username: $('#Username').val(), Password: $('#Password').val() }, function (response) {
                 if (response.status == 'success') {
                     if (response.type == 3)

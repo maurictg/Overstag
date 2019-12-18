@@ -71,8 +71,28 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>View</returns>
         public IActionResult Events()
-            =>View();
+        {
+            using (var context = new OverstagContext())
+            {
+                var user = context.Accounts.Include(a => a.Subscriptions).First(p => p.Id == currentuser().Id);
+                var parti = user.Subscriptions.ToList();
 
+                List<ISubscription> events = new List<ISubscription>();
+
+                foreach (var eve in context.Events.Where(e => e.When.Date >= DateTime.Today).OrderBy(e => e.When).ToList())
+                {
+                    bool hasparti = parti.Any(f => f.EventID == eve.Id);
+                    events.Add(new ISubscription()
+                    {
+                        Event = eve,
+                        Subscribed = hasparti,
+                        Friends = (hasparti ? parti.First(f => f.EventID == eve.Id).FriendCount : 0)
+                    });
+                }
+
+                return View(events);
+            }
+        }
 
         /// <summary>
         /// Get all unpayed events and invoices
@@ -130,35 +150,6 @@ namespace Overstag.Controllers
             }
         }
 
-
-
-        /// <summary>
-        /// A partial view rendered into other views
-        /// </summary>
-        /// <returns>A view with events</returns>
-        public IActionResult Subscriptions()
-        {
-            using (var context = new OverstagContext())
-            {
-                var user = context.Accounts.Include(a => a.Subscriptions).First(p => p.Id == currentuser().Id);
-                var parti = user.Subscriptions.ToList();
-
-                List<ISubscription> events = new List<ISubscription>();
-
-                foreach (var eve in context.Events.Where(e => e.When.Date >= DateTime.Today).OrderBy(e => e.When).ToList())
-                {
-                    bool hasparti = parti.Any(f => f.EventID == eve.Id);
-                    events.Add(new ISubscription()
-                    {
-                        Event = eve,
-                        Subscribed = hasparti,
-                        Friends = (hasparti ? parti.First(f => f.EventID == eve.Id).FriendCount : 0)
-                    });
-                }
-
-                return View(events);
-            }
-        }
 
         /// <summary>
         /// Get all subscribers of an event

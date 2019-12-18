@@ -15,7 +15,7 @@ namespace Overstag.Middlewares
 
         private readonly Dictionary<int, string> allowedpaths = new Dictionary<int, string>()
         {
-            {0, "/User,/Photo,/Files" },
+            {0, "/User,/Files" },
             {1, "/Parent" },
             {2, "/Mentor,/Accountancy" },
             {3, "/Admin" }
@@ -23,7 +23,7 @@ namespace Overstag.Middlewares
 
         private readonly string[] allpaths =
         {
-            "/Home", "/Register", "/Admin/initdb", "/Pay", "/html", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy"
+            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy"
         };
 
         public Authentication(RequestDelegate next)
@@ -38,7 +38,7 @@ namespace Overstag.Middlewares
                 int code = 400;
                 bool loggedin = (type != null);
 
-                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/html", "/Auth" };
+                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo" };
 
                 if (loggedin)
                     for (int i = 0; i <= type; i++)

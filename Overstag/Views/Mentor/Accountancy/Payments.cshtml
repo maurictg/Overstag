@@ -50,7 +50,7 @@
 
                         @if (i.Payment.Status == null || (int)i.Payment.Status == 0 || (int)i.Payment.Status == 6)
                         {
-                            <a class="btn blue waves-effect" target="_blank" href="/Pay/Direct/@Uri.EscapeDataString(i.Invoice.PayID)">Factuur openen</a>
+                            <a class="btn blue waves-effect" target="_blank" href="/Pay/Invoice/@Uri.EscapeDataString(i.Invoice.PayID)">Factuur openen</a>
                         }
 
                         @if (i.Payment.Status == null || ((int)i.Payment.Status < 6 && (int)i.Payment.Status != 0))

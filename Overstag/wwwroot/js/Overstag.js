@@ -10,7 +10,6 @@
             });
         },*/
 
-
         Loader: function () {
             return {
                 init: function(callback) {
@@ -141,10 +140,22 @@
                         return false;
                     }
                 },
-                logout: function () {
-                    localStorage.removeItem('remember');
+                logout: function(nomaterial) {
+                    var token = localStorage.getItem('remember');
                     localStorage.setItem('logout', true);
-                    window.location.href = '/Register/Logoff';
+                    localStorage.removeItem('remember');
+                    $.get('/Register/Logout', { token: token }, function (r){
+                        if (r.status === 'error') {
+                            if (!nomaterial)
+                                M.toast({ html: 'Er is iets fout gegaan met uitloggen', classes: 'red' });
+
+                            window.setTimeout(function () {
+                                window.location.href = '/Home';
+                            }, 500);
+                        } else {
+                            window.location.href = '/Home';
+                        }
+                    },'json');
                 }
             };
         }(),
