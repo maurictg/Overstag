@@ -330,7 +330,7 @@
                             if (response.status == 'success') {
                                 M.toast({ html: 'Account verwijderd', classes: 'green' });
                                 localStorage.setItem("logout", true);
-                                $(location).attr('href', '/Register/Logoff')
+                                OverstagJS.General.logout();
                             }
                             else {
                                 M.toast({ html: response.error, classes: 'red' });

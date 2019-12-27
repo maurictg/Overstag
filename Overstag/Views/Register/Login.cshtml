@@ -5,29 +5,40 @@
     ViewBag.Keywords = "stichting overstag, overstag rilland, overstag reimerswaal, overstag inloggen, meedoen";
     ViewBag.Canonical = "https://stoverstag.nl/inloggen";
 }
-    <body>
+    <body class="blue-dark" style="height: 100%; vertical-align: middle;">
         <div class="row">
+            <div class="row"></div>
+            <h2 class="white-text center-align" id="lblmoment">Momentje...</h2>
             <div class="col s12 m6 offset-m3">
-                <h4 class="blue-light-text center-align"><b>Inloggen</b></h4><br />
-                <div class="card-panel" style="display: block; margin-left: auto; margin-right: auto">
-                    <form method="post" action="/Register/postLogin" class="login-form" id="frmlogin">
-                        <div class="input-field">
-                            <i class="material-icons prefix">account_circle</i>
-                            <input type="text" disabled class="checki" id="Username" placeholder="Gebruikersnaam of email" />
-                            <label class="active" for="Username">Gebruikersnaam of email</label>
+                <div class="card rounded" id="logincard" style="display: none">
+                    <div class="card-content">
+                        <h3 class="center-align blue-middle-text">Inloggen</h3>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">mail_outline</i>
+                                <input id="Username" class="checki bigger-input" type="text">
+                                <label for="Username" id="lUsername">Gebruikersnaam/email</label>
+                            </div>
                         </div>
-                        <div class="input-field">
-                            <i class="material-icons prefix">lock</i>
-                            <input type="password" disabled class="checki" id="Password" placeholder="Wachtwoord" />
-                            <label for="Password">Wachtwoord</label>
-                            <a href="#memailreset" class="modal-trigger" id="forgotpass">Wachtwoord vergeten?</a>
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <i class="material-icons prefix">lock_outline</i>
+                                <input id="Password" class="checki bigger-input" type="password">
+                                <label for="password" id="lPassword">Wachtwoord</label>
+                            </div>
                         </div>
-                        <a href="/Register/Register"><b>Geen account? Maak er hier een</b></a>
-                        <div class="card-action center-align">
-                            <br />
-                            <a class="btn btn-large blue-light waves-effect disabled" id="btnlogin">Inloggen</a><br />
+                        <div class="row">
+                            <a class="btn btn-large blue-light col s12 waves-effect disabled rounded" id="btnlogin">Inloggen</a>
                         </div>
-                    </form>
+                        <div class="row">
+                            <div class="input-field col s6">
+                                <p class="margin left-align"><a href="/Register/Register"><b>Geen account?</b></a></p>
+                            </div>
+                            <div class="input-field col s6">
+                                <p class="margin right-align"><a class="modal-trigger" href="#memailreset"><b>Wachtwoord vergeten?</b></a></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -120,6 +131,9 @@
                 }
             });
 
+            $("#lUsername").click(function () { $('#Username').focus(); });
+            $("#lPassword").click(function () { $('#Password').focus(); });
+
             $('#btnlogin').click(function () {
                 Login.login();
             });
@@ -192,6 +206,8 @@
                 $('#_progbar').show();
             } else {
                 $('#_progbar').hide();
+                $('#lblmoment').hide();
+                $('#logincard').fadeIn('slow');
                 $('#btnlogin').removeClass('disabled');
                 $('#Username').removeAttr('disabled');
                 $('#Password').removeAttr('disabled');

@@ -25,6 +25,18 @@
 }
 
 
+@media only screen and (min-width: 601px) {
+    .logo-pad {
+        padding-left: 5em;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    .logo-pad {
+        padding-left: 3em;
+    }
+}
+
 /*Custom Overstag CSS*/
 
 .blue-light {
@@ -89,6 +101,14 @@
     background: #000;
 }
 
+.rounded {
+    border-radius: 0.6em;
+}
+
+.bigger-input {
+    font-size: large !important;
+}
+
 @keyframes swing {
     0% {
         transform: rotate(3deg);
@@ -98,3 +118,4 @@
         transform: rotate(-3deg);
     }
 }
+
