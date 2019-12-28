@@ -2,6 +2,7 @@
     return {
         init: function () {
             this.Theme.init();
+            this.mapEvents();
         },
         /*useHelper: function(callback) {
             $.getScript('/js/Helper.js', function () {
@@ -9,6 +10,9 @@
                     callback();
             });
         },*/
+        mapEvents: function () {
+            $('#btnsnow').click(this.Theme.letItSnow);
+        },
 
         Loader: function () {
             return {
@@ -50,6 +54,18 @@
                     $('tr.grey').removeClass('darken-1').addClass('lighten-4');
                     $('.bdt').removeClass('white-text').addClass('blue-dark-text');
                     localStorage.setItem('darktheme', 'false');
+                },
+                letItSnow: function () {
+                    $("<link/>", {
+                        rel: "stylesheet",
+                        type: "text/css",
+                        href: "/css/particles.css"
+                    }).appendTo("head");
+                    $.getScript('/js/particles.min.js', function () {
+                        particlesJS.load('particles-js', '/js/particlesjs-config.json', function () {
+                            $('#btnsnow').fadeOut();
+                        });
+                    });
                 },
                 init: function () {
                     if (localStorage.getItem('darktheme')) {

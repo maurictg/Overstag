@@ -11,9 +11,9 @@
     <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
     <script type="text/javascript" src="~/js/Overstag.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/Overstag.css" />
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="~/css/Overstag.css" />
     <link rel="canonical" href="@ViewBag.Canonical" />
     <script>
         Overstag = {
@@ -76,6 +76,17 @@
     </ul>
 
     @RenderBody()
+
+    @if (DateTime.Now.Month == 12 || DateTime.Now.Month == 1)
+    {
+        <div class="fixed-action-btn">
+            <a class="btn-floating btn-large" id="btnsnow">
+                <i class="large blue-light material-icons waves-effect">star_border</i>
+            </a>
+        </div>
+
+        <div id="particles-js"></div>
+    }
 
     <script>
         $(document).ready(function () {
