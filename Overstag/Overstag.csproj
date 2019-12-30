@@ -5,6 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Views\Register\Login.cshtml.bak" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Views\Register\Login.cshtml.bak" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\html\loader.html" />
   </ItemGroup>
 

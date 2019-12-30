@@ -28,7 +28,8 @@
                     <div class="col s12 center-align">
                         <button class="btn btn-large @((iss)?"red":"green") waves-effect" @Html.Raw((item.Subscribed) ? "style=\"display: none;\"" : "") onclick="Events.Subscribe(@item.Event.Id);" id="sub-@item.Event.Id">@((iss) ? "Alsnog" : "") Inschrijven</button>
                         <div id="unsub-@item.Event.Id" @Html.Raw((!item.Subscribed) ? "style=\"display: none;\"" : "")>
-                            <a class="btn btn-large orange waves-effect @Html.Raw((iss)?"disabled":"")" onclick="Events.DoUnsubscribe(@item.Event.Id);">Uitschrijven</a><a class="btn btn-flat transparent waves-effect btn-large btnsetting @Html.Raw((iss)?"disabled":"")" data-id="@item.Event.Id" data-fc="@item.Friends"><i class="material-icons">settings</i></a>
+                            <a class="btn btn-large orange waves-effect @Html.Raw((iss)?"disabled":"")" onclick="Events.DoUnsubscribe(@item.Event.Id);">Uitschrijven</a>
+                            <a class="btn btn-flat transparent waves-effect btn-large btnsetting @Html.Raw((iss)?"disabled":"")" data-id="@item.Event.Id" data-fc="@item.Friends"><i class="material-icons">settings</i></a>
                         </div>
                     </div>
                 </div>

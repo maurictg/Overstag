@@ -101,8 +101,6 @@
     Home = {
         init: function () {
             $("#_home, #_mhome").addClass("active");
-
-            //Toast wanneer doorverwezen vanaf logout
             if (localStorage.getItem("logout")) {
                 M.toast({ html: 'Successvol uitgelogd!', classes: 'orange' });
                 localStorage.removeItem("logout");
@@ -121,9 +119,10 @@
             }
 
             $('#homecard').fadeIn();
-
-        },
+        }
     }
-    //call init function
-    Home.init();
+
+    $(function(){
+        Home.init();
+    });
 </script>

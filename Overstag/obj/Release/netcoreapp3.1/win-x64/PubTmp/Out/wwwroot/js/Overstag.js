@@ -2,6 +2,7 @@
     return {
         init: function () {
             this.Theme.init();
+            this.mapEvents();
         },
         /*useHelper: function(callback) {
             $.getScript('/js/Helper.js', function () {
@@ -9,7 +10,9 @@
                     callback();
             });
         },*/
-
+        mapEvents: function () {
+            $('#btnsnow').click(this.Theme.letItSnow);
+        },
 
         Loader: function () {
             return {
@@ -51,6 +54,18 @@
                     $('tr.grey').removeClass('darken-1').addClass('lighten-4');
                     $('.bdt').removeClass('white-text').addClass('blue-dark-text');
                     localStorage.setItem('darktheme', 'false');
+                },
+                letItSnow: function () {
+                    $("<link/>", {
+                        rel: "stylesheet",
+                        type: "text/css",
+                        href: "/css/particles.css"
+                    }).appendTo("head");
+                    $.getScript('/js/particles.min.js', function () {
+                        particlesJS.load('particles-js', '/js/particlesjs-config.json', function () {
+                            $('#btnsnow').fadeOut();
+                        });
+                    });
                 },
                 init: function () {
                     if (localStorage.getItem('darktheme')) {
@@ -141,10 +156,22 @@
                         return false;
                     }
                 },
-                logout: function () {
-                    localStorage.removeItem('remember');
+                logout: function(nomaterial) {
+                    var token = localStorage.getItem('remember');
                     localStorage.setItem('logout', true);
-                    window.location.href = '/Register/Logoff';
+                    localStorage.removeItem('remember');
+                    $.get('/Register/Logout', { token: token }, function (r){
+                        if (r.status === 'error') {
+                            if (!nomaterial)
+                                M.toast({ html: 'Er is iets fout gegaan met uitloggen', classes: 'red' });
+
+                            window.setTimeout(function () {
+                                window.location.href = '/Home';
+                            }, 500);
+                        } else {
+                            window.location.href = '/Home';
+                        }
+                    },'json');
                 }
             };
         }(),
