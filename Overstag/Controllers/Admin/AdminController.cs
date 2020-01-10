@@ -39,9 +39,9 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    context.Database.EnsureCreatedAsync();
+                    context.Database.EnsureCreated();
                     return "Calling: Admin/initDB.\n\nDatabase successfully restored!!";
-                }catch(Exception ex)
+                } catch(Exception ex)
                 {
                     return "Calling: Admin/initDB.\n\nError: " + ex.ToString();
                 }
@@ -193,7 +193,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>View with sorted ideas</returns>
         public IActionResult Ideas()
-            => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote == 1) - b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
+            => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote) - b.Votes.Count(i => !i.Upvote))).ToArray().Reverse().ToList());
         
         /// <summary>
         /// Delete an idea
@@ -251,7 +251,7 @@ namespace Overstag.Controllers
                         foreach (var p in parti)
                         {
                             Users.Add(context.Accounts.First(u => u.Id == p.UserID));
-                            Factured.Add(p.Payed==1);
+                            Factured.Add(p.Payed);
                         }
 
                         aPart.Add(new AParticipator()
@@ -273,7 +273,7 @@ namespace Overstag.Controllers
         /// <returns>View with a List of AUnpayed objects</returns>
         public IActionResult Billing()
         {
-            List<AUnpayed> aus = new List<AUnpayed>();
+            /*List<AUnpayed> aus = new List<AUnpayed>();
 
             using (var context = new OverstagContext())
             {
@@ -287,7 +287,7 @@ namespace Overstag.Controllers
                         foreach (var part in parti)
                         {
                             var eve = context.Events.Include(f => f.Participators).First(e => e.Id == part.EventID);
-                            if (part.Payed == 0)
+                            if (!part.Payed)
                             {
                             if (Core.General.DateIsPassed(eve.When))
                                 events.Add(eve);
@@ -303,9 +303,9 @@ namespace Overstag.Controllers
                     }
                     
                 }
-            }
+            }*/
             
-            return View(aus);
+            return View();
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace Overstag.Controllers
         [HttpGet("Admin/upgrade/{grade}/{id}")]
         public async Task<IActionResult> Upgrade(int grade, int id)
         {
-            int inc = (grade == 0) ? -1 : 1;
+            byte inc = (byte)((grade == 0) ? -1 : 1);
             using(var context = new OverstagContext())
             {
                 var user = context.Accounts.First(f => f.Id == id);

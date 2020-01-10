@@ -28,7 +28,7 @@
                     <td>@d.Timestamp.ToString("dd-MM-yyyy") om @d.Timestamp.ToString("HH:mm:ss")</td>
                     <td>&euro;@Math.Round((double)d.Amount / 100, 2).ToString("F")</td>
                     <td>@d.Description</td>
-                    <td>@Html.Raw((d.Payed == 1) ? "<b class=\"green-text\">Ja</b>" : "<b class=\"green-text\">Nee</b>")</td>
+                    <td>@Html.Raw((d.Payed) ? "<b class=\"green-text\">Ja</b>" : "<b class=\"green-text\">Nee</b>")</td>
                 </tr>
             }
         </tbody>

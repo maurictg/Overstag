@@ -22,8 +22,8 @@
                         <td>
                             <b>@idea.Title</b>
                             <div class="right">
-                                <span class="badge badge-pill badge-success">@idea.Votes.Count(i => i.Upvote == 1) likes</span>
-                                <span class="badge badge-pill badge-danger">@idea.Votes.Count(i => i.Upvote == 0) dislikes</span>
+                                <span class="badge badge-pill badge-success">@idea.Votes.Count(i => i.Upvote) likes</span>
+                                <span class="badge badge-pill badge-danger">@idea.Votes.Count(i => !i.Upvote) dislikes</span>
                             </div>
                         </td>
                         <td>@idea.Description</td>

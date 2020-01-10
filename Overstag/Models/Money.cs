@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Overstag.Models;
 
 namespace Overstag.Accountancy
 {
@@ -17,13 +18,15 @@ namespace Overstag.Accountancy
     public class Request
     {
         public int Id { get; set; }
-        public int UserID { get; set; }
         public DateTime When { get; set; }
         public DateTime Timestamp { get; set; }
         public int Amount { get; set; }
-        public int Payed { get; set; }
+        public bool Payed { get; set; }
         //public int isGift { get; set; }
         public string Metadata { get; set; } //JSON
         public string Description { get; set; }
+
+        //Relations
+        public Account User { get; set; }
     }
 }

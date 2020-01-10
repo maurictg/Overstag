@@ -58,10 +58,9 @@ namespace Overstag.Controllers
                     int cc = 0;
 
                     List<Event> Events = new List<Event>();
-                    foreach (var s in user.Subscriptions.Where(s => s.Payed == 0))
+                    foreach (var s in user.Subscriptions.Where(s => !s.Payed))
                     {
-                        ccnt += s.ConsumptionCount;
-                        cc += s.ConsumptionTax;
+                        cc += s.AdditionsCost;
                         var e = context.Events.First(f => f.Id == s.EventID);
 
                         fc += s.FriendCount;
@@ -133,35 +132,8 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or status = error with details)</returns>
         public async Task<IActionResult> GenerateInvoice()
         {
-            //Zet ID's om van kind naar ouder
-            using (var context = new OverstagContext())
-            {
-                var me = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
-                var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id);
-                List<Account> members = new List<Account>();
-
-                foreach (var user in family.Members)
-                    members.Add(context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == user.Id));
-
-                foreach (var m in members)
-                    foreach (var f in m.Subscriptions.Where(g => g.Payed == 0))
-                    {
-                        me.Subscriptions.Add(new Participate { UserID = me.Id, EventID = f.EventID, FriendCount = f.FriendCount, ConsumptionTax = f.ConsumptionTax, ConsumptionCount = f.ConsumptionCount });
-                        f.Payed = 1;
-                    }
-
-                try
-                {
-                    context.Accounts.Update(me);
-                    context.Accounts.UpdateRange(members);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch (Exception e)
-                {
-                    return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message });
-                }
-            }
+            //Zet IDS om van kind naar ouder
+            return null;
         }
     }
 }

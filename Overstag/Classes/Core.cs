@@ -16,6 +16,7 @@ namespace Overstag.Core
         public string mailPass { get; set; }
         public string mySqlConnectionString { get; set; }
         public string msSqlConnectionString { get; set; }
+        public string msSqlLiveCString { get; set; }
         public string mollieApiToken { get; set; }
         public string msSqlDebugCString { get; set; }
 
@@ -30,18 +31,6 @@ namespace Overstag.Core
     public static class General
     {
         public static Credentials Credentials = new Credentials().Get();
-
-        /// <summary>
-        /// Create a backup in JSON
-        /// </summary>
-        public static void CreateBackup()
-        {
-            int errorcount = 0;
-            List<Exception> exceptions = new List<Exception>();
-
-            Overstag.Security.Backup b = new Security.Backup("");
-            b.Create(ref errorcount, ref exceptions);
-        }
 
         public static bool DateIsPassed(DateTime check)
             => check < DateTime.Now;

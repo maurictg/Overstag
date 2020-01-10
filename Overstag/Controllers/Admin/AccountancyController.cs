@@ -97,10 +97,10 @@ namespace Overstag.Controllers
 
                                 if ((int)payment.Status == 6)
                                 {
-                                    var invoice = context.Invoices.FirstOrDefault(f => f.PayID == payment.InvoiceID);
+                                    var invoice = context.Invoices.Find(payment.Invoice.Id);
                                     if (invoice != null)
                                     {
-                                        invoice.Payed = 1;
+                                        invoice.Payed = true;
                                         context.Invoices.Update(invoice);
                                         await context.SaveChangesAsync();
                                     }
@@ -127,13 +127,13 @@ namespace Overstag.Controllers
             List<MPayment> payments = new List<MPayment>();
             using (var context = new OverstagContext())
             {
-                var pms = context.Payments.OrderBy(f => f.PayedAt == null).OrderByDescending(f => f.PlacedAt).ToList();
+                var pms = context.Payments.Include(x => x.User).Include(y => y.Invoice).OrderBy(f => f.PayedAt == null).OrderByDescending(f => f.PlacedAt).ToList();
                 foreach (var pm in pms)
                 {
                     try
                     {
-                        var user = context.Accounts.First(f => f.Id == pm.UserID);
-                        var invoice = context.Invoices.First(f => f.PayID == pm.InvoiceID);
+                        var user = pm.User;
+                        var invoice = pm.Invoice;
                         payments.Add(new MPayment()
                         {
                             Invoice = invoice,
@@ -212,7 +212,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var invoice = context.Invoices.First(f => f.Id == invoiceid);
+                    var invoice = context.Invoices.Include(x => x.User).First(f => f.Id == invoiceid);
                     var payment = context.Payments.First(f => f.Id == payid);
 
                     if (payed == 0 || payed == 1)
@@ -220,13 +220,13 @@ namespace Overstag.Controllers
                         DateTime? nd = null;
                         Mollie.Api.Models.Payment.PaymentStatus? np = null;
 
-                        invoice.Payed = payed;
+                        invoice.Payed = (payed == 1);
                         payment.PayedAt = (payed == 1) ? DateTime.Now : nd;
                         payment.PaymentID = (payed == 1) ? Encryption.Random.rCode(10) : null;
                         payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == invoice.UserID).Firstname}", When = DateTime.Now, Type = 1 });
+                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {invoice.User.Firstname}", When = DateTime.Now, Type = 1 });
                         await context.SaveChangesAsync();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }
@@ -264,7 +264,7 @@ namespace Overstag.Controllers
         }
 
         public IActionResult Invoices()
-            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => f.Payed == 0).OrderByDescending(g => g.Timestamp).ToList());
+            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Payed).OrderByDescending(g => g.Timestamp).ToList());
 
         /// <summary>
         /// Automatize invoicing for all users
@@ -285,79 +285,8 @@ namespace Overstag.Controllers
             {
                 var users = context.Accounts.Include(p => p.Subscriptions).Include(f => f.Family).ToList();
 
-                try
-                {
-                    foreach (var user in users)
-                    {
-                        var parti = user.Subscriptions.ToList();
-
-                        List<int> eventIDS = new List<int>();
-
-                        int bill = 0;
-                        int additions = 0;
-                        int eventcount = 0;
-
-                        foreach (var part in parti.Where(f => f.Payed == 0))
-                        {
-                            var eve = context.Events.First(f => f.Id == part.EventID);
-                            if (Core.General.DateIsPassed(eve.When))
-                            {
-                                eventcount++;
-
-                                bill += (eve.Cost * (part.FriendCount + 1));
-
-                                additions += part.ConsumptionCount;
-                                bill += part.ConsumptionTax;
-
-                                for (int i = 0; i < part.FriendCount + 1; i++)
-                                    eventIDS.Add(eve.Id);
-                            }
-                        }
-
-                        var facture = new Invoice()
-                        {
-                            UserID = (user.Family == null) ? user.Id : user.Family.ParentID,
-                            Amount = bill,
-                            EventIDs = string.Join(',', eventIDS),
-                            Payed = 0,
-                            Timestamp = DateTime.Now,
-                            PayID = Encryption.Random.rHash(user.Token),
-                            AdditionsCount = additions
-                        };
-
-                        if (eventIDS.Count() > (amount-1))
-                        {
-                            context.Invoices.Add(facture);
-                            parti.ForEach(f => f.Payed = 1);
-                            user.Subscriptions = parti;
-                            context.Accounts.Update(user);
-                            await context.SaveChangesAsync();
-                            moneycount += bill;
-                            usercount++;
-                            particount += eventcount;
-                            Emails.Add(new Tuple<string, string>(user.Email,
-                                $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
-                        }
-                    }
-
-                    foreach (var email in Emails)
-                    {
-                        try
-                        {
-                            Core.General.SendMail("Factuur gemaakt", email.Item2, email.Item1);
-                        }
-                        catch
-                        {
-                            failedmails++;
-                            continue;
-                        }
-                    }
-                    return Json(new { status = "success", usercount, particount, moneycount, failedmails });
-                }
-                catch (Exception ex)
-                {
-                    return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = ex.ToString() });
-                }
+                //DONT FORGET FAMILYS
+                return null;
             }
         }
 
@@ -388,10 +317,10 @@ namespace Overstag.Controllers
                         members.Add(context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == user.Id));
 
                     foreach (var m in members)
-                        foreach (var f in m.Subscriptions.Where(g => g.Payed == 0))
+                        foreach (var f in m.Subscriptions.Where(g => !g.Payed))
                         {
-                            parent.Subscriptions.Add(new Participate { UserID = parent.Id, EventID = f.EventID, FriendCount = f.FriendCount, ConsumptionTax = f.ConsumptionTax, ConsumptionCount = f.ConsumptionCount });
-                            f.Payed = 1;
+                            parent.Subscriptions.Add(new Participate { UserID = parent.Id, EventID = f.EventID, FriendCount = f.FriendCount, AdditionsCost = f.AdditionsCost });
+                            f.Payed = true;
                             count++;
                         }
 

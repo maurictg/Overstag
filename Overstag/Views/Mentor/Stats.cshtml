@@ -41,8 +41,8 @@
             aadata.Add(Math.Round(e.Sub.Select(f => Overstag.Core.General.getAge(f.account.Birthdate)).Average(),1).ToString().Replace(",","."));
         }
 
-        int ttm = e.Sub.Count(f => f.account.Sex == 0);
-        int ttv = e.Sub.Count(f => f.account.Sex == 1);
+        int ttm = e.Sub.Count(f => f.account.Gender);
+        int ttv = e.Sub.Count(f => !f.account.Gender);
         tm += ttm;
         tv += ttv;
         mdata.Add(ttm);
@@ -147,7 +147,7 @@
                             <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
                             <div class="collapsible-body">
                                 <h6><b>Omschrijving:</b> @e.Event.Description</h6>
-                                <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
+                                <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Gender).Count()</span> / <span class="red-text">@e.Sub.Where(f => !f.account.Gender).Count()</span>)</b></h6>
                                 <table class="responsive-table">
                                     <thead>
                                         <tr>
@@ -165,7 +165,7 @@
                                                 <td>@a.account.Firstname</td>
                                                 <td>@a.account.Lastname</td>
                                                 <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
-                                                <td>@Html.Raw((a.account.Sex == 0) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                                                <td>@Html.Raw((a.account.Gender) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
                                                 <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
                                             </tr>
                                         }
@@ -190,7 +190,7 @@
                         <div class="collapsible-header"><i class="material-icons">event</i><b>@e.Event.Title</b> &nbsp;&nbsp;@e.Event.When.ToString("dd-MM-yyyy HH:mm")</div>
                         <div class="collapsible-body">
                             <h6><b>Omschrijving:</b> @e.Event.Description</h6>
-                            <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Sex == 0).Count()</span> / <span class="red-text">@e.Sub.Where(f => f.account.Sex == 1).Count()</span>)</b></h6>
+                            <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Gender).Count()</span> / <span class="red-text">@e.Sub.Where(f => !f.account.Gender).Count()</span>)</b></h6>
                             <a class="btn-small blue" href="/Mentor/Event/@e.Event.Id">Openen</a>
                             <table class="responsive-table">
                                 <thead>
@@ -209,7 +209,7 @@
                                             <td>@a.account.Firstname</td>
                                             <td>@a.account.Lastname</td>
                                             <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
-                                            <td>@Html.Raw((a.account.Sex == 0) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                                            <td>@Html.Raw((a.account.Gender) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
                                             <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
                                         </tr>
                                     }

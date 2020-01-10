@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
 using System.Threading.Tasks;
@@ -29,10 +29,10 @@ namespace Overstag.Controllers
                 {
                     if (context.Auths.Any(f => f.Token == token))
                     {
-                        var auth = context.Auths.First(f => f.Token == token);
+                        var auth = context.Auths.Include(f => f.User).First(f => f.Token == token);
                         if (auth.Registered > DateTime.Now.AddMonths(-2))
                         {
-                            var user = context.Accounts.First(f => f.Id == auth.UserID);
+                            var user = context.Accounts.First(f => f.Id == auth.User.Id);
                             HttpContext.Session.SetString("Token", user.Token);
                             HttpContext.Session.SetInt32("Type", user.Type);
                             HttpContext.Session.SetString("Name", user.Username);

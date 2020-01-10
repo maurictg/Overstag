@@ -129,7 +129,7 @@ namespace Overstag.Controllers
                             //Set password hashes, create token and set type
                             account.Password = Encryption.PBKDF2.Hash(account.Password);
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                            account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
+                            account.Type = (byte)(account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
 
                             try
                             {
@@ -200,12 +200,12 @@ namespace Overstag.Controllers
                             return Json(new { status = "error", error = "Gebruiker bestaat niet" });
 
                         //Controleren op onjuiste inlogpogingen
-                        if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
+                        /*if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
                         {
                             return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
                         }
                         else
-                        {
+                        {*/
                             if (Encryption.PBKDF2.Verify(account.Password, Password))
                             {
                                 bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
@@ -219,14 +219,14 @@ namespace Overstag.Controllers
                                     HttpContext.Session.SetString("Name", account.Username);
                                 }
 
-                                //Eventuele foute pogingen verwijderen
+                                /*Eventuele foute pogingen verwijderen
                                 if (context.Logging.Count(i => i.Ip == ip && i.Username == Username) > 0)
                                 {
                                     foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == Username))
                                         context.Logging.Remove(log);
 
                                     context.SaveChangesAsync();
-                                }
+                                }*/
 
                                 string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
 
@@ -234,11 +234,11 @@ namespace Overstag.Controllers
                             }
                             else
                             {
-                                context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
-                                context.SaveChangesAsync();
+                                //context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
+                                //context.SaveChangesAsync();
                                 return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
                             }
-                        }
+                        //}
                     }
                     catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                 }
