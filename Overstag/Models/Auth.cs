@@ -10,6 +10,7 @@ namespace Overstag.Models
         public DateTime Registered { get; set; }
 
         //Relations
+        public int UserId { get; set; }
         public Account User { get; set; }
     }
 }

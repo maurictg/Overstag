@@ -196,8 +196,7 @@ namespace Overstag.Controllers
                     if (DateTime.Today > eve.When.Date.AddDays(3))
                         return Json(new { status = "error", error = "Het is nu te lang geleden. U kunt geen mensen meer inschrijven." });
 
-                    var part = user.Subscriptions.Where(e => e.EventID == eventid).FirstOrDefault();
-                    if (part == null)
+                    if (user.Subscriptions.Any(e => e.EventID == eventid))
                     {
                         user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id });
                         await context.SaveChangesAsync();

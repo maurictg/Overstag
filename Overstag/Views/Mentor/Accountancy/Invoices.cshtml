@@ -21,8 +21,7 @@
                     <tr>
                         <td>
                         @{
-                            var user = new Overstag.Models.OverstagContext().Accounts.Find(item.User.Id);
-                            @Html.Raw(user.Firstname+"&nbsp;")@Html.Raw(user.Lastname)
+                            @Html.Raw(item.User.Firstname+"&nbsp;")@Html.Raw(item.User.Lastname)
                         }
                         </td>
                         <td>@item.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
@@ -52,16 +51,12 @@
                 <thead>
                     <tr>
                         <th>Aantal gebruikers gefactureerd</th>
-                        <th>Aantal evenementen gefactureerd</th>
-                        <th>Hoeveelheid geld gefactureerd</th>
                         <th>Aantal mails mislukt te verzenden</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><b id="uc">0</b></td>
-                        <td><b id="ec">0</b></td>
-                        <td><b id="mc">0</b></td>
                         <td><b id="fmc" class="red-text">0</b></td>
                     </tr>
                 </tbody>
@@ -105,8 +100,6 @@
                     sessionStorage.setItem('disablegenerate', 1);
                     $('#info').show();
                     $('#uc').text(r.usercount);
-                    $('#ec').text(r.particount);
-                    $('#mc').text((r.moneycount / 100).toLocaleString("nl-NL", { style: "currency", currency: "EUR" }))
                     $('#fmc').text(r.failedmails);
                     sessionStorage.setItem('info', $('#info').html());
                 } else {

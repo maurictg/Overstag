@@ -33,7 +33,7 @@ namespace Overstag.Controllers
             invoiceid = Uri.UnescapeDataString(invoiceid);
             using(var context = new OverstagContext())
             {
-                var invoice = context.Invoices.Include(f => f.User).FirstOrDefault(f => f.InvoiceID == invoiceid);
+                var invoice = Services.Invoices.GetXInvoice(context.Invoices.First(f => f.InvoiceID == invoiceid).Id);
 
                 if (invoice == null)
                 {
@@ -42,22 +42,7 @@ namespace Overstag.Controllers
                 }
                 else
                 {
-                    List<Event> events = new List<Event>();
-
-                    foreach(string eve in invoice.EventIDs.Split(','))
-                        events.Add(context.Events.First(f => f.Id == Convert.ToInt32(eve)));
-
-                    var iinvoice = new IInvoice {
-                        Amount = invoice.Amount,
-                        UserID = invoice.User.Id,
-                        Payed = invoice.Payed,
-                        PayID = invoice.InvoiceID,
-                        Timestamp = invoice.Timestamp,
-                        Events = events.OrderBy(e => e.When).ToList(),
-                        Additions = invoice.AdditionsCost
-                    };
-
-                    if(iinvoice.Payed)
+                    if(invoice.Payed)
                     {
                         //Validate payment
                         var payment = context.Payments.Include(f => f.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == invoice.InvoiceID);
@@ -65,11 +50,7 @@ namespace Overstag.Controllers
                             ViewBag.Payment = payment;
                     }
 
-                    return View(new OPayInfo
-                    {
-                        User = invoice.User,
-                        Invoice = iinvoice
-                    });
+                    return View(invoice);
                 }
             }
         }
@@ -82,9 +63,11 @@ namespace Overstag.Controllers
         [HttpPost("Pay/Checkout")]
         public async Task<IActionResult> Checkout([FromForm]string invoiceid)
         {
+            bool createPayment = true;
+
             using (var context = new OverstagContext())
             {
-                var invoice = context.Invoices.Include(x => x.User).FirstOrDefault(f => f.InvoiceID == Uri.UnescapeDataString(invoiceid));
+                var invoice = await context.Invoices.Include(x => x.User).Include(y => y.Payment).FirstOrDefaultAsync(f => f.InvoiceID == Uri.UnescapeDataString(invoiceid));
 
                 if(invoice == null)
                 {
@@ -92,14 +75,48 @@ namespace Overstag.Controllers
                     return View("~/Views/Error/Custom.cshtml", error);
                 }
 
-                if(invoice.Payed)
+
+                if(invoice.Payment != null)
+                {
+                    bool save = false;
+                    if (invoice.Payment.Status == PaymentStatus.Paid)
+                    {
+                        save = true;
+                        invoice.Payed = true;
+                    }
+                    else if(invoice.Payment.Status == PaymentStatus.Canceled || invoice.Payment.Status == PaymentStatus.Expired || invoice.Payment.Status == PaymentStatus.Failed)
+                    {
+                        save = true;
+                        invoice.Payment = null;
+                    }
+                    else if (invoice.Payment.Status == null)
+                        createPayment = false;
+
+                    try
+                    {
+                        if (save)
+                        {
+                            context.Invoices.Update(invoice);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                    catch(Exception e) { throw e; }
+                }
+
+                if (invoice.Payed)
                 {
                     string[] error = { "Factuur is al betaald", "<i>Wat probeer je? Ik zou echt werkelijk niet weten waarom je een factuur 2 keer zou betalen...</i>" };
                     return View("~/Views/Error/Custom.cshtml", error);
                 }
 
-                var user = invoice.User;
+                //Viewbag info
+                ViewBag.Amount = invoice.Amount;
 
+                if (!createPayment)
+                    return View(invoice.Payment);
+
+
+                var user = invoice.User;
                 string cost = Math.Round((double)invoice.Amount / 100, 2).ToString("F").Replace(",", ".");
 
                 string url = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Done/{Uri.EscapeDataString(invoice.InvoiceID)}";
@@ -137,9 +154,6 @@ namespace Overstag.Controllers
                 });
 
                 await context.SaveChangesAsync();
-
-                //Viewbag info
-                ViewBag.Amount = invoice.Amount;
 
                 return View(context.Payments.Include(x => x.Invoice).First(f => f.Invoice.InvoiceID == invoice.InvoiceID));
             }

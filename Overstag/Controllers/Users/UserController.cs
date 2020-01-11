@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
@@ -47,7 +46,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>Logins object</returns>
         public IActionResult getLogins()
-            => Json(new OverstagContext().Auths.Include(f => f.User).Where(f => f.User.Id == currentuser().Id).ToList());
+            => Json(new OverstagContext().Auths.Where(f => f.UserId == currentuser().Id).ToList());
 
         /// <summary>
         /// Remove login by its id
@@ -61,7 +60,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var login = context.Auths.First(f => f.Id == id);
+                    var login = context.Auths.Find(id);
                     context.Auths.Remove(login);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
@@ -114,8 +113,8 @@ namespace Overstag.Controllers
 
                 List<Event> events = context.Events.ToList();
                 List<Event> unpayedEvents = new List<Event>();
-                List<Invoice> invoices = context.Invoices.Include(g => g.User).Where(f => f.User.Id == user.Id).ToList();
-                List<IInvoice> iinvoices = new List<IInvoice>();
+                List<Invoice> invoices = context.Invoices.Include(g => g.User).ThenInclude(h => h.Subscriptions).Where(f => f.User.Id == user.Id).ToList();
+                List<XInvoice> iinvoices = new List<XInvoice>();
 
                 foreach(var p in user.Subscriptions)
                 {
@@ -130,22 +129,7 @@ namespace Overstag.Controllers
                 if(invoices.Count() > 0)
                 {
                     foreach(var i in invoices)
-                    {
-                        List<Event> containingEvents = new List<Event>();
-                        i.EventIDs.Split(',').Select(f => Convert.ToInt32(f)).ToList()
-                            .ForEach(f => containingEvents.Add(events.First(g => g.Id == f)));
-
-                        iinvoices.Add(new IInvoice()
-                        {
-                            Payed = i.Payed,
-                            Amount = i.Amount,
-                            Events = containingEvents,
-                            Timestamp = i.Timestamp,
-                            UserID = i.User.Id,
-                            PayID = i.InvoiceID,
-                            Additions = i.AdditionsCost
-                        });
-                    }
+                        iinvoices.Add(Services.Invoices.GetXInvoice(i));
                 }
 
                 return View("Payment", new UnpayedEvents()
@@ -501,29 +485,23 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var account = context.Accounts.Where(e => e.Token == Uri.UnescapeDataString(a.Token)).Include(f => f.Subscriptions).FirstOrDefault();
+                    var account = context.Accounts.Include(f => f.Auths).Include(g => g.Invoices).Include(h => h.Payments).Include(i => i.Subscriptions).Include(j => j.Votes).Include(x => x.Requests).First(k => k.Token == Uri.UnescapeDataString(a.Token));
 
                     if (currentuser().Username != "admin" && currentuser().Username != account.Username)
                         return Json(new { status = "error", error = "Mislukt door authenticatiefout!" });
 
                     if (Encryption.PBKDF2.Verify(account.Password, a.Password))
                     {
-                        if (context.Invoices.Include(f => f.User).Where(i => i.User.Id == account.Id && !i.Payed).Count() > 0)
+                        if (account.Invoices.Count(f => !f.Payed) > 0)
                             return Json(new { status = "error", error = "U heeft nog onbetaalde facturen openstaan." });
+
+                        if (account.Subscriptions.Count(f => !f.Payed) > 0)
+                            return Json(new { status = "error", error = "U heeft nog ongefactureerde activiteiten openstaan." });
 
                         try
                         {
-                            //Ingeschreven events verwijderen
-                            try
-                            {
-                                foreach (var item in account.Subscriptions)
-                                {
-                                    account.Subscriptions.Remove(item);
-                                }
-                            }
-                            catch { }
-
-                            //Mollie integratie verwijderen
+                            //All data is removed thanks to cascade and the includes
+                            //Remove mollie integration
                             try
                             {
                                 if (!string.IsNullOrEmpty(account.MollieID))
@@ -536,8 +514,8 @@ namespace Overstag.Controllers
                                 return Json(new { status = "warning", warning = "Mollie integratie verwijderen mislukt" });
                             }
 
-                            //Account verwijderen
-                            context.Remove(account);
+                            //Remove account
+                            context.Accounts.Remove(account);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
                         }
@@ -559,22 +537,22 @@ namespace Overstag.Controllers
         [HttpGet]
         public async Task<JsonResult> GenerateInvoice()
         {
-            bool result = await Core.Invoices.Create(currentuser().Id);
+            bool result = await Services.Invoices.Create(currentuser().Id);
             if(result)
                 return Json(new { status = "success" });
             else
-                return Json(new { status = "error", error = Core.Invoices.error.ToString() });
+                return Json(new { status = "error", error = Services.Invoices.error.ToString() });
         }
 
         public async Task<JsonResult> MergeInvoices()
         {
             using(var context = new OverstagContext())
             {
-                var invoices = context.Invoices.Include(x => x.User).Where(f => f.User.Id == currentuser().Id && !f.Payed).ToList();
+                var user = context.Accounts.Include(f => f.Invoices).First(f => f.Id == currentuser().Id);
+                var invoices = user.Invoices.Where(f => !f.Payed).ToList();
                 if (invoices.Count() > 1)
                 {
                     Invoice i = new Invoice();
-                    i.User = currentuser();
 
                     int additions = 0;
                     int bill = 0;
@@ -586,6 +564,7 @@ namespace Overstag.Controllers
                         bill += invoice.Amount;
                         i.InvoiceID = invoice.InvoiceID;
                         EventIDS.AddRange(invoice.EventIDs.Split(',').ToList());
+                        user.Invoices.Remove(invoice);
                     }
 
                     i.EventIDs = string.Join(',', EventIDS);
@@ -596,8 +575,8 @@ namespace Overstag.Controllers
 
                     try
                     {
-                        context.Invoices.RemoveRange(invoices);
-                        context.Invoices.Add(i);
+                        user.Invoices.Add(i);
+                        context.Accounts.Update(user);
                         await context.SaveChangesAsync();
                         return Json(new { status = "success" });
                     }

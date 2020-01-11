@@ -1,5 +1,4 @@
 using System;
-using Overstag.Classes;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
-using System.Net.WebSockets;
 
 namespace Overstag
 {
@@ -47,7 +45,7 @@ namespace Overstag
             app.UseResponseCompression();
             app.UseSession();
             app.UseStaticFiles();
-            app.UseMiddleware<Overstag.Middlewares.Authentication>();
+            app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
             app.UseWebSockets(new WebSocketOptions()
             {
@@ -55,21 +53,7 @@ namespace Overstag
                 ReceiveBufferSize = 1024 * 4
             });
 
-            app.Use(async (context, next) => {
-                if (context.Request.Path == "/ws")
-                {
-                    if (context.WebSockets.IsWebSocketRequest)
-                    {
-                        WebSocket ws = await context.WebSockets.AcceptWebSocketAsync();
-                        await Sockets.HandleWS(context, ws);
-                    }
-                    else
-                        context.Response.StatusCode = 400;
-                }
-                else
-                    await next();
-            });
-
+            app.Map("/ws", Middlewares.SocketMiddleware.Handle);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();

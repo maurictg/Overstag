@@ -5,7 +5,9 @@ using TwoFactorAuthentication;
 using Overstag.Models;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Overstag.Encryption
 {
@@ -321,23 +323,22 @@ namespace Overstag.Security
 
     public static class Auth
     {
-        public static string Register(string token, string ip)
+        public static async Task<string> Register(string token, string ip)
         {
             using (var context = new OverstagContext())
             {
-                int userid = context.Accounts.First(f => f.Token == token).Id;
+                var user = await context.Accounts.Include(f => f.Auths).FirstAsync(f => f.Token == token);
                 string ttoken = Encryption.Random.rString(Encryption.Random.rInt(15, 45), "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890123456789");
 
-                context.Auths.Add(new Overstag.Models.Auth
+                user.Auths.Add(new Models.Auth()
                 {
-                    User = context.Accounts.Find(userid),
                     Registered = DateTime.Now,
                     Token = ttoken,
                     IP = ip
                 });
 
-                context.SaveChanges();
-
+                context.Accounts.Update(user);
+                await context.SaveChangesAsync();
                 return ttoken;
             }
         }

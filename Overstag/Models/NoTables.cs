@@ -18,20 +18,9 @@ namespace Overstag.Models.NoDB
 
     public struct UnpayedEvents
     {
-        public List<IInvoice> Invoices;
+        public List<XInvoice> Invoices;
         public List<Event> UnfacturedEvents;
         public List<Participate> Subscriptions;
-    }
-
-    public struct IInvoice
-    {
-        public int UserID;
-        public int Amount;
-        public List<Event> Events;
-        public bool Payed;
-        public DateTime Timestamp;
-        public string PayID;
-        public int Additions;
     }
     
     public struct AUnpayed
@@ -48,11 +37,6 @@ namespace Overstag.Models.NoDB
         public bool[] Factured;
     }
 
-    public struct OPayInfo
-    {
-        public Account User;
-        public IInvoice Invoice;
-    }
 
     public struct SSub
     {

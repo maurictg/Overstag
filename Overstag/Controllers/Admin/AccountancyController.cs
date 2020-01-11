@@ -264,7 +264,7 @@ namespace Overstag.Controllers
         }
 
         public IActionResult Invoices()
-            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Payed).OrderByDescending(g => g.Timestamp).ToList());
+            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Payed).OrderByDescending(g => g.Timestamp).Include(h => h.User).ToList());
 
         /// <summary>
         /// Automatize invoicing for all users
@@ -274,9 +274,8 @@ namespace Overstag.Controllers
         public async Task<JsonResult> autoInvoice([FromForm]int amount)
         {
             int usercount = 0;
-            int particount = 0;
-            int moneycount = 0;
             int failedmails = 0;
+            List<string> errors = new List<string>();
 
             //ontvanger, mail
             List<Tuple<string, string>> Emails = new List<Tuple<string, string>>();
@@ -285,8 +284,27 @@ namespace Overstag.Controllers
             {
                 var users = context.Accounts.Include(p => p.Subscriptions).Include(f => f.Family).ToList();
 
-                //DONT FORGET FAMILYS
-                return null;
+                foreach (var user in users)
+                {
+                    if(user.Subscriptions.Count(f => !f.Payed) >= amount && user.Family == null)
+                    {
+                        bool result = await Services.Invoices.Create(user.Id);
+                        if (!result)
+                            errors.Add(Services.Invoices.error.ToString());
+
+                        usercount++;
+                        string message = $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(Services.Invoices.invoiceId)}\">https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(Services.Invoices.invoiceId)}</a><br></h4>";
+                        Emails.Add(new Tuple<string, string>(user.Email,message));
+                    }
+                }
+
+                foreach (var email in Emails)
+                {
+                    try { Core.General.SendMail("Factuur gemaakt", email.Item2, email.Item1); }
+                    catch { failedmails++; continue; }
+                }
+
+                return Json(new { status = "success", usercount, failedmails });
             }
         }
 

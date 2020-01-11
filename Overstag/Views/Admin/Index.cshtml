@@ -1,18 +1,22 @@
 ﻿@{
-    ViewData["Title"] = "Admin";
-    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin home";
 }
-<br />
 
-<div class="center-align white-text">
-    <h2>Kies een item uit het menu</h2>
-    <br /><br />
-    <h3>Snelle acties</h3>
-    <br />
-    <button class="btn btn-primary" onclick="location.href='/Admin/initdb'">Database initialiseren</button>
-    <button class="btn btn-secondary" onclick="location.href='/User'">Mijn account</button>
-    <button class="btn btn-success" onclick="location.href='/Mentor'">Overstag bestuur</button>
+<div>
+    
 </div>
+
 <script>
-    $('#_ahome').addClass('active');
+    var Admin = function () {
+        return {
+            init: function () {
+                $('#_title').html('&nbsp;Overstag Admin');
+                $('#btnsnow').remove();
+            }
+        };
+    }();
+
+    $(function () {
+        Admin.init();
+    });
 </script>

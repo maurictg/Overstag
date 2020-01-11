@@ -79,7 +79,7 @@
             <div class="input-field col s12 m3">
                 <input type="text" id="tbcost" class="validate" value="1,00" maxlength="4" />
                 <label for="tbcost">Kosten in € per stuk</label>
-                <span class="helper-text" data-error="Vul a.u.b. een geldig bedrag in (kommagetal)"></span>
+                <span class="helper-text" data-error="Vul a.u.b. een geldig bedrag in (kommagetal, 2 decimalen)"></span>
             </div>
             <table>
                 <thead>
@@ -178,12 +178,10 @@
                 }
             });
 
-             //Not working yet
-             $('#tbcost').change(function() {
+             $('#tbcost').blur(function () {
                  if (!/^([0-9]*),([0-9][0-9])/.test($(this).val())) {
-                     $(this).addClass("invalid");
-                     $(this).prop("aria-invalid", "true");
-                     valid = false;
+                     $('#tbcost').addClass("invalid");
+                     $('#tbcost').prop("aria-invalid", true);
                  }
              });
 
@@ -248,7 +246,8 @@
             $(el).data('confirm', '');
             $(el).fadeIn();
         },
-        addDrink: function (id, valueToAdd) {
+         addDrink: function (id, valueToAdd) {
+            valueToAdd = Math.round(Number($('#tbcost').val().replace(',', '.')) * 100) * valueToAdd;
             var value = Number($('#' + id + '-cc').data('amount')) + valueToAdd;
             if (value < 0)
                 return;

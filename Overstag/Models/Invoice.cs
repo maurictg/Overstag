@@ -18,4 +18,10 @@ namespace Overstag.Models
         public Payment Payment { get; set; }
         public int PaymentId;
     }
+
+    //Xtended invoice
+    public class XInvoice : Invoice
+    {
+        public Dictionary<Event, int> Events;
+    }
 }

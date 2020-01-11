@@ -164,7 +164,7 @@ namespace Overstag.Controllers
                             HttpContext.Session.SetInt32("Type", account.Type);
                             HttpContext.Session.SetString("Name", account.Username);
 
-                            string remember = Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
+                            string remember = await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
 
                             return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                         }
@@ -188,7 +188,7 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<JsonResult> postLogin([FromForm]string Username, [FromForm]string Password)
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 using (var context = new OverstagContext())
                 {
@@ -199,18 +199,10 @@ namespace Overstag.Controllers
                         if (account == null)
                             return Json(new { status = "error", error = "Gebruiker bestaat niet" });
 
-                        //Controleren op onjuiste inlogpogingen
-                        /*if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
-                        {
-                            return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
-                        }
-                        else
-                        {*/
                             if (Encryption.PBKDF2.Verify(account.Password, Password))
                             {
                                 bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
                                 //Login is juist, redirect naar page, zet sessie variablen
-
 
                                 if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
                                 {
@@ -219,26 +211,14 @@ namespace Overstag.Controllers
                                     HttpContext.Session.SetString("Name", account.Username);
                                 }
 
-                                /*Eventuele foute pogingen verwijderen
-                                if (context.Logging.Count(i => i.Ip == ip && i.Username == Username) > 0)
-                                {
-                                    foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == Username))
-                                        context.Logging.Remove(log);
-
-                                    context.SaveChangesAsync();
-                                }*/
-
-                                string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
+                                string remember = (no2fa) ? await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
 
                                 return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
                             }
                             else
                             {
-                                //context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
-                                //context.SaveChangesAsync();
                                 return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
                             }
-                        //}
                     }
                     catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                 }
@@ -355,7 +335,7 @@ namespace Overstag.Controllers
                     HttpContext.Session.SetString("Token", a.Token);
                     HttpContext.Session.SetInt32("Type", a.Type);
                     HttpContext.Session.SetString("Name", a.Username);
-                    string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString());
+                    string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString()).Result;
                     HttpContext.Session.SetString("Remember", remember);
                     return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                 }

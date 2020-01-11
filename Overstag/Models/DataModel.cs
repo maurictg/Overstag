@@ -73,26 +73,28 @@ namespace Overstag.Models
             //One to many (account aan invoice koppelen)
             mb.Entity<Account>()
                 .HasMany(f => f.Invoices)
-                .WithOne(g => g.User);
+                .WithOne(g => g.User)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             //One to many (account aan payments)
             mb.Entity<Account>()
                 .HasMany(f => f.Payments)
-                .WithOne(g => g.User);
+                .WithOne(g => g.User)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             //One to many (account aan requests)
             mb.Entity<Account>()
                 .HasMany(f => f.Requests)
-                .WithOne(g => g.User);
+                .WithOne(g => g.User)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             //One to many (account aan auths)
             mb.Entity<Account>()
                 .HasMany(f => f.Auths)
-                .WithOne(g => g.User);
+                .WithOne(g => g.User)
+                .OnDelete(DeleteBehavior.ClientCascade);
 
             //One to one (payment aan invoice)
-
-
             mb.Entity<Invoice>()
                 .HasOne(f => f.Payment)
                 .WithOne(g => g.Invoice)

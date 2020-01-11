@@ -12,11 +12,11 @@ namespace Overstag.Controllers
     public class AuthController : Controller
     {
         [HttpPost]
-        public JsonResult Register([FromForm]string token)
+        public async Task<JsonResult> Register([FromForm]string token)
         {
             token = Uri.UnescapeDataString(token);
 
-            string ttoken = Overstag.Security.Auth.Register(token, HttpContext.Connection.RemoteIpAddress.ToString());
+            string ttoken = await Security.Auth.Register(token, HttpContext.Connection.RemoteIpAddress.ToString());
             return Json(new { status = "success", token = Uri.EscapeDataString(ttoken) });
         }
 
@@ -61,25 +61,22 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<JsonResult> Logout()
         {
-            return await Task.Run(() =>
+            if (HttpContext.Session.GetString("Remember") != null)
             {
-                if (HttpContext.Session.GetString("Remember") != null)
+                string token = HttpContext.Session.GetString("Remember");
+                using (var context = new OverstagContext())
                 {
-                    string token = HttpContext.Session.GetString("Remember");
-                    using (var context = new OverstagContext())
+                    if (context.Auths.Any(f => f.Token == token))
                     {
-                        if (context.Auths.Any(f => f.Token == token))
-                        {
-                            var auth = context.Auths.First(f => f.Token == token);
-                            context.Auths.Remove(auth);
-                            context.SaveChanges();
-                            return Json(new { status = "success" });
-                        }
+                        var auth = await context.Auths.FirstAsync(f => f.Token == token);
+                        context.Auths.Remove(auth);
+                        await context.SaveChangesAsync();
+                        return Json(new { status = "success" });
                     }
                 }
+            }
 
-                return Json(new { status = "error" });
-            });
+            return Json(new { status = "error" });
         }
     }
 }
