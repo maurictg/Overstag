@@ -14,12 +14,12 @@ namespace Overstag.Models
         public string Username { get; set; }
         public string Password { get; set; }
         public string Email { get; set; }
-
-        [MaxLength(12)]
-        public string Phone { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
 
+        [MaxLength(12)]
+        public string Phone { get; set; }
+        
         public string Token { get; set; }
         public string Adress { get; set; }
         public string Postalcode { get; set; }
@@ -32,7 +32,7 @@ namespace Overstag.Models
         public string TwoFactor { get; set; }
         public string TwoFactorCodes { get; set; }
         
-        //Relations (One to one)
+        //Relations (Many to one)
         public Family Family { get; set; }
         //Relations (Many to many)
         public List<Participate> Subscriptions { get; set; }

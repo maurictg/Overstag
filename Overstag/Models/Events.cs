@@ -10,6 +10,7 @@ namespace Overstag.Models
         public string Description { get; set; }
         public DateTime When { get; set; }
         public int Cost { get; set; }
+        public byte Type { get; set; }
 
         //Relations
         public List<Participate> Participators { get; set; }
@@ -44,10 +45,9 @@ namespace Overstag.Models
         public Account User { get; set; }
         public int EventID { get; set; }
         public Event Event { get; set; }
-
         public bool Payed { get; set; }
 
         public int AdditionsCost { get; set; }
-        public int FriendCount { get; set; }
+        public byte FriendCount { get; set; }
     }
 }

@@ -15,13 +15,14 @@ namespace Overstag.Models
 
         //Relations
         public Account User { get; set;  }
+        public int UserID { get; set; }
         public Payment Payment { get; set; }
-        public int PaymentId;
+        public int PaymentID;
     }
 
     //Xtended invoice
     public class XInvoice : Invoice
     {
-        public Dictionary<Event, int> Events;
+        public Dictionary<Event, int> Events { get; set; }
     }
 }

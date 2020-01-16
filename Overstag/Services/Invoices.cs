@@ -4,11 +4,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Overstag.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Services
 {
     public class Invoices
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public Invoices(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+
         public static Exception error;
         public static string invoiceId;
         public static async Task<bool> Create(int userId)
@@ -17,7 +25,9 @@ namespace Overstag.Services
             {
                 using(var context = new OverstagContext())
                 {
-                    var user = await context.Accounts.Include(f => f.Subscriptions).ThenInclude(f => f.Event).Include(g => g.Invoices).FirstOrDefaultAsync(h => h.Id == userId);
+                    var user = await context.Accounts.Include(f => f.Subscriptions).ThenInclude(f => f.Event)
+                        .Include(f => f.Subscriptions).ThenInclude(g => g.Invoice)
+                        .Include(g => g.Invoices).FirstOrDefaultAsync(h => h.Id == userId);
                     if(user == null)
                         throw new ArgumentException("User not found");
 
@@ -53,7 +63,6 @@ namespace Overstag.Services
                     });
 
                     context.Accounts.Update(user);
-
                     await context.SaveChangesAsync();
                 }
                 return true;
@@ -67,11 +76,19 @@ namespace Overstag.Services
 
         public static XInvoice GetXInvoice(int id)
         {
-            var invoice = new OverstagContext().Invoices.Include(g => g.User).ThenInclude(h => h.Subscriptions).First(j => j.Id == id);
-            invoice.User.Subscriptions = new OverstagContext().Accounts.Include(f => f.Subscriptions).ThenInclude(g => g.Event).First(j => j.Id == invoice.User.Id).Subscriptions;
+            var invoice = new OverstagContext().Invoices
+                .Include(f => f.Payment)
+                .Include(g => g.User).ThenInclude(h => h.Subscriptions).ThenInclude(i => i.Event)
+                .First(j => j.Id == id);
+
             return GetXInvoice(invoice);
         }
 
+        /// <summary>
+        /// Get's XInvoice. Needs invoice with included User with incluced Subscriptions and included Events
+        /// </summary>
+        /// <param name="i">Invoice with included Event</param>
+        /// <returns>XInvoice instance</returns>
         public static XInvoice GetXInvoice(Invoice i)
         {
             List<int> eventIDS = i.EventIDs.Split(',').Select(f => Convert.ToInt32(f)).ToList();
@@ -85,6 +102,10 @@ namespace Overstag.Services
 
             return new XInvoice()
             {
+                Id = i.Id,
+                EventIDs = i.EventIDs,
+                Payment = i.Payment,
+                PaymentID = i.PaymentID,
                 Payed = i.Payed,
                 Amount = i.Amount,
                 Events = EventAndFriends,

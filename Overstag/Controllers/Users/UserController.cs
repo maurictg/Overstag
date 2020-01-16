@@ -108,7 +108,7 @@ namespace Overstag.Controllers
         {
             using(var context = new OverstagContext())
             {
-                var user = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
+                var user = context.Accounts.Include(f => f.Subscriptions).Include(f => f.Family).First(f => f.Id == currentuser().Id);
                 ViewBag.Age = Core.General.getAge(user.Birthdate);
 
                 List<Event> events = context.Events.ToList();
@@ -131,6 +131,8 @@ namespace Overstag.Controllers
                     foreach(var i in invoices)
                         iinvoices.Add(Services.Invoices.GetXInvoice(i));
                 }
+
+                ViewBag.HasFamily = (user.Family != null);
 
                 return View("Payment", new UnpayedEvents()
                 {
@@ -350,7 +352,7 @@ namespace Overstag.Controllers
                 {
                     var user = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
                     var part = user.Subscriptions.First(f => f.EventID == id);
-                    part.FriendCount = (amount>0) ? amount : 0;
+                    part.FriendCount = (byte)((amount>0) ? amount : 0);
                     context.Accounts.Update(user);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });

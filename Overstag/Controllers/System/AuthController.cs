@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +35,6 @@ namespace Overstag.Controllers
                             HttpContext.Session.SetString("Token", user.Token);
                             HttpContext.Session.SetInt32("Type", user.Type);
                             HttpContext.Session.SetString("Name", user.Username);
-                            HttpContext.Session.SetString("Remember", token);
                             return Json(new { status = "success" });
                         }
                         else
@@ -58,25 +56,5 @@ namespace Overstag.Controllers
             });
         }
 
-        [HttpPost]
-        public async Task<JsonResult> Logout()
-        {
-            if (HttpContext.Session.GetString("Remember") != null)
-            {
-                string token = HttpContext.Session.GetString("Remember");
-                using (var context = new OverstagContext())
-                {
-                    if (context.Auths.Any(f => f.Token == token))
-                    {
-                        var auth = await context.Auths.FirstAsync(f => f.Token == token);
-                        context.Auths.Remove(auth);
-                        await context.SaveChangesAsync();
-                        return Json(new { status = "success" });
-                    }
-                }
-            }
-
-            return Json(new { status = "error" });
-        }
     }
 }

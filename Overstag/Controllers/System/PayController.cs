@@ -33,7 +33,7 @@ namespace Overstag.Controllers
             invoiceid = Uri.UnescapeDataString(invoiceid);
             using(var context = new OverstagContext())
             {
-                var invoice = Services.Invoices.GetXInvoice(context.Invoices.First(f => f.InvoiceID == invoiceid).Id);
+                var invoice = context.Invoices.FirstOrDefault(f => f.InvoiceID == invoiceid);
 
                 if (invoice == null)
                 {
@@ -50,7 +50,7 @@ namespace Overstag.Controllers
                             ViewBag.Payment = payment;
                     }
 
-                    return View(invoice);
+                    return View(Services.Invoices.GetXInvoice(invoice.Id));
                 }
             }
         }

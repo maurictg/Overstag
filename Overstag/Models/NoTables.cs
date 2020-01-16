@@ -22,21 +22,6 @@ namespace Overstag.Models.NoDB
         public List<Event> UnfacturedEvents;
         public List<Participate> Subscriptions;
     }
-    
-    public struct AUnpayed
-    {
-        public Account User;
-        public List<Invoice> Unpayed_Invoices;
-        public List<Event> Unfactured_Events;
-    }
-
-    public struct AParticipator
-    {
-        public Event Event;
-        public Account[] Accounts;
-        public bool[] Factured;
-    }
-
 
     public struct SSub
     {
@@ -48,15 +33,6 @@ namespace Overstag.Models.NoDB
     {
         public Event Event;
         public List<SSub> Sub;
-    }
-
-    public struct FUnpayed
-    {
-        public Account User;
-        public List<Event> UnpayedEvents;
-        public int FriendCount;
-        public int ConsumptionCount;
-        public int ConsumptionCost;
     }
 
     public struct MPayment

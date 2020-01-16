@@ -5,11 +5,10 @@
     Layout = "_UserLayout";
     ViewBag.Title = "Betalingen";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
-    var currentuser = new Overstag.Models.OverstagContext().Accounts.Include(f => f.Family).First(g => g.Token == Context.Session.GetString("Token"));
 }
 
     <div>
-        @if (currentuser.Family != null)
+        @if (ViewBag.HasFamily)
         {
             <h4 class="red-text center-align" style="font-weight: bold;">De facturering wordt beheerd door het gezin waarbij je aangesloten bent</h4>
         }
@@ -147,7 +146,7 @@
 
                                             <tr>
                                                 <td colspan="6" class="center-align white-text grey darken-1">
-                                                    @Html.Raw((item.AdditionsCost > 0) ? $"<br />Let op: Dit is <b>inclusief</b> de drankjes. (&euro;{Math.Round((double)item.AdditionsCost / 100, 2).ToString("F")})" : "")
+                                                    @Html.Raw((item.AdditionsCost > 0) ? $"<br />Let op: Het totaal is <b>inclusief</b> de drankjes. (&euro;{Math.Round((double)item.AdditionsCost / 100, 2).ToString("F")})" : "")
                                                     <h5>Totaal: &euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</h5><br />
                                                 </td>
                                             </tr>

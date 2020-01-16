@@ -22,6 +22,7 @@ namespace Overstag
             services.AddSession();
             services.AddResponseCaching();
             services.AddRazorPages();
+            services.AddHttpContextAccessor();
             services.AddResponseCompression(options => {
                 options.Providers.Add<GzipCompressionProvider>();
                 options.Providers.Add<BrotliCompressionProvider>();

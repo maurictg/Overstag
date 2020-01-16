@@ -68,9 +68,9 @@ namespace Overstag.Controllers
                     using (var context = new OverstagContext())
                     {
                         token = Uri.UnescapeDataString(token);
-                        if (context.Auths.Any(f => f.Token == token))
+                        if (await context.Auths.AnyAsync(f => f.Token == token))
                         {
-                            var auth = context.Auths.First(f => f.Token == token);
+                            var auth = await context.Auths.FirstAsync(f => f.Token == token);
                             context.Auths.Remove(auth);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
@@ -130,6 +130,7 @@ namespace Overstag.Controllers
                             account.Password = Encryption.PBKDF2.Hash(account.Password);
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                             account.Type = (byte)(account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
+                            account.RegisterDate = DateTime.Now;
 
                             try
                             {
@@ -295,12 +296,12 @@ namespace Overstag.Controllers
                 try
                 {
                     Token = Uri.UnescapeDataString(Token);
-                    var account = context.Accounts./*ToList().*/FirstOrDefault(e => e.Token == Token);
+                    var account = await context.Accounts.FirstOrDefaultAsync(e => e.Token == Token);
 
                     if (account == null)
                         return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
 
-                    account.Password = Encryption.PBKDF2.Hash(Password); //<--NULLexception
+                    account.Password = Encryption.PBKDF2.Hash(Password);
                     account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                     context.Accounts.Update(account);
                     await context.SaveChangesAsync();

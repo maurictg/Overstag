@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
-using Overstag.Models.NoDB;
 
 namespace Overstag.Controllers
 {
@@ -42,38 +41,15 @@ namespace Overstag.Controllers
         /// <returns>View</returns>
         public IActionResult Billing()
         {
-            List<FUnpayed> Billing = new List<FUnpayed>();
-            int fc = 0;
-
             using(var context = new OverstagContext())
             {
-                List<Account> Users = new List<Account>();
+                var family = context.Families
+                    .Include(f => f.Members).ThenInclude(g => g.Subscriptions).ThenInclude(h => h.Event)
+                    //.Include(f => f.Members).ThenInclude(g => g.Invoices) <-- This is how you also include invoices
+                    .First(i => i.ParentID == currentuser().Id);
 
-                foreach (var user in context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id).Members)
-                    Users.Add(context.Accounts.Include(f => f.Subscriptions).First(g => g.Id == user.Id));
-
-                foreach(var user in Users)
-                {
-                    int ccnt = 0;
-                    int cc = 0;
-
-                    List<Event> Events = new List<Event>();
-                    foreach (var s in user.Subscriptions.Where(s => !s.Payed))
-                    {
-                        cc += s.AdditionsCost;
-                        var e = context.Events.First(f => f.Id == s.EventID);
-
-                        fc += s.FriendCount;
-
-                        if(Core.General.DateIsPassed(e.When))
-                            Events.Add(e);
-                    }
-                        
-                    Billing.Add(new FUnpayed { UnpayedEvents = Events.OrderBy(b => b.When).ToList(), User = user, ConsumptionCount = ccnt, ConsumptionCost = cc, FriendCount = fc });
-                }
+                return View(family.Members);
             }
-
-            return View(Billing);
         }
 
         /// <summary>
@@ -85,7 +61,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    context.Add(new Family()
+                    context.Families.Add(new Family()
                     {
                         ParentID = currentuser().Id,
                         Token = Encryption.Random.rHash(currentuser().Token)
@@ -132,7 +108,44 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or status = error with details)</returns>
         public async Task<IActionResult> GenerateInvoice()
         {
-            //Zet IDS om van kind naar ouder
+            List<Exception> exceptions = new List<Exception>();
+            using(var context = new OverstagContext())
+            {
+                foreach (var member in context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id).Members)
+                {
+                    bool result = await Services.Invoices.Create(member.Id);
+                    if (!result)
+                        exceptions.Add(Services.Invoices.error);
+                }
+
+                if (exceptions.Count() > 0)
+                    return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken." });
+                else
+                    return Json(new { status = "success" });
+            }
+        }
+
+        /*
+         * 1. Get all participations
+         * 2. Make Event unique in participations
+         * 3. Set participations on parent's name
+         * 4. Create new invoice with events
+         * 
+         */
+        public async Task<IActionResult> MergeInvoices()
+        {
+            using (var context = new OverstagContext())
+            {
+                var cuser = context.Accounts.Include(g => g.Subscriptions).ThenInclude(i => i.Event).Include(h => h.Invoices).First(f => f.Id == currentuser().Id);
+                var family = context.Families.Include(g => g.Members).ThenInclude(h => h.Subscriptions).ThenInclude(i => i.Event).First(f => f.ParentID == cuser.Id);
+
+                
+                foreach (var member in family.Members)
+                {
+                    
+                }
+            }
+
             return null;
         }
     }

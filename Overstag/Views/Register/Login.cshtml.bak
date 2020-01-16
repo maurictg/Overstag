@@ -41,6 +41,25 @@
                 </div>
             </div>
         </div>
+
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <div class="card rounded" id="2facard" style="display: none">
+                <div class="card-content">
+                    <h4 class="center-align blue-middle-text">Tweetrapsauthenticatie</h4>
+                    <div class="row">
+                        <h6 class="center-align">Open uw 2fa-app en voer de authenticatiecode in</h6>
+                        <div class="input-field col s12 m6 offset-m3">
+                            <i class="material-icons prefix">lock_outline</i>
+                            <input type="number" placeholder="000000" maxlength="6" style="font-size: xx-large" data-length="6" id="2facode">
+                        </div>
+                    </div>
+                    <div class="center-align">
+                        <button class="btn waves-effect orange" onclick="Login.cancel2fa();">Annuleren</button>
+                        <a href="#!" class="modal-close waves-effect btn modal-trigger" data-target="tfarestore">Code vergeten?</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
    
     <!-- Modal Structure -->
@@ -64,25 +83,6 @@
     </div>
 
     <!-- Modal Structure -->
-    <div id="tfa" class="modal">
-        <div class="modal-content">
-            <div class="row">
-                <div class="center-align">
-                    <h4>Tweetrapsvertificatie (2FA)</h4>
-                    <h5>Open uw 2FA app, selecteer het account en type de code in:</h5>
-                    <div class="row">
-                        <div class="input-field col m4 s12 offset-m4">
-                            <input type="number" style="font-size: xx-large" maxlength="6" data-length="6" id="2facode" placeholder="000000" />
-                        </div>
-                    </div>
-                    <a href="#!" class="modal-close waves-effect orange btn modal-trigger" data-target="tfarestore" onclick="Login.cancel2fa();">Code vergeten</a>
-                    <a href="#!" class="modal-close waves-effect red btn" onclick="Login.cancel2fa();">Annuleren</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Structure -->
     <div id="tfarestore" class="modal">
         <div class="modal-content">
             <div class="row">
@@ -100,7 +100,6 @@
             </div>
         </div>
     </div>
-    <div id="_data"></div>
 </body>
 <script>
     let wrong2fa = 0;
@@ -114,7 +113,7 @@
             $("#_reg, #_mreg").addClass("active");
             $('#progbar2, #mailhelper').hide();
             Login.mapEvents();
-            OverstagJS.General.restoreMe(Login.toggle, true, Login.redirect);
+            OverstagJS.General.restoreMe(Login.toggleWith, true, Login.redirect);
         },
 
         mapEvents: function () {
@@ -197,6 +196,12 @@
             }
         },
 
+        toggleWith: function (enable) {
+            if (enable)
+                $('#logincard').fadeIn('slow');
+            Login.toggle(enable);
+        },
+
         toggle: function (enable) {
             if (!enable) {
                 $('#btnlogin').addClass('disabled');
@@ -206,7 +211,6 @@
             } else {
                 $('#_progbar').hide();
                 $('#lblmoment').hide();
-                $('#logincard').fadeIn('slow');
                 $('#btnlogin').removeClass('disabled');
                 $('#Username').removeAttr('disabled');
                 $('#Password').removeAttr('disabled');
@@ -267,7 +271,8 @@
         },
 
         open2fa: function () {
-            M.Modal.getInstance($('#tfa')).open();
+            $('#logincard').hide();
+            $('#2facard').fadeIn('slow');
             $('#2facode').focus();
         },
 
@@ -282,9 +287,8 @@
                 $.post('/Register/Validate2FA', { token: token, code: $('#2facode').val(), datetime: timestring}, function (response) {
                     if (response.status == 'success') {
                         localStorage.setItem('remember', response.remember);
+                        Login.cancel2fa();
                         Login.redirect();
-                        M.Modal.getInstance($('#tfa')).close();
-                        $('#2facode').val('');
                     }
                     else if (response.status == 'timeout') {
                         M.toast({ html: 'Uw klok staat niet goed.', classes: 'orange' });
@@ -311,7 +315,9 @@
             $('#Username').val('');
             $('#Password').val('');
             $('#2facode').val('');
-            M.Modal.getInstance($('#tfa')).close();
+            $('#2facard').hide();
+            $('#logincard').fadeIn('slow');
+            $('#Username').focus();
         },
 
         restore2fa: function () {
@@ -321,6 +327,7 @@
                 $.get('/Register/Restore2FA/' + token + '/' + encodeURIComponent($('#tfarest').val()), function (r) {
                     if (r.status == 'success') {
                         M.Modal.getInstance($('#tfarestore')).close();
+                        Login.cancel2fa();
                         M.toast({ html: 'Code is juist. Log a.u.b. opnieuw in', classes: 'green' });
                     } else
                         M.toast({ html: 'Code onjuist', classes: 'red' });
