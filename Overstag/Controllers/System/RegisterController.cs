@@ -198,7 +198,7 @@ namespace Overstag.Controllers
                     {
                         var account = context.Accounts.FirstOrDefault(e => e.Username.ToLower().Equals(Username.ToLower()) || e.Email.ToLower().Equals(Username.ToLower()));
                         if (account == null)
-                            return Json(new { status = "error", error = "Gebruiker bestaat niet" });
+                            return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist", debuginfo = "Account is NULL" });
 
                             if (Encryption.PBKDF2.Verify(account.Password, Password))
                             {

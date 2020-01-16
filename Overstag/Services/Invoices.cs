@@ -26,8 +26,8 @@ namespace Overstag.Services
                 using(var context = new OverstagContext())
                 {
                     var user = await context.Accounts.Include(f => f.Subscriptions).ThenInclude(f => f.Event)
-                        .Include(f => f.Subscriptions).ThenInclude(g => g.Invoice)
                         .Include(g => g.Invoices).FirstOrDefaultAsync(h => h.Id == userId);
+
                     if(user == null)
                         throw new ArgumentException("User not found");
 

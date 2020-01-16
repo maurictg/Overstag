@@ -85,11 +85,16 @@ namespace Overstag.Controllers
                 {
                     List<SSub> subs = new List<SSub>();
                     foreach (var s in e.Participators)
-                        subs.Add(new SSub
+                    {
+                        SSub sssb = new SSub
                         {
                             account = context.Accounts.First(f => f.Id == s.UserID),
                             part = s
-                        });
+                        };
+
+                        if (sssb.account.Type == 0)
+                            subs.Add(sssb);
+                    }
 
                     sse.Add(new SSubEvent()
                     {

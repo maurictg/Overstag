@@ -10,77 +10,81 @@
     <div>
         @if (ViewBag.HasFamily)
         {
-            <h4 class="red-text center-align" style="font-weight: bold;">De facturering wordt beheerd door het gezin waarbij je aangesloten bent</h4>
+            <h4 class="red-text center-align" style="font-weight: bold;">De facturering wordt beheerd door de familie waarbij je aangesloten bent</h4>
         }
         else
         {
-            <h3>Niet-gefactureerde activiteiten</h3>
-            <div id="unpayedevents">
-                @if (Model.UnfacturedEvents.Count() > 0)
-                {
-                    <table class="responsive-table">
-                        <thead>
-                            <tr>
-                                <th>Wat</th>
-                                <th>Wanneer</th>
-                                <th>Omschrijving</th>
-                                <th>Kosten aan drankjes</th>
-                                <th>Aantal vriend(inn)en</th>
-                                <th>Kosten</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{double topay = 0; }
-                            @foreach (var e in Model.UnfacturedEvents)
-                            {
-                                var p = Model.Subscriptions.First(f => f.EventID == e.Id);
-                                double c = (double)e.Cost;
-                                topay += c * (p.FriendCount + 1);
-                                topay += p.AdditionsCost;
-                            <tr>
-                                <td>@e.Title</td>
-                                <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                                <td>@e.Description</td>
+            @if (!ViewBag.IsParent)
+            {
+                <h3 class="center-align blue-dark-text">Niet-gefactureerde activiteiten</h3>
+                <div id="unpayedevents">
+                    @if (Model.UnfacturedEvents.Count() > 0)
+                    {
+                        <table class="responsive-table">
+                            <thead>
+                                <tr>
+                                    <th>Wat</th>
+                                    <th>Wanneer</th>
+                                    <th>Omschrijving</th>
+                                    <th>Kosten aan drankjes</th>
+                                    <th>Aantal vriend(inn)en</th>
+                                    <th>Kosten</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{double topay = 0; }
+                                @foreach (var e in Model.UnfacturedEvents)
+                                {
+                                    var p = Model.Subscriptions.First(f => f.EventID == e.Id);
+                                    double c = (double)e.Cost;
+                                    topay += c * (p.FriendCount + 1);
+                                    topay += p.AdditionsCost;
+                                    <tr>
+                                        <td>@e.Title</td>
+                                        <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
+                                        <td>@e.Description</td>
 
-                                @if (p.AdditionsCost > 0)
-                                {
-                                    <td>&euro;&nbsp;@Math.Round((double)p.AdditionsCost / 100, 2).ToString("F")</td>
-                                }
-                                else
-                                {
-                                    <td>-</td>
-                                }
+                                        @if (p.AdditionsCost > 0)
+                                        {
+                                            <td>&euro;&nbsp;@Math.Round((double)p.AdditionsCost / 100, 2).ToString("F")</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
 
-                                @if (p.FriendCount > 0)
-                                {
-                                    <td>@p.FriendCount (<b>+&euro;@Math.Round(c * (p.FriendCount) / 100, 2).ToString("F")</b>)</td>
+                                        @if (p.FriendCount > 0)
+                                        {
+                                            <td>@p.FriendCount (<b>+&euro;@Math.Round(c * (p.FriendCount) / 100, 2).ToString("F")</b>)</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                        <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
+                                    </tr>
                                 }
-                                else
-                                {
-                                    <td>-</td>
-                                }
-                                <td>&euro;@Math.Round(c / 100, 2).ToString("F") </td>
-                            </tr>
-                            }
-                            <tr class="grey lighten-4">
-                                <td colspan="6" class="center">
-                                    <b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <br />
-                    <div class="center-align">
-                        <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger blue-dark">Factuur genereren</a>
-                    </div>
-                    <br /><br />
-                }
-                else
-                {
-                    <h5>Geen ongefactureerde activiteiten!</h5>
-                }
-            </div>
-            <h3>Facturen</h3>
+                                <tr class="grey lighten-4">
+                                    <td colspan="6" class="center">
+                                        <b>Totaal te verrekenen: &euro;@Math.Round(Convert.ToDecimal(topay) / 100, 2).ToString("F")</b>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br />
+                        <div class="center-align">
+                            <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger blue-dark">Factuur genereren</a>
+                        </div>
+                        <br /><br />
+                    }
+                    else
+                    {
+                        <h5 class="center-align orange-text">Geen ongefactureerde activiteiten gevonden!</h5>
+                    }
+                </div>
+            }
+
+            <h3 class="center-align blue-dark-text">Facturen</h3>
             <div id="factures">
                 @if (Model.Invoices.Count() > 0)
                 {
@@ -130,9 +134,9 @@
                                                     <td>@e.Key.When.ToString("D", culture) om @e.Key.When.ToString("t", culture)</td>
                                                     <td>@e.Key.Description</td>
                                                     <td>
-                                                        @if(e.Value > 0)
+                                                        @if (e.Value > 0)
                                                         {
-                                                            @Html.Raw($"Ja, <b>{e.Value}</b>, (+&euro;{Math.Round((double)(e.Key.Cost*e.Value)/100,2).ToString("F")})")
+                                                            @Html.Raw($"Ja, <b>{e.Value}</b>, (+&euro;{Math.Round((double)(e.Key.Cost * e.Value) / 100, 2).ToString("F")})")
                                                         }
                                                         else
                                                         {
@@ -164,14 +168,14 @@
                 }
                 else
                 {
-                    <h5>Geen facturen gevonden</h5><br />
+                    <h5 class="center-align orange-text">Geen facturen gevonden!</h5><br />
                 }
             </div>
-            
+
             @if (ViewBag.Age >= 18)
             {
                 <!--<h3>Kosten declareren</h3>
-                @Html.Raw("&nbsp;")<a class="btn blue-dark waves-effect" href="/User/Declaration">Klik hier</a>-->
+            @Html.Raw("&nbsp;")<a class="btn blue-dark waves-effect" href="/User/Declaration">Klik hier</a>-->
             }
 
         }

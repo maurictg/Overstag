@@ -5,7 +5,7 @@
     string[] type = { "Lid", "Ouder", "Bestuurder", "Administrator" };
 }
 <div>
-    <h3 class="center-align">Accountinstellingen</h3><br />
+    <h3 class="center-align blue-dark-text">Accountinstellingen</h3><br />
     <div>
         <ul class="collapsible">
             <li>
@@ -177,12 +177,13 @@
 
                     @if (Model.Family != null)
                     {
-                        <h5>Gezin</h5>
-                        <p>Uw account is gekoppeld aan een gezin. Wanneer u het gezin wilt verlaten, klik dan op &quot;Gezin verlaten&quot;.</p>
-                        <a class="waves-effect waves-light btn orange center" onclick="User.leaveFamily();">Gezin verlaten</a>
+                        <h5>Familie</h5>
+                        <p>Jouw account is gekoppeld aan een familie. Wanneer je de familie wilt verlaten, klik dan op &quot;Familie verlaten&quot;.</p>
+                        <a class="waves-effect waves-light btn orange center" onclick="User.leaveFamily();">Familie verlaten</a>
+                        <br/>
                     }
 
-                    <br /><br />
+                    <br />
                     <a class="waves-effect waves-light btn green center" onclick="M.Collapsible.getInstance($('.collapsible')).close(5);">Annuleren</a>
 
                 </div>

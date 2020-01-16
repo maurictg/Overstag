@@ -133,6 +133,7 @@ namespace Overstag.Controllers
                 }
 
                 ViewBag.HasFamily = (user.Family != null);
+                ViewBag.IsParent = (user.Type == 1);
 
                 return View("Payment", new UnpayedEvents()
                 {
