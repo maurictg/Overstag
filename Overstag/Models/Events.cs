@@ -10,7 +10,7 @@ namespace Overstag.Models
         public string Description { get; set; }
         public DateTime When { get; set; }
         public int Cost { get; set; }
-        public byte Type { get; set; }
+        public byte Type { get; set; } //0: chill, 1: activity
 
         //Relations
         public List<Participate> Participators { get; set; }

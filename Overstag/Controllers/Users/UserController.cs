@@ -184,7 +184,7 @@ namespace Overstag.Controllers
             => View();
 
         public IActionResult Declaration()
-            => View(new OverstagContext().Requests.Include(x => x.User).Where(f => f.User.Id == currentuser().Id).OrderBy(g => g.Timestamp).ToList());
+            => View(new OverstagContext().Transactions.Include(x => x.User).Where(f => f.User.Id == currentuser().Id && f.Type == 29).OrderByDescending(g => g.Timestamp).ToList());
 
         /// <summary>
         /// Post a new idea to the server
@@ -366,16 +366,17 @@ namespace Overstag.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> postDeclaration(Accountancy.Request request)
+        public async Task<IActionResult> postDeclaration(Accountancy.Transaction request)
         {
             try
             {
                 request.Timestamp = DateTime.Now;
                 request.Payed = false;
-                request.User = currentuser();
+                request.UserId = currentuser().Id;
+                request.Type = 29; //Declaratie
                 using (var context = new OverstagContext())
                 {
-                    context.Requests.Add(request);
+                    context.Transactions.Add(request);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
@@ -488,7 +489,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var account = context.Accounts.Include(f => f.Auths).Include(g => g.Invoices).Include(h => h.Payments).Include(i => i.Subscriptions).Include(j => j.Votes).Include(x => x.Requests).First(k => k.Token == Uri.UnescapeDataString(a.Token));
+                    var account = context.Accounts.Include(f => f.Auths).Include(g => g.Invoices).Include(h => h.Payments).Include(i => i.Subscriptions).Include(j => j.Votes).Include(x => x.Transactions).First(k => k.Token == Uri.UnescapeDataString(a.Token));
 
                     if (currentuser().Username != "admin" && currentuser().Username != account.Username)
                         return Json(new { status = "error", error = "Mislukt door authenticatiefout!" });

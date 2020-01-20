@@ -55,6 +55,7 @@ namespace Overstag.Models.NoDB
         public Dictionary<int, int> OutPerType;
         public Dictionary<int, int> InPerType;
         public double Balance;
+        public double BalanceWithDC;
         public double Out;
         public double In;
         public int Limit;

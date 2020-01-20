@@ -17,6 +17,7 @@ namespace Overstag.Core
         public string mySqlConnectionString { get; set; }
         public string msSqlConnectionString { get; set; }
         public string msSqlLiveCString { get; set; }
+        public string mySqlLiveCString { get; set; }
         public string mollieApiToken { get; set; }
         public string msSqlDebugCString { get; set; }
 

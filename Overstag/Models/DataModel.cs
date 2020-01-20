@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
+
 /// <summary>
 /// Database structuur
 /// </summary>
@@ -15,15 +16,15 @@ namespace Overstag.Models
         public DbSet<Idea> Ideas { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Auth> Auths { get; set; }
-        public DbSet<Files> Files { get; set; }
+        public DbSet<File> Files { get; set; }
         public DbSet<Accountancy.Transaction> Transactions { get; set; }
-        public DbSet<Accountancy.Request> Requests { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Connection string
 #if DEBUG
+            //optionsBuilder.UseMySQL(Core.General.Credentials.mySqlLiveCString);
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
             //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlLiveCString);
 
@@ -82,11 +83,11 @@ namespace Overstag.Models
                 .WithOne(g => g.User)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
-            //One to many (account aan requests)
+            //One to many (account aan Transaction)
             mb.Entity<Account>()
-                .HasMany(f => f.Requests)
+                .HasMany(f => f.Transactions)
                 .WithOne(g => g.User)
-                .OnDelete(DeleteBehavior.ClientCascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             //One to many (account aan auths)
             mb.Entity<Account>()

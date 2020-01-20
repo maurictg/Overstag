@@ -40,7 +40,7 @@ namespace Overstag.Models
         //Relations (One to many)
         public List<Invoice> Invoices { get; set; }
         public List<Payment> Payments { get; set; }
-        public List<Accountancy.Request> Requests { get; set; }
+        public List<Accountancy.Transaction> Transactions { get; set; }
         public List<Auth> Auths { get; set; }
     }
 }

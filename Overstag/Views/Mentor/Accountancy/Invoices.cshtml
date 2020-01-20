@@ -126,10 +126,10 @@
                     preGenerateSucceed = true;
                     if (r.failed > 0) {
                         M.toast({ html: 'Verwerken van ' + r.failed + ' mislukt', classes: 'orange' });
+                    } else {
+                        Invoice.generate();
                     }
                 }
-            }).done(function () {
-                Invoice.generate();
             }).fail(function () {
                 setTimeout(Invoice.generate, 200);
                 M.toast({ html: 'Automatisch verwerken van families mislukt', classes: 'red' });

@@ -1,27 +1,6 @@
 ﻿@model Overstag.Models.NoDB._Transactions
 @{
     Layout = "_AccountancyLayout";
-    
-    Dictionary<int, string> Types = new Dictionary<int, string>()
-    {
-        //Inkomsten
-        {1, "Activiteiten"},
-        {2, "Subsidie"},
-        {3, "Sponsor (bedrijf)"},
-        {4, "Sponsor (particulier)"},
-        {5, "Sponsor (kerk)"},
-        {6, "Overige"},
-
-        //Uitgaven
-        {21, "Boodschappen"},
-        {22, "Huur gebouw"},
-        {23, "Website"},
-        {24, "Activiteiten"},
-        {25, "Drukwerk"},
-        {26, "Inboedel"},
-        {27, "Reiskosten"},
-        {28, "Overige" }
-    };
 }
 
     <div class="row">
@@ -33,6 +12,8 @@
                 <li class="tab disabled"><a href="#accountancy">Boekhouding</a></li>
             </ul>
         </div>
+
+        <h5 class="red-text hide-on-med-and-up"><i class="material-icons">warning</i>&nbsp;Deze pagina werkt beter op een computer of een ander groot scherm.</h5>
 
         <div id="transactions">
             <div class="col s12">
@@ -50,7 +31,21 @@
             </div>
             <table>
                 <tr>
-                    <td class="grey darken-1 white-text center-align">Geld in de kas: <b>&euro;@Math.Round((double)Model.Balance / 100, 2).ToString("F")</b></td>
+                    <td class="grey darken-1 white-text center-align row">
+                        <div class="col s5">
+                            Geld in de kas: <b id="cash">&euro;&nbsp;@Math.Round((double)Model.Balance / 100, 2).ToString("F")</b>
+                        </div>
+                        <div class="col s7">
+                            <div class="switch">
+                                <label class="white-text">
+                                    Alleen definitief
+                                    <input type="checkbox" id="useDC">
+                                    <span class="lever"></span>
+                                    Ook debit/credit
+                                </label>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             </table>
             <table class="responsive-table">
@@ -66,12 +61,22 @@
                 <tbody>
                     @foreach (var t in Model.Transactions)
                     {
-                        <tr>
+                        <tr class="@Html.Raw(t.Payed?"":"grey lighten-1 debitcredit hide")" id="t-@t.Id">
                             <td>@Html.Raw((t.Amount > 0) ? $"<b class=\"green-text text-accent-4\">+ &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F")}</b>" : $"<b class=\"red-text\">- &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F").Replace("-", "")}</b>")</td>
                             <td>@t.When.ToString("dd-MM-yyyy")</td>
                             <td>@t.Description</td>
-                            <td>@Html.Raw((t.Type != null) ? Types[Convert.ToInt32(t.Type)] : "-")</td>
-                            <td><button class="btn-small red waves-effect modal-trigger" data-target="areusure" onclick="$('#btndelete').data('id','@t.Id')">Verwijderen</button></td>
+                            <td>@Html.Raw((t.Type != null) ? Overstag.Accountancy.Transactions.Types[Convert.ToInt32(t.Type)] : "-")</td>
+                            <td>
+                                <button class="btn-small red waves-effect modal-trigger" data-target="areusure" onclick="$('#btndelete').data('id','@t.Id')">Verwijderen</button>
+                                @if (!t.Payed)
+                                {
+                                    <button class="btn-small blue waves-effect modal-trigger" id="btnsp-@t.Id" data-target="areusure2" onclick="$('#btnsetpayed').data('id','@t.Id')">Definitief maken</button>
+                                }
+                                @if(t.Type == 29)
+                                {
+                                    <a class="btn-small green waves-effect" href="/Accountancy/Declaration/@t.Id">Open declaratie</a>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -90,7 +95,7 @@
                     <canvas id="pie2b" style="height: 1em; width: 1em"></canvas>
                 </div>
             </div>
-            <br/>
+            <br />
             <div class="row">
                 <div class="col s12 m8 offset-m2">
                     <canvas id="stat" style="height: 1em; width: 1em"></canvas>
@@ -104,41 +109,59 @@
 
     </div>
 
-    <div id="add" class="modal">
+    <div id="add" class="modal fullscreen-modal">
         <div class="modal-content">
             <h4>Transactie toevoegen</h4>
             <br />
             <div class="row">
-                <div class="input-field col s6">
-                    <input id="amount" type="text" class="validate" />
-                    <label for="amount">Bedrag in €</label>
-                    <span class="helper-text" data-error="Vul a.u.b. een geldig bedrag in (kommagetal)"></span>
+                <div class="row">
+                    <div class="input-field col s6 m4">
+                        <input id="amount" type="text" class="validate tinput" />
+                        <label for="amount">Bedrag in €</label>
+                        <span class="helper-text" data-error="Vul a.u.b. een geldig bedrag in (kommagetal)"></span>
+                    </div>
+                    <div class="col s6 m4">
+                        <p>
+                            <label>
+                                <input class="with-gap" value="plus" checked="checked" name="mode" type="radio" />
+                                <span>Bij</span>
+                            </label>
+                            &nbsp;&nbsp;
+                            <label>
+                                <input class="with-gap" value="min" name="mode" type="radio" />
+                                <span>Af</span>
+                            </label>
+                        </p>
+                    </div>
+                    <div class="col s12 m4 row">
+                        <div class="right-align col s6">
+                            <h6>Is definitief</h6>
+                        </div>
+                        <div class="input-field left-align col s6">
+                            <div class="switch">
+                                <label>
+                                    Nee
+                                    <input type="checkbox" id="isDC">
+                                    <span class="lever"></span>
+                                    Ja
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col s6">
-                    <p>
-                        <label>
-                            <input class="with-gap" value="plus" checked="checked" name="mode" type="radio" />
-                            <span>Bij</span>
-                        </label>
-                        &nbsp;&nbsp;
-                        <label>
-                            <input class="with-gap" value="min" name="mode" type="radio" />
-                            <span>Af</span>
-                        </label>
-                    </p>
-                </div>
+                
                 <div class="input-field col s12">
-                    <input id="desc" type="text" class="validate" />
+                    <input id="desc" type="text" class="validate tinput" />
                     <label for="desc">Omschrijving</label>
                     <span class="helper-text" data-error="Vul a.u.b. dit veld in"></span>
                 </div>
-                <div class="input-field col s12 m8">
-                    <input id="when" type="text" class="datepicker" />
-                    <label for="when">Datum</label>
-                </div>
-                <br /><br />
+
                 <div class="row">
-                    <div class="input-field col s12 m8" id="bij">
+                    <div class="input-field col s12 m6">
+                        <input id="when" type="text" class="datepicker tinput" />
+                        <label for="when">Datum</label>
+                    </div>
+                    <div class="input-field col s12 m6" id="bij">
                         <select id="selbij">
                             <option value="1" selected>Activiteiten</option>
                             <option value="2">Subsidie</option>
@@ -149,7 +172,7 @@
                         </select>
                         <label>Selecteer inkomst</label>
                     </div>
-                    <div class="input-field col s12 m8" id="af" style="display: none;">
+                    <div class="input-field col s12 m6" id="af" style="display: none;">
                         <select id="selaf">
                             <option value="21" selected>Boodschappen</option>
                             <option value="22">Huur gebouw</option>
@@ -163,6 +186,7 @@
                         <label>Selecteer uitgave</label>
                     </div>
                 </div>
+
             </div>
         </div>
         <div class="modal-footer">
@@ -182,7 +206,20 @@
         </div>
     </div>
 
+    <div id="areusure2" class="modal">
+        <div class="modal-content">
+            <h4>Weet je zeker dat je deze transactie definitief wilt maken?</h4>
+            <p>Dit kan niet ongedaan worden gemaakt!</p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close btn orange waves-effect">Annuleren</button>
+            <button id="btnsetpayed" onclick="Transactions.setPayed($('#btnsetpayed').data('id'));" class="btn green waves-effect modal-close">Jazeker</button>
+        </div>
+    </div>
+
 <script>
+    let balanceWithDC = '&euro;&nbsp;@Math.Round((double)Model.BalanceWithDC / 100, 2).ToString("F")';
+    let balance = '&euro;&nbsp;@Math.Round((double)Model.Balance / 100, 2).ToString("F")';
     var Transactions = {
         init: function () {
             $('#_acc, #_macc').addClass('active');
@@ -190,11 +227,33 @@
             Transactions.createPieChart();
             Transactions.createPieChart2a();
             Transactions.createPieChart2b();
+            $('#isDC').prop('checked', true);
+            $('#useDC').prop('checked', false);
+            $('.tinput').val('');
             Transactions.mapEvents();
         },
         mapEvents: function () {
             $("input[name='mode']").change(function () {
                 Transactions.updateDD();
+            });
+
+            $('#useDC').change(function(){
+                if ($(this).prop('checked')) {
+                    $('.debitcredit').removeClass('hide');
+                    $('#cash').html(balanceWithDC);
+                } else {
+                    $('.debitcredit').addClass('hide');
+                    $('#cash').html(balance);
+                }
+            });
+        },
+        setPayed: function (id) {
+            $.post('/Accountancy/setTransactionAsPayed', { id: id }, function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
+                    $('#t-' + id).removeClass('grey lighten-1 debitcredit');
+                    $('#btnsp-' + id).remove();
+                }
             });
         },
         updateDD: function () {
@@ -253,7 +312,7 @@
                 ]
             };
 
-            var MVChart = new Chart($('#pie'), {
+            var chart = new Chart($('#pie'), {
                 type: 'pie',
                 data: data
             });
@@ -271,11 +330,11 @@
                 }],
 
                 labels: [
-                   @Html.Raw(string.Join(",", Types.Where(g => g.Key <= 20).Select(f => "'"+f.Value+"'")))
+                   @Html.Raw(string.Join(",", Overstag.Accountancy.Transactions.Types.Where(g => g.Key <= 20).Select(f => "'"+f.Value+"'")))
                 ]
             };
 
-            var MVChart = new Chart($('#pie2a'), {
+            var chart = new Chart($('#pie2a'), {
                 type: 'pie',
                 data: data
             });
@@ -293,11 +352,11 @@
                 }],
 
                 labels: [
-                   @Html.Raw(string.Join(",", Types.Where(g => g.Key > 20).Select(f => "'"+f.Value+"'")))
+                   @Html.Raw(string.Join(",", Overstag.Accountancy.Transactions.Types.Where(g => g.Key > 20).Select(f => "'"+f.Value+"'")))
                 ]
             };
 
-            var MVChart = new Chart($('#pie2b'), {
+            var chart = new Chart($('#pie2b'), {
                 type: 'pie',
                 data: data
             });
@@ -326,7 +385,7 @@
                     type = $('#selaf option:selected').val();
                 }
                 $('#_progbar').show();
-                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val(), Type: type, When: $('#when').val() }, function (r) {
+                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val(), Type: type, When: $('#when').val(), Payed: ($('#isDC').prop('checked')) }, function (r) {
                     if (r.status == 'success') {
                         M.toast({ html: 'Transactie toegevoegd', classes: 'green' });
                         Core.doReload(500);
