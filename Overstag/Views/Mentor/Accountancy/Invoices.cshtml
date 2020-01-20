@@ -20,12 +20,12 @@
                 {
                     <tr>
                         <td>
-                        @{
-                            @Html.Raw(item.User.Firstname+"&nbsp;")@Html.Raw(item.User.Lastname)
-                        }
+                            @{
+                                @Html.Raw(item.User.Firstname + "&nbsp;")@Html.Raw(item.User.Lastname)
+                            }
                         </td>
                         <td>@item.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
-                        <td>&euro;@Math.Round((double)item.Amount/100, 2).ToString("F")</td>
+                        <td>&euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
                         <td>
                             <a class="btn red darken-4 waves-effect" href="/Pay/Invoice/@Uri.UnescapeDataString(item.InvoiceID)" target="_blank">Openen</a>
                         </td>
@@ -39,6 +39,12 @@
             Het algoritme op deze pagina brengt automatisch voor alle gebruikers die <input style="width: 3em" type="number" max="10" min="1" id="amount" value="5" class="col s1 center-align centered" /> of meer ongefactureerde activiteiten hebben staan de activiteiten in rekening dmv een factuur.
             <br />Ook wordt naar alle betreffende gebruikers een email gestuurd met een link naar de factuur.
         </h6>
+        <p>
+            <label>
+                <input type="checkbox" id="sendEmail" class="filled-in" checked="checked" />
+                <span>Stuur een email met de link naar de factuur</span>
+            </label>
+        </p>
         <br /><br />
 
         <a class="btn btn-large red darken-4 waves-effect disabled" id="btngenerate" onclick="M.Modal.getInstance($('#areusure')).open()">Facturen maken</a>
@@ -93,7 +99,7 @@
             }
         },
         generate: function () {
-            $.post('/Accountancy/autoInvoice', {amount: $('#amount').val()}, function (r) {
+            $.post('/Accountancy/autoInvoice', {amount: $('#amount').val(), sendmail: $('#sendEmail').prop('checked')}, function (r) {
                 if (r.status == 'success') {
                     generateSucceed = true;
                     M.toast({ html: 'Automatisch factureren gelukt', classes: 'green' });

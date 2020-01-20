@@ -116,7 +116,7 @@ namespace Overstag.Services
             };
         }
 
-        public static async Task<bool> MergeFamilyInvoices(int parentID)
+        public static async Task<bool> MergeFamilyInvoices(int parentID, bool sendmail = false)
         {
             using (var context = new OverstagContext())
             {
@@ -186,6 +186,9 @@ namespace Overstag.Services
 
                 context.Accounts.Update(cuser);
                 await context.SaveChangesAsync();
+
+                
+
                 return true;
             }
         }

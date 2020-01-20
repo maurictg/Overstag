@@ -325,14 +325,14 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<JsonResult> autoInvoice([FromForm]int amount)
+        public async Task<JsonResult> autoInvoice([FromForm]int amount, [FromForm]bool sendmail)
         {
             int usercount = 0;
             int failedmails = 0;
             List<string> errors = new List<string>();
 
-            //ontvanger, mail
-            List<(string,string)> Emails = new List<(string, string)>();
+            //ontvanger, token
+            List<(Account, string)> usersToEmail = new List<(Account, string)>();
 
             using (var context = new OverstagContext())
             {
@@ -347,15 +347,17 @@ namespace Overstag.Controllers
                             errors.Add(Services.Invoices.error.ToString());
 
                         usercount++;
-                        string message = $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(Services.Invoices.invoiceId)}\">https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(Services.Invoices.invoiceId)}</a><br></h4>";
-                        Emails.Add((user.Email,message));
+                        usersToEmail.Add((user,Services.Invoices.invoiceId));
                     }
                 }
 
-                foreach (var email in Emails)
+                if (sendmail)
                 {
-                    try { Core.General.SendMail("Factuur gemaakt", email.Item2, email.Item1); }
-                    catch { failedmails++; }
+                    foreach (var email in usersToEmail)
+                    {
+                        if (!new Services.InvoiceEmail(email.Item1, email.Item2).SendAsync().Result)
+                            failedmails++;
+                    }
                 }
 
                 return Json(new { status = "success", usercount, failedmails });
