@@ -233,52 +233,29 @@ namespace Overstag.Controllers
         /// <param name="a">The account info (email adress)</param>
         /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
-        public JsonResult postMailreset(Account a)
+        public JsonResult postMailreset([FromForm]string Email)
         {
-            if (!ModelState.IsValid)
+            using (var context = new OverstagContext())
             {
-                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
-            }
-            else
-            {
-                using (var context = new OverstagContext())
+                try
                 {
-                    try
+                    var account = context.Accounts.Where(e => e.Email == Email).FirstOrDefault();
+                    if (account != null)
                     {
-                        UserController u = new UserController();
-                        var account = context.Accounts.Where(e => e.Email == a.Email).FirstOrDefault();
-                        if(account != null)
-                        {
-                            try
-                            {
-                                string message = "<h1>Overstag wachtwoord reset</h1>" +
-                                    "Beste " + account.Firstname + ",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>" +
-                                    "Klik op <a href='http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(account.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
-                                    "Als de link het niet doet, kopieer en plak deze dan: http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(account.Token)+"<br>"+
-                                    "<br>Success! Mocht het niet werken, neem dan contact met ons op";
-                                string res = Core.General.SendMail("Wachtwoord reset", message, account.Email);
-                                if (res == "OK")
-                                {
-                                    return Json(new { status = "success" });
-                                }
-                                else
-                                {
-                                    return Json(new { status = "error", error = res });
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
-                            }
-                        }
-                        else
-                        {
-                            return Json(new { status = "error", error = "Dit mailadres is niet bekend in ons systeem" });
-                        }
+                        var mail = new Services.PassresetMail(account);
 
+                        if (mail.SendAsync().Result)
+                            return Json(new { status = "success" });
+                        else
+                            return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = mail.error.ToString() });
                     }
-                    catch(Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
+                    else
+                    {
+                        return Json(new { status = "error", error = "Dit mailadres is niet bekend in ons systeem" });
+                    }
+
                 }
+                catch (Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
             }
         }
 

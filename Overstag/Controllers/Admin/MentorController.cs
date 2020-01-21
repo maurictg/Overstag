@@ -262,7 +262,7 @@ namespace Overstag.Controllers
                     eve.Description = e.Description;
                     eve.When = e.When;
                     eve.Cost = e.Cost;
-                    eve.Type = 0; //TEMPORARY
+                    eve.Type = (byte)(e.Title.ToLower().Contains("chill") ? 0 : 1);
 
                     if (e.Id == -1)
                         context.Events.Add(eve);

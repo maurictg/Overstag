@@ -84,4 +84,28 @@ namespace Overstag.Services
             this.message = $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(invoiceToken)}\">https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(invoiceToken)}</a><br></h4>";
         }
     }
+
+    public class PassWarningMail : Email
+    {
+        public PassWarningMail(Account user) : base("Wachtwoord gewijzigd", "","","noreply@stoverstag.nl", null,null)
+        {
+            this.credentials = new NetworkCredential(Core.General.Credentials.mailUsername, Core.General.Credentials.mailPass);
+            this.to.Clear();
+            this.to.Add(user.Email);
+            this.message = $"<h1>Iemand heeft uw wachtwoord veranderd</h1><h4>Beste {user.Firstname}, <br>Op {DateTime.Now.ToString("dd-MM-yyyy")} om {DateTime.Now.ToString("HH:mm:ss")} heeft iemand uw wachtwoord veranderd.<br><b>Was u dit zelf? Beschouw deze mail dan als niet verzonden</b>.<br>Als je deze activiteit niet herkent, neem dan contact met ons op.</h4>";
+        }
+    }
+
+    public class PassresetMail : PassWarningMail
+    {
+        public PassresetMail(Account user) : base(user)
+        {
+            this.message = "<h1>Overstag wachtwoord reset</h1>" +
+                                    "Beste " + user.Firstname + ",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>" +
+                                    "Klik op <a href='http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(user.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
+                                    "Als de link het niet doet, kopieer en plak deze dan: http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(user.Token) + "<br>" +
+                                    "<br>Success! Mocht het niet werken, neem dan contact met ons op";
+            this.title = "Wachtwoord reset";
+        }
+    }
 }
