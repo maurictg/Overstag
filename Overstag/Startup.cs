@@ -1,14 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Razor.Runtime;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
 
@@ -26,6 +21,8 @@ namespace Overstag
             services.AddDistributedMemoryCache(); // Adds a default in-memory implementation of IDistributedCache
             services.AddSession();
             services.AddResponseCaching();
+            services.AddRazorPages();
+            services.AddHttpContextAccessor();
             services.AddResponseCompression(options => {
                 options.Providers.Add<GzipCompressionProvider>();
                 options.Providers.Add<BrotliCompressionProvider>();
@@ -49,12 +46,19 @@ namespace Overstag
             app.UseResponseCompression();
             app.UseSession();
             app.UseStaticFiles();
-            app.UseMiddleware<Overstag.Middlewares.Authentication>();
+            app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
+            app.UseWebSockets(new WebSocketOptions()
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(60),
+                ReceiveBufferSize = 1024 * 4
+            });
 
+            app.Map("/ws", Middlewares.SocketMiddleware.Handle);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages();
             });
         }
     }

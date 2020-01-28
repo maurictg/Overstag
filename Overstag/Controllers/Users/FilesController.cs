@@ -11,6 +11,7 @@ namespace Overstag.Controllers.Users
 {
     public class FilesController : Controller
     {
+       
         [HttpGet]
         [Route("Files/Serve/{token}")]
         public IActionResult Serve(string token)
@@ -62,7 +63,7 @@ namespace Overstag.Controllers.Users
                             await file.CopyToAsync(stream);
                         }
 
-                        context.Files.Add(new Files()
+                        context.Files.Add(new Models.File()
                         {
                             Mimetype = file.ContentType,
                             Name = file.FileName,

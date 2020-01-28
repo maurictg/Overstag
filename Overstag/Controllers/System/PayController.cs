@@ -15,6 +15,7 @@ using Mollie.Api.Client;
 using Mollie.Api.Models.Payment.Request;
 using Mollie.Api.Models.Payment.Response;
 using Mollie.Api.Models.Payment;
+using Microsoft.EntityFrameworkCore;
 
 namespace Overstag.Controllers
 {
@@ -32,7 +33,7 @@ namespace Overstag.Controllers
             invoiceid = Uri.UnescapeDataString(invoiceid);
             using(var context = new OverstagContext())
             {
-                var invoice = context.Invoices.FirstOrDefault(f => f.PayID == invoiceid);
+                var invoice = context.Invoices.FirstOrDefault(f => f.InvoiceID == invoiceid);
 
                 if (invoice == null)
                 {
@@ -41,34 +42,15 @@ namespace Overstag.Controllers
                 }
                 else
                 {
-                    List<Event> events = new List<Event>();
-
-                    foreach(string eve in invoice.EventIDs.Split(','))
-                        events.Add(context.Events.First(f => f.Id == Convert.ToInt32(eve)));
-
-                    var iinvoice = new IInvoice {
-                        Amount = invoice.Amount,
-                        UserID = invoice.UserID,
-                        Payed = (invoice.Payed==1),
-                        PayID = invoice.PayID,
-                        Timestamp = invoice.Timestamp,
-                        Events = events.OrderBy(e => e.When).ToList(),
-                        Additions = invoice.AdditionsCount
-                    };
-
-                    if(iinvoice.Payed)
+                    if(invoice.Payed)
                     {
                         //Validate payment
-                        var payment = context.Payments.OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.InvoiceID == invoice.PayID);
+                        var payment = context.Payments.Include(f => f.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == invoice.InvoiceID);
                         if (payment != null && !string.IsNullOrEmpty(payment.PaymentID))
                             ViewBag.Payment = payment;
                     }
 
-                    return View(new OPayInfo
-                    {
-                        User = context.Accounts.First(a => a.Id==invoice.UserID),
-                        Invoice = iinvoice
-                    });
+                    return View(Services.Invoices.GetXInvoice(invoice.Id));
                 }
             }
         }
@@ -81,9 +63,11 @@ namespace Overstag.Controllers
         [HttpPost("Pay/Checkout")]
         public async Task<IActionResult> Checkout([FromForm]string invoiceid)
         {
+            bool createPayment = true;
+
             using (var context = new OverstagContext())
             {
-                var invoice = context.Invoices.FirstOrDefault(f => f.PayID == Uri.UnescapeDataString(invoiceid));
+                var invoice = await context.Invoices.Include(x => x.User).Include(y => y.Payment).FirstOrDefaultAsync(f => f.InvoiceID == Uri.UnescapeDataString(invoiceid));
 
                 if(invoice == null)
                 {
@@ -91,17 +75,51 @@ namespace Overstag.Controllers
                     return View("~/Views/Error/Custom.cshtml", error);
                 }
 
-                if(invoice.Payed == 1)
+
+                if(invoice.Payment != null)
+                {
+                    bool save = false;
+                    if (invoice.Payment.Status == PaymentStatus.Paid)
+                    {
+                        save = true;
+                        invoice.Payed = true;
+                    }
+                    else if(invoice.Payment.Status == PaymentStatus.Canceled || invoice.Payment.Status == PaymentStatus.Expired || invoice.Payment.Status == PaymentStatus.Failed)
+                    {
+                        save = true;
+                        invoice.Payment = null;
+                    }
+                    else if (invoice.Payment.Status == null)
+                        createPayment = false;
+
+                    try
+                    {
+                        if (save)
+                        {
+                            context.Invoices.Update(invoice);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                    catch(Exception e) { throw e; }
+                }
+
+                if (invoice.Payed)
                 {
                     string[] error = { "Factuur is al betaald", "<i>Wat probeer je? Ik zou echt werkelijk niet weten waarom je een factuur 2 keer zou betalen...</i>" };
                     return View("~/Views/Error/Custom.cshtml", error);
                 }
 
-                var user = context.Accounts.First(f => f.Id == invoice.UserID);
+                //Viewbag info
+                ViewBag.Amount = invoice.Amount;
 
+                if (!createPayment)
+                    return View(invoice.Payment);
+
+
+                var user = invoice.User;
                 string cost = Math.Round((double)invoice.Amount / 100, 2).ToString("F").Replace(",", ".");
 
-                string url = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Done/{Uri.EscapeDataString(invoice.PayID)}";
+                string url = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Done/{Uri.EscapeDataString(invoice.InvoiceID)}";
                 string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
 
                 //Create payment
@@ -119,15 +137,15 @@ namespace Overstag.Controllers
 #endif
                 };
 
-                pr.SetMetadata(Uri.EscapeDataString(invoice.PayID));
+                pr.SetMetadata(Uri.EscapeDataString(invoice.InvoiceID));
 #if MOLLIE_ENABLED
                 PaymentResponse ps = await pc.CreatePaymentAsync(pr);
                 ViewBag.PayLink = ps.Links.Checkout.Href;
 #endif
                 context.Payments.Add(new Payment()
                 {
-                    InvoiceID = invoice.PayID,
-                    UserID = invoice.UserID,
+                    Invoice = invoice,
+                    User = invoice.User,
                     PlacedAt = DateTime.Now,
 #if MOLLIE_ENABLED
                     PaymentID = ps.Id,
@@ -137,10 +155,7 @@ namespace Overstag.Controllers
 
                 await context.SaveChangesAsync();
 
-                //Viewbag info
-                ViewBag.Amount = invoice.Amount;
-
-                return View(context.Payments.First(f => f.InvoiceID == invoice.PayID));
+                return View(context.Payments.Include(x => x.Invoice).First(f => f.Invoice.InvoiceID == invoice.InvoiceID));
             }
         }
 
@@ -205,7 +220,7 @@ namespace Overstag.Controllers
         { 
             using(var context = new OverstagContext())
             {
-                var payment = context.Payments.OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.InvoiceID == Uri.UnescapeDataString(id));
+                var payment = context.Payments.Include(x => x.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == Uri.UnescapeDataString(id));
                 if (payment == null)
                 {
                     string[] error = { "Betaling niet gevonden", "Waarschijnlijk is de URL onjuist.<br/><i>Als het probleem blijft optreden neem dan contact met ons op.</i>" };
@@ -243,19 +258,19 @@ namespace Overstag.Controllers
 
                 using (var context = new OverstagContext())
                 {
-                    var payment = context.Payments.FirstOrDefault(f => f.PaymentID == id);
+                    var payment = context.Payments.Include(x => x.Invoice).Include(y => y.User).FirstOrDefault(f => f.PaymentID == id);
                     if (payment != null)
                     {
                         payment.Status = ps.Status;
                         payment.PayedAt = ps.PaidAt;
 
-                        var invoice = context.Invoices.FirstOrDefault(f => f.PayID == payment.InvoiceID);
+                        var invoice = payment.Invoice;
                         if (invoice != null)
                         {
                             if (payment.Status == PaymentStatus.Paid)
                             {
-                                invoice.Payed = 1;
-                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == payment.UserID).Firstname}", When = DateTime.Now, Type = 1 });
+                                invoice.Payed = true;
+                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentID}) van factuur door {payment.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = payment.User.Id });
                             }
                             
                             //if(payment.Status != PaymentStatus.Open)
@@ -292,8 +307,8 @@ namespace Overstag.Controllers
             {
                 using (var context = new OverstagContext())
                 {
-                    var payment = context.Payments.First(f => f.PaymentID == id);
-                    payment.InvoiceID = Uri.EscapeDataString(payment.InvoiceID);
+                    var payment = context.Payments.Include(f => f.Invoice).First(f => f.PaymentID == id);
+                    payment.Invoice.InvoiceID = Uri.EscapeDataString(payment.Invoice.InvoiceID);
                     return Json(new { status = "success", data = payment });
                 }
             }

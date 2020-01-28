@@ -11079,7 +11079,8 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mauri\\.nuget\\packages\\": {}
+    "C:\\Users\\mauri\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
@@ -11090,6 +11091,9 @@
       "packagesPath": "C:\\Users\\mauri\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\mauri\\Documents\\GitHub\\Overstag\\Overstag\\obj\\publish\\win-x64\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
         "C:\\Users\\mauri\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"

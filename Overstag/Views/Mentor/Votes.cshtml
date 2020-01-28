@@ -23,8 +23,8 @@
                     <td>
                         <b>@idea.Title</b>
                         <div class="right">
-                            <span class="new badge green" data-badge-caption="likes">@idea.Votes.Count(i => i.Upvote == 1) </span>
-                            <span class="new badge red" data-badge-caption="dislikes">@idea.Votes.Count(i => i.Upvote == 0) </span>
+                            <span class="new badge green" data-badge-caption="likes">@idea.Votes.Count(i => i.Upvote) </span>
+                            <span class="new badge red" data-badge-caption="dislikes">@idea.Votes.Count(i => !i.Upvote) </span>
                         </div>
                     </td>
                     <td>@idea.Description</td>

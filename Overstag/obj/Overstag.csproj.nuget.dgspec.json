@@ -13,6 +13,9 @@
         "packagesPath": "C:\\Users\\mauri\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\mauri\\Documents\\GitHub\\Overstag\\Overstag\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
           "C:\\Users\\mauri\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -40,7 +43,7 @@
           "dependencies": {
             "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.AspNetCore.Razor.Runtime": {
               "target": "Package",
@@ -48,25 +51,25 @@
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.Abstractions": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.Relational": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer.Design": {
               "target": "Package",
@@ -74,23 +77,35 @@
             },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.Sqlite.Core": {
               "target": "Package",
-              "version": "[3.1.0, )"
+              "version": "[3.1.1, )"
             },
             "Microsoft.EntityFrameworkCore.Sqlite.Design": {
               "target": "Package",
               "version": "[1.1.6, )"
             },
+            "Microsoft.Extensions.Logging.Debug": {
+              "target": "Package",
+              "version": "[3.1.1, )"
+            },
             "Microsoft.Extensions.PlatformAbstractions": {
               "target": "Package",
               "version": "[1.1.0, )"
             },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[3.1.0, )"
+            },
             "Mollie.Api": {
               "target": "Package",
               "version": "[2.0.7.1, )"
+            },
+            "MySql.Data.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.19, )"
             },
             "QRCoder": {
               "target": "Package",

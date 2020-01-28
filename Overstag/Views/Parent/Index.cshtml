@@ -4,44 +4,51 @@
     Layout = "_UserLayout";
 }
 
-<div>
-    <h3>Mijn gezin</h3>
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <th>Naam</th>
-                <th>Acties</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model.Members)
-            {
+    <div>
+        <h3 class="center-align blue-dark-text">Mijn gezin</h3>
+        <table>
+            <thead>
                 <tr>
-                    <td>@user.Firstname</td>
-                    <td>
-                        <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
-                    </td>
+                    <th>Naam</th>
+                    <th>Acties</th>
                 </tr>
-            }
-            @if (Model.Members.Count() == 0)
-            {
-                <tr><td colspan="2" class="center-align"><h5><b>Geen gezinsleden</b>.</h5> Klik op de + om iemand uit te nodigen</td></tr>
-            }
-        </tbody>
-    </table>
-    <div class="center-align">
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Members)
+                {
+                    <tr>
+                        <td>@user.Firstname</td>
+                        <td>
+                            <a class="waves-effect waves-light btn-small red" onclick="Parent.openRemove(@user.Id)">Verwijderen</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Members.Count() == 0)
+                {
+                    <tr><td colspan="2" class="center-align"><h5 class="orange-text"><b>Geen gezinsleden gevonden.</b></h5> Klik op de + om iemand uit te nodigen</td></tr>
+                }
+            </tbody>
+        </table>
+        @if (Model.Members.Count() > 0)
+        {
+            <div class="center-align">
+                <br />
+                <a href="/Parent/Billing" class="waves-effect waves-light btn blue-dark">Betalingen en facturering</a>
+            </div>
+        }
         <br />
-        <a href="/Parent/Billing" class="waves-effect waves-light btn blue-dark">Betalingen en facturering</a>
     </div>
-    <br />
-</div>
 
-<div class="tap-target blue-dark" id="tt" data-target="fab">
-    <div class="tap-target-content">
-        <h5>Gezinsleden toevoegen</h5>
-        <p>Klik hier om gezinsleden toe te voegen</p>
+@if (Model.Members.Count() == 0)
+{
+    <div class="tap-target blue-dark" id="tt" data-target="fab">
+        <div class="tap-target-content white-text">
+            <h5>Gezinsleden toevoegen</h5>
+            <p>Klik hier om gezinsleden toe te voegen</p>
+        </div>
     </div>
-</div>
+}
+
 
 <div class="fixed-action-btn">
     <a id="fab" class="btn-floating btn-large blue-dark waves-effect" onclick="Parent.openLink()">

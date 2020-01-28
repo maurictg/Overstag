@@ -10,10 +10,10 @@
     <meta name="google-site-verification" content="sYX4bBfxEv4Mg3974SRhXeQ6-JRTfaUTOyKNw_tqT5A" />
     <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/Overstag.js"></script>
+    <script type="text/javascript" src="~/js/Overstag.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/css/Overstag.min.css" />
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="~/css/Overstag.css" />
     <link rel="canonical" href="@ViewBag.Canonical" />
     <script>
         Overstag = {
@@ -41,14 +41,12 @@
             },
 
             //IMPORTANT VARIABLES
-            firstname: '@Context.Session.GetString("Name")',
             loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
             type: @Html.Raw(Context.Session.GetInt32("Type") != null ? Context.Session.GetInt32("Type") : -1),
-            url: window.location.href.replace(window.location.origin,''),
         }
     </script>
 </head>
-<body>
+<body class="blue-dark">
     <nav>
         <div class="nav-wrapper blue-light">
             <a href="#" id="_title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
@@ -76,6 +74,17 @@
     </ul>
 
     @RenderBody()
+
+    @if (DateTime.Now.Month == 12 || DateTime.Now.Month == 1)
+    {
+        <div class="fixed-action-btn hide-on-small-and-down">
+            <a class="btn-floating btn-large" id="btnsnow">
+                <i class="large blue-light material-icons waves-effect">star_border</i>
+            </a>
+        </div>
+
+        <div id="particles-js"></div>
+    }
 
     <script>
         $(document).ready(function () {

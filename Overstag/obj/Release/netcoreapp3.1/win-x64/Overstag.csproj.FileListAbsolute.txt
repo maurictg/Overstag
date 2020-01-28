@@ -834,7 +834,6 @@ C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Razor\Views\User\Index.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Razor\Views\User\Payment.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Razor\Views\User\Settings.cshtml.g.cs
-C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Razor\Views\User\Subscriptions.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Razor\Views\User\Vote.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Razor\Views\_ViewStart.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Release\netcoreapp3.1\win-x64\Overstag.RazorTargetAssemblyInfo.cache
