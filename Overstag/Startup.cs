@@ -54,7 +54,7 @@ namespace Overstag
                 ReceiveBufferSize = 1024 * 4
             });
 
-            app.Map("/ws", Middlewares.SocketMiddleware.Handle);
+            app.Map("/ws", Middlewares.SocketMiddleware.UseTest);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
