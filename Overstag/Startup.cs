@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
+using Overstag.Services;
 
 namespace Overstag
 {
@@ -28,10 +29,12 @@ namespace Overstag
                 options.Providers.Add<BrotliCompressionProvider>();
                 options.EnableForHttps = true; 
             });
+
+            services.AddSocketHandler(); //custom, Sockets.cs
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -48,13 +51,17 @@ namespace Overstag
             app.UseStaticFiles();
             app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
-            app.UseWebSockets(new WebSocketOptions()
+            /*app.UseWebSockets(new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(60),
                 ReceiveBufferSize = 1024 * 4
             });
 
-            app.Map("/ws", Middlewares.SocketMiddleware.UseTest);
+            app.Map("/ws", Middlewares.SocketMiddleware.UseTest);*/
+
+            app.UseWebSockets();
+            app.MapSocketHandler("/ws", provider.GetService<SocketHandler>());
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
