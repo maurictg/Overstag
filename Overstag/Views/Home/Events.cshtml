@@ -90,17 +90,7 @@
     var Events = {
         init: function () {
             $('#_events, #_mevents').addClass('active');
-            if (Overstag.type == 1)
-                $('#btnsub').addClass('disabled');
             $('.card').fadeIn();
-        },
-        sub: function () {
-            if (!Overstag.loggedin) {
-                localStorage.setItem("redirect", "/User/Events");
-                $(location).attr('href', '/Register/Login');
-            } else {
-                $(location).attr('href', '/User/Events');
-            }
         }
     }
 

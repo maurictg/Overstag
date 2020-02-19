@@ -150,29 +150,36 @@
                             <div class="collapsible-body">
                                 <h6><b>Omschrijving:</b> @e.Event.Description</h6>
                                 <h6>Totaal aantal deelnemers: <b>@e.Sub.Count() (<span class="blue-text">@e.Sub.Where(f => f.account.Gender).Count()</span> / <span class="red-text">@e.Sub.Where(f => !f.account.Gender).Count()</span>)</b></h6>
-                                <table class="responsive-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Naam</th>
-                                            <th>Achternaam</th>
-                                            <th>Leeftijd</th>
-                                            <th>Geslacht</th>
-                                            <th>Vriend(inn)en mee?</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var a in e.Sub.Where(f => f.account.Type < 3))
-                                        {
+                                @if (e.Sub.Count(f => f.account.Type < 3) > 0)
+                                {
+                                    <table class="responsive-table">
+                                        <thead>
                                             <tr>
-                                                <td>@a.account.Firstname</td>
-                                                <td>@a.account.Lastname</td>
-                                                <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
-                                                <td>@Html.Raw((a.account.Gender) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
-                                                <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
+                                                <th>Naam</th>
+                                                <th>Achternaam</th>
+                                                <th>Leeftijd</th>
+                                                <th>Geslacht</th>
+                                                <th>Vriend(inn)en mee?</th>
                                             </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var a in e.Sub.Where(f => f.account.Type < 3))
+                                            {
+                                                <tr>
+                                                    <td>@a.account.Firstname</td>
+                                                    <td>@a.account.Lastname</td>
+                                                    <td>@Overstag.Core.General.getAge(a.account.Birthdate)</td>
+                                                    <td>@Html.Raw((a.account.Gender) ? "<b class=\"blue-text\">Man</b>" : "<b class=\"red-text\">Vrouw</b>")</td>
+                                                    <td>@Html.Raw((a.part.FriendCount > 0) ? "Ja, <b class=\"green-text\">" + a.part.FriendCount + "</b>" : "Nee")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                                else
+                                {
+                                    <h5>Nog geen inschrijvingen.</h5>
+                                }
                             </div>
                         </li>
                     }

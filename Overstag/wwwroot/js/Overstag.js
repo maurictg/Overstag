@@ -4,12 +4,6 @@
             this.Theme.init();
             this.mapEvents();
         },
-        /*useHelper: function(callback) {
-            $.getScript('/js/Helper.js', function () {
-                if (callback !== undefined && callback !== null)
-                    callback();
-            });
-        },*/
         mapEvents: function () {
             $('#btnsnow').click(this.Theme.letItSnow);
         },

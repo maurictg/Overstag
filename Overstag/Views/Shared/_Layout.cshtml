@@ -8,43 +8,47 @@
     <meta name="description" content="@ViewBag.Description" />
     <meta name="keywords" content="@ViewBag.Keywords" />
     <meta name="google-site-verification" content="sYX4bBfxEv4Mg3974SRhXeQ6-JRTfaUTOyKNw_tqT5A" />
+
     <script type="text/javascript" src="~/js/jquery-3.4.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
     <script type="text/javascript" src="~/js/Overstag.min.js"></script>
+    @RenderSection("Scripts", required: false)
+
+
     <link rel="stylesheet" type="text/css" href="~/css/Overstag.min.css" />
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
+    @RenderSection("Stylesheets", required: false)
+
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link rel="canonical" href="@ViewBag.Canonical" />
     <script>
-        Overstag = {
-            init: function(){
-                //Check if user is logged in
-                if (Overstag.loggedin) {
-                    $('#_reg a').attr('href', '#');
-                    $('#_reg a').text('Uitloggen');
-                    $('#_mreg a').attr('href', '#');
-                    $('#_mreg a').text('Uitloggen');
-                    $('#_reg a').attr('onclick', 'OverstagJS.General.logout();');
-                    $('#_mreg a').attr('onclick', 'OverstagJS.General.logout();');
+        let loggedin = ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True');
+        let usertype = @Html.Raw(Context.Session.GetInt32("Type") != null ? Context.Session.GetInt32("Type") : -1);
 
-                    $('.hidden').show();
+        $(function () {
+            if (loggedin) {
+                $('#_reg a').attr('href', '#');
+                $('#_reg a').text('Uitloggen');
+                $('#_mreg a').attr('href', '#');
+                $('#_mreg a').text('Uitloggen');
+                $('#_reg a').attr('onclick', 'OverstagJS.General.logout();');
+                $('#_mreg a').attr('onclick', 'OverstagJS.General.logout();');
 
-                    if (Overstag.type != 1) {
-                        $('#_events a').attr('href', '/User/Events');
-                        $('#_mevents a').attr('href', '/User/Events');
-                        $('#_events a').text('Mijn agenda');
-                        $('#_mevents a').text('Mijn agenda');
-                    }
+                $('.hidden').show();
+
+                if (usertype != 1) {
+                    $('#_events a').attr('href', '/User/Events');
+                    $('#_mevents a').attr('href', '/User/Events');
+                    $('#_events a').text('Mijn agenda');
+                    $('#_mevents a').text('Mijn agenda');
                 }
+            }
 
-                OverstagJS.General.detectIE();
-            },
-
-            //IMPORTANT VARIABLES
-            loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
-            type: @Html.Raw(Context.Session.GetInt32("Type") != null ? Context.Session.GetInt32("Type") : -1),
-        }
+            OverstagJS.General.detectIE();
+        });
     </script>
+
+    @RenderSection("Styles", required: false)
 </head>
 <body class="blue-dark">
     <nav>
@@ -93,8 +97,6 @@
             $('.modal').modal();
             $('.materialboxed').materialbox();
         });
-
-        Overstag.init();
     </script>
 
     <div id="_data"></div>

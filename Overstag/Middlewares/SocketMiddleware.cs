@@ -1,46 +1,61 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Overstag.Services;
 
 namespace Overstag.Middlewares
 {
     public class SocketMiddleware
     {
-        public static void Handle(IApplicationBuilder app)
+        public readonly RequestDelegate _next;
+        public SocketHandler Handler { get; set; }
+
+        public SocketMiddleware(RequestDelegate next, SocketHandler handler)
         {
-            app.Run(async context =>
-            {
-                if (context.WebSockets.IsWebSocketRequest)
-                {
-                    WebSocket ws = await context.WebSockets.AcceptWebSocketAsync();
-                    await HandleWS(context, ws);
-                }
-                else
-                    context.Response.StatusCode = 400;
-            });
+            _next = next;
+            Handler = handler;
         }
 
-        public static async Task HandleWS(HttpContext context, WebSocket socket)
+        /// <summary>
+        /// Invokes websocket async
+        /// </summary>
+        /// <param name="context">Given HttpContext from middleware</param>
+        /// <returns>Task</returns>
+        public async Task InvokeAsync(HttpContext context)
+        {
+            if (context.WebSockets.IsWebSocketRequest)
+            {
+                byte type = (!string.IsNullOrEmpty(context.Request.Query["type"])) ? Convert.ToByte(context.Request.Query["type"]) : (byte)0;
+                bool broadcast = string.IsNullOrEmpty(context.Request.Query["noBroadcast"]);
+                string name = (!string.IsNullOrEmpty(context.Request.Query["name"])) ? context.Request.Query["name"].ToString() : "Anonymous";
+
+                WebSocket ws = await context.WebSockets.AcceptWebSocketAsync();
+                await Handler.Add(ws, type, broadcast, name);
+                await Receive(ws, async (result, buffer) =>
+                {
+                    if (result.MessageType == WebSocketMessageType.Text)
+                        await Handler.Receive(ws, result, buffer);
+                    else if (result.MessageType == WebSocketMessageType.Close)
+                        await Handler.Remove(ws, true);
+                });
+            }
+        }
+
+        /// <summary>
+        /// Handle when websocket receives data
+        /// </summary>
+        /// <param name="socket">The socket</param>
+        /// <param name="messageHandler">The function that handles the event</param>
+        /// <returns>Task</returns>
+        private async Task Receive(WebSocket socket, Action<WebSocketReceiveResult, byte[]> messageHandler)
         {
             var buffer = new byte[1024 * 4];
-            WebSocketReceiveResult result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
-            while (!result.CloseStatus.HasValue)
+            while(socket.State == WebSocketState.Open)
             {
-                string message = Encoding.UTF8.GetString(buffer).Trim('\0');
-                message = "You said: " + message;
-
-                byte[] bytes = new byte[message.Length * sizeof(char)];
-                Buffer.BlockCopy(message.ToCharArray(), 0, bytes, 0, bytes.Length);
-
-                await socket.SendAsync(new ArraySegment<byte>(bytes, 0, bytes.Length), result.MessageType, result.EndOfMessage, System.Threading.CancellationToken.None);
-                result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
+                WebSocketReceiveResult result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), System.Threading.CancellationToken.None);
+                messageHandler(result, buffer);
             }
-            await socket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, System.Threading.CancellationToken.None);
         }
     }
 }

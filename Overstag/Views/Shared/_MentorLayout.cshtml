@@ -14,19 +14,6 @@
     <link rel="stylesheet" type="text/css" href="~/css/chart.min.css" />
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="~/css/Overstag.min.css" />
-    <script>
-        Overstag = {
-            init: function(){
-
-            },
-
-            //IMPORTANT VARIABLES
-            firstname: '@Context.Session.GetString("Name")',
-            loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
-            type: @Context.Session.GetInt32("Type"),
-            url: window.location.href.replace(window.location.origin,''),
-        }
-    </script>
 </head>
 <body>
     <nav>

@@ -20,7 +20,7 @@ namespace Overstag.Middlewares
 
         private readonly string[] allpaths =
         {
-            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/websockets"
+            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/Public"
         };
 
         public Authentication(RequestDelegate next)
@@ -35,7 +35,7 @@ namespace Overstag.Middlewares
                 int code = 400;
                 bool loggedin = (type != null);
 
-                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo", "/ws", "/websockets" };
+                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo", "/ws", "/Public" };
 
                 if (loggedin)
                     for (int i = 0; i <= type; i++)

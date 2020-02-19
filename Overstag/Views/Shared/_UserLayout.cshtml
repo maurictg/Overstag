@@ -12,22 +12,16 @@
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="~/css/Overstag.min.css" />
     <script>
-        Overstag = {
-            init: function(){
-                if (Overstag.type == 1) {
-                    $('#_mfamily').show();
-                    $('#_family').show();
-                    $('#_aevent').hide();
-                    $('#_maevent').hide();
-                }
-            },
+        let usertype = @Html.Raw(Context.Session.GetInt32("Type") != null ? Context.Session.GetInt32("Type") : -1);
 
-            //IMPORTANT VARIABLES
-            firstname: '@Context.Session.GetString("Name")',
-            loggedin: ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True'),
-            type: @Context.Session.GetInt32("Type"),
-            url: window.location.href.replace(window.location.origin,''),
-        }
+        $(function () {
+            if (usertype == 1) {
+                $('#_mfamily').show();
+                $('#_family').show();
+                $('#_aevent').hide();
+                $('#_maevent').hide();
+            }
+        });
     </script>
 </head>
 <body>
@@ -65,8 +59,6 @@
             $('.collapsible').collapsible();
             $('.modal').modal();
         });
-
-        Overstag.init();
     </script>
 
     <div id="_data"></div>
