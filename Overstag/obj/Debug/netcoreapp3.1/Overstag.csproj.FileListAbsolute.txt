@@ -907,7 +907,6 @@ C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\ru\Mic
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
-C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Razor\Pages\Websockets.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Razor\Views\Mentor\Accountancy\Declaration.cshtml.g.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Overstag.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Overstag.MvcApplicationPartsAssemblyInfo.cache
@@ -931,3 +930,4 @@ C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\MySql.
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\Renci.SshNet.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\SshNet.Security.Cryptography.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\System.Xml.XPath.XmlDocument.dll
+C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Razor\Pages\Public\Live\Lasergame.cshtml.g.cs

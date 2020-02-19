@@ -51,13 +51,6 @@ namespace Overstag
             app.UseStaticFiles();
             app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
-            /*app.UseWebSockets(new WebSocketOptions()
-            {
-                KeepAliveInterval = TimeSpan.FromSeconds(60),
-                ReceiveBufferSize = 1024 * 4
-            });
-
-            app.Map("/ws", Middlewares.SocketMiddleware.UseTest);*/
 
             app.UseWebSockets();
             app.MapSocketHandler("/ws", provider.GetService<SocketHandler>());

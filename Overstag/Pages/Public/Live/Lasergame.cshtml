@@ -1,0 +1,128 @@
+﻿@page
+@{
+    ViewData["Title"] = "Lasergame";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+
+</div>
+
+@section Scripts { 
+    <script src="~/js/Live.js"></script>
+}
+
+@section Styles {
+    <style>
+        body {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        body::before {
+            opacity: 0.5;
+            position: absolute;
+            content:  url("/img/wallpapers/abandoned.jpg");
+            z-index: -1;
+        }
+    </style>
+}
+
+<div id="welcome" class="white-text center-align">
+    <h1><b>Welkom</b></h1>
+    <h3>Meld je aan bij een post.</h3>
+</div>
+
+<div id="roundover" style="display: none;" class="center-align">
+    <h1 class="red-text"><b>Ronde voorbij</b></h1>
+    <h3 class="white-text">Ga terug naar de post</h3>
+</div>
+
+<div id="timer" style="display: none;" class="white-text center-align">
+    <br/>
+    <h1 id="lblcount" style="font-size: 20em; font-family: 'Segoe UI';">20</h1>
+</div>
+
+<div id="stats">
+
+</div>
+
+<script>
+    var i = null;
+    var round = 0;
+    var roundLength = 180;
+    var Lasergame = {
+        init: function () {
+            $('#_title').html('&nbsp;Lasergame LIVE');
+            $('#_title').parent().removeClass('blue-light').addClass('blue-grey darken-3');
+            $('#nav-mobile>li>a').addClass('blue-grey-text text-darken-3');
+            $('body').removeClass('blue-dark').addClass('black');
+            OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle)
+            $('#_progbar>div').removeClass('indeterminate').addClass('determinate').css('width','100%');
+        },
+        start: function () {
+            Lasergame.clear();
+            $('#timer').fadeIn();
+            $('#lblcount').css('color', '');
+            $('#lblcount').text('Ronde '+ (++round));
+            setTimeout(function () {
+                $('#_progbar>div').css('width', '100%');
+                $('#_progbar').show();
+                $('#lblcount').text('20');
+                var count = 20;
+                clearInterval(i);
+                i = setInterval(function () {
+                    if (count > -1) count--;
+                    else {
+                        clearInterval(i);
+                        $('#timer, #_progbar').fadeOut('slow');
+
+                        var time = roundLength;
+                        i = setInterval(function () {
+                            if (--time < 0) {
+                                $('#_title').html('&nbsp;Lasergame LIVE');
+                                clearInterval(i);
+                                $('#roundover').show();
+                                return;
+                            }
+                            $('#_title').html('&nbsp;Ronde ' + round + ' <b>' + time.toTimeString()+'</b>');
+                        }, 1000);
+                    }
+
+                    if (count > 0) {
+                        $('#_progbar>div').css('width', count * 5 + '%');
+                        $('#lblcount').text(count);
+                    } else {
+                        $('#_progbar>div').css('width', '0%');
+                        $('#lblcount').css('color', 'red');
+                        $('#lblcount').text('Go!');
+                    }
+
+                }, 1000);
+            }, 2000);
+        },
+        clear: function () {
+            $('#_progbar, #timer, #welcome, #roundover').hide();
+            clearInterval(i);
+        }
+    };
+
+    
+
+    Number.prototype.toTimeString = function () {
+        var sec_num = parseInt(this, 10);
+        var hours = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (minutes < 10) { minutes = "0" + minutes; }
+        if (seconds < 10) { seconds = "0" + seconds; }
+        return minutes + ':' + seconds;
+    }
+</script>
+<script>
+    $(function() {
+        Lasergame.init();
+    });
+</script>
