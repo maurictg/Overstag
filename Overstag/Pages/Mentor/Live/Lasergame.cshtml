@@ -1,0 +1,36 @@
+﻿@page
+@model Overstag.LasergameModel
+@{
+    ViewData["Title"] = "Lasergame";
+    Layout = "~/Views/Shared/_MentorLayout.cshtml";
+}
+
+@section Scripts {
+    <script src="~/js/Live.js"></script>
+}
+
+<h1>Lasergame</h1>
+
+
+<script>
+    var token = '@Uri.EscapeDataString((Model.Token!=null)?Model.Token:"")';
+    var Lasergame = function () {
+        return {
+            init: function () {
+                $('#_title').html('&nbsp;Lasergame LIVE Mentor');
+                $('#_title').parent().removeClass('green darken-4').addClass('blue-grey darken-3');
+                $('body').addClass('blue-dark white-text');
+                OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handler);
+            },
+            handler: function (data) {
+                console.log(data)
+            }
+        };
+    }();
+</script>
+
+<script>
+    $(function () {
+        Lasergame.init();
+    });
+</script>

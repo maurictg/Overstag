@@ -931,3 +931,4 @@ C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\Renci.
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\SshNet.Security.Cryptography.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\bin\Debug\netcoreapp3.1\System.Xml.XPath.XmlDocument.dll
 C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Razor\Pages\Public\Live\Lasergame.cshtml.g.cs
+C:\Users\mauri\Documents\GitHub\Overstag\Overstag\obj\Debug\netcoreapp3.1\Razor\Pages\Mentor\Live\Lasergame.cshtml.g.cs

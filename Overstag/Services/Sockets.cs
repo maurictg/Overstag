@@ -24,8 +24,7 @@ namespace Overstag.Services
 
         /* Types
          * 0: all
-         * 1: lasergame live
-         * 2: lasergame admin
+         * 1: lasergame
          */
     }
 
@@ -49,10 +48,7 @@ namespace Overstag.Services
         public ConnectionPool FindPool(int type)
         {
             ConnectionPool p = _pools.FirstOrDefault(f => f.Type == type);
-            if(p == null)
-                p = new ConnectionPool((byte)type);
-
-            return p;
+            return (p == null) ? new ConnectionPool((byte)type) : p;
         }
 
         public string FindId(WebSocket socket) => Find(socket).Id;
@@ -113,10 +109,20 @@ namespace Overstag.Services
             byte[] data = new byte[result.Count];
             Buffer.BlockCopy(buffer, 0, data, 0, result.Count);
 
-            await Task.Run(() => {
-                //Get connectionPool of same kind, and handle data
-                FindPool(socket).HandleMessage(data);
-            });
+            (ConnectionPool, object) value = FindPool(socket).HandleMessage(data);
+
+            //Update list or insert
+            var pool = value.Item1;
+            var p = _pools.FirstOrDefault(f => f.Type == pool.Type);
+            if (p == null)
+                _pools.Add(pool);
+
+            p = pool;
+
+            //Broadcast result if not null
+            object rdata = value.Item2;
+            if (rdata != null)
+                await Broadcast(rdata, p.Type);
         }
     }
 

@@ -10,10 +10,16 @@
     <script type="text/javascript" src="~/js/Overstag.min.js"></script>
     <script type="text/javascript" src="~/js/moment.min.js"></script>
     <script type="text/javascript" src="~/js/chart.min.js"></script>
+    @RenderSection("Scripts", required: false)
+
     <link rel="stylesheet" type="text/css" href="~/css/materialize.min.css" />
     <link rel="stylesheet" type="text/css" href="~/css/chart.min.css" />
+    @RenderSection("Stylesheets", required: false)
+
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="~/css/Overstag.min.css" />
+
+    @RenderSection("Styles", required: false)
 </head>
 <body>
     <nav>
@@ -58,8 +64,6 @@
             $('.collapsible').collapsible();
             $('.modal').modal();
         });
-
-        Overstag.init();
     </script>
 
     <div id="_data"></div>

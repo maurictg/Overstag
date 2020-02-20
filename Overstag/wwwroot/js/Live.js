@@ -20,8 +20,17 @@
             };
 
             this.websocket.onmessage = function (e) {
-                this.handler(e.data);
+                if (OverstagLive.handler !== null && OverstagLive.handler !== undefined)
+                    OverstagLive.handler(e.data);
+                else
+                    console.log('Handler not set');
             };
+        },
+        sendObject: function (type, data) {
+            this.websocket.send(JSON.stringify({ t: type, data: JSON.stringify(data) }));
+        },
+        send: function (type, data) {
+            this.websocket.send(JSON.stringify({ t: type, data: data }));
         }
     };
 }();

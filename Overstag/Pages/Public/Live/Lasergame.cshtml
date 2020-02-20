@@ -1,4 +1,5 @@
 ﻿@page
+@model Overstag.WebsocketsModel
 @{
     ViewData["Title"] = "Lasergame";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -51,15 +52,21 @@
 <script>
     var i = null;
     var round = 0;
-    var roundLength = 180;
+    var roundLength = 300;
+    
     var Lasergame = {
         init: function () {
             $('#_title').html('&nbsp;Lasergame LIVE');
             $('#_title').parent().removeClass('blue-light').addClass('blue-grey darken-3');
             $('#nav-mobile>li>a').addClass('blue-grey-text text-darken-3');
             $('body').removeClass('blue-dark').addClass('black');
+
             OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle)
+
             $('#_progbar>div').removeClass('indeterminate').addClass('determinate').css('width','100%');
+        },
+        handle: function (data) {
+            console.log(data);
         },
         start: function () {
             Lasergame.clear();
