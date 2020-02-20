@@ -4,12 +4,14 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Overstag.Middlewares;
+using Overstag.Classes;
 
 namespace Overstag.Services
 {
@@ -19,6 +21,7 @@ namespace Overstag.Services
         public string Username { get; set; }
         public string Metadata { get; set; }
         public byte Type { get; set; }
+
         /* Types
          * 0: all
          * 1: lasergame live
@@ -26,9 +29,11 @@ namespace Overstag.Services
          */
     }
 
+
     public class SocketHandler
     {
         private ConcurrentDictionary<ConnectionData, WebSocket> _connections = new ConcurrentDictionary<ConnectionData, WebSocket>();
+        private ConcurrentBag<ConnectionPool> _pools = new ConcurrentBag<ConnectionPool>();
         private int _counter = 0;
 
         /// <summary>
@@ -39,6 +44,17 @@ namespace Overstag.Services
 
         public ConnectionData Find(WebSocket socket) => _connections.FirstOrDefault(f => f.Value == socket).Key;
         public ConnectionData Find(string id) => _connections.FirstOrDefault(f => f.Key.Id == id).Key;
+
+        public ConnectionPool FindPool(WebSocket socket) => FindPool(Find(socket).Type);
+        public ConnectionPool FindPool(int type)
+        {
+            ConnectionPool p = _pools.FirstOrDefault(f => f.Type == type);
+            if(p == null)
+                p = new ConnectionPool((byte)type);
+
+            return p;
+        }
+
         public string FindId(WebSocket socket) => Find(socket).Id;
         public WebSocket FindSocket(string id) => _connections.FirstOrDefault(f => f.Key.Id == id).Value;
 
@@ -50,9 +66,13 @@ namespace Overstag.Services
                 if (!_connections.TryAdd(data, socket))
                     return;
             });
-            
-            if(broadcast)
-                await Broadcast(Encoding.UTF8.GetBytes($"{data.Username} joined at {DateTime.Now.ToLongTimeString()}"), data.Type);
+
+            //Send data to joined client 
+            await Send(socket, new { t = "fillData", data = FindPool(socket).Data });
+
+            //Broadcast userJoined if has to do
+            if (broadcast)
+                await Broadcast(new { t = "userJoined", data = data.Username }, data.Type);
         }
 
         public async Task Remove(string id, bool broadcast = false) => await Remove(Find(id), broadcast);
@@ -61,29 +81,42 @@ namespace Overstag.Services
         {
             _connections.TryRemove(data, out var socket);
             await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed connection (server)", CancellationToken.None);
+
+            //Broadcast that user left. Receivers can ignore if they want
             if (broadcast)
-                await Broadcast(Encoding.UTF8.GetBytes($"{data.Username} left at {DateTime.Now.ToLongTimeString()}"));
+                await Broadcast(new { t = "userLeft", data = data.Username }, data.Type);
         } 
 
         public async Task Broadcast(byte[] data)
         {
             foreach (var socket in _connections.Select(f => f.Value).ToList())
-                await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                await Send(socket, data);
         }
 
         public async Task Broadcast(byte[] data, int type)
         {
             foreach (var socket in _connections.Where(g => g.Key.Type == type).Select(f => f.Value).ToList())
-                await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+                await Send(socket, data);
         }
+
+        public async Task Broadcast(object data) => await Broadcast(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
+        public async Task Broadcast(object data, int type) => await Broadcast(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)), type);
+
+        public async Task Send(WebSocket socket, byte[] data)
+            => await socket.SendAsync(new ArraySegment<byte>(data, 0, data.Length), WebSocketMessageType.Text, true, CancellationToken.None);
+
+        public async Task Send(WebSocket socket, object data)
+            => await Send(socket, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data)));
 
         public async Task Receive(WebSocket socket, WebSocketReceiveResult result, byte[] buffer)
         {
             byte[] data = new byte[result.Count];
             Buffer.BlockCopy(buffer, 0, data, 0, result.Count);
 
-            //Echo to all nodes
-            await Broadcast(data);
+            await Task.Run(() => {
+                //Get connectionPool of same kind, and handle data
+                FindPool(socket).HandleMessage(data);
+            });
         }
     }
 
