@@ -12,14 +12,13 @@ namespace Overstag.Classes
     {
         public byte Type { get; set; }
         public object Data { get; set; }
-        public ConcurrentDictionary<string, int> auths = new ConcurrentDictionary<string, int>();
 
         public ConnectionPool(byte type)
         {
             this.Type = type;
         }
 
-        public (ConnectionPool, object) HandleMessage(byte[] _data)
+        public (ConnectionPool, object) HandleMessage(byte[] _data, bool authenticated)
         {
             object returnData = null; //If returndata != null then this data will be broadcasted
             string json = Encoding.UTF8.GetString(_data);
@@ -31,34 +30,49 @@ namespace Overstag.Classes
                     this.Data = data.data;
                     break;
 
-               //Section lasergame
-                case "lg_nextRound": //JSON: {t: 'lg_nextRound', data: 'TOKEN,0'}
+                //Authed actions to all
+                case "broadcast": //Broadcast message
                     {
-                        string[] values = data.data.Split(',');
-                        if(values.Length == 2)
-                            if (Authenticate(values[0]))
-                                returnData = new { t = "nextRound", data = values[1] };
+                        if (authenticated)
+                                returnData = new { t = "alert", data = data.data };
                     }
                     break;
-                case "lg_reset": //JSON: {t: 'lg_reset', data: 'TOKEN'}
+               //Section lasergame
+                case "lg_nextRound": //JSON: {t: 'lg_nextRound', data: '0'}
                     {
-                        if (Authenticate(data.data))
+                        if (authenticated)
+                        {
+                            if (this.Data == null)
+                                this.Data = new LG_Data();
+
+                            if (this.Data.GetType() == typeof(LG_Data))
+                            {
+                                var l = (LG_Data)this.Data;
+                                l.round = Convert.ToInt32(data.data);
+
+                                returnData = new { t = "nextRound", data = data.data };
+                            }
+                        }
+                            
+                    }
+                    break;
+                case "lg_reset": //JSON: {t: 'lg_reset'}
+                    {
+                        if (authenticated)
                             returnData = new { t = "reset" };
                     }
                     break;
-                case "lg_insert": //JSON {t: 'lg_insert', data: TOKEN,json... }
+                case "lg_insert": //JSON {t: 'lg_insert', data: json... }
                     {
                         try
                         {
                             string[] d = data.data.Split(',');
                             if(d.Count() == 3)
-                            {
-                                if (Authenticate(d[0]))
+                                if (authenticated)
                                 {
-                                    this.Data = new LG_Data() { round = Convert.ToInt32(d[1]), roundLength = Convert.ToInt32(d[2]) };
-                                    return (this, new { t = "fillData", this.Data });
+                                    this.Data = new LG_Data() { round = Convert.ToInt32(d[0]), roundLength = Convert.ToInt32(d[1]), allowAudio = (d[2]=="true") };
+                                    return (this, new { t = "fillData", data = this.Data });
                                 }
-                            }
                         }
                         catch(Exception e)
                         {
@@ -67,14 +81,38 @@ namespace Overstag.Classes
                         }
                     }
                     break;
-                case "lg_update": //JSON {t: 'lg_insert', data: TOKEN,name,score }
+                case "lg_mute": //JSON {t: 'lg_mute', data: bool (allowed)
+                    {
+                        if (authenticated)
+                        {
+                            if (this.Data == null)
+                                this.Data = new LG_Data();
+
+                            if (this.Data.GetType() == typeof(LG_Data))
+                            {
+                                var l = (LG_Data)this.Data;
+                                l.allowAudio = (data.data == "true");
+                                this.Data = l;
+
+                                returnData = new { t = (l.allowAudio) ? "unmute" : "mute" };
+                            }
+                        }
+                    }
+                    break;
+                case "lg_playSound": //JSON {t: 'playSound', data: soundname}
+                    {
+                        if (authenticated)
+                            returnData = new { t = "playSound", data = data.data };
+                    }
+                    break;
+                case "lg_update": //JSON {t: 'lg_update', data: name,score }
                     {
                         try
                         {
                             string[] d = data.data.Split(',');
-                            if (d.Length == 3)
+                            if (d.Length == 2)
                             {
-                                if (Authenticate(d[0]))
+                                if (authenticated)
                                 {
                                     if (this.Data == null)
                                         this.Data = new LG_Data();
@@ -82,14 +120,14 @@ namespace Overstag.Classes
                                     if (this.Data.GetType() == typeof(LG_Data))
                                     {
                                         var l = (LG_Data)this.Data;
-                                        if (l.scores.ContainsKey(d[1]))
-                                            l.scores[d[1]] = Convert.ToInt32(d[2]);
+                                        if (l.scores.ContainsKey(d[0]))
+                                            l.scores[d[0]] = Convert.ToInt32(d[1]);
                                         else
-                                            l.scores.Add(d[1], Convert.ToInt32(d[2]));
+                                            l.scores.Add(d[0], Convert.ToInt32(d[1]));
 
                                         this.Data = l;
 
-                                        returnData = new { t = "updateScore", data = new { user = d[1], score = d[2] } };
+                                        returnData = new { t = "updateScore", data = new { user = d[0], score = d[1] } };
                                     }
                                 }
                             }
@@ -102,30 +140,6 @@ namespace Overstag.Classes
             }
 
             return (this, returnData);
-        }
-
-        private bool Authenticate(string userToken)
-        {
-            userToken = Uri.UnescapeDataString(userToken);
-            if(userToken != null)
-            {
-                if (auths.ContainsKey(userToken))
-                {
-                    if (auths[userToken] > 0)
-                        return true;
-                }
-                else
-                {
-                    var user = new OverstagContext().Accounts.FirstOrDefault(f => f.Token == userToken);
-                    if (user != null && user.Type > 0)
-                    {
-                        auths.TryAdd(user.Token, user.Type);
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
     }
 
@@ -143,12 +157,14 @@ namespace Overstag.Classes
     {
         public int round { get; set; }
         public int roundLength { get; set; }
+        public bool allowAudio { get; set; }
         public Dictionary<string, int> scores { get; set; }
        
         public LG_Data()
         {
             this.round = 0;
             this.roundLength = 300;
+            this.allowAudio = true;
             this.scores = new Dictionary<string, int>();
         }
     }

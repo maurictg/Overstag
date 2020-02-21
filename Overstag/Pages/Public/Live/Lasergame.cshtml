@@ -45,14 +45,21 @@
     <h1 id="lblcount" style="font-size: 20em; font-family: 'Segoe UI';">20</h1>
 </div>
 
-<div id="stats">
-
+<div id="stats" class="row" style="display: none;">
+    <h1 class="red-text">stats</h1>
 </div>
 
 <script>
     var i = null;
     var round = 0;
     var roundLength = 300;
+    var muted = false;
+
+    var scoreboard = [];
+
+    var nuclearAlarm;
+    var tornadoAlarm;
+    var emergencyAlarm;
     
     var Lasergame = {
         init: function () {
@@ -63,10 +70,108 @@
 
             OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle)
 
-            $('#_progbar>div').removeClass('indeterminate').addClass('determinate').css('width','100%');
+            $('#_progbar>div').removeClass('indeterminate').addClass('determinate').css('width', '100%');
         },
         handle: function (data) {
-            console.log(data);
+            data = JSON.parse(data);
+            switch (data.t) {
+                case 'fillData':
+                    {
+                        if (data.data != null) {
+                            var d = data.data;
+                            round = d.round;
+                            roundLength = d.roundLength;
+                            muted = !d.allowAudio;
+
+                            if (!muted)
+                                Lasergame.includeAlarms();
+                        }
+                    }
+                    break;
+                case 'alert':
+                    M.toast({ html: data.data, classes: 'orange' });
+                    break;
+                case 'nextRound':
+                    {
+                        round = Number(data.data) - 1;
+                        Lasergame.start();
+                    }
+                    break;
+                case 'reset':
+                    {
+                        scoreboard = [];
+                        Lasergame.clear();
+                    }
+                    break;
+                case 'mute':
+                    {
+                        if (muted == false) {
+                            nuclearAlarm.pause();
+                            nuclearAlarm.currentTime = 0;
+                            emergencyAlarm.pause();
+                            emergencyAlarm.currentTime = 0;
+                            tornadoAlarm.pause();
+                            tornadoAlarm.currentTime = 0;
+                        }
+
+                        muted = true;
+                    }
+                    break;
+                case 'unmute':
+                    muted = false;
+                    break;
+                case 'playSound':
+                    {
+                        muted = false;
+                        if (nuclearAlarm == undefined)
+                            Lasergame.includeAlarms();
+
+                        var playedPromise;
+
+                        try {
+                            if (data.data == 'nuclear') {
+                                const promise = nuclearAlarm.play();
+                                playedPromise = promise;
+                            }
+                            else if (data.data == 'emergency') {
+                                const promise = emergencyAlarm.play();
+                                playedPromise = promise;
+                            }
+                            else if(data.data == 'tornado'){
+                                const promise = tornadoAlarm.play();
+                                playedPromise = promise;
+                            }
+
+                            if (playedPromise) {
+                                if (playedPromise.state == 'pending')
+                                    M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
+                            }
+                        } catch (err) {
+                            console.log(err);
+                            M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
+                        }
+                    }
+                    break;
+                case 'updateScore':
+                    {
+                        var user = data.data.user;
+                        var score = data.data.score;
+
+                        for (var i = 0; i < scoreboard.length; i++) {
+                            if (scoreboard[i].user == user) {
+                                scoreboard[i].score = score;
+                                Lasergame.updateStats();
+                                return;
+                            }
+                        }
+
+                        scoreboard.push({ user: user, score: score })
+                        Lasergame.updateStats();
+                    }
+                    break;
+                default:
+                    break;
+            }
         },
         start: function () {
             Lasergame.clear();
@@ -84,13 +189,13 @@
                     else {
                         clearInterval(i);
                         $('#timer, #_progbar').fadeOut('slow');
+                        $('#stats').fadeIn('slow');
 
                         var time = roundLength;
                         i = setInterval(function () {
                             if (--time < 0) {
-                                $('#_title').html('&nbsp;Lasergame LIVE');
-                                clearInterval(i);
-                                $('#roundover').show();
+                                Lasergame.clear();
+                                $('#roundover').fadeIn('slow');
                                 return;
                             }
                             $('#_title').html('&nbsp;Ronde ' + round + ' <b>' + time.toTimeString()+'</b>');
@@ -109,9 +214,32 @@
                 }, 1000);
             }, 2000);
         },
+        includeAlarms: function () {
+            //Load alarms.
+            nuclearAlarm = new Audio('/audio/nuclear.mp3');
+            tornadoAlarm = new Audio('/audio/tornado.mp3');
+            emergencyAlarm = new Audio('/audio/emergency.mp3');
+            console.log('Loaded!');
+        },
         clear: function () {
-            $('#_progbar, #timer, #welcome, #roundover').hide();
+            $('#_progbar, #timer, #welcome, #roundover, #stats').fadeOut();
             clearInterval(i);
+            $('#_title').html('&nbsp;Lasergame LIVE');
+        },
+        updateStats: function() {
+            $('#stats').hide();
+            var html = '';
+            $.each(scoreboard, function (i, e) {
+                html += `
+                <div class="col s12 m3">
+                <div class="card-panel blue-grey darken-3 center-align">
+                    <h2 class="white-text">${e.user}</h1>
+                    <h1 style="font-size: 8em; margin-top: -0.1em;"><b class="green-text">${e.score}</b></h2>
+                </div></div>
+                `;
+            });
+            $('#stats').html(html);
+            $('#stats').fadeIn();
         }
     };
 

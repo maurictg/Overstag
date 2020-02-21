@@ -21,6 +21,7 @@ namespace Overstag.Services
         public string Username { get; set; }
         public string Metadata { get; set; }
         public byte Type { get; set; }
+        public bool Authenticated { get; set; }
 
         /* Types
          * 0: all
@@ -54,7 +55,7 @@ namespace Overstag.Services
         public string FindId(WebSocket socket) => Find(socket).Id;
         public WebSocket FindSocket(string id) => _connections.FirstOrDefault(f => f.Key.Id == id).Value;
 
-        public async Task Add(WebSocket socket, byte type = 0, bool broadcast = false, string name = "Anonymous") => await Add(socket, new ConnectionData() { Username = name, Type = type}, broadcast);
+        public async Task Add(WebSocket socket, byte type = 0, bool broadcast = false, bool authenticated = false, string name = "Anonymous") => await Add(socket, new ConnectionData() { Username = name, Type = type, Authenticated = authenticated}, broadcast);
         public async Task Add(WebSocket socket, ConnectionData data, bool broadcast)
         {
             await Task.Run(() => {
@@ -109,7 +110,8 @@ namespace Overstag.Services
             byte[] data = new byte[result.Count];
             Buffer.BlockCopy(buffer, 0, data, 0, result.Count);
 
-            (ConnectionPool, object) value = FindPool(socket).HandleMessage(data);
+            var cdata = Find(socket);
+            (ConnectionPool, object) value = FindPool(cdata.Type).HandleMessage(data, cdata.Authenticated);
 
             //Update list or insert
             var pool = value.Item1;

@@ -32,9 +32,11 @@ namespace Overstag.Controllers
                         if (auth.Registered > DateTime.Now.AddMonths(-2))
                         {
                             var user = context.Accounts.First(f => f.Id == auth.User.Id);
+
+                            //Important session variables
                             HttpContext.Session.SetString("Token", user.Token);
                             HttpContext.Session.SetInt32("Type", user.Type);
-                            HttpContext.Session.SetString("Name", user.Username);
+
                             return Json(new { status = "success" });
                         }
                         else

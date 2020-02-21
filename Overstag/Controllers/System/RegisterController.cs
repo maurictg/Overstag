@@ -57,8 +57,8 @@ namespace Overstag.Controllers
 
         public async Task<IActionResult> Logout([FromQuery]string token)
         {
+            //Important session variables
             HttpContext.Session.Remove("Token");
-            HttpContext.Session.Remove("Name");
             HttpContext.Session.Remove("Type");
 
             if (!string.IsNullOrEmpty(token))
@@ -160,10 +160,9 @@ namespace Overstag.Controllers
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
 
-                            //Register variables for login
+                            //Set important session variables
                             HttpContext.Session.SetString("Token", account.Token);
                             HttpContext.Session.SetInt32("Type", account.Type);
-                            HttpContext.Session.SetString("Name", account.Username);
 
                             string remember = await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
 
@@ -207,9 +206,9 @@ namespace Overstag.Controllers
 
                                 if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
                                 {
+                                    //Set important session variables
                                     HttpContext.Session.SetString("Token", account.Token);
                                     HttpContext.Session.SetInt32("Type", account.Type);
-                                    HttpContext.Session.SetString("Name", account.Username);
                                 }
 
                                 string remember = (no2fa) ? await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
@@ -310,9 +309,11 @@ namespace Overstag.Controllers
                 using(var context = new OverstagContext())
                 {
                     var a = context.Accounts.First(e => e.Token == token);
+
+                    //Set important session variables
                     HttpContext.Session.SetString("Token", a.Token);
                     HttpContext.Session.SetInt32("Type", a.Type);
-                    HttpContext.Session.SetString("Name", a.Username);
+
                     string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString()).Result;
                     HttpContext.Session.SetString("Remember", remember);
                     return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
