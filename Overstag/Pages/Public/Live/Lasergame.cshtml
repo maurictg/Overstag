@@ -31,8 +31,8 @@
 }
 
 <div id="welcome" class="white-text center-align">
-    <h1><b>Welkom</b></h1>
-    <h3>Meld je aan bij een post.</h3>
+    <h1><b>Welkom!</b></h1>
+    <h3>Over enkele ogenblikken begint het spel</h3>
 </div>
 
 <div id="roundover" style="display: none;" class="center-align">
@@ -46,7 +46,6 @@
 </div>
 
 <div id="stats" class="row" style="display: none;">
-    <h1 class="red-text">stats</h1>
 </div>
 
 <script>
@@ -57,9 +56,11 @@
 
     var scoreboard = [];
 
-    var nuclearAlarm;
-    var tornadoAlarm;
-    var emergencyAlarm;
+    var nuclearAlarm = new Audio('/audio/nuclear.mp3');
+    var tornadoAlarm = new Audio('/audio/tornado.mp3');
+    var emergencyAlarm = new Audio('/audio/emergency.mp3');
+    var message = new Audio('/audio/message.mp3');
+    var pirates = new Audio('/audio/pirates_of_the_carribean.mp3');
     
     var Lasergame = {
         init: function () {
@@ -68,7 +69,7 @@
             $('#nav-mobile>li>a').addClass('blue-grey-text text-darken-3');
             $('body').removeClass('blue-dark').addClass('black');
 
-            OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle)
+            OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle, Lasergame.close, true)
 
             $('#_progbar>div').removeClass('indeterminate').addClass('determinate').css('width', '100%');
         },
@@ -82,14 +83,16 @@
                             round = d.round;
                             roundLength = d.roundLength;
                             muted = !d.allowAudio;
-
-                            if (!muted)
-                                Lasergame.includeAlarms();
                         }
                     }
                     break;
                 case 'alert':
-                    M.toast({ html: data.data, classes: 'orange' });
+                    {
+                        if (!muted)
+                            Lasergame.playSound('message');
+
+                        M.toast({ html: '<h5>'+data.data+'</h5>', classes: 'orange' });
+                    }
                     break;
                 case 'nextRound':
                     {
@@ -112,6 +115,7 @@
                             emergencyAlarm.currentTime = 0;
                             tornadoAlarm.pause();
                             tornadoAlarm.currentTime = 0;
+                            pirates.pause();
                         }
 
                         muted = true;
@@ -123,33 +127,8 @@
                 case 'playSound':
                     {
                         muted = false;
-                        if (nuclearAlarm == undefined)
-                            Lasergame.includeAlarms();
 
-                        var playedPromise;
-
-                        try {
-                            if (data.data == 'nuclear') {
-                                const promise = nuclearAlarm.play();
-                                playedPromise = promise;
-                            }
-                            else if (data.data == 'emergency') {
-                                const promise = emergencyAlarm.play();
-                                playedPromise = promise;
-                            }
-                            else if(data.data == 'tornado'){
-                                const promise = tornadoAlarm.play();
-                                playedPromise = promise;
-                            }
-
-                            if (playedPromise) {
-                                if (playedPromise.state == 'pending')
-                                    M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
-                            }
-                        } catch (err) {
-                            console.log(err);
-                            M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
-                        }
+                        Lasergame.playSound(data.data);
                     }
                     break;
                 case 'updateScore':
@@ -184,6 +163,10 @@
                 $('#lblcount').text('20');
                 var count = 20;
                 clearInterval(i);
+
+                if (!muted)
+                    Lasergame.playSound('nuclear');
+
                 i = setInterval(function () {
                     if (count > -1) count--;
                     else {
@@ -196,6 +179,10 @@
                             if (--time < 0) {
                                 Lasergame.clear();
                                 $('#roundover').fadeIn('slow');
+
+                                if (!muted)
+                                    Lasergame.playSound('tornado');
+
                                 return;
                             }
                             $('#_title').html('&nbsp;Ronde ' + round + ' <b>' + time.toTimeString()+'</b>');
@@ -214,32 +201,78 @@
                 }, 1000);
             }, 2000);
         },
-        includeAlarms: function () {
-            //Load alarms.
-            nuclearAlarm = new Audio('/audio/nuclear.mp3');
-            tornadoAlarm = new Audio('/audio/tornado.mp3');
-            emergencyAlarm = new Audio('/audio/emergency.mp3');
-            console.log('Loaded!');
-        },
         clear: function () {
             $('#_progbar, #timer, #welcome, #roundover, #stats').fadeOut();
             clearInterval(i);
             $('#_title').html('&nbsp;Lasergame LIVE');
         },
+        close: function () {
+            scoreboard = [];
+            Lasergame.clear();
+        },
         updateStats: function() {
             $('#stats').hide();
+
+
             var html = '';
             $.each(scoreboard, function (i, e) {
+
+                var name = e.user;
+                if (e.user.includes('Team-')) {
+                    var color = e.user.split('-')[1];
+                    name = `Team <span class="${color}-text">${color}</span>`;
+                }
+
                 html += `
                 <div class="col s12 m3">
                 <div class="card-panel blue-grey darken-3 center-align">
-                    <h2 class="white-text">${e.user}</h1>
+                    <h2 class="white-text">${name}</h1>
                     <h1 style="font-size: 8em; margin-top: -0.1em;"><b class="green-text">${e.score}</b></h2>
                 </div></div>
                 `;
             });
             $('#stats').html(html);
             $('#stats').fadeIn();
+        },
+        playSound: function (sound) {
+            var playedPromise;
+
+            try {
+
+                if (!pirates.paused)
+                    pirates.pause();
+
+                if (sound == 'nuclear') {
+                    const promise = nuclearAlarm.play();
+                    playedPromise = promise;
+                }
+                else if (sound == 'emergency') {
+                    const promise = emergencyAlarm.play();
+                    playedPromise = promise;
+                }
+                else if (sound == 'tornado') {
+                    const promise = tornadoAlarm.play();
+                    playedPromise = promise;
+                }
+                else if (sound == 'pirates') {
+                    pirates.loop = true;
+                    pirates.volume = 0.5;
+                    const promise = pirates.play();
+                    playedPromise = promise;
+
+                } else if (sound == 'message') {
+                    const promise = message.play();
+                    playedPromise = promise;
+                }
+
+                if (playedPromise) {
+                    if (playedPromise.state == 'pending')
+                        M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
+                }
+            } catch (err) {
+                console.log(err);
+                M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
+            }
         }
     };
 

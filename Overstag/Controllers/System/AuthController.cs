@@ -10,6 +10,11 @@ namespace Overstag.Controllers
 {
     public class AuthController : Controller
     {
+        /// <summary>
+        /// Register new loginToken
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <returns>JSON {status, token} -> new token to login</returns>
         [HttpPost]
         public async Task<JsonResult> Register([FromForm]string token)
         {
@@ -19,6 +24,11 @@ namespace Overstag.Controllers
             return Json(new { status = "success", token = Uri.EscapeDataString(ttoken) });
         }
 
+        /// <summary>
+        /// Login into system using Auth token
+        /// </summary>
+        /// <param name="token">The auth token</param>
+        /// <returns>JSON, status = success or status = error</returns>
         [HttpPost]
         public async Task<JsonResult> Login([FromForm]string token)
         {
@@ -57,6 +67,5 @@ namespace Overstag.Controllers
                 }
             });
         }
-
     }
 }

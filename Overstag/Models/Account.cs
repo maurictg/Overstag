@@ -42,5 +42,22 @@ namespace Overstag.Models
         public List<Payment> Payments { get; set; }
         public List<Accountancy.Transaction> Transactions { get; set; }
         public List<Auth> Auths { get; set; }
+
+        public API.UserInfo ToUserInfo()
+        {
+            return new API.UserInfo()
+            {
+                Address = this.Adress,
+                Birthdate = this.Birthdate,
+                Email = this.Email,
+                Firstname = this.Firstname,
+                Gender = this.Gender,
+                Lastname = this.Lastname,
+                Phone = this.Phone,
+                Postalcode = this.Postalcode,
+                Residence = this.Residence,
+                Username = this.Username
+            };
+        }
     }
 }

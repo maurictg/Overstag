@@ -1,10 +1,21 @@
 ﻿var OverstagLive = function () {
     return {
-        websocket: null, handler: null,
-        init: function (url, handler) {
+        websocket: null, handler: null, url: null, closehandler: null,
+        init: function (url, handler, closehandler, autoreconnect = false) {
+            this.url = url;
             this.handler = handler;
+            this.closehandler = closehandler;
             this.websocket = new WebSocket(url);
             this.mapEvents();
+
+            if (autoreconnect) {
+                setInterval(function () {
+                    if (OverstagLive.websocket.readyState === WebSocket.CLOSED) {
+                        OverstagLive.websocket = new WebSocket(OverstagLive.url);
+                        OverstagLive.mapEvents();
+                    }
+                }, 10000);
+            }
         },
         mapEvents: function () {
             this.websocket.onerror = function(e) {
@@ -17,6 +28,8 @@
 
             this.websocket.onclose = function (e) {
                 M.toast({ html: 'Verbinding verbroken', classes: 'orange' });
+                if (OverstagLive.closehandler !== null && OverstagLive.closehandler !== undefined)
+                    OverstagLive.closehandler();
             };
 
             this.websocket.onmessage = function (e) {

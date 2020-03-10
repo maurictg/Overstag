@@ -16,8 +16,8 @@
         <h3>Spel</h3>
         <p>Ronde</p>
         <input type="text" class="col s1 white-text" id="newround" value="1" />
-        <br/><br/><p>Lengte in seconden</p>
-        <input type="text" class="col s1 white-text" id="newlength" value="300" /><br /><br/><br/>
+        <br /><br /><p>Lengte in seconden</p>
+        <input type="text" class="col s1 white-text" id="newlength" value="300" /><br /><br /><br />
         <div class="col s3">
             <p>
                 <label>
@@ -41,13 +41,21 @@
         <button onclick="OverstagLive.send('lg_playSound','emergency')" class="btn waves-effect yellow darken-2">Emergency alarm</button>
         <button onclick="OverstagLive.send('lg_playSound','tornado')" class="btn waves-effect yellow darken-2">Tornado alarm</button>
 
+        <h3>Sound tracks</h3>
+        <button onclick="OverstagLive.send('lg_playSound','pirates')" class="btn waves-effect waves-light black">Pirates of the Carribean</button>
+
+
         <h3>Scores</h3>
         <input type="text" class="col s3 white-text" id="name" />
         <button onclick="Lasergame.addScore($('#name').val());" class="btn green waves-effect">Toevoegen</button>
-        <button onclick="Lasergame.addScore('Team <b class=\'blue-text\'>blauw</b>');" class="btn blue waves-effect">Team blauw</button>
-        <button onclick="Lasergame.addScore('Team <b class=\'red-text\'>rood</b>');" class="btn red waves-effect">Team rood</button>
-        <button onclick="Lasergame.addScore('Team <b class=\'yellow-text\'>geel</b>');" class="btn yellow darken-2 waves-effect">Team geel</button>
-        <button onclick="Lasergame.addScore('Team <b class=\'green-text\'>groen</b>');" class="btn green waves-effect">Team groen</button>
+        <button onclick="Lasergame.addScore('Team-blue');" class="btn blue waves-effect">Team blauw</button>
+        <button onclick="Lasergame.addScore('Team-red');" class="btn red waves-effect">Team rood</button>
+        <button onclick="Lasergame.addScore('Team-yellow');" class="btn yellow darken-2 waves-effect">Team geel</button>
+        <button onclick="Lasergame.addScore('Team-green');" class="btn green waves-effect">Team groen</button>
+
+        <h3>Melding</h3>
+        <input type="text" id="message" class="col s6 white-text" />
+        <button class="btn orange waves-effect" onclick="Lasergame.alert();">Versturen</button>
 
         <table>
             <thead>
@@ -69,6 +77,7 @@
 </div>
 
 <script>
+    var filled = false;
     var Lasergame = function () {
         return {
             init: function () {
@@ -79,17 +88,34 @@
             },
             handler: function (data) {
                 $('#log').append(data + '\n');
+
+
+                data = JSON.parse(data);
+                console.log(data);
+
+                if (data.data == null)
+                    return;
+
+                if (!filled && data.t == 'fillData') {
+                    var test = data.data.scores;
+
+                    $.each(Object.keys(test), function (i, e) {
+                        Lasergame.addScore(e, false, test[e]);
+                    });
+
+                    filled = true;
+                }
             },
             nextRound: function () {
                 OverstagLive.send('lg_nextRound', '' + $('#round').val());
                 $('#round').val(Number($('#round').val()) + 1);
             },
-            addScore: function (name) {
+            addScore: function (name, send = true, score = 0) {
                 var html = 
                     `
                     <tr>
                         <td><b>${name}</b></td>
-                        <td id="id-${name}">0</td>
+                        <td id="id-${name}">${score}</td>
                         <td>
                             <button onclick="Lasergame.updateScore('${name}',true)" class="btn waves-effect green">+</button>
                             <button onclick="Lasergame.updateScore('${name}',false)" class="btn waves-effect red">-</button>
@@ -97,15 +123,23 @@
                     </tr>
                     `;
                 $('#scores').append(html);
-                OverstagLive.send('lg_update', name + ',0');
+
+                if(send)
+                    OverstagLive.send('lg_update', name + ',0');
             },
             updateScore: function (name, add) {
-                var score = Number($('#id-' + name).val()) + ((add) ? 1 : -1);
-                $('#' + name).val(score);
-                OverstagLive.send('lg_update', name + ',' + score+((add) ? 1 : -1));
+                var score = Number($('#id-' + name).text()) + ((add) ? 1 : -1);
+                $('#id-' + name).text(score);
+                OverstagLive.send('lg_update', name + ',' + score);
             },
             newGame: function () {
+                $('#round').val(Number($('#newround').val()));
                 OverstagLive.send('lg_insert', $('#newround').val() + ',' + $('#newlength').val() + ',' + ($('#audio').prop('checked') ? 'true' : 'false'));
+            },
+            alert: function () {
+                var msg = $('#message').val();
+                $('#message').val('');
+                OverstagLive.send('broadcast', msg);
             }
 
         };

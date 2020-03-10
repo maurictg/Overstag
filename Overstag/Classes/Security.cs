@@ -343,5 +343,25 @@ namespace Overstag.Security
                 return ttoken;
             }
         }
+
+        public static async Task<string> CreateAPIToken(string token)
+        {
+            using(var context = new OverstagContext())
+            {
+                var user = await context.Accounts.Include(f => f.Auths).FirstAsync(f => f.Token == token);
+                string ttoken = Encryption.PBKDF2.Hash($"{user.Firstname}#{user.Token}");
+
+                user.Auths.Add(new Models.Auth()
+                {
+                    Registered = DateTime.Now,
+                    Token = ttoken,
+                    IP = "OVERSTAG_APP",
+                });
+
+                context.Accounts.Update(user);
+                await context.SaveChangesAsync();
+                return ttoken;
+            }
+        }
     }
 }

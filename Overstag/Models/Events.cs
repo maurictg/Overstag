@@ -14,6 +14,18 @@ namespace Overstag.Models
 
         //Relations
         public List<Participate> Participators { get; set; }
+
+        public API.ActivityInfo ToActivityInfo()
+        {
+            return new API.ActivityInfo
+            {
+                EventID = Id,
+                Cost = Math.Round((double)Cost/100, 2),
+                Description = Description,
+                Title = Title,
+                When = When
+            };
+        }
     }
 
     public class Idea
@@ -25,6 +37,17 @@ namespace Overstag.Models
 
         //Relations
         public List<Vote> Votes { get; set; }
+
+        public API.IdeaInfo ToIdeaInfo()
+        {
+            return new API.IdeaInfo
+            {
+                Cost = Cost,
+                Description = Description,
+                Title = Title,
+                Id = Id
+            };
+        }
     }
 
     // [Intermediate table]
@@ -35,6 +58,18 @@ namespace Overstag.Models
         public int UserID { get; set; }
         public Account User { get; set; }
         public bool Upvote { get; set; }
+
+        public API.VoteInfo ToVoteInfo(bool withIdea = false)
+        {
+            API.IdeaInfo i = (Idea == null) ? null : Idea.ToIdeaInfo();
+
+            return new API.VoteInfo
+            {
+                IdeaID = IdeaID,
+                Vote = Upvote,
+                Idea = (withIdea) ? i : null
+            };
+        }
     }
 
     // [Intermediate table]
@@ -49,5 +84,17 @@ namespace Overstag.Models
 
         public int AdditionsCost { get; set; }
         public byte FriendCount { get; set; }
+
+        public API.SubscriptionInfo ToSubscriptionInfo(bool withActivity = false)
+        {
+            return new API.SubscriptionInfo
+            {
+                Activity = (!withActivity || Event == null) ? null : Event.ToActivityInfo(),
+                Factured = Payed,
+                FriendCount = FriendCount,
+                DrinksCost = Math.Round((double)AdditionsCost / 100, 2),
+                EventID = EventID
+            };
+        }
     }
 }

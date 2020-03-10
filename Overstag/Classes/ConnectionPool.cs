@@ -24,119 +24,129 @@ namespace Overstag.Classes
             string json = Encoding.UTF8.GetString(_data);
             CommonData data = JsonSerializer.Deserialize<CommonData>(json);
 
-            switch (data.t)
+            try
             {
-                case "createData": //Fill pool with data
-                    this.Data = data.data;
-                    break;
 
-                //Authed actions to all
-                case "broadcast": //Broadcast message
-                    {
-                        if (authenticated)
+
+                switch (data.t)
+                {
+                    case "createData": //Fill pool with data
+                        this.Data = data.data;
+                        break;
+
+                    //Authed actions to all
+                    case "broadcast": //Broadcast message
+                        {
+                            if (authenticated)
                                 returnData = new { t = "alert", data = data.data };
-                    }
-                    break;
-               //Section lasergame
-                case "lg_nextRound": //JSON: {t: 'lg_nextRound', data: '0'}
-                    {
-                        if (authenticated)
-                        {
-                            if (this.Data == null)
-                                this.Data = new LG_Data();
-
-                            if (this.Data.GetType() == typeof(LG_Data))
-                            {
-                                var l = (LG_Data)this.Data;
-                                l.round = Convert.ToInt32(data.data);
-
-                                returnData = new { t = "nextRound", data = data.data };
-                            }
                         }
-                            
-                    }
-                    break;
-                case "lg_reset": //JSON: {t: 'lg_reset'}
-                    {
-                        if (authenticated)
-                            returnData = new { t = "reset" };
-                    }
-                    break;
-                case "lg_insert": //JSON {t: 'lg_insert', data: json... }
-                    {
-                        try
+                        break;
+                    //Section lasergame
+                    case "lg_nextRound": //JSON: {t: 'lg_nextRound', data: '0'}
                         {
-                            string[] d = data.data.Split(',');
-                            if(d.Count() == 3)
-                                if (authenticated)
+                            if (authenticated)
+                            {
+                                if (this.Data == null)
+                                    this.Data = new LG_Data();
+
+                                if (this.Data.GetType() == typeof(LG_Data))
                                 {
-                                    this.Data = new LG_Data() { round = Convert.ToInt32(d[0]), roundLength = Convert.ToInt32(d[1]), allowAudio = (d[2]=="true") };
-                                    return (this, new { t = "fillData", data = this.Data });
+                                    var l = (LG_Data)this.Data;
+                                    l.round = Convert.ToInt32(data.data);
+
+                                    returnData = new { t = "nextRound", data = data.data };
                                 }
-                        }
-                        catch(Exception e)
-                        {
-                            Console.WriteLine("=== ERROR: " + e.Message);
-                            Console.WriteLine(e.StackTrace);
-                        }
-                    }
-                    break;
-                case "lg_mute": //JSON {t: 'lg_mute', data: bool (allowed)
-                    {
-                        if (authenticated)
-                        {
-                            if (this.Data == null)
-                                this.Data = new LG_Data();
+                            }
 
-                            if (this.Data.GetType() == typeof(LG_Data))
+                        }
+                        break;
+                    case "lg_reset": //JSON: {t: 'lg_reset'}
+                        {
+                            if (authenticated)
+                                returnData = new { t = "reset" };
+                        }
+                        break;
+                    case "lg_insert": //JSON {t: 'lg_insert', data: json... }
+                        {
+                            try
                             {
-                                var l = (LG_Data)this.Data;
-                                l.allowAudio = (data.data == "true");
-                                this.Data = l;
-
-                                returnData = new { t = (l.allowAudio) ? "unmute" : "mute" };
+                                string[] d = data.data.Split(',');
+                                if (d.Count() == 3)
+                                    if (authenticated)
+                                    {
+                                        this.Data = new LG_Data() { round = Convert.ToInt32(d[0]), roundLength = Convert.ToInt32(d[1]), allowAudio = (d[2] == "true") };
+                                        return (this, new { t = "fillData", data = this.Data });
+                                    }
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine("=== ERROR: " + e.Message);
+                                Console.WriteLine(e.StackTrace);
                             }
                         }
-                    }
-                    break;
-                case "lg_playSound": //JSON {t: 'playSound', data: soundname}
-                    {
-                        if (authenticated)
-                            returnData = new { t = "playSound", data = data.data };
-                    }
-                    break;
-                case "lg_update": //JSON {t: 'lg_update', data: name,score }
-                    {
-                        try
+                        break;
+                    case "lg_mute": //JSON {t: 'lg_mute', data: bool (allowed)
                         {
-                            string[] d = data.data.Split(',');
-                            if (d.Length == 2)
+                            if (authenticated)
                             {
-                                if (authenticated)
+                                if (this.Data == null)
+                                    this.Data = new LG_Data();
+
+                                if (this.Data.GetType() == typeof(LG_Data))
                                 {
-                                    if (this.Data == null)
-                                        this.Data = new LG_Data();
+                                    var l = (LG_Data)this.Data;
+                                    l.allowAudio = (data.data == "true");
+                                    this.Data = l;
 
-                                    if (this.Data.GetType() == typeof(LG_Data))
+                                    returnData = new { t = (l.allowAudio) ? "unmute" : "mute" };
+                                }
+                            }
+                        }
+                        break;
+                    case "lg_playSound": //JSON {t: 'playSound', data: soundname}
+                        {
+                            if (authenticated)
+                                returnData = new { t = "playSound", data = data.data };
+                        }
+                        break;
+                    case "lg_update": //JSON {t: 'lg_update', data: name,score }
+                        {
+                            try
+                            {
+                                string[] d = data.data.Split(',');
+                                if (d.Length == 2)
+                                {
+                                    if (authenticated)
                                     {
-                                        var l = (LG_Data)this.Data;
-                                        if (l.scores.ContainsKey(d[0]))
-                                            l.scores[d[0]] = Convert.ToInt32(d[1]);
-                                        else
-                                            l.scores.Add(d[0], Convert.ToInt32(d[1]));
+                                        if (this.Data == null)
+                                            this.Data = new LG_Data();
 
-                                        this.Data = l;
+                                        if (this.Data.GetType() == typeof(LG_Data))
+                                        {
+                                            var l = (LG_Data)this.Data;
+                                            if (l.scores.ContainsKey(d[0]))
+                                                l.scores[d[0]] = Convert.ToInt32(d[1]);
+                                            else
+                                                l.scores.Add(d[0], Convert.ToInt32(d[1]));
 
-                                        returnData = new { t = "updateScore", data = new { user = d[0], score = d[1] } };
+                                            this.Data = l;
+
+                                            returnData = new { t = "updateScore", data = new { user = d[0], score = d[1] } };
+                                        }
                                     }
                                 }
                             }
+                            catch { }
                         }
-                        catch { }
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+            catch(Exception e)
+            {
+                returnData = new { t = "alert", data = "<span class=\"red-text\">Er is een onbekende fout opgetreden></span>", error = e.Message, stacktrace = e.StackTrace };
             }
 
             return (this, returnData);

@@ -35,6 +35,15 @@ namespace Overstag.Controllers
             View(currentuser());
 
         /// <summary>
+        /// Get authenticate page for application
+        /// 
+        /// Go via: /Register/Login?r=/User/Authenticate
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Authenticate()
+            => View();
+
+        /// <summary>
         /// Get settings with user info
         /// </summary>
         /// <returns>View with User modal including family info</returns>
@@ -374,6 +383,7 @@ namespace Overstag.Controllers
                 request.Payed = false;
                 request.UserId = currentuser().Id;
                 request.Type = 29; //Declaratie
+                request.Amount = request.Amount * -1;
                 using (var context = new OverstagContext())
                 {
                     context.Transactions.Add(request);
@@ -629,6 +639,17 @@ namespace Overstag.Controllers
             {
                 return Json(new { status = "error", error = "2FA is niet ingeschakeld" });
             }
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetAuthToken()
+        {
+            string token = await Security.Auth.CreateAPIToken(currentuser().Token);
+
+            if (token == null)
+                return Json(new { status = "error" });
+            else
+                return Json(new { status = "success", authToken = token });
         }
 
         /// <summary>

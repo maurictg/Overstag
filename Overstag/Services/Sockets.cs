@@ -49,7 +49,12 @@ namespace Overstag.Services
         public ConnectionPool FindPool(int type)
         {
             ConnectionPool p = _pools.FirstOrDefault(f => f.Type == type);
-            return (p == null) ? new ConnectionPool((byte)type) : p;
+            if(p == null)
+            {
+                p = new ConnectionPool((byte)type);
+                _pools.Add(p);
+            }
+            return p;
         }
 
         public string FindId(WebSocket socket) => Find(socket).Id;
@@ -58,11 +63,9 @@ namespace Overstag.Services
         public async Task Add(WebSocket socket, byte type = 0, bool broadcast = false, bool authenticated = false, string name = "Anonymous") => await Add(socket, new ConnectionData() { Username = name, Type = type, Authenticated = authenticated}, broadcast);
         public async Task Add(WebSocket socket, ConnectionData data, bool broadcast)
         {
-            await Task.Run(() => {
-                data.Id = GenerateID();
-                if (!_connections.TryAdd(data, socket))
-                    return;
-            });
+            data.Id = GenerateID();
+            if (!_connections.TryAdd(data, socket))
+                return;
 
             //Send data to joined client 
             await Send(socket, new { t = "fillData", data = FindPool(socket).Data });

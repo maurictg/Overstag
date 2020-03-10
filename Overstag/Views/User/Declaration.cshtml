@@ -238,6 +238,8 @@ else
                 formdata.append('files', e);
             });
 
+            M.toast({ html: 'Wacht a.u.b tot de upload voltooid is. Zie balk bovenin het scherm', classes: 'orange' });
+
             $.ajax({
                 url: '/Files/uploadFiles',
                 type: "POST",

@@ -408,7 +408,14 @@
                         $.each(r, function (i, e) {
                             var date = moment(new Date(Date.parse(e.registered)));
                             var date2 = moment(new Date(Date.parse(e.registered))).add(2, 'M');
-                             html += `<tr><td>${date.format('DD-MM-YYYY')} om ${date.format('HH:mm')}</td><td>${date2.format('DD-MM-YYYY')} om ${date2.format('HH:mm')}</td><td>${e.ip}</td><td><button class="btn orange waves-effect" onclick="User.removeLogin('${e.id}')">Uitloggen</button></td></tr>`;
+                            var date2text = `${date2.format('DD-MM-YYYY')} om ${date2.format('HH:mm')}`
+
+                            var htmldata = `<tr><td>${date.format('DD-MM-YYYY')} om ${date.format('HH:mm')}</td><td>${date2text}</td><td>${e.ip}</td><td><button class="btn orange waves-effect" onclick="User.removeLogin('${e.id}')">Uitloggen</button></td></tr>`;
+
+                            if (e.ip == 'OVERSTAG_APP') {
+                                htmldata = htmldata.replace(date2text, 'Verloopt nooit');
+                            }
+                            html += htmldata;
                         });
 
                         $('#logins').html(html);

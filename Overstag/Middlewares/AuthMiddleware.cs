@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Overstag.Middlewares
 {
@@ -20,7 +20,7 @@ namespace Overstag.Middlewares
 
         private readonly string[] allpaths =
         {
-            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/Public"
+            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/Public", "/api"
         };
 
         public Authentication(RequestDelegate next)
@@ -31,6 +31,11 @@ namespace Overstag.Middlewares
             if (c.Request.Path.HasValue)
             {
                 string p = c.Request.Path.Value;
+
+                //API authenticates in controller
+                if (p.StartsWith("/api"))
+                    return _next(c);
+
                 int? type = c.Session.GetInt32("Type");
                 int code = 400;
                 bool loggedin = (type != null);
