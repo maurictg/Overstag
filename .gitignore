@@ -1,4 +1,5 @@
-Overstag/bin/Debug/netcoreapp2.2/credentials.json
-Overstag/credentials.json
-Overstag/db.sqlite
-Overstag/bin/Release/netcoreapp3.1/credentials.json
+credentials.json
+Overstag/bin/Debug/
+Overstag/bin/Release/
+Overstag/obj/
+*.sqlite
