@@ -30,6 +30,21 @@ namespace Overstag.Controllers.API
             }
         }
 
+        [HttpGet("api/Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var current = await GetCurrent();
+            if (current == null) return StatusCode(StatusCodes.Status401Unauthorized, new { status = "error", error = "Authentication error." });
+
+            using(var context = new OverstagContext())
+            {
+                context.Auths.Remove(current);
+                await context.SaveChangesAsync();
+            }
+
+            return Json(new { status = "success" });
+        }
+
         [HttpGet("api/GetActivities")]
         public async Task<JsonResult> GetActivities([FromQuery]DateTime? after)
         {
@@ -44,6 +59,18 @@ namespace Overstag.Controllers.API
             events.ForEach(f => activities.Add(f.ToActivityInfo()));
 
             return Json(new { status = "success", count = activities.Count(), activities });
+        }
+
+        [HttpGet("api/GetActivitiesIds")]
+        public async Task<JsonResult> GetActivitiesIds([FromQuery]DateTime? after)
+        {
+            List<int> ids = new List<int>();
+            if (after == null)
+                ids = await new OverstagContext().Events.Select(f => f.Id).ToListAsync();
+            else
+                ids = await new OverstagContext().Events.Where(f => f.When > Convert.ToDateTime(after)).Select(g => g.Id).ToListAsync();
+
+            return Json(new { status = "success", count = ids.Count(), activities = ids });
         }
 
         [Produces("application/json")]
@@ -78,6 +105,8 @@ namespace Overstag.Controllers.API
                 return Json(new { status = "success", count = inf.Count(), subscriptions = inf });
             }
         }
+
+       
 
         [HttpGet("api/Subscribe/{eventID}")]
         [Produces("application/json")]

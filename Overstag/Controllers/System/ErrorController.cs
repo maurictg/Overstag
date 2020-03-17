@@ -7,12 +7,13 @@ namespace Overstag.Controllers
     public class ErrorController : Controller
     {
         [Route("Error/{code}")]
-        public IActionResult Default(int code)
+        public IActionResult Default(int code, [FromQuery]string r)
         {
             ViewBag.Code = code;
             ViewBag.Message = ReasonPhrases.GetReasonPhrase(code);
             ViewBag.English = ReasonPhrases.GetReasonPhrase(code);
             ViewBag.Description = "Het schip lijkt op de klippen te zijn gelopen";
+            ViewBag.Redirect = (string.IsNullOrEmpty(r) ? null : r);
             this.HttpContext.Response.StatusCode = code;
 
             if (ViewBag.Message == "" || ViewBag.Message == null)
@@ -28,7 +29,7 @@ namespace Overstag.Controllers
             if (code == 401)
             {
                 ViewBag.Message = "Niet ingelogd";
-                ViewBag.Description = "De kaptitein was er niet van op de hoogte dat u mee zou gaan";
+                ViewBag.Description = "De kaptitein was er niet van op de hoogte dat u mee zou varen";
                 ViewBag.showLogin = true;
                 ViewBag.showHome = true;
             }
@@ -43,7 +44,7 @@ namespace Overstag.Controllers
             if (code == 404)
             {
                 ViewBag.Message = "Pagina niet gevonden";
-                ViewBag.Description = "<i>Oh, the captain was drunk...</i>?<br>Het schip heeft een verkeerde route gevaren";
+                ViewBag.Description = "<i>Oh, the lost his compass...</i>?<br>Het schip heeft een verkeerde route gevaren";
                 ViewBag.showHome = true;
             }
             else
@@ -57,7 +58,7 @@ namespace Overstag.Controllers
             if (code == 500)
             {
                 ViewBag.Message = "Interne serverfout";
-                ViewBag.Description = "<i>Er is iets flink fout gegaan...</i><br>Het schip is tegen een ijsberg gevaren en gezonken";
+                ViewBag.Description = "<i>Er is iets flink fout gegaan...</i><br>Het schip is tegen een ijsberg gevaren. Neem a.u.b contact op";
                 ViewBag.showHome = true;
             }
 

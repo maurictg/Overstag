@@ -31,6 +31,9 @@
     function allow() {
         $.getJSON('/User/GetAuthToken', function (r) {
             if (r.status == 'success') {
+                if (localStorage.getItem('remember')) {
+                    localStorage.removeItem('remember');
+                }
                 console.log('Token: ' + r.authToken);
                 Android.allow(r.authToken);
             } else {

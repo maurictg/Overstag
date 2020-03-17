@@ -43,6 +43,7 @@ namespace Overstag.Models
         public List<Accountancy.Transaction> Transactions { get; set; }
         public List<Auth> Auths { get; set; }
 
+
         public API.UserInfo ToUserInfo()
         {
             return new API.UserInfo()

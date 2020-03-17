@@ -6,9 +6,7 @@ using Overstag.Models;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Encryption
 {
@@ -338,7 +336,7 @@ namespace Overstag.Security
                     IP = ip
                 });
 
-                context.Accounts.Update(user);
+                //context.Accounts.Update(user); //<-- redundant
                 await context.SaveChangesAsync();
                 return ttoken;
             }

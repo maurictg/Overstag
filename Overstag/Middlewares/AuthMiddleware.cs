@@ -38,6 +38,7 @@ namespace Overstag.Middlewares
 
                 int? type = c.Session.GetInt32("Type");
                 int code = 400;
+                string redirect = "";
                 bool loggedin = (type != null);
 
                 List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo", "/ws", "/Public" };
@@ -69,8 +70,11 @@ namespace Overstag.Middlewares
                     code = -1;
                 }
 
+                if (code == 401) //not logged in
+                    redirect = p;
+
                 if (code != -1)
-                    c.Response.Redirect("/Error/"+code.ToString());
+                    c.Response.Redirect($"/Error/{code.ToString()}" + (!string.IsNullOrEmpty(redirect) ? $"?r={redirect}" : ""));
                 else
                     return _next(c);
             }
