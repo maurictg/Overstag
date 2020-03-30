@@ -20,15 +20,14 @@
                 {
                     <tr>
                         <td>
-                        @{
-                            var user = new Overstag.Models.OverstagContext().Accounts.First(f => f.Id == item.UserID);
-                            @Html.Raw(user.Firstname+"&nbsp;")@Html.Raw(user.Lastname)
-                        }
+                            @{
+                                @Html.Raw(item.User.Firstname + "&nbsp;")@Html.Raw(item.User.Lastname)
+                            }
                         </td>
                         <td>@item.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
-                        <td>&euro;@Math.Round((double)item.Amount/100, 2).ToString("F")</td>
+                        <td>&euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</td>
                         <td>
-                            <a class="btn red darken-4 waves-effect" href="/Pay/Invoice/@Uri.UnescapeDataString(item.PayID)" target="_blank">Openen</a>
+                            <a class="btn red darken-4 waves-effect" href="/Pay/Invoice/@Uri.UnescapeDataString(item.InvoiceID)" target="_blank">Openen</a>
                         </td>
                     </tr>
                 }
@@ -40,6 +39,12 @@
             Het algoritme op deze pagina brengt automatisch voor alle gebruikers die <input style="width: 3em" type="number" max="10" min="1" id="amount" value="5" class="col s1 center-align centered" /> of meer ongefactureerde activiteiten hebben staan de activiteiten in rekening dmv een factuur.
             <br />Ook wordt naar alle betreffende gebruikers een email gestuurd met een link naar de factuur.
         </h6>
+        <p>
+            <label>
+                <input type="checkbox" id="sendEmail" class="filled-in" checked="checked" />
+                <span>Stuur een email met de link naar de factuur</span>
+            </label>
+        </p>
         <br /><br />
 
         <a class="btn btn-large red darken-4 waves-effect disabled" id="btngenerate" onclick="M.Modal.getInstance($('#areusure')).open()">Facturen maken</a>
@@ -52,16 +57,12 @@
                 <thead>
                     <tr>
                         <th>Aantal gebruikers gefactureerd</th>
-                        <th>Aantal evenementen gefactureerd</th>
-                        <th>Hoeveelheid geld gefactureerd</th>
                         <th>Aantal mails mislukt te verzenden</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><b id="uc">0</b></td>
-                        <td><b id="ec">0</b></td>
-                        <td><b id="mc">0</b></td>
                         <td><b id="fmc" class="red-text">0</b></td>
                     </tr>
                 </tbody>
@@ -98,15 +99,13 @@
             }
         },
         generate: function () {
-            $.post('/Accountancy/autoInvoice', {amount: $('#amount').val()}, function (r) {
+            $.post('/Accountancy/autoInvoice', {amount: $('#amount').val(), sendmail: $('#sendEmail').prop('checked')}, function (r) {
                 if (r.status == 'success') {
                     generateSucceed = true;
                     M.toast({ html: 'Automatisch factureren gelukt', classes: 'green' });
                     sessionStorage.setItem('disablegenerate', 1);
                     $('#info').show();
                     $('#uc').text(r.usercount);
-                    $('#ec').text(r.particount);
-                    $('#mc').text((r.moneycount / 100).toLocaleString("nl-NL", { style: "currency", currency: "EUR" }))
                     $('#fmc').text(r.failedmails);
                     sessionStorage.setItem('info', $('#info').html());
                 } else {
@@ -133,10 +132,10 @@
                     preGenerateSucceed = true;
                     if (r.failed > 0) {
                         M.toast({ html: 'Verwerken van ' + r.failed + ' mislukt', classes: 'orange' });
+                    } else {
+                        Invoice.generate();
                     }
                 }
-            }).done(function () {
-                Invoice.generate();
             }).fail(function () {
                 setTimeout(Invoice.generate, 200);
                 M.toast({ html: 'Automatisch verwerken van families mislukt', classes: 'red' });

@@ -1,7 +1,7 @@
-
-Overstag/bin/Debug/netcoreapp2.2/credentials.json
-Overstag/credentials.json
-Overstag/db.sqlite
-Overstag/db.sqlite
-Overstag/bin/Release/netcoreapp3.1/credentials.json
-Overstag/wwwroot/img/wallpapers/
+credentials.json
+Overstag/bin/Debug/
+Overstag/bin/Release/
+Overstag/obj/
+*.sqlite
+Overstag/.vscode/launch.json
+Overstag/.vscode/tasks.json

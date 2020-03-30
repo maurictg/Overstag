@@ -1,62 +1,78 @@
-﻿@model List<Overstag.Models.NoDB.FUnpayed>
+﻿@model List<Overstag.Models.Account>
 @{
     Layout = "_UserLayout";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
     int eventcnt = 0;
 }
 
-<h3>Overzicht van onverwerkte activiteiten per kind</h3>
+<h5 class="red-text hide-on-med-and-up"><i class="material-icons">warning</i>&nbsp;Deze pagina is overzichtelijker op een computer of een ander groot scherm.</h5>
+
+<h3>Overzicht van ongefactureerde activiteiten per kind</h3>
 <table>
     <thead>
         <tr>
             <th>Naam</th>
-            <th>Facturering</th>
+            <th>Activiteiten</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var u in Model)
         {
             <tr>
-                <td><b>@u.User.Firstname</b></td>
+                <td><b>@u.Firstname</b></td>
                 <td>
-                    <table>
+                    <table class="responsive-table">
                         <thead>
                             <tr>
                                 <th>Titel</th>
                                 <th>Datum</th>
+                                <th>Kosten aan drankjes</th>
+                                <th>Aantal vriend(inn)en</th>
                                 <th>Kosten</th>
+                                <th>Totaal</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if (u.UnpayedEvents.Count() > 0)
+                            @if (u.Subscriptions.Count(f => !f.Payed) > 0)
                             {
                                 double total = 0;
-                                total += u.ConsumptionCost;
-                                @foreach (var e in u.UnpayedEvents)
+                                double totalConsumptions = 0;
+                                @foreach (var e in u.Subscriptions.Where(f => !f.Payed && Overstag.Core.General.DateIsPassed(f.Event.When)))
                                 {
                                     eventcnt++;
-                                    total += (double)e.Cost;
+                                    total += (double)(e.Event.Cost * (e.FriendCount+1));
+                                    totalConsumptions += (double)e.AdditionsCost;
                                     <tr>
-                                        <td>@e.Title</td>
-                                        <td>@e.When.ToString("D", culture) om @e.When.ToString("t", culture)</td>
-                                        <td>&euro;@Math.Round((double)e.Cost / 100, 2).ToString("F")</td>
+                                        <td>@e.Event.Title</td>
+                                        <td>@e.Event.When.ToString("D", culture) om @e.Event.When.ToString("t", culture)</td>
+                                        <td>
+                                            @if (e.AdditionsCost > 0)
+                                            {
+                                                <span>&euro;@Math.Round((double)e.AdditionsCost / 100, 2).ToString("F")</span>
+                                            }
+                                            else { <b>-</b>}
+                                        </td>
+                                        <td>
+                                            @if(e.FriendCount > 0)
+                                            {
+                                                @Html.Raw(e.FriendCount.ToString()+$" (+ <b>&euro;{Math.Round((double)(e.FriendCount*e.Event.Cost) / 100, 2).ToString("F")}</b>)")
+                                            }
+                                            else { <b>-</b>}
+                                        </td>
+                                        <td>&euro;@Math.Round((double)e.Event.Cost / 100, 2).ToString("F")</td>
+                                        <td><b>&euro;@Math.Round((double)((e.Event.Cost * (e.FriendCount + 1)) + e.AdditionsCost) / 100, 2).ToString("F")</b></td>
                                     </tr>
                                 }
                                 <tr>
-                                    <td class="center-align" colspan="3">
-                                        Totaal aantal drankjes: <b>@u.ConsumptionCount</b> (&euro;1,00/st.)<br />
-                                        Bedrag: <b>&euro;@Math.Round(total / 100, 2).ToString("F")</b>
-                                        @if(u.FriendCount > 0)
-                                        {
-                                            <p class="red-text">LET OP: tijdens de avonden had @u.User.Firstname <b>@u.FriendCount</b> keer een vriend(in) mee. Dit kan vanwege technische redenen niet hier berekend worden. Op de factuur wordt dit er nog bij gerekend. Op de factuur worden deze avonden dubbel gerekend.</p>
-                                        }
+                                    <td class="center-align" colspan="6">
+                                        Totaalbedrag: <b>&euro;@Math.Round((total+totalConsumptions) / 100, 2).ToString("F")</b>
                                     </td>
                                 </tr>
                             }
                             else
                             {
                                 <tr>
-                                    <td colspan="3" class="center-align"><h6>Geen onverwerkte ongefactureerde avonden. Kijk onder &quot;Betalingen&quot;</h6></td>
+                                    <td colspan="6" class="center-align"><h6>Geen onverwerkte ongefactureerde avonden. Kijk onder &quot;Betalingen&quot;</h6></td>
                                 </tr>
                             }
                         </tbody>
@@ -71,7 +87,7 @@
 {
     <div class="center-align">
         <br />
-        <a class="waves-effect waves-light btn blue-dark" id="btngenerate">Verwerken</a>
+        <a class="waves-effect waves-light btn blue-dark modal-trigger" href="#areusure">Facturen maken en samenvoegen</a>
         <div class="progress" style="display: none;"><div class="indeterminate"></div></div>
     </div>
     <br />
@@ -86,6 +102,17 @@
     </a>
 </div>
 
+<div class="modal" id="areusure">
+    <div class="modal-content">
+        <h4>Weet u zeker dat u de facturen wilt maken en samenvoegen? Controleer eerst de bedragen van de ongefactureerde activiteiten per kind.</h4>
+        <p>Hiermee wordt er een factuur op uw naam gezet en worden de avonden die de kinderen samengevoegd door middel van extra &quot;vrienden&quot;. Dit is de enige manier op voor uw kind(eren) tegelijk af te rekenen. Als u 1 kind heeft gekoppeld wordt er gewoon een normale factuur gemaakt op uw naam.</p>
+    </div>
+    <div class="modal-footer">
+        <button class="orange btn waves-effect modal-close">Annuleren</button>
+        <button id="btngenerate" class="green btn waves-effect modal-close">Maken en samenvoegen</button>
+    </div>
+</div>
+
 
 <script>
     var Billing = {
@@ -95,16 +122,35 @@
         },
         mapEvents: function () {
             $('#btngenerate').click(function () {
-                $('#progress').show();
+                $('#_progbar').show();
+                $('#btngenerate').addClass('disabled');
                 $.get('/Parent/GenerateInvoice', function (r) {
                     if (r.status == 'success') {
-                        M.toast({ html: 'Activiteiten successvol verwerkt!', classes: 'green' })
-                        setTimeout(window.location.reload.bind(window.location), 1000);
+                        M.toast({ html: 'Activiteiten successvol verwerkt!', classes: 'green' });
+                        OverstagJS.Loader.init(Billing.mergeInvoices);
                     } else {
-                        M.toast({ html: 'Er is iets fout gegaan. Probeer het later opnieuw', classes: 'red' })
+                        M.toast({ html: r.error, classes: 'red' });
+                        $('#_progbar').hide();
                     }
-                    $('#progress').hide();
                 },'json');
+            });
+        },
+        mergeInvoices: function () {
+            OverstagJS.Loader.show();
+            $.get('/Parent/MergeInvoices', function (r) {
+                if (r.status == 'success') {
+                    M.toast({ html: 'Facturen successvol samengevoegd!', classes: 'green' })
+                    Core.doReload(1000);
+                } else {
+                    if (r.status == 'warning') {
+                        M.toast({ html: r.warning, classes: 'orange' });
+                    } else {
+                        M.toast({ html: r.error, classes: 'red' });
+                        console.log(r.debuginfo);
+                    }
+                }
+            }, 'json').done(function () {
+                OverstagJS.Loader.hide();
             });
         }
     }

@@ -85,11 +85,16 @@ namespace Overstag.Controllers
                 {
                     List<SSub> subs = new List<SSub>();
                     foreach (var s in e.Participators)
-                        subs.Add(new SSub
+                    {
+                        SSub sssb = new SSub
                         {
                             account = context.Accounts.First(f => f.Id == s.UserID),
                             part = s
-                        });
+                        };
+
+                        if (sssb.account.Type == 0)
+                            subs.Add(sssb);
+                    }
 
                     sse.Add(new SSubEvent()
                     {
@@ -123,7 +128,7 @@ namespace Overstag.Controllers
                     {
                         var parti = eve.Participators.ToList();
                         var e = eve.Participators.First(f => f.UserID == id);
-                        if (e.Payed == 0)
+                        if (!e.Payed)
                         {
                             eve.Participators.Remove(e);
                         }
@@ -154,8 +159,8 @@ namespace Overstag.Controllers
         /// <param name="count">The amount of drinks</param>
         /// <param name="eventid">The event's identifier</param>
         /// <returns>JSON, success or error</returns>
-        [HttpGet("/Mentor/setDrink/{eventid}/{userid}/{count}")]
-        public async Task<IActionResult> setDrink(int eventid, int userid, int count)
+        [HttpGet("/Mentor/setDrink/{eventid}/{userid}/{amount}")]
+        public async Task<IActionResult> setDrink(int eventid, int userid, int amount)
         {
             using(var context = new OverstagContext())
             {
@@ -167,11 +172,10 @@ namespace Overstag.Controllers
                 try
                 {
                     var user = eve.Participators.First(f => f.UserID == userid);
-                    if (user.Payed == 1)
+                    if (user.Payed)
                         return Json(new { status = "error", error = "Gebruiker heeft al betaald" });
 
-                    user.ConsumptionCount = (count >= 0) ? count : 0;
-                    user.ConsumptionTax = user.ConsumptionCount * 100;
+                    user.AdditionsCost = amount;
                     context.Events.Update(eve);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
@@ -197,8 +201,7 @@ namespace Overstag.Controllers
                     if (DateTime.Today > eve.When.Date.AddDays(3))
                         return Json(new { status = "error", error = "Het is nu te lang geleden. U kunt geen mensen meer inschrijven." });
 
-                    var part = user.Subscriptions.Where(e => e.EventID == eventid).FirstOrDefault();
-                    if (part == null)
+                    if (!user.Subscriptions.Any(e => e.EventID == eventid))
                     {
                         user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id });
                         await context.SaveChangesAsync();
@@ -259,6 +262,7 @@ namespace Overstag.Controllers
                     eve.Description = e.Description;
                     eve.When = e.When;
                     eve.Cost = e.Cost;
+                    eve.Type = (byte)(e.Title.ToLower().Contains("chill") ? 0 : 1);
 
                     if (e.Id == -1)
                         context.Events.Add(eve);
@@ -304,7 +308,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>View with sorted ideas</returns>
         public IActionResult Votes()
-            => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote == 1) - b.Votes.Count(i => i.Upvote == 0))).ToArray().Reverse().ToList());
+            => View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote) - b.Votes.Count(i => !i.Upvote))).ToArray().Reverse().ToList());
 
         /// <summary>
         /// Delete an idea

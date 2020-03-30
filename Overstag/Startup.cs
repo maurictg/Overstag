@@ -1,16 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Razor.Runtime;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
+using Overstag.Services;
 
 namespace Overstag
 {
@@ -26,15 +22,19 @@ namespace Overstag
             services.AddDistributedMemoryCache(); // Adds a default in-memory implementation of IDistributedCache
             services.AddSession();
             services.AddResponseCaching();
+            services.AddRazorPages();
+            services.AddHttpContextAccessor();
             services.AddResponseCompression(options => {
                 options.Providers.Add<GzipCompressionProvider>();
                 options.Providers.Add<BrotliCompressionProvider>();
                 options.EnableForHttps = true; 
             });
+
+            services.AddSocketHandler(); //custom, Sockets.cs
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -49,12 +49,16 @@ namespace Overstag
             app.UseResponseCompression();
             app.UseSession();
             app.UseStaticFiles();
-            app.UseMiddleware<Overstag.Middlewares.Authentication>();
+            app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
 
+            app.UseWebSockets();
+            app.MapSocketHandler("/ws", provider.GetService<SocketHandler>());
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages();
             });
         }
     }

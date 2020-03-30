@@ -37,7 +37,7 @@
                     <td><b>@i.User.Lastname</b></td>
                     <td>@i.Invoice.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
                     <td>@i.Payment.PlacedAt.ToString("dd-MM-yyyy HH:mm:ss")</td>
-                    <td>@Html.Raw((i.Invoice.Payed == 0) ? "<b class=\"red-text\">Nee</b>" : "<b class=\"green-text\">Ja</b>")</td>
+                    <td>@Html.Raw((!i.Invoice.Payed) ? "<b class=\"red-text\">Nee</b>" : "<b class=\"green-text\">Ja</b>")</td>
                     <td>@Html.Raw((i.Payment.PaymentID != null) ? i.Payment.PaymentID : "<b>?</b>")</td>
                     <td>@Html.Raw((i.Payment.Status != null) ? $"<b class=\"{StatusColors[Convert.ToInt32(i.Payment.Status)]}-text\">{Status[Convert.ToInt32(i.Payment.Status)]}</b>" : "<b>?</b>")</td>
                     <td>@Convert.ToDateTime(i.Payment.PayedAt).ToString("dd-MM-yyyy HH:mm:ss")</td>
@@ -50,7 +50,7 @@
 
                         @if (i.Payment.Status == null || (int)i.Payment.Status == 0 || (int)i.Payment.Status == 6)
                         {
-                            <a class="btn blue waves-effect" target="_blank" href="/Pay/Invoice/@Uri.EscapeDataString(i.Invoice.PayID)">Factuur openen</a>
+                            <a class="btn blue waves-effect" target="_blank" href="/Pay/Invoice/@Uri.EscapeDataString(i.Invoice.InvoiceID)">Factuur openen</a>
                         }
 
                         @if (i.Payment.Status == null || ((int)i.Payment.Status < 6 && (int)i.Payment.Status != 0))

@@ -1,5 +1,6 @@
 ﻿@{
     Layout = null;
+    string redir = "/Register/Login" + ((ViewBag.Redirect == null) ? "" : "?r="+ViewBag.Redirect);
 }
 <!DOCTYPE html>
 <html>
@@ -42,7 +43,7 @@
         }
         @if (ViewBag.showLogin == true)
         {
-            <a href="/Register/Login" class="btn btn-large red waves-effect">Inloggen &rarr;</a>
+            <a href="@redir" class="btn btn-large red waves-effect">Inloggen &rarr;</a>
         }
     </div>
     <br /><br />

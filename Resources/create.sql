@@ -1,117 +1,154 @@
-CREATE TABLE events (
-  [Id] int NOT NULL IDENTITY,
-  [Title] varchar(max),
-  [Description] varchar(max),
-  [When] datetime2(0) NOT NULL,
-  [Cost] int NOT NULL,
-  PRIMARY KEY ([Id])
+DROP DATABASE IF EXISTS overstag
+GO
+CREATE DATABASE overstag
+GO
+USE overstag
+GO
+
+
+CREATE TABLE [Events] (
+    [Id] int NOT NULL IDENTITY,
+    [Title] nvarchar(max) NULL,
+    [Description] nvarchar(max) NULL,
+    [When] datetime2 NOT NULL,
+    [Cost] int NOT NULL,
+    [Type] tinyint NOT NULL,
+    CONSTRAINT [PK_Events] PRIMARY KEY ([Id])
 );
 
-CREATE TABLE tickets (
-  [Id] int NOT NULL IDENTITY,
-  [UserID] int NOT NULL,
-  [Type] int NOT NULL,
-  [Title] varchar(max),
-  [Message] varchar(max),
-  [Timestamp] datetime2(0) NOT NULL,
-  PRIMARY KEY ([Id])
+GO
+
+CREATE TABLE [Families] (
+    [Id] int NOT NULL IDENTITY,
+    [ParentID] int NOT NULL,
+    [Token] nvarchar(max) NULL,
+    CONSTRAINT [PK_Families] PRIMARY KEY ([Id])
 );
 
+GO
 
-CREATE TABLE families (
-  [Id] int NOT NULL IDENTITY,
-  [ParentID] int NOT NULL,
-  [Token] varchar(max),
-  PRIMARY KEY ([Id])
+CREATE TABLE [Files] (
+    [Id] int NOT NULL IDENTITY,
+    [Token] nvarchar(max) NULL,
+    [Name] nvarchar(max) NULL,
+    [Mimetype] nvarchar(max) NULL,
+    CONSTRAINT [PK_Files] PRIMARY KEY ([Id])
 );
 
-CREATE TABLE ideas (
-  [Id] int NOT NULL IDENTITY,
-  [Title] varchar(max),
-  [Description] varchar(max),
-  PRIMARY KEY ([Id])
+GO
+
+CREATE TABLE [Ideas] (
+    [Id] int NOT NULL IDENTITY,
+    [Title] nvarchar(max) NULL,
+    [Description] nvarchar(max) NULL,
+    [Cost] nvarchar(max) NULL,
+    CONSTRAINT [PK_Ideas] PRIMARY KEY ([Id])
 );
 
-CREATE TABLE invoices (
-  [Id] int NOT NULL IDENTITY,
-  [UserID] int NOT NULL,
-  [Amount] int NOT NULL,
-  [Timestamp] datetime2(0) NOT NULL,
-  [EventIDs] varchar(max),
-  [Payed] int NOT NULL,
-  [AdditionsCount] int NOT NULL,
-  [PayID] varchar(max),
-  PRIMARY KEY ([Id])
+GO
+
+CREATE TABLE [Accounts] (
+    [Id] int NOT NULL IDENTITY,
+    [Gender] bit NOT NULL,
+    [Type] tinyint NOT NULL,
+    [Username] nvarchar(max) NULL,
+    [Password] nvarchar(max) NULL,
+    [Email] nvarchar(max) NULL,
+    [Firstname] nvarchar(max) NULL,
+    [Lastname] nvarchar(max) NULL,
+    [Phone] nvarchar(12) NULL,
+    [Token] nvarchar(max) NULL,
+    [Adress] nvarchar(max) NULL,
+    [Postalcode] nvarchar(max) NULL,
+    [Residence] nvarchar(max) NULL,
+    [Birthdate] datetime2 NOT NULL,
+    [RegisterDate] datetime2 NOT NULL,
+    [MollieID] nvarchar(max) NULL,
+    [TwoFactor] nvarchar(max) NULL,
+    [TwoFactorCodes] nvarchar(max) NULL,
+    [FamilyId] int NULL,
+    CONSTRAINT [PK_Accounts] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Accounts_Families_FamilyId] FOREIGN KEY ([FamilyId]) REFERENCES [Families] ([Id]) ON DELETE NO ACTION
 );
 
-CREATE TABLE logging (
-  [Id] int NOT NULL IDENTITY,
-  [Username] varchar(max),
-  [Type] int NOT NULL,
-  [Date] datetime2(0) NOT NULL,
-  [Ip] varchar(max),
-  PRIMARY KEY ([Id])
+GO
+
+CREATE TABLE [Auths] (
+    [Id] int NOT NULL IDENTITY,
+    [Token] nvarchar(max) NULL,
+    [IP] nvarchar(max) NULL,
+    [Registered] datetime2 NOT NULL,
+    [UserId] int NOT NULL,
+    CONSTRAINT [PK_Auths] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Auths_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION                                                      
 );
 
-CREATE TABLE payments (
-  [Id] int NOT NULL IDENTITY,
-  [PaymentID] varchar(max),
-  [InvoiceID] varchar(max),
-  [UserID] int NOT NULL,
-  [Status] int DEFAULT NULL,
-  [PlacedAt] datetime2(0) NOT NULL,
-  [PayedAt] datetime2(0) DEFAULT NULL,
-  PRIMARY KEY ([Id])
+GO
+
+CREATE TABLE [Invoices] (
+    [Id] int NOT NULL IDENTITY,
+    [Amount] int NOT NULL,
+    [Timestamp] datetime2 NOT NULL,
+    [EventIDs] nvarchar(max) NULL,
+    [AdditionsCost] int NOT NULL,
+    [Payed] bit NOT NULL,
+    [InvoiceID] nvarchar(max) NULL,
+    [UserID] int NOT NULL,
+    CONSTRAINT [PK_Invoices] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Invoices_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION                                                   
 );
 
-CREATE TABLE accounts (
-  [Id] int NOT NULL IDENTITY,
-  [Sex] int NOT NULL,
-  [Type] int NOT NULL,
-  [Username] varchar(max) NOT NULL,
-  [Password] varchar(max) NOT NULL,
-  [Email] varchar(max) NOT NULL,
-  [Firstname] varchar(max),
-  [Lastname] varchar(max),
-  [Token] varchar(max),
-  [Adress] varchar(max),
-  [Postalcode] varchar(max),
-  [Residence] varchar(max),
-  [Birthdate] datetime2(0) NOT NULL,
-  [MollieID] varchar(max),
-  [TwoFactor] varchar(max),
-  [FamilyId] int DEFAULT NULL,
-  [DenyTickets] int NOT NULL,
-  PRIMARY KEY ([Id])
- ,
-  CONSTRAINT [FK_Accounts_Families_FamilyId] FOREIGN KEY ([FamilyId]) REFERENCES families ([Id]) ON DELETE CASCADE
-) ;
+GO
 
-CREATE INDEX [IX_Accounts_FamilyId] ON accounts ([FamilyId]);
+CREATE TABLE [Participate] (
+    [UserID] int NOT NULL,
+    [EventID] int NOT NULL,
+    [Payed] bit NOT NULL,
+    [AdditionsCost] int NOT NULL,
+    [FriendCount] tinyint NOT NULL,
+    CONSTRAINT [PK_Participate] PRIMARY KEY ([EventID], [UserID]),
+    CONSTRAINT [FK_Participate_Events_EventID] FOREIGN KEY ([EventID]) REFERENCES [Events] ([Id]) ON DELETE CASCADE,                                                       CONSTRAINT [FK_Participate_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE CASCADE                                                  );
 
-CREATE TABLE participate (
-  [UserID] int NOT NULL,
-  [EventID] int NOT NULL,
-  [Payed] int NOT NULL,
-  [ConsumptionTax] int NOT NULL,
-  [ConsumptionCount] int NOT NULL,
-  PRIMARY KEY ([EventID],[UserID])
- ,
-  CONSTRAINT [FK_Participate_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES accounts ([Id]) ON DELETE CASCADE,
-  CONSTRAINT [FK_Participate_Events_EventID] FOREIGN KEY ([EventID]) REFERENCES events ([Id]) ON DELETE CASCADE
+GO
+
+CREATE TABLE [Transactions] (
+    [Id] int NOT NULL IDENTITY,
+    [Amount] int NOT NULL,
+    [Type] int NULL,
+    [When] datetime2 NOT NULL,
+    [Timestamp] datetime2 NOT NULL,
+    [Description] nvarchar(max) NULL,
+    [Payed] bit NOT NULL,
+    [Metadata] nvarchar(max) NULL,
+    [UserId] int NOT NULL,
+    CONSTRAINT [PK_Transactions] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Transactions_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION
 );
 
-CREATE INDEX [IX_Participate_UserID] ON participate ([UserID]);
+GO
 
-
-CREATE TABLE vote (
-  [IdeaID] int NOT NULL,
-  [UserID] int NOT NULL,
-  [Upvote] int NOT NULL,
-  PRIMARY KEY ([IdeaID],[UserID])
- ,
-  CONSTRAINT [FK_Vote_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES accounts ([Id]) ON DELETE CASCADE,
-  CONSTRAINT [FK_Vote_Ideas_IdeaID] FOREIGN KEY ([IdeaID]) REFERENCES ideas ([Id]) ON DELETE CASCADE
+CREATE TABLE [Vote] (
+    [IdeaID] int NOT NULL,
+    [UserID] int NOT NULL,
+    [Upvote] bit NOT NULL,
+    CONSTRAINT [PK_Vote] PRIMARY KEY ([IdeaID], [UserID]),
+    CONSTRAINT [FK_Vote_Ideas_IdeaID] FOREIGN KEY ([IdeaID]) REFERENCES [Ideas] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_Vote_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE CASCADE
 );
 
-CREATE INDEX [IX_Vote_UserID] ON vote ([UserID]);
+GO
+
+CREATE TABLE [Payments] (
+    [Id] int NOT NULL IDENTITY,
+    [PaymentID] nvarchar(max) NULL,
+    [Status] int NULL,
+    [PlacedAt] datetime2 NOT NULL,
+    [PayedAt] datetime2 NULL,
+    [UserId] int NULL,
+    [InvoiceId] int NOT NULL,
+    CONSTRAINT [PK_Payments] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Payments_Invoices_InvoiceId] FOREIGN KEY ([InvoiceId]) REFERENCES [Invoices] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_Payments_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION
+);
+
+GO

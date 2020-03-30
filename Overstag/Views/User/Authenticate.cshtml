@@ -1,0 +1,48 @@
+﻿@{
+    ViewBag.Title = "Toegang verlenen";
+}
+
+<div class="row"></div>
+<div class="row">
+    <div id="authcard" class="card col s12 m10 offset-m1 center-align rounded">
+        <div class="card-content">
+            <div class="row center-align">
+                <h2 class="blue-middle-text">Toegang verlenen</h2>
+                <h4>Een applicatie wil graag toegang tot jouw Overstag account</h4>
+                <br /><br />
+                <button class="btn btn-large green waves-effect" onclick="allow();">Toestaan</button>
+                <button class="btn btn-large red waves-effect" onclick="discard();">Weigeren</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- https://stackoverflow.com/questions/40889152/is-it-possible-to-get-data-from-html-forms-into-android-while-using-webview -->
+<script>
+    $(function () {
+        if (typeof (Android) == 'undefined') {
+            $('button').addClass('disabled');
+            $('#authcard').fadeOut(3000);
+            M.toast({ html: 'Deze webpagina werkt alleen in een app.', classes: 'red' });
+            setTimeout(function() { window.location.href = '/User'; }, 3000);
+        }
+    });
+
+    function allow() {
+        $.getJSON('/User/GetAuthToken', function (r) {
+            if (r.status == 'success') {
+                if (localStorage.getItem('remember')) {
+                    localStorage.removeItem('remember');
+                }
+                console.log('Token: ' + r.authToken);
+                Android.allow(r.authToken);
+            } else {
+                M.toast({ html: 'Toestemming geven mislukt', classes: 'red' });
+            }
+        });
+    }
+
+    function discard() {
+        Android.discard();
+    }
+</script>

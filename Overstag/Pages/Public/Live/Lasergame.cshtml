@@ -1,0 +1,297 @@
+﻿@page
+@model Overstag.WebsocketsModel
+@{
+    ViewData["Title"] = "Lasergame";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+
+</div>
+
+@section Scripts { 
+    <script src="~/js/Live.js"></script>
+}
+
+@section Styles {
+    <style>
+        body {
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        body::before {
+            opacity: 0.5;
+            position: absolute;
+            content:  url("/img/wallpapers/abandoned.jpg");
+            z-index: -1;
+        }
+    </style>
+}
+
+<div id="welcome" class="white-text center-align">
+    <h1><b>Welkom!</b></h1>
+    <h3>Over enkele ogenblikken begint het spel</h3>
+</div>
+
+<div id="roundover" style="display: none;" class="center-align">
+    <h1 class="red-text"><b>Ronde voorbij</b></h1>
+    <h3 class="white-text">Ga terug naar de post</h3>
+</div>
+
+<div id="timer" style="display: none;" class="white-text center-align">
+    <br/>
+    <h1 id="lblcount" style="font-size: 20em; font-family: 'Segoe UI';">20</h1>
+</div>
+
+<div id="stats" class="row" style="display: none;">
+</div>
+
+<script>
+    var i = null;
+    var round = 0;
+    var roundLength = 300;
+    var muted = false;
+
+    var scoreboard = [];
+
+    var nuclearAlarm = new Audio('/audio/nuclear.mp3');
+    var tornadoAlarm = new Audio('/audio/tornado.mp3');
+    var emergencyAlarm = new Audio('/audio/emergency.mp3');
+    var message = new Audio('/audio/message.mp3');
+    var pirates = new Audio('/audio/pirates_of_the_carribean.mp3');
+    
+    var Lasergame = {
+        init: function () {
+            $('#_title').html('&nbsp;Lasergame LIVE');
+            $('#_title').parent().removeClass('blue-light').addClass('blue-grey darken-3');
+            $('#nav-mobile>li>a').addClass('blue-grey-text text-darken-3');
+            $('body').removeClass('blue-dark').addClass('black');
+
+            OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle, Lasergame.close, true)
+
+            $('#_progbar>div').removeClass('indeterminate').addClass('determinate').css('width', '100%');
+        },
+        handle: function (data) {
+            data = JSON.parse(data);
+            switch (data.t) {
+                case 'fillData':
+                    {
+                        if (data.data != null) {
+                            var d = data.data;
+                            round = d.round;
+                            roundLength = d.roundLength;
+                            muted = !d.allowAudio;
+                        }
+                    }
+                    break;
+                case 'alert':
+                    {
+                        if (!muted)
+                            Lasergame.playSound('message');
+
+                        M.toast({ html: '<h5>'+data.data+'</h5>', classes: 'orange' });
+                    }
+                    break;
+                case 'nextRound':
+                    {
+                        round = Number(data.data) - 1;
+                        Lasergame.start();
+                    }
+                    break;
+                case 'reset':
+                    {
+                        scoreboard = [];
+                        Lasergame.clear();
+                    }
+                    break;
+                case 'mute':
+                    {
+                        if (muted == false) {
+                            nuclearAlarm.pause();
+                            nuclearAlarm.currentTime = 0;
+                            emergencyAlarm.pause();
+                            emergencyAlarm.currentTime = 0;
+                            tornadoAlarm.pause();
+                            tornadoAlarm.currentTime = 0;
+                            pirates.pause();
+                        }
+
+                        muted = true;
+                    }
+                    break;
+                case 'unmute':
+                    muted = false;
+                    break;
+                case 'playSound':
+                    {
+                        muted = false;
+
+                        Lasergame.playSound(data.data);
+                    }
+                    break;
+                case 'updateScore':
+                    {
+                        var user = data.data.user;
+                        var score = data.data.score;
+
+                        for (var i = 0; i < scoreboard.length; i++) {
+                            if (scoreboard[i].user == user) {
+                                scoreboard[i].score = score;
+                                Lasergame.updateStats();
+                                return;
+                            }
+                        }
+
+                        scoreboard.push({ user: user, score: score })
+                        Lasergame.updateStats();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        },
+        start: function () {
+            Lasergame.clear();
+            $('#timer').fadeIn();
+            $('#lblcount').css('color', '');
+            $('#lblcount').text('Ronde '+ (++round));
+            setTimeout(function () {
+                $('#_progbar>div').css('width', '100%');
+                $('#_progbar').show();
+                $('#lblcount').text('20');
+                var count = 20;
+                clearInterval(i);
+
+                if (!muted)
+                    Lasergame.playSound('nuclear');
+
+                i = setInterval(function () {
+                    if (count > -1) count--;
+                    else {
+                        clearInterval(i);
+                        $('#timer, #_progbar').fadeOut('slow');
+                        $('#stats').fadeIn('slow');
+
+                        var time = roundLength;
+                        i = setInterval(function () {
+                            if (--time < 0) {
+                                Lasergame.clear();
+                                $('#roundover').fadeIn('slow');
+
+                                if (!muted)
+                                    Lasergame.playSound('tornado');
+
+                                return;
+                            }
+                            $('#_title').html('&nbsp;Ronde ' + round + ' <b>' + time.toTimeString()+'</b>');
+                        }, 1000);
+                    }
+
+                    if (count > 0) {
+                        $('#_progbar>div').css('width', count * 5 + '%');
+                        $('#lblcount').text(count);
+                    } else {
+                        $('#_progbar>div').css('width', '0%');
+                        $('#lblcount').css('color', 'red');
+                        $('#lblcount').text('Go!');
+                    }
+
+                }, 1000);
+            }, 2000);
+        },
+        clear: function () {
+            $('#_progbar, #timer, #welcome, #roundover, #stats').fadeOut();
+            clearInterval(i);
+            $('#_title').html('&nbsp;Lasergame LIVE');
+        },
+        close: function () {
+            scoreboard = [];
+            Lasergame.clear();
+        },
+        updateStats: function() {
+            $('#stats').hide();
+
+
+            var html = '';
+            $.each(scoreboard, function (i, e) {
+
+                var name = e.user;
+                if (e.user.includes('Team-')) {
+                    var color = e.user.split('-')[1];
+                    name = `Team <span class="${color}-text">${color}</span>`;
+                }
+
+                html += `
+                <div class="col s12 m3">
+                <div class="card-panel blue-grey darken-3 center-align">
+                    <h2 class="white-text">${name}</h1>
+                    <h1 style="font-size: 8em; margin-top: -0.1em;"><b class="green-text">${e.score}</b></h2>
+                </div></div>
+                `;
+            });
+            $('#stats').html(html);
+            $('#stats').fadeIn();
+        },
+        playSound: function (sound) {
+            var playedPromise;
+
+            try {
+
+                if (!pirates.paused)
+                    pirates.pause();
+
+                if (sound == 'nuclear') {
+                    const promise = nuclearAlarm.play();
+                    playedPromise = promise;
+                }
+                else if (sound == 'emergency') {
+                    const promise = emergencyAlarm.play();
+                    playedPromise = promise;
+                }
+                else if (sound == 'tornado') {
+                    const promise = tornadoAlarm.play();
+                    playedPromise = promise;
+                }
+                else if (sound == 'pirates') {
+                    pirates.loop = true;
+                    pirates.volume = 0.5;
+                    const promise = pirates.play();
+                    playedPromise = promise;
+
+                } else if (sound == 'message') {
+                    const promise = message.play();
+                    playedPromise = promise;
+                }
+
+                if (playedPromise) {
+                    if (playedPromise.state == 'pending')
+                        M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
+                }
+            } catch (err) {
+                console.log(err);
+                M.toast({ html: 'Geef a.u.b. deze pagina rechten audio af te spelen', classes: 'red' });
+            }
+        }
+    };
+
+    
+
+    Number.prototype.toTimeString = function () {
+        var sec_num = parseInt(this, 10);
+        var hours = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (minutes < 10) { minutes = "0" + minutes; }
+        if (seconds < 10) { seconds = "0" + seconds; }
+        return minutes + ':' + seconds;
+    }
+
+</script>
+<script>
+    $(function() {
+        Lasergame.init();
+    });
+</script>

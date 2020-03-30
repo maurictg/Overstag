@@ -25,8 +25,8 @@ namespace Overstag.Controllers
 
         [Route("Register/Login")]
         [Route("inloggen")]
-        public IActionResult Login()
-            => View("Login", "");
+        public IActionResult Login([FromQuery]string r)
+            => View("Login", (r==null)?"":r);
 
         [Route("Register/Register")]
         [Route("aanmelden")]
@@ -57,8 +57,8 @@ namespace Overstag.Controllers
 
         public async Task<IActionResult> Logout([FromQuery]string token)
         {
+            //Important session variables
             HttpContext.Session.Remove("Token");
-            HttpContext.Session.Remove("Name");
             HttpContext.Session.Remove("Type");
 
             if (!string.IsNullOrEmpty(token))
@@ -68,9 +68,9 @@ namespace Overstag.Controllers
                     using (var context = new OverstagContext())
                     {
                         token = Uri.UnescapeDataString(token);
-                        if (context.Auths.Any(f => f.Token == token))
+                        if (await context.Auths.AnyAsync(f => f.Token == token))
                         {
-                            var auth = context.Auths.First(f => f.Token == token);
+                            var auth = await context.Auths.FirstAsync(f => f.Token == token);
                             context.Auths.Remove(auth);
                             await context.SaveChangesAsync();
                             return Json(new { status = "success" });
@@ -129,7 +129,8 @@ namespace Overstag.Controllers
                             //Set password hashes, create token and set type
                             account.Password = Encryption.PBKDF2.Hash(account.Password);
                             account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                            account.Type = (account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
+                            account.Type = (byte)(account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
+                            account.RegisterDate = DateTime.Now;
 
                             try
                             {
@@ -159,12 +160,11 @@ namespace Overstag.Controllers
                             context.Accounts.Add(account);
                             await context.SaveChangesAsync();
 
-                            //Register variables for login
+                            //Set important session variables
                             HttpContext.Session.SetString("Token", account.Token);
                             HttpContext.Session.SetInt32("Type", account.Type);
-                            HttpContext.Session.SetString("Name", account.Username);
 
-                            string remember = Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
+                            string remember = await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
 
                             return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                         }
@@ -188,7 +188,7 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<JsonResult> postLogin([FromForm]string Username, [FromForm]string Password)
         {
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
                 using (var context = new OverstagContext())
                 {
@@ -197,48 +197,28 @@ namespace Overstag.Controllers
                     {
                         var account = context.Accounts.FirstOrDefault(e => e.Username.ToLower().Equals(Username.ToLower()) || e.Email.ToLower().Equals(Username.ToLower()));
                         if (account == null)
-                            return Json(new { status = "error", error = "Gebruiker bestaat niet" });
+                            return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist", debuginfo = "Account is NULL" });
 
-                        //Controleren op onjuiste inlogpogingen
-                        if (context.Logging.Count(i => i.Ip == ip && i.Date == DateTime.Now.Date && i.Username == Username) > 15)
-                        {
-                            return Json(new { status = "error", error = "Te veel onjuiste inlogpogingen. Probeer het morgen opnieuw." });
-                        }
-                        else
-                        {
                             if (Encryption.PBKDF2.Verify(account.Password, Password))
                             {
                                 bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
                                 //Login is juist, redirect naar page, zet sessie variablen
 
-
                                 if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
                                 {
+                                    //Set important session variables
                                     HttpContext.Session.SetString("Token", account.Token);
                                     HttpContext.Session.SetInt32("Type", account.Type);
-                                    HttpContext.Session.SetString("Name", account.Username);
                                 }
 
-                                //Eventuele foute pogingen verwijderen
-                                if (context.Logging.Count(i => i.Ip == ip && i.Username == Username) > 0)
-                                {
-                                    foreach (var log in context.Logging.Where(i => i.Ip == ip && i.Username == Username))
-                                        context.Logging.Remove(log);
-
-                                    context.SaveChangesAsync();
-                                }
-
-                                string remember = (no2fa) ? Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
+                                string remember = (no2fa) ? await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
 
                                 return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
                             }
                             else
                             {
-                                context.Logging.Add(new Logging { Ip = ip, Type = 0, Username = Username, Date = DateTime.Now.Date });
-                                context.SaveChangesAsync();
                                 return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
                             }
-                        }
                     }
                     catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
                 }
@@ -252,52 +232,29 @@ namespace Overstag.Controllers
         /// <param name="a">The account info (email adress)</param>
         /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
-        public JsonResult postMailreset(Account a)
+        public JsonResult postMailreset([FromForm]string Email)
         {
-            if (!ModelState.IsValid)
+            using (var context = new OverstagContext())
             {
-                return Json(new { status = "error", error = "Gegevens zijn ongeldig.\nControleer alle velden" });
-            }
-            else
-            {
-                using (var context = new OverstagContext())
+                try
                 {
-                    try
+                    var account = context.Accounts.Where(e => e.Email == Email).FirstOrDefault();
+                    if (account != null)
                     {
-                        UserController u = new UserController();
-                        var account = context.Accounts.Where(e => e.Email == a.Email).FirstOrDefault();
-                        if(account != null)
-                        {
-                            try
-                            {
-                                string message = "<h1>Overstag wachtwoord reset</h1>" +
-                                    "Beste " + account.Firstname + ",<br>We sturen je deze mail omdat je je wachtwoord vergeten bent.<br>" +
-                                    "Klik op <a href='http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(account.Token) + "'>deze link</a>  om je wachtwoord te resetten of plak hem in je adresbalk." +
-                                    "Als de link het niet doet, kopieer en plak deze dan: http://stoverstag.nl/Register/Passreset/" + Uri.EscapeDataString(account.Token)+"<br>"+
-                                    "<br>Success! Mocht het niet werken, neem dan contact met ons op";
-                                string res = Core.General.SendMail("Wachtwoord reset", message, account.Email);
-                                if (res == "OK")
-                                {
-                                    return Json(new { status = "success" });
-                                }
-                                else
-                                {
-                                    return Json(new { status = "error", error = res });
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
-                            }
-                        }
-                        else
-                        {
-                            return Json(new { status = "error", error = "Dit mailadres is niet bekend in ons systeem" });
-                        }
+                        var mail = new Services.PassresetMail(account);
 
+                        if (mail.SendAsync().Result)
+                            return Json(new { status = "success" });
+                        else
+                            return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = mail.error.ToString() });
                     }
-                    catch(Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
+                    else
+                    {
+                        return Json(new { status = "error", error = "Dit mailadres is niet bekend in ons systeem" });
+                    }
+
                 }
+                catch (Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
             }
         }
 
@@ -315,12 +272,12 @@ namespace Overstag.Controllers
                 try
                 {
                     Token = Uri.UnescapeDataString(Token);
-                    var account = context.Accounts./*ToList().*/FirstOrDefault(e => e.Token == Token);
+                    var account = await context.Accounts.FirstOrDefaultAsync(e => e.Token == Token);
 
                     if (account == null)
                         return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
 
-                    account.Password = Encryption.PBKDF2.Hash(Password); //<--NULLexception
+                    account.Password = Encryption.PBKDF2.Hash(Password);
                     account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
                     context.Accounts.Update(account);
                     await context.SaveChangesAsync();
@@ -352,10 +309,12 @@ namespace Overstag.Controllers
                 using(var context = new OverstagContext())
                 {
                     var a = context.Accounts.First(e => e.Token == token);
+
+                    //Set important session variables
                     HttpContext.Session.SetString("Token", a.Token);
                     HttpContext.Session.SetInt32("Type", a.Type);
-                    HttpContext.Session.SetString("Name", a.Username);
-                    string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString());
+
+                    string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString()).Result;
                     HttpContext.Session.SetString("Remember", remember);
                     return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                 }

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
-using Overstag.Models.NoDB;
 
 namespace Overstag.Controllers
 {
@@ -42,39 +41,15 @@ namespace Overstag.Controllers
         /// <returns>View</returns>
         public IActionResult Billing()
         {
-            List<FUnpayed> Billing = new List<FUnpayed>();
-            int fc = 0;
-
             using(var context = new OverstagContext())
             {
-                List<Account> Users = new List<Account>();
+                var family = context.Families
+                    .Include(f => f.Members).ThenInclude(g => g.Subscriptions).ThenInclude(h => h.Event)
+                    //.Include(f => f.Members).ThenInclude(g => g.Invoices) <-- This is how you also include invoices
+                    .First(i => i.ParentID == currentuser().Id);
 
-                foreach (var user in context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id).Members)
-                    Users.Add(context.Accounts.Include(f => f.Subscriptions).First(g => g.Id == user.Id));
-
-                foreach(var user in Users)
-                {
-                    int ccnt = 0;
-                    int cc = 0;
-
-                    List<Event> Events = new List<Event>();
-                    foreach (var s in user.Subscriptions.Where(s => s.Payed == 0))
-                    {
-                        ccnt += s.ConsumptionCount;
-                        cc += s.ConsumptionTax;
-                        var e = context.Events.First(f => f.Id == s.EventID);
-
-                        fc += s.FriendCount;
-
-                        if(Core.General.DateIsPassed(e.When))
-                            Events.Add(e);
-                    }
-                        
-                    Billing.Add(new FUnpayed { UnpayedEvents = Events.OrderBy(b => b.When).ToList(), User = user, ConsumptionCount = ccnt, ConsumptionCost = cc, FriendCount = fc });
-                }
+                return View(family.Members);
             }
-
-            return View(Billing);
         }
 
         /// <summary>
@@ -86,7 +61,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    context.Add(new Family()
+                    context.Families.Add(new Family()
                     {
                         ParentID = currentuser().Id,
                         Token = Encryption.Random.rHash(currentuser().Token)
@@ -133,34 +108,40 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or status = error with details)</returns>
         public async Task<IActionResult> GenerateInvoice()
         {
-            //Zet ID's om van kind naar ouder
-            using (var context = new OverstagContext())
+            List<Exception> exceptions = new List<Exception>();
+            using(var context = new OverstagContext())
             {
-                var me = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentuser().Id);
-                var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id);
-                List<Account> members = new List<Account>();
-
-                foreach (var user in family.Members)
-                    members.Add(context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == user.Id));
-
-                foreach (var m in members)
-                    foreach (var f in m.Subscriptions.Where(g => g.Payed == 0))
-                    {
-                        me.Subscriptions.Add(new Participate { UserID = me.Id, EventID = f.EventID, FriendCount = f.FriendCount, ConsumptionTax = f.ConsumptionTax, ConsumptionCount = f.ConsumptionCount });
-                        f.Payed = 1;
-                    }
-
-                try
+                foreach (var member in context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id).Members)
                 {
-                    context.Accounts.Update(me);
-                    context.Accounts.UpdateRange(members);
-                    await context.SaveChangesAsync();
+                    bool result = await Services.Invoices.Create(member.Id);
+                    if (!result)
+                        exceptions.Add(Services.Invoices.error);
+                }
+
+                if (exceptions.Count() > 0)
+                    return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken." });
+                else
                     return Json(new { status = "success" });
-                }
-                catch (Exception e)
-                {
-                    return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = e.Message });
-                }
+            }
+        }
+
+        /*
+         * 1. Get all participations
+         * 2. Make Event unique in participations
+         * 3. Set participations on parent's name
+         * 4. Create new invoice with events
+         * 
+         */
+        public async Task<IActionResult> MergeInvoices()
+        {
+            try
+            {
+                await Services.Invoices.MergeFamilyInvoices(currentuser().Id);
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", debuginfo = e.ToString() });
             }
         }
     }

@@ -9,15 +9,31 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Overstag.Models;
 using Overstag.Models.NoDB;
+using Overstag.Accountancy;
 using Microsoft.EntityFrameworkCore;
 using Mollie.Api.Client;
 using Mollie.Api.Models.Payment.Response;
 using Mollie.Api.Models.Payment;
+using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Controllers
 {
     public class AccountancyController : Controller
     {
+        private Account currentUser = null;
+
+        /// <summary>
+        /// Gets the current user
+        /// </summary>
+        /// <returns>All account info of the current user</returns>
+        public Account currentuser()
+        {
+            if (currentUser == null)
+                currentUser = new OverstagContext().Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
+
+            return currentUser;
+        }
+
         /// <summary>
         /// Get a range of transactions
         /// </summary>
@@ -31,7 +47,7 @@ namespace Overstag.Controllers
                 var trans = context.Transactions.OrderByDescending(f => f.When).ToList();
                 
                 int[] typesIn = { 1, 2, 3, 4, 5, 6 };
-                int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28 };
+                int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28, 29 };
 
                 Dictionary<int, int> OPT = new Dictionary<int, int>();
                 Dictionary<int, int> IPT = new Dictionary<int, int>();
@@ -57,7 +73,8 @@ namespace Overstag.Controllers
 
                 return View("~/Views/Mentor/Accountancy/Index.cshtml", new _Transactions()
                 {
-                    Balance = trans.Sum(f => f.Amount),
+                    Balance = trans.Where(g => g.Payed).Sum(f => f.Amount),
+                    BalanceWithDC = trans.Sum(f => f.Amount),
                     In = trans.Where(f => f.Amount > 0).Sum(g => g.Amount),
                     Out = trans.Where(f => f.Amount < 0).Sum(g => g.Amount),
                     OutPerType = OPT,
@@ -97,10 +114,10 @@ namespace Overstag.Controllers
 
                                 if ((int)payment.Status == 6)
                                 {
-                                    var invoice = context.Invoices.FirstOrDefault(f => f.PayID == payment.InvoiceID);
+                                    var invoice = context.Invoices.Find(payment.Invoice.Id);
                                     if (invoice != null)
                                     {
-                                        invoice.Payed = 1;
+                                        invoice.Payed = true;
                                         context.Invoices.Update(invoice);
                                         await context.SaveChangesAsync();
                                     }
@@ -127,13 +144,13 @@ namespace Overstag.Controllers
             List<MPayment> payments = new List<MPayment>();
             using (var context = new OverstagContext())
             {
-                var pms = context.Payments.OrderBy(f => f.PayedAt == null).OrderByDescending(f => f.PlacedAt).ToList();
+                var pms = context.Payments.Include(x => x.User).Include(y => y.Invoice).OrderBy(f => f.PayedAt == null).OrderByDescending(f => f.PlacedAt).ToList();
                 foreach (var pm in pms)
                 {
                     try
                     {
-                        var user = context.Accounts.First(f => f.Id == pm.UserID);
-                        var invoice = context.Invoices.First(f => f.PayID == pm.InvoiceID);
+                        var user = pm.User;
+                        var invoice = pm.Invoice;
                         payments.Add(new MPayment()
                         {
                             Invoice = invoice,
@@ -150,6 +167,20 @@ namespace Overstag.Controllers
             return View("~/Views/Mentor/Accountancy/Payments.cshtml",payments);
         }
 
+        [Route("Accountancy/Declaration/{id}")]
+        public IActionResult Declaration(int id)
+        {
+            using(var context = new OverstagContext())
+            {
+                var declaration = context.Transactions.Include(f => f.User).FirstOrDefault(f => f.Id == id);
+                string[] error = { "Declaratie niet gevonden", "Probeer een andere." };
+                if (declaration != null)
+                    return View("~/Views/Mentor/Accountancy/Declaration.cshtml",declaration);
+                else
+                    return View("~/Views/Error/Custom.cshtml", error);
+            }
+        }
+
         /// <summary>
         /// Add transaction to database
         /// </summary>
@@ -163,6 +194,8 @@ namespace Overstag.Controllers
                 using (var context = new OverstagContext())
                 {
                     t.When = (t.When < DateTime.Now.AddYears(-25)) ? DateTime.Now : t.When;
+                    t.Timestamp = DateTime.Now;
+                    t.UserId = currentuser().Id;
                     context.Transactions.Add(t);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
@@ -186,8 +219,29 @@ namespace Overstag.Controllers
             {
                 using (var context = new OverstagContext())
                 {
-                    var t = context.Transactions.First(f => f.Id == id);
+                    var t = await context.Transactions.FirstAsync(f => f.Id == id);
                     context.Transactions.Remove(t);
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = "Interne fout", debuginfo = e.ToString() });
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> setTransactionAsPayed([FromForm]int id)
+        {
+            try
+            {
+                using (var context = new OverstagContext())
+                {
+                    var t = await context.Transactions.FirstAsync(f => f.Id == id);
+                    t.Payed = true;
+                    context.Transactions.Update(t);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
                 }
@@ -212,7 +266,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var invoice = context.Invoices.First(f => f.Id == invoiceid);
+                    var invoice = context.Invoices.Include(x => x.User).First(f => f.Id == invoiceid);
                     var payment = context.Payments.First(f => f.Id == payid);
 
                     if (payed == 0 || payed == 1)
@@ -220,13 +274,13 @@ namespace Overstag.Controllers
                         DateTime? nd = null;
                         Mollie.Api.Models.Payment.PaymentStatus? np = null;
 
-                        invoice.Payed = payed;
+                        invoice.Payed = (payed == 1);
                         payment.PayedAt = (payed == 1) ? DateTime.Now : nd;
                         payment.PaymentID = (payed == 1) ? Encryption.Random.rCode(10) : null;
                         payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {context.Accounts.First(f => f.Id == invoice.UserID).Firstname}", When = DateTime.Now, Type = 1 });
+                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {invoice.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = currentuser().Id });
                         await context.SaveChangesAsync();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }
@@ -264,100 +318,49 @@ namespace Overstag.Controllers
         }
 
         public IActionResult Invoices()
-            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => f.Payed == 0).OrderByDescending(g => g.Timestamp).ToList());
+            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Payed).OrderByDescending(g => g.Timestamp).Include(h => h.User).ToList());
 
         /// <summary>
         /// Automatize invoicing for all users
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<JsonResult> autoInvoice([FromForm]int amount)
+        public async Task<JsonResult> autoInvoice([FromForm]int amount, [FromForm]bool sendmail)
         {
             int usercount = 0;
-            int particount = 0;
-            int moneycount = 0;
             int failedmails = 0;
+            List<string> errors = new List<string>();
 
-            //ontvanger, mail
-            List<Tuple<string, string>> Emails = new List<Tuple<string, string>>();
+            //ontvanger, token
+            List<(Account, string)> usersToEmail = new List<(Account, string)>();
 
             using (var context = new OverstagContext())
             {
                 var users = context.Accounts.Include(p => p.Subscriptions).Include(f => f.Family).ToList();
 
-                try
+                foreach (var user in users)
                 {
-                    foreach (var user in users)
+                    if(user.Subscriptions.Count(f => !f.Payed) >= amount && user.Family == null)
                     {
-                        var parti = user.Subscriptions.ToList();
+                        bool result = await Services.Invoices.Create(user.Id);
+                        if (!result)
+                            errors.Add(Services.Invoices.error.ToString());
 
-                        List<int> eventIDS = new List<int>();
-
-                        int bill = 0;
-                        int additions = 0;
-                        int eventcount = 0;
-
-                        foreach (var part in parti.Where(f => f.Payed == 0))
-                        {
-                            var eve = context.Events.First(f => f.Id == part.EventID);
-                            if (Core.General.DateIsPassed(eve.When))
-                            {
-                                eventcount++;
-
-                                bill += (eve.Cost * (part.FriendCount + 1));
-
-                                additions += part.ConsumptionCount;
-                                bill += part.ConsumptionTax;
-
-                                for (int i = 0; i < part.FriendCount + 1; i++)
-                                    eventIDS.Add(eve.Id);
-                            }
-                        }
-
-                        var facture = new Invoice()
-                        {
-                            UserID = (user.Family == null) ? user.Id : user.Family.ParentID,
-                            Amount = bill,
-                            EventIDs = string.Join(',', eventIDS),
-                            Payed = 0,
-                            Timestamp = DateTime.Now,
-                            PayID = Encryption.Random.rHash(user.Token),
-                            AdditionsCount = additions
-                        };
-
-                        if (eventIDS.Count() > (amount-1))
-                        {
-                            context.Invoices.Add(facture);
-                            parti.ForEach(f => f.Payed = 1);
-                            user.Subscriptions = parti;
-                            context.Accounts.Update(user);
-                            await context.SaveChangesAsync();
-                            moneycount += bill;
-                            usercount++;
-                            particount += eventcount;
-                            Emails.Add(new Tuple<string, string>(user.Email,
-                                $"<h1>Er is een factuur gemaakt</h1><h4>Beste {user.Firstname},<br>Er is automatisch een factuur gemaakt van de afgelopen avonden.<br>Deze kun je vinden onder <i>&quot;Betalingen&quot;</i> in je account op de website.<br>Hier is de link naar je factuur:<br><br><a href=\"https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(facture.PayID)}\">https://stoverstag.nl/Pay/Invoice/{Uri.EscapeDataString(facture.PayID)}</a><br></h4>"));
-                        }
+                        usercount++;
+                        usersToEmail.Add((user,Services.Invoices.invoiceId));
                     }
+                }
 
-                    foreach (var email in Emails)
+                if (sendmail)
+                {
+                    foreach (var email in usersToEmail)
                     {
-                        try
-                        {
-                            Core.General.SendMail("Factuur gemaakt", email.Item2, email.Item1);
-                        }
-                        catch
-                        {
+                        if (!new Services.InvoiceEmail(email.Item1, email.Item2).SendAsync().Result)
                             failedmails++;
-                            continue;
-                        }
                     }
-                    return Json(new { status = "success", usercount, particount, moneycount, failedmails });
                 }
-                catch (Exception ex)
-                {
-                    return Json(new { status = "error", error = "Mislukt door interne fout", debuginfo = ex.ToString() });
-                }
+
+                return Json(new { status = "success", usercount, failedmails });
             }
         }
 
@@ -367,7 +370,6 @@ namespace Overstag.Controllers
         /// <returns>json with info</returns>
         public async Task<JsonResult> processPUE()
         {
-            //Zet ID's om van kind naar ouder
             using (var context = new OverstagContext())
             {
                 int count = 0;
@@ -377,34 +379,26 @@ namespace Overstag.Controllers
 
                 foreach (var family in context.Families.Include(f => f.Members).ToList())
                 {
-                    if (family.Members.Count() <= 0)
+                    if (family.Members.Count() == 0)
                         continue;
 
-                    var parent = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == family.ParentID);
-
-                    List<Account> members = new List<Account>();
-
-                    foreach (var user in family.Members)
-                        members.Add(context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == user.Id));
-
-                    foreach (var m in members)
-                        foreach (var f in m.Subscriptions.Where(g => g.Payed == 0))
-                        {
-                            parent.Subscriptions.Add(new Participate { UserID = parent.Id, EventID = f.EventID, FriendCount = f.FriendCount, ConsumptionTax = f.ConsumptionTax, ConsumptionCount = f.ConsumptionCount });
-                            f.Payed = 1;
-                            count++;
-                        }
+                    foreach (var member in family.Members)
+                    {
+                        count++;
+                        bool result = await Services.Invoices.Create(member.Id);
+                        if (!result)
+                            failed++;
+                        else
+                            succeed++;
+                    }
 
                     try
                     {
-                        context.Accounts.Update(parent);
-                        context.Accounts.UpdateRange(members);
-                        await context.SaveChangesAsync();
-                        succeed++;
+                        await Services.Invoices.MergeFamilyInvoices(family.ParentID);
                     }
-                    catch (Exception e)
+                    catch(Exception e)
                     {
-                        exceptions.Add(e.ToString());
+                        Services.Invoices.error = e;
                         failed++;
                     }
                 }

@@ -63,7 +63,7 @@ namespace Overstag.Controllers.Users
                             await file.CopyToAsync(stream);
                         }
 
-                        context.Files.Add(new Files()
+                        context.Files.Add(new Models.File()
                         {
                             Mimetype = file.ContentType,
                             Name = file.FileName,

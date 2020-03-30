@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
 using System.Threading.Tasks;
@@ -11,15 +10,25 @@ namespace Overstag.Controllers
 {
     public class AuthController : Controller
     {
+        /// <summary>
+        /// Register new loginToken
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <returns>JSON {status, token} -> new token to login</returns>
         [HttpPost]
-        public JsonResult Register([FromForm]string token)
+        public async Task<JsonResult> Register([FromForm]string token)
         {
             token = Uri.UnescapeDataString(token);
 
-            string ttoken = Overstag.Security.Auth.Register(token, HttpContext.Connection.RemoteIpAddress.ToString());
+            string ttoken = await Security.Auth.Register(token, HttpContext.Connection.RemoteIpAddress.ToString());
             return Json(new { status = "success", token = Uri.EscapeDataString(ttoken) });
         }
 
+        /// <summary>
+        /// Login into system using Auth token
+        /// </summary>
+        /// <param name="token">The auth token</param>
+        /// <returns>JSON, status = success or status = error</returns>
         [HttpPost]
         public async Task<JsonResult> Login([FromForm]string token)
         {
@@ -29,14 +38,15 @@ namespace Overstag.Controllers
                 {
                     if (context.Auths.Any(f => f.Token == token))
                     {
-                        var auth = context.Auths.First(f => f.Token == token);
+                        var auth = context.Auths.Include(f => f.User).First(f => f.Token == token);
                         if (auth.Registered > DateTime.Now.AddMonths(-2))
                         {
-                            var user = context.Accounts.First(f => f.Id == auth.UserID);
+                            var user = context.Accounts.First(f => f.Id == auth.User.Id);
+
+                            //Important session variables
                             HttpContext.Session.SetString("Token", user.Token);
                             HttpContext.Session.SetInt32("Type", user.Type);
-                            HttpContext.Session.SetString("Name", user.Username);
-                            HttpContext.Session.SetString("Remember", token);
+
                             return Json(new { status = "success" });
                         }
                         else
@@ -55,30 +65,6 @@ namespace Overstag.Controllers
 
                     return Json(new { status = "error" });
                 }
-            });
-        }
-
-        [HttpPost]
-        public async Task<JsonResult> Logout()
-        {
-            return await Task.Run(() =>
-            {
-                if (HttpContext.Session.GetString("Remember") != null)
-                {
-                    string token = HttpContext.Session.GetString("Remember");
-                    using (var context = new OverstagContext())
-                    {
-                        if (context.Auths.Any(f => f.Token == token))
-                        {
-                            var auth = context.Auths.First(f => f.Token == token);
-                            context.Auths.Remove(auth);
-                            context.SaveChanges();
-                            return Json(new { status = "success" });
-                        }
-                    }
-                }
-
-                return Json(new { status = "error" });
             });
         }
     }

@@ -23,13 +23,13 @@
             <div class="col s6 m3">
                 <div class="card-panel center-align">
                     <span class="flow-text">Aantal mannen</span>
-                    <h3><b class="blue-text" id="aantalm">@Model.Participators.Count(f => f.account.Sex == 0)</b></h3>
+                    <h3><b class="blue-text" id="aantalm">@Model.Participators.Count(f => f.account.Gender)</b></h3>
                 </div>
             </div>
             <div class="col s6 m3">
                 <div class="card-panel center-align">
                     <span class="flow-text">Aantal vrouwen</span>
-                    <h3><b class="red-text" id="aantalv">@Model.Participators.Count(f => f.account.Sex == 1)</b></h3>
+                    <h3><b class="red-text" id="aantalv">@Model.Participators.Count(f => !f.account.Gender)</b></h3>
                 </div>
             </div>
             <div class="col s6 m3">
@@ -39,12 +39,12 @@
                 </div>
             </div>
             @{
-                Model.Participators.ForEach(f => totald += f.part.ConsumptionCount);
+                Model.Participators.ForEach(f => totald += f.part.AdditionsCost);
             }
             <div class="col s6 m3">
                 <div class="card-panel center-align">
-                    <span class="flow-text">Totaal aantal drankjes</span>
-                    <h3><b class="green-text" id="aantald">@totald</b></h3>
+                    <span class="flow-text">Verdiend aan drankjes</span>
+                    <h3><b class="green-text" id="aantald" data-amount="@totald">&euro;&nbsp;@Math.Round((double)totald / 100, 2)</b></h3>
                 </div>
             </div>
         </div>
@@ -62,8 +62,8 @@
                 <li class="collection-item">
                     <p>
                         <label>
-                            <input type="checkbox" class="filled-in checki" checked="checked" data-id="@p.account.Id" data-sx="@p.account.Sex" />
-                            <span style="font-size: large;"><b>@p.account.Firstname @p.account.Lastname</b> (@Html.Raw((p.account.Sex == 0) ? "<b class=\"blue-text\">m</b>" : "<b class=\"red-text\">v</b>"))</span>
+                            <input type="checkbox" class="filled-in checki" checked="checked" data-id="@p.account.Id" data-sx="@(p.account.Gender ? 0 : 1)" />
+                            <span style="font-size: large;"><b>@p.account.Firstname @p.account.Lastname</b> (@Html.Raw((p.account.Gender) ? "<b class=\"blue-text\">m</b>" : "<b class=\"red-text\">v</b>"))</span>
                         </label>
                     </p>
                 </li>
@@ -76,13 +76,18 @@
 
         <h3 class="green-text text-darken-4">Drankjes</h3>
         <div class="row">
+            <div class="input-field col s12 m3">
+                <input type="text" id="tbcost" class="validate" value="1,00" maxlength="4" />
+                <label for="tbcost">Kosten in € per stuk</label>
+                <span class="helper-text" data-error="Vul a.u.b. een geldig bedrag in (kommagetal, 2 decimalen)"></span>
+            </div>
             <table>
                 <thead>
                     <tr>
                         <th>Voornaam</th>
                         <th>Achternaam</th>
                         <th>Vriend(inn)en mee?</th>
-                        <th>Aantal drankjes</th>
+                        <th>Gekocht aan drankjes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,18 +100,16 @@
                             <td>
                                 <div class="row">
                                     <div class="col s6 center-align">
-                                        <h5 id="@user.account.Id-cc">@user.part.ConsumptionCount</h5>
+                                        <h5 id="@user.account.Id-cc" data-amount="@user.part.AdditionsCost">&euro;&nbsp;@Math.Round((double)user.part.AdditionsCost / 100, 2)</h5>
                                     </div>
                                     <div class="col s6 left-align">
-                                        <a onclick="Presence.setDrink('@user.account.Id',1)" class="btn btn-flat green waves-effect white-text"><i class="material-icons">add_circle</i></a>
-                                        <a onclick="Presence.setDrink('@user.account.Id',-1)" class="btn btn-flat red waves-effect white-text"><i class="material-icons">remove_circle</i></a>
+                                        <a onclick="Presence.addDrink('@user.account.Id',1)" class="btn btn-flat green waves-effect white-text"><i class="material-icons">add_circle</i></a>
+                                        <a onclick="Presence.addDrink('@user.account.Id',-1)" class="btn btn-flat red waves-effect white-text"><i class="material-icons">remove_circle</i></a>
                                     </div>
                                 </div>
                             </td>
                         </tr>
                     }
-
-
                 </tbody>
             </table>
         </div>
@@ -175,6 +178,13 @@
                 }
             });
 
+             $('#tbcost').blur(function () {
+                 if (!/^([0-9]*),([0-9][0-9])/.test($(this).val())) {
+                     $('#tbcost').addClass("invalid");
+                     $('#tbcost').prop("aria-invalid", true);
+                 }
+             });
+
             $('select').formSelect();
         },
         calculateAbsence: function () {
@@ -219,7 +229,7 @@
                 }
             },'json');
         },
-         addUser: function () {
+        addUser: function () {
            $('#_progbar').show();
            $.getJSON('/Mentor/addUser/@Model.Event.Id/' + $('#seluser').val(), function(r) {
                if (r.status == 'success') {
@@ -236,19 +246,25 @@
             $(el).data('confirm', '');
             $(el).fadeIn();
         },
-        setDrink: function(id, add) {
-            var count = Number($('#' + id + '-cc').text()) + add;
-            if (count >= 0 && id > 0 && count <= 15) {
-                $.get('/Mentor/setDrink/@Model.Event.Id/' + id + '/' + count, function (r) {
-                    if (r.status == 'success') {
-                        M.toast({ html: 'Drankje ' + (add > 0 ? 'toegevoegd!' : 'verwijderd!'), classes: (add > 0 ? 'green' : 'yellow darken-3') });
-                        $('#' + id + '-cc').text(count);
-                        $('#aantald').text(Number($('#aantald').text()) + add);
-                    } else {
-                        M.toast({ html: r.error, classes: 'red' });
-                    }
-                }, 'json');
-            }
+         addDrink: function (id, valueToAdd) {
+            valueToAdd = Math.round(Number($('#tbcost').val().replace(',', '.')) * 100) * valueToAdd;
+            var value = Number($('#' + id + '-cc').data('amount')) + valueToAdd;
+            if (value < 0)
+                return;
+
+             $.get('/Mentor/setDrink/@Model.Event.Id/' + id + '/' + value, function (r) {
+                 if (r.status == 'success') {
+                     M.toast({ html: 'Drankje opgeslagen!', classes: 'blue' });
+
+                     $('#' + id + '-cc').text((value / 100).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' }));
+                     var total = Number($('#aantald').data('amount')) + valueToAdd;
+                     $('#aantald').data('amount', total);
+                     $('#' + id + '-cc').data('amount', value);
+                     $('#aantald').text((total / 100).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' }));
+                 } else {
+                     M.toast({ html: r.error, classes: 'red' });
+                 }
+             }, 'json');
         }
     }
 

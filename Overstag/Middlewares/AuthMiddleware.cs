@@ -1,10 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Overstag.Middlewares
 {
@@ -23,7 +20,7 @@ namespace Overstag.Middlewares
 
         private readonly string[] allpaths =
         {
-            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy"
+            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/Public", "/api"
         };
 
         public Authentication(RequestDelegate next)
@@ -34,11 +31,17 @@ namespace Overstag.Middlewares
             if (c.Request.Path.HasValue)
             {
                 string p = c.Request.Path.Value;
+
+                //API authenticates in controller
+                if (p.StartsWith("/api"))
+                    return _next(c);
+
                 int? type = c.Session.GetInt32("Type");
                 int code = 400;
+                string redirect = "";
                 bool loggedin = (type != null);
 
-                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo" };
+                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo", "/ws", "/Public" };
 
                 if (loggedin)
                     for (int i = 0; i <= type; i++)
@@ -67,8 +70,11 @@ namespace Overstag.Middlewares
                     code = -1;
                 }
 
+                if (code == 401) //not logged in
+                    redirect = p;
+
                 if (code != -1)
-                    c.Response.Redirect("/Error/"+code.ToString());
+                    c.Response.Redirect($"/Error/{code.ToString()}" + (!string.IsNullOrEmpty(redirect) ? $"?r={redirect}" : ""));
                 else
                     return _next(c);
             }

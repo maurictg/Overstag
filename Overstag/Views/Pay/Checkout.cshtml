@@ -2,7 +2,7 @@
 @{
     Layout = "_PayLayout";
     ViewBag.Title = "Betalen";
-    ViewBag.InvoiceURL = Model.InvoiceID;
+    ViewBag.InvoiceURL = Model.Invoice.InvoiceID;
     int amount = (ViewBag.Amount != null) ? Convert.ToInt32(ViewBag.Amount) : 0;
 }
 
@@ -94,7 +94,7 @@
             cancelPayment = false;
         },
         done: function () {
-            window.location.href = '/Pay/Done/@Uri.EscapeDataString(Model.InvoiceID)';
+            window.location.href = '/Pay/Done/@Uri.EscapeDataString(Model.Invoice.InvoiceID)';
         }
     }
 

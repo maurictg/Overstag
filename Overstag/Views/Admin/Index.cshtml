@@ -1,18 +1,91 @@
 ﻿@{
-    ViewData["Title"] = "Admin";
-    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin home";
 }
-<br />
 
-<div class="center-align white-text">
-    <h2>Kies een item uit het menu</h2>
-    <br /><br />
-    <h3>Snelle acties</h3>
-    <br />
-    <button class="btn btn-primary" onclick="location.href='/Admin/initdb'">Database initialiseren</button>
-    <button class="btn btn-secondary" onclick="location.href='/User'">Mijn account</button>
-    <button class="btn btn-success" onclick="location.href='/Mentor'">Overstag bestuur</button>
+<div class="row white-text">
+    <div class="center-align col s12 center-align">
+        <h3>Snelle acties</h3>
+        <a class="btn btn-large green waves-effect" href="/Mentor">Mentor</a>
+        <button class="btn btn-large orange waves-effect" id="btnShowUsers" onclick="Admin.showUsers();">Toon gebruikers</button>
+    </div>
 </div>
+
+<br/>
+
+<div class="row center-align white-text" id="users" style="display: none;">
+    <h4>Gebruikers</h4>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Voornaam</th>
+                <th>Achternaam</th>
+                <th>Gebruikersnaam</th>
+                <th>Token</th>
+                <th>Registratiedatum</th>
+                <th>Type</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody id="tblUsers">
+
+        </tbody>
+    </table>
+</div>
+
+<script src="~/js/moment.min.js"></script>
 <script>
-    $('#_ahome').addClass('active');
+    var type = { 0: "Lid", 1: "Ouder", 2: "Bestuurder", 3: "Administrator" };
+    var Admin = function () {
+        return {
+            init: function () {
+                $('#_title').html('&nbsp;Overstag Admin');
+                $('#btnsnow').remove();
+            },
+            showUsers: function () {
+                $.getJSON('/Admin/getUsers', function (r) {
+                    var html = '';
+                    $.each(r, function (i, e) {
+                        var date = moment(new Date(e.registerDate));
+                        html += `
+                        <tr>
+                            <td>${e.firstname}</td>
+                            <td>${e.lastname}</td>
+                            <td>${e.username}</td>
+                            <td><i>${e.token}</i></td>
+                            <td>${date.format('d-M-Y H:mm:ss')}</td>
+                            <td><span data-type="${e.type}" id="${e.id}-type">${type[e.type]}</span>&nbsp;<a href="#" onclick="Admin.setType('${e.id}',true)">+</a>/<a href="#" onclick="Admin.setType('${e.id}',false)">-</a></td>
+                            <td><a href="/Admin/loginAs/${encodeURIComponent(e.token)}">Inloggen als</a> | <a href="/Register/Passreset/${encodeURIComponent(e.token)}">Wachtwoord reset</a></td>
+                            </tr>
+                        `;
+                        $('#btnShowUsers').fadeOut();
+                        $('#users').fadeIn();
+                    });
+                    $('#tblUsers').html(html);
+                }).fail(function () {
+                    M.toast({ html: 'Ophalen gebruikers mislukt', classes: 'red rounded' });
+                });
+            },
+            setType: function (id, up) {
+                var t = Number($('#' + id + '-type').data('type'));
+                t += (up) ? 1 : -1;
+
+                if (t >= 0 && t <= 3) {
+                    $('#' + id + '-type').data('type', t);
+                    $('#' + id + '-type').text(type[t]);
+
+                    $.get('/Admin/saveType', { id: id, type: t }, function (r) {
+                        if (r.status == 'success') {
+                            M.toast({ html: 'Opgeslagen!', classes: 'green rounded' });
+                        }
+                    }).fail(function () {
+                        M.toast({ html: 'Opslaan mislukt', classes: 'red rounded' });
+                    });
+                }
+            }
+        };
+    }();
+
+    $(function () {
+        Admin.init();
+    });
 </script>

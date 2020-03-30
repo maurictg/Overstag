@@ -1,23 +1,23 @@
-﻿@model List<Overstag.Accountancy.Request>
+﻿@model List<Overstag.Accountancy.Transaction>
 @{
     ViewBag.Title = "Declaraties";
     Layout = "_UserLayout";
 }
 <div>
-    <h2 class="blue-dark-text center-align">Declaratie</h2>
+    <h2 class="blue-dark-text center-align">Declaraties</h2>
 </div>
 
 @if (Model.Count() > 0)
 {
-    <table class="responsive-table">
+    <table>
         <thead>
             <tr>
                 <th>Datum</th>
                 <th>Ingediend op</th>
                 <th>Bedrag</th>
                 <th>Omschrijving</th>
+                <th>Type</th>
                 <th>Uitbetaald</th>
-                <!--Metadata...?-->
             </tr>
         </thead>
         <tbody>
@@ -25,10 +25,16 @@
             {
                 <tr>
                     <td>@d.When.ToString("dd-MM-yyyy")</td>
-                    <td>@d.Timestamp.ToString("dd-MM-yyyy") om @d.Timestamp.ToString("HH:mm:ss")</td>
+                    <td>@d.Timestamp.ToString("dd-MM-yyyy") om @d.Timestamp.ToString("HH:mm")</td>
                     <td>&euro;@Math.Round((double)d.Amount / 100, 2).ToString("F")</td>
                     <td>@d.Description</td>
-                    <td>@Html.Raw((d.Payed == 1) ? "<b class=\"green-text\">Ja</b>" : "<b class=\"green-text\">Nee</b>")</td>
+                    <td id="type-@d.Id"></td>
+                    <td>@Html.Raw(Overstag.Services.Html.YesNo(d.Payed))</td>
+                </tr>
+                <tr>
+                    <td colspan="6" class="center-align photodata" data-id="@d.Id" data-json="@d.Metadata">
+                        <p>Fotos niet ingeladen - <a href="#" onclick="Payment.loadImages();">Alles inladen</a></p>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -38,9 +44,10 @@ else
 {
     <h5 class="center-align">Geen ingediende declaraties gevonden</h5>
 }
-<br /><br />
+<br />
+<br />
 <div class="center-align">
-    <button class="btn btn-large waves-effect blue-dark" id="btnshow" onclick="Payment.showField()">Toevoegen</button>
+    <a class="btn btn-large waves-effect blue-dark" id="btnshow" href="#add" onclick="Payment.showField()">Toevoegen</a>
 </div>
 
 <br />
@@ -78,7 +85,7 @@ else
             </div>
         </div>
         <div class="col s12">
-            Type: 
+            Type:
             <p>
                 <label>
                     <input class="with-gap" value="Brandstof" name="type" type="radio" checked="checked" />
@@ -128,6 +135,7 @@ else
             $('#_apay, #_mapay').addClass('active');
             $('#check').prop('checked', false);
             Payment.mapEvents();
+            Payment.loadTypes();
         },
         mapEvents: function () {
             $('#check').change(function () {
@@ -137,6 +145,27 @@ else
                     $('#btnsend').addClass('disabled');
                 }
             });
+        },
+        loadTypes: function () {
+            $.each($('.photodata'), function (i, e) {
+                $('#type-' + $(e).data('id')).html($(e).data('json').type);
+            });
+        },
+        loadImages: function () {
+            $.each($('.photodata'), function (i, e) {
+                var html = '<div class="row">';
+                var json = $(e).data('json')
+                if (json.files != '') {
+                    var files = json.files.split(',');
+                    $.each(files, function (i, e) {
+                        html += `<img src="/Files/Serve/${encodeURIComponent(e)}" class="materialboxed col s3 m2"/>`
+                    });
+                } else {
+                    html += '<i>Geen foto\'s geupload</i>'
+                }
+                $(e).html(html + '</row>');
+            });
+            $('.materialboxed').materialbox();
         },
         showField: function () {
             $('#add').show();
@@ -169,7 +198,7 @@ else
                 Payment.hideField();
                 $('#btnshow').addClass('disabled');
                 if ($("#files").prop('files').length > 0) {
-                    M.toast({ html: 'Uploaden....'});
+                    M.toast({ html: 'Uploaden....' });
                     $('#_progbar div').removeClass('indeterminate').addClass('determinate');
                     $('#_progbar div').css('width', '0%');
                     Payment.uploadPhotos(Payment.post);
@@ -185,9 +214,9 @@ else
 
             var data = {
                 When: $('#when').val(),
-                Amount: Math.round(Number($('#amount').val().replace(",",".")) * 100),
+                Amount: Math.round(Number($('#amount').val().replace(",", ".")) * 100),
                 Description: $('#desc').val(),
-                Metadata: JSON.stringify({type: $("input[name='type']:checked").val(), files: files})
+                Metadata: JSON.stringify({ type: $("input[name='type']:checked").val(), files: files })
             };
 
             $.post('/User/postDeclaration', data, function (r) {
@@ -209,6 +238,8 @@ else
                 formdata.append('files', e);
             });
 
+            M.toast({ html: 'Wacht a.u.b tot de upload voltooid is. Zie balk bovenin het scherm', classes: 'orange' });
+
             $.ajax({
                 url: '/Files/uploadFiles',
                 type: "POST",
@@ -228,7 +259,7 @@ else
                         _callback(response.fileIDS);
                     }
                 },
-                error: function() {
+                error: function () {
                     M.toast({ html: 'Error: Uw foto kon niet geupload worden', classes: 'red' });
                     $('#_progbar div').removeClass('determinate').addClass('indeterminate');
                     $('#btnshow').removeClass('disabled');
@@ -258,6 +289,16 @@ else
         $('.datepicker').datepicker({
             format: 'dd-mm-yyyy'
         });
+
         Payment.init();
+
+
     });
 </script>
+
+@if (Model.Count() < 5)
+{
+    <script>
+        Payment.loadImages();
+    </script>
+}
