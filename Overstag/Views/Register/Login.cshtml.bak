@@ -32,10 +32,14 @@
                     </div>
                     <div class="row">
                         <div class="input-field col s6">
-                            <p class="margin left-align"><a href="/Register/Register"><b>Geen account?</b></a></p>
+                            <p class="margin left-align">
+                                <a href="/Register/Register"><b>Geen account?</b></a>
+                            </p>
                         </div>
                         <div class="input-field col s6">
-                            <p class="margin right-align"><a class="modal-trigger" href="#memailreset"><b>Wachtwoord vergeten?</b></a></p>
+                            <p class="margin right-align">
+                                <a class="modal-trigger" href="#" onclick="Login.openMailReset();"><b>Wachtwoord vergeten?</b></a>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -60,29 +64,33 @@
                 </div>
             </div>
         </div>
-    </div>
-   
-    <!-- Modal Structure -->
-    <div id="memailreset" class="modal">
-        <div class="modal-content">
-            <h4>Wachtwoord reset aanvragen</h4>
-            <p>Voer hieronder het emailadres in dat gekoppeld is aan uw account</p><br />
-            <div class="input-field">
-                <i class="material-icons prefix">email</i>
-                <input type="email" class="validate" id="tbrmail" placeholder="Emailadres" />
-                <label for="tbrmail">Emailadres</label>
-                <span class="helper-text" data-error="Vul a.u.b. een geldig emailadres in"></span>
-                <p class="red-text" id="mailhelper">Vul a.u.b. alle velden in</p>
-                <div class="progress" id="progbar2"><div class="indeterminate"></div></div>
+
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <div class="card rounded" id="memailreset" style="display: none">
+                <div class="card-content">
+                    <h4 class="center-align blue-middle-text">Wachtwoord resetten</h4>
+                    <br />
+                    <h6>Vul het emailadres in dat gekoppeld is aan uw account</h6>
+                    <div class="row input-field">
+                        <i class="material-icons prefix">mail_outline</i>
+                        <input type="email" class="validate" id="tbrmail" />
+                        <label for="tbrmail">Emailadres</label>
+                        <span class="helper-text" data-error="Vul a.u.b. een geldig emailadres in"></span>
+                        <p class="red-text" id="mailhelper">Vul a.u.b. alle velden in</p>
+                    </div>
+                    <div class="center-align">
+                        <button class="btn waves-effect orange" onclick="Login.cancelMail();">Annuleren</button>
+                        <a href="#!" onclick="Login.sendmail();" class="btn green waves-effect ">Verzenden</a>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <a href="#!" class="modal-close waves-effect waves-red btn-flat">Annuleren</a>
-            <a href="#!" id="sendmailreset" class="waves-effect waves-green btn-flat">Verzenden</a>
-        </div>
+
+
     </div>
 
-    <!-- Modal Structure -->
+    
+
     <div id="tfarestore" class="modal">
         <div class="modal-content">
             <div class="row">
@@ -102,7 +110,7 @@
     </div>
 </body>
 <script>
-    let wrong2fa = 0;
+let wrong2fa = 0;
     var token = "";
     let redirecturl = '@Model';
     let errorcnt = 0;
@@ -164,20 +172,32 @@
 
         sendmail: function () {
             $('#progbar2').show();
+            if ($('#tbrmail').val() == '') {
+                M.toast({ html: 'Vul a.u.b. alle velden in', classes: 'orange' });
+                return;
+            }
             $.post("/Register/postMailreset", { Email: $('#tbrmail').val() }, function (response) {
                 if (response.status == 'success') {
                     $('#tbrmail').val('')
                     M.toast({ html: 'Mail verzonden. Check je email a.u.b. <br><b>Controleer ook je spam map</b>', classes: 'green ' });
+                    Login.cancelMail();
                 }
                 else {
                     //status = error
                     M.toast({ html: response.error, classes: 'red ' });
-                    $('.checki').val('');
+                    $('#tbrmail').val('');
                 }
             }, 'json').done(function () {
                 $('#progbar2').hide();
                 M.Modal.getInstance($('#memailreset')).close();
             });
+        },
+
+        cancelMail: function () {
+            $('#tbremail').val('');
+            $('#memailreset').hide();
+            $('#logincard').fadeIn('slow');
+            $('#Username').focus();
         },
 
         login: function () {
@@ -274,6 +294,11 @@
             $('#logincard').hide();
             $('#2facard').fadeIn('slow');
             $('#2facode').focus();
+        },
+
+        openMailReset: function () {
+            $('#logincard').hide();
+            $('#memailreset').fadeIn('slow');
         },
 
         validate2fa: function() {

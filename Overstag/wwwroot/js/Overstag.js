@@ -74,42 +74,6 @@
         }(),
         General: function () {
             return {
-                getIEVersion: function () {
-                    var ua = window.navigator.userAgent;
-                    var msie = ua.indexOf('MSIE ');
-                    if (msie > 0) {
-                        // IE 10 or older => return version number
-                        return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
-                    }
-
-                    var trident = ua.indexOf('Trident/');
-                    if (trident > 0) {
-                        // IE 11 => return version number
-                        var rv = ua.indexOf('rv:');
-                        return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
-                    }
-
-                    var edge = ua.indexOf('Edge/');
-                    if (edge > 0) {
-                        // Edge (IE 12+) => return version number
-                        return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
-                    }
-
-                    // other browser
-                    return false;
-                },
-                detectIE: function () {
-                    var version = this.getIEVersion();
-                    if (version === false) {
-                        console.log('Goed bezig! Geen IE');
-                    } else if (version >= 12) {
-                        console.log('User gebruikt Edge ' + version);
-                    } else {
-                        console.log('User gebruikt IE ' + version);
-                        M.toast({ html: '<b>Overstag support geen Internet Explorer</b>', classes: 'red', displayLength: 10000 });
-                        M.toast({ html: 'Gebruik in plaats van dit Edge, Chrome of beter: Firefox', classes: 'blue' });
-                    }
-                },
                 rememberMe: function (token) {
                     $.post('/Auth/Register', { token: token }, function (r) {
                         if (r.status === 'success') {
