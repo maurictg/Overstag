@@ -7,6 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
 using Overstag.Services;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Overstag.Models;
 
 namespace Overstag
 {
@@ -54,6 +57,7 @@ namespace Overstag
 
             app.UseWebSockets();
             app.MapSocketHandler("/ws", provider.GetService<SocketHandler>());
+
             
             app.UseEndpoints(endpoints =>
             {
@@ -61,5 +65,6 @@ namespace Overstag
                 endpoints.MapRazorPages();
             });
         }
+
     }
 }

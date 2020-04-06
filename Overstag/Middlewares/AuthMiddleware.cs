@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Overstag.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Overstag.Middlewares
@@ -30,11 +34,33 @@ namespace Overstag.Middlewares
         {
             if (c.Request.Path.HasValue)
             {
-                string p = c.Request.Path.Value;
+                string p = c.Request.Path.Value.ToLower();
 
-                //API authenticates in controller
+                //Handle API
                 if (p.StartsWith("/api"))
-                    return _next(c);
+                {
+                    bool ok = false;
+
+                    if (c.Request.Headers.ContainsKey("Token"))
+                    {
+                        var auth = new OverstagContext().Auths.Include(f => f.User).FirstOrDefault(g => g.Token == c.Request.Headers["Token"].ToString());
+                        if (auth != null && auth.IP == "OVERSTAG_APP")
+                        {
+                            ok = true;
+                            c.Items.Add("User", auth.User);
+                            c.Items.Add("Auth", auth);
+                        }
+                    }
+                    
+                    if(ok)
+                        return _next(c);
+                    else
+                    {
+                        c.Response.StatusCode = 401;
+                        c.Response.ContentType = "application/json";
+                        c.Response.WriteAsync(JsonConvert.SerializeObject(new { status = "error", error = "Authentication token invalid or not provided." }));
+                    }
+                }
 
                 int? type = c.Session.GetInt32("Type");
                 int code = 400;
