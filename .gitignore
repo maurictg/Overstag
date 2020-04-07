@@ -5,3 +5,6 @@ Overstag/obj/
 *.sqlite
 Overstag/.vscode/launch.json
 Overstag/.vscode/tasks.json
+.idea/
+.vs/
+.vscode/
