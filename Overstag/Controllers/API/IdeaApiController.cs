@@ -45,6 +45,17 @@ namespace Overstag.Controllers.API
             return Json(new { status = "success", count = ideas.Count(), ideas = ideai.OrderByDescending(f => (f.Idea.Upvotes - f.Idea.Downvotes)).ToList() });
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetIdeaById(int id)
+        {
+            var a = await new OverstagContext().Ideas.FindAsync(id);
+            if (a == null)
+                return Json(new { status = "error", error = "Idea not found" });
+            else
+                return Json(new { status = "success", idea = a.ToIdeaInfo() });
+        }
+
 
         [HttpGet]
         [Route("votes")]

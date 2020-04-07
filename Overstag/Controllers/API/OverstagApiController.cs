@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Overstag.Models;
 
 namespace Overstag.Controllers.API
 {
     public class OverstagApiController : Controller
     {
-        protected int getUserId() => ((Overstag.Models.Account)HttpContext.Items["User"]).Id;
+        protected int getUserId() => getUser().Id;
+        protected Account getUser() => ((Account)HttpContext.Items["User"]);
+        protected Auth getAuth() => ((Auth)HttpContext.Items["Auth"]);
     }
 }
