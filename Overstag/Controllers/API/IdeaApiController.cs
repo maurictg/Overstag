@@ -16,25 +16,38 @@ namespace Overstag.Controllers.API
         [Route("")]
         public async Task<IActionResult> List()
         {
-            List<IdeaInfo> ideai = new List<IdeaInfo>();
+            List<IdeaVoteInfo> ideai = new List<IdeaVoteInfo>();
             var ideas = await new OverstagContext().Ideas.Include(f => f.Votes).ToListAsync();
+            var userVotes = await new OverstagContext().Accounts.Include(f => f.Votes).FirstOrDefaultAsync(g => g.Id == getUserId());
 
             foreach (var item in ideas)
             {
-                ideai.Add(new IdeaInfo()
+                var vote = userVotes.Votes.FirstOrDefault(f => f.IdeaID == item.Id);
+                ideai.Add(new IdeaVoteInfo()
                 {
-                    Id = item.Id,
-                    Cost = item.Cost,
-                    Description = item.Description,
-                    Title = item.Title,
-                    Downvotes = item.Votes.Count(f => !f.Upvote),
-                    Upvotes = item.Votes.Count(f => f.Upvote)
+                    Idea = new IdeaInfo()
+                    {
+                        Id = item.Id,
+                        Cost = item.Cost,
+                        Description = item.Description,
+                        Title = item.Title,
+                        Downvotes = item.Votes.Count(f => !f.Upvote),
+                        Upvotes = item.Votes.Count(f => f.Upvote)
+                    },
+                    Vote = (vote == null) ? null : new VoteInfo()
+                    {
+                        IdeaID = vote.IdeaID,
+                        Vote = vote.Upvote
+                    }
                 });
             }
 
-            return Json(new { status = "success", count = ideas.Count(), ideas = ideai.OrderByDescending(f => (f.Upvotes - f.Downvotes)).ToList() });
+            return Json(new { status = "success", count = ideas.Count(), ideas = ideai.OrderByDescending(f => (f.Idea.Upvotes - f.Idea.Downvotes)).ToList() });
         }
 
+
+        [HttpGet]
+        [Route("votes")]
         public async Task<IActionResult> ListVotes([FromQuery]bool withIdeas)
         {
             using (var context = new OverstagContext())

@@ -26,7 +26,7 @@ namespace Overstag.Controllers
         [Route("Register/Login")]
         [Route("inloggen")]
         public IActionResult Login([FromQuery]string r)
-            => View("Login", (r==null)?"":r);
+            => View("Login", (r==null) ? "" : r);
 
         [Route("Register/Register")]
         [Route("aanmelden")]

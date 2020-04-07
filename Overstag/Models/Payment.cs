@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Overstag.Models
 {
@@ -15,6 +16,8 @@ namespace Overstag.Models
 
         //Relations
         public Account User { get; set; }
+
+        [JsonIgnore] //Ignore inovice to prevent object cycle
         public Invoice Invoice { get; set; }
         public int InvoiceId { get; set; }
     }

@@ -5,9 +5,14 @@ using System.Threading.Tasks;
 
 namespace Overstag.Models.API
 {
-    public class VoteInfo
+    public class IdeaVoteInfo
     {
         public IdeaInfo Idea { get; set; }
+        public VoteInfo Vote { get; set; }
+    }
+
+    public class VoteInfo
+    {
         public int IdeaID { get; set; }
         public bool Vote { get; set; }
     }

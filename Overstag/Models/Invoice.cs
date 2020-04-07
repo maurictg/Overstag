@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Overstag.Models.API;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Overstag.Models
 {
@@ -18,6 +21,21 @@ namespace Overstag.Models
         public int UserID { get; set; }
         public Payment Payment { get; set; }
         public int PaymentID;
+
+        public InvoiceInfo toInvoiceInfo(string url = "/Pay/Invoice/")
+        {
+            return new InvoiceInfo()
+            {
+                AdditionsCost = (AdditionsCost / 100),
+                Amount = (Amount / 100),
+                Timestamp = Timestamp,
+                ActivityIds = EventIDs.Split(',').Select(f => Convert.ToInt32(f)).ToArray(),
+                InvoiceID = InvoiceID,
+                InvoiceURL = url+Uri.EscapeDataString(InvoiceID),
+                Payed = Payed,
+                Payment = (Payed) ? Payment : null
+            };
+        }
     }
 
     //Xtended invoice

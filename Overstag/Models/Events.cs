@@ -67,7 +67,6 @@ namespace Overstag.Models
             {
                 IdeaID = IdeaID,
                 Vote = Upvote,
-                Idea = (withIdea) ? i : null
             };
         }
     }

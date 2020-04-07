@@ -14,10 +14,12 @@ namespace Overstag.Controllers.API
         [HttpGet]
         [Route("")]
         public IActionResult Details()
-        {
-            var current = (Account)HttpContext.Items["User"];
-            return Json(new { status = "success", data = current.ToUserInfo() });
-        }
+            => Json(new { status = "success", data = ((Account)HttpContext.Items["User"]).ToUserInfo() });
+
+        [HttpGet]
+        [Route("auth")]
+        public IActionResult GetAuthToken() 
+            => Json(new { status = "success", auth = (Auth)HttpContext.Items["Auth"]});
 
         [HttpGet]
         [Route("logout")]

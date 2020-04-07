@@ -58,5 +58,20 @@ namespace Overstag.Controllers.API
 
             return Json(new { status = "success", count = ids.Count(), activities = ids });
         }
+
+        [HttpGet]
+        [Route("unfactured")]
+        public async Task<IActionResult> GetUnfactured()
+        {
+            List<ActivityInfo> activities = new List<ActivityInfo>();
+            var user = await new OverstagContext().Accounts.Include(f => f.Subscriptions).ThenInclude(g => g.Event).Include(f => f.Family).FirstAsync(f => f.Id == getUserId());
+            foreach (var s in user.Subscriptions)
+            {
+                if (!s.Payed && !activities.Any(f => f.EventID == s.EventID) && Core.General.DateIsPassed(s.Event.When))
+                    activities.Add(s.Event.ToActivityInfo());
+            }
+
+            return Json(new { status = "success", count = activities.Count(), activities });
+        }
     }
 }

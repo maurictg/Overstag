@@ -24,7 +24,7 @@ namespace Overstag.Middlewares
 
         private readonly string[] allpaths =
         {
-            "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/Public", "/api"
+            "/Home", "/Test", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/User", "/Photo", "/Files", "/Parent", "/Mentor", "/Admin", "/Accountancy", "/ws", "/Public", "/api"
         };
 
         public Authentication(RequestDelegate next)
@@ -37,7 +37,7 @@ namespace Overstag.Middlewares
                 string p = c.Request.Path.Value.ToLower();
 
                 //Handle API
-                if (p.StartsWith("/api"))
+                if (p.StartsWith("/api") && p != "/api/user/register")
                 {
                     bool ok = false;
 
@@ -67,7 +67,7 @@ namespace Overstag.Middlewares
                 string redirect = "";
                 bool loggedin = (type != null);
 
-                List<string> allowed = new List<string>() { "/Home", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo", "/ws", "/Public" };
+                List<string> allowed = new List<string>() { "/Home", "/Test/T", "/Register", "/Admin/initdb", "/Pay", "/Auth", "/Photo", "/ws", "/Public" };
 
                 if (loggedin)
                     for (int i = 0; i <= type; i++)

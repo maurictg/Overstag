@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Text.Json.Serialization;
+using System;
 
 namespace Overstag.Models
 {
@@ -11,6 +12,7 @@ namespace Overstag.Models
 
         //Relations
         public int UserId { get; set; }
+        [JsonIgnore]
         public Account User { get; set; }
     }
 }
