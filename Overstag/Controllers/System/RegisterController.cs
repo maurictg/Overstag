@@ -15,6 +15,7 @@ using Mollie.Api;
 using Mollie.Api.Models.Customer;
 using Mollie.Api.Client.Abstract;
 using Mollie.Api.Client;
+using System.Text;
 
 namespace Overstag.Controllers
 {
@@ -26,12 +27,48 @@ namespace Overstag.Controllers
         [Route("Register/Login")]
         [Route("inloggen")]
         public IActionResult Login([FromQuery]string r)
-            => View("Login", (r==null) ? "" : r);
+        {
+            ViewBag.RedirectURL = (r == null) ? "" : r;
+            return View("Login");
+        }
 
         [Route("Register/Register")]
         [Route("aanmelden")]
         public IActionResult Register()
             => View();
+
+        /// <summary>
+        /// Get authenticate page for application
+        /// 
+        /// Go via: /Register/Authenticate?{params...}
+        /// </summary>
+        /// <param name="appName">The name of the application that requests the api token</param>
+        /// <param name="callbackUrl">The url to send the api token to. Optional, must be URL ENCODED!!!</param>
+        /// <param name="id">A id to post to your callback url for your database. Optional</param>
+        /// <returns></returns>
+        public IActionResult Authenticate([FromQuery]string appName, [FromQuery]string callbackUrl)
+        {
+            string token = HttpContext.Session.GetString("Token");
+            if(string.IsNullOrEmpty(token))
+            {
+                ViewBag.RedirectURL = "RELOAD";
+                return View("Login");
+            }
+
+            string randomToken = Encryption.Random.rString(15);
+            callbackUrl = string.IsNullOrEmpty(callbackUrl) ? "" : Uri.UnescapeDataString(callbackUrl);
+            appName = (string.IsNullOrEmpty(appName)) ? "Een applicatie" : appName;
+
+            HttpContext.Session.SetString("AuthToken", randomToken);
+            HttpContext.Session.SetString("CallbackUrl", callbackUrl);
+
+            ViewBag.Android = !string.IsNullOrEmpty(callbackUrl) && callbackUrl == "ANDROID";
+            ViewBag.AuthToken = randomToken;
+            ViewBag.AppName = appName;
+            ViewBag.CallbackUrl = string.IsNullOrEmpty(callbackUrl) ? "EMPTY" : callbackUrl;
+
+            return View("Authenticate");
+        }
 
         /// <summary>
         /// Resets the password of the user
@@ -350,7 +387,8 @@ namespace Overstag.Controllers
             if(string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
             {
                 HttpContext.Session.SetString("JoinFamily",token);
-                return View("Login","/Register/joinFamily/"+token);
+                ViewBag.RedirectURL = "/Register/joinFamily/" + token;
+                return View("Login");
             }
             else
             {

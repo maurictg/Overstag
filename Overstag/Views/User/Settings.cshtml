@@ -410,7 +410,7 @@
                             var date2 = moment(new Date(Date.parse(e.registered))).add(2, 'M');
                             var date2text = `${date2.format('DD-MM-YYYY')} om ${date2.format('HH:mm')}`
 
-                            var htmldata = `<tr><td>${date.format('DD-MM-YYYY')} om ${date.format('HH:mm')}</td><td>${date2text}</td><td>${e.ip}</td><td><button class="btn orange waves-effect" onclick="User.removeLogin('${e.id}')">Uitloggen</button></td></tr>`;
+                            var htmldata = `<tr id="row-${e.id}"><td>${date.format('DD-MM-YYYY')} om ${date.format('HH:mm')}</td><td>${date2text}</td><td>${e.ip}</td><td><button class="btn orange waves-effect" onclick="User.removeLogin('${e.id}'); $(this).addClass('disabled');">Uitloggen</button></td></tr>`;
 
                             if (e.ip == 'OVERSTAG_APP') {
                                 htmldata = htmldata.replace(date2text, 'Verloopt nooit');
@@ -428,7 +428,8 @@
                     $.get('/User/removeLogin/' + id, function (r) {
                         if (r.status == 'success') {
                             M.toast({ html: 'Successvol uitgelogd', classes: 'green' });
-                            User.getLogins();
+                            $('#row-' + id).remove();
+                            $('#_progbar').hide();
                         } else {
                             $('#_progbar').hide();
                             M.toast({ html: r.error, classes: 'red' });

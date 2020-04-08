@@ -10,8 +10,8 @@
                 <h2 class="blue-middle-text">Toegang verlenen</h2>
                 <h4><b>@ViewBag.AppName</b> wil graag toegang tot jouw Overstag account</h4>
                 <br /><br />
-                <button class="btn btn-large green waves-effect" onclick="allow();">Toestaan</button>
-                <button class="btn btn-large red waves-effect" onclick="discard();">Weigeren</button>
+                <button class="btn btna btn-large green waves-effect" onclick="allow();">Toestaan</button>
+                <button class="btn btna btn-large red waves-effect" onclick="discard();">Weigeren</button>
             </div>
         </div>
     </div>
@@ -36,9 +36,10 @@
 <script>
     var androidInterface = false;
     console.log('@ViewBag.CallbackUrl');
+    let randomToken = '@ViewBag.AuthToken';
 
     function allow() {
-        $.post('/User/GetApiKey', {randomToken: '@ViewBag.AuthToken'} , function (r) {
+        $.post('/User/GetApiKey', { randomToken: randomToken }, function (r) {
             if (r.status == 'success') {
                 if (localStorage.getItem('remember')) {
                     localStorage.removeItem('remember');
@@ -59,10 +60,10 @@
             } else if (r.status == 'warning') {
                 M.toast({ html: 'Toestemming geven gelukt, maar het lukt niet om de gegevens door te geven aan de applicatie.', classes: 'orange' });
             } else {
-                M.toast({ html: 'Toestemming geven mislukt', classes: 'red' });
+                M.toast({ html: `<span>Toestemming geven mislukt</span><button class="btn-flat white-text toast-action" onclick="window.location.reload();">Opnieuw proberen</button>`, classes: 'red', displayLength: 10000 });
             }
 
-            $('button').addClass('disabled');
+            $('.btna').addClass('disabled');
         });
     }
 
@@ -71,7 +72,8 @@
             Android.discard();
         } else {
             M.toast({ html: 'Toestemming geweigerd', classes: 'orange' });
-            window.location.href = '/User';
+            setTimeout(function () { window.location.href = '/User'; }, 2000);
+            $('.btna').addClass('disabled');
         }
     }
 </script>

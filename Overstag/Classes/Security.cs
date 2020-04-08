@@ -347,7 +347,7 @@ namespace Overstag.Security
             using(var context = new OverstagContext())
             {
                 var user = await context.Accounts.Include(f => f.Auths).FirstAsync(f => f.Token == token);
-                string ttoken = Encryption.PBKDF2.Hash($"{user.Firstname}#{user.Token}");
+                string ttoken = Encryption.SHA.S256(Encryption.PBKDF2.Hash($"{user.Firstname}#{user.Token}"));
 
                 user.Auths.Add(new Models.Auth()
                 {

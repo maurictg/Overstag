@@ -11,6 +11,7 @@ using Mollie.Api.Client;
 using System.Net;
 using System.Text;
 using System.IO;
+using System.Web;
 
 namespace Overstag.Controllers
 {
@@ -636,33 +637,7 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// Get authenticate page for application
-        /// 
-        /// Go via: /Register/Login?r=/User/Authenticate?{params...}
-        /// </summary>
-        /// <param name="appName">The name of the application that requests the api token</param>
-        /// <param name="callbackUrl">The url to send the api token to. Optional, must be URL ENCODED!!!</param>
-        /// <param name="id">A id to post to your callback url for your database. Optional</param>
-        /// <returns></returns>
-        public IActionResult Authenticate([FromQuery]string appName, [FromQuery]string id, [FromQuery]string callbackUrl)
-        {
-            string randomToken = Encryption.Random.rString(15);
-            callbackUrl = string.IsNullOrEmpty(callbackUrl) ? "" : Uri.UnescapeDataString(callbackUrl);
-            appName = (string.IsNullOrEmpty(appName)) ? "Een applicatie" : appName;
-            id = (string.IsNullOrEmpty(id)) ? "" : id;
-
-            HttpContext.Session.SetString("AuthToken", randomToken);
-            HttpContext.Session.SetString("CallbackUrl", callbackUrl);
-            HttpContext.Session.SetString("AuthId", id);
-
-            ViewBag.Android = !string.IsNullOrEmpty(callbackUrl) && callbackUrl == "ANDROID";
-            ViewBag.AuthToken = randomToken;
-            ViewBag.AppName = appName;
-            ViewBag.CallbackUrl = string.IsNullOrEmpty(callbackUrl) ? "EMPTY" : callbackUrl;
-
-            return View();
-        }
+        
 
         /// <summary>
         /// Get auth code
@@ -673,12 +648,10 @@ namespace Overstag.Controllers
         public async Task<JsonResult> GetAPIKey([FromForm]string randomToken)
         {
             string callbackUrl = HttpContext.Session.GetString("CallbackUrl");
-            string id = HttpContext.Session.GetString("AuthId");
             string authToken = HttpContext.Session.GetString("AuthToken");
 
             HttpContext.Session.Remove("AuthToken");
             HttpContext.Session.Remove("CallbackUrl");
-            HttpContext.Session.Remove("AuthId");
 
             if (!string.IsNullOrEmpty(randomToken) && authToken == randomToken)
             {
@@ -690,10 +663,14 @@ namespace Overstag.Controllers
                     {
                         try
                         {
-                            string qString = new StringBuilder().Append("apiKey=").Append(token).Append("&id=").Append(id).ToString();
-                            var data = Encoding.UTF8.GetBytes(qString);
+                            var uri = new UriBuilder(callbackUrl);
+                            var query = HttpUtility.ParseQueryString(uri.Query);
+                            query["apiKey"] = token;
 
-                            var request = (HttpWebRequest)WebRequest.Create(callbackUrl+"?"+qString);
+                            var data = Encoding.UTF8.GetBytes(query.ToString().Replace("?",""));
+                            uri.Query = query.ToString();
+
+                            var request = (HttpWebRequest)WebRequest.Create(uri.ToString());
 
                             request.Method = "POST";
                             request.ContentType = "application/x-www-form-urlencoded";
@@ -705,7 +682,7 @@ namespace Overstag.Controllers
                             var response = (HttpWebResponse)request.GetResponse();
                             var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
 
-                            return Json(new { status = "success", response = responseString });
+                            return Json(new { status = "success", calledUrl= uri.ToString(), response = responseString });
                         }
                         catch (Exception e)
                         {
