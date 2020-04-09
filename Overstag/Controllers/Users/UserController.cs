@@ -691,7 +691,7 @@ namespace Overstag.Controllers
                     }
                 }
 
-                HttpContext.Response.Headers.Add("api_key", token);
+                HttpContext.Response.Headers.Add("Api-Key", token);
                 return Json(new { status = "success", apiKey = token });
             }
             else

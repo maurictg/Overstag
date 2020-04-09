@@ -68,6 +68,10 @@
     }
 
     function discard() {
+        if (localStorage.getItem('remember')) {
+            localStorage.removeItem('remember');
+        }
+
         if (androidInterface) {
             Android.discard();
         } else {
