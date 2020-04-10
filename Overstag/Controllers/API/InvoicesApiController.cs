@@ -26,5 +26,17 @@ namespace Overstag.Controllers.API
 
             return Json(new { status = "success", count, invoices = (hidePayed) ? inv.Where(f => !f.Payed).ToList() : inv });
         }
+
+        [HttpGet]
+        [Route("{invoiceId}")]
+        public async Task<IActionResult> GetById(string invoiceId)
+        {
+            //Get invoices
+            var invoice = await new OverstagContext().Invoices.Include(f => f.Payment).FirstOrDefaultAsync(x => x.InvoiceID == Uri.UnescapeDataString(invoiceId));
+            if (invoice == null)
+                return Json(new { status = "error", error = "Invoice not found" });
+            else
+                return Json(new { status = "success", invoice = invoice.toInvoiceInfo(string.Format("{0}://{1}/Pay/Invoice/", HttpContext.Request.Scheme, HttpContext.Request.Host)) });
+        }
     }
 }

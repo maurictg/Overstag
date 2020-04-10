@@ -3,6 +3,7 @@
     Layout = "_UserLayout";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
     int eventcnt = 0;
+    double Total = 0;
 }
 
 <h5 class="red-text hide-on-med-and-up"><i class="material-icons">warning</i>&nbsp;Deze pagina is overzichtelijker op een computer of een ander groot scherm.</h5>
@@ -33,7 +34,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (u.Subscriptions.Count(f => !f.Payed) > 0)
+                            @if (u.Subscriptions.Count(f => !f.Payed && Overstag.Core.General.DateIsPassed(f.Event.When)) > 0)
                             {
                                 double total = 0;
                                 double totalConsumptions = 0;
@@ -66,6 +67,7 @@
                                 <tr>
                                     <td class="center-align" colspan="6">
                                         Totaalbedrag: <b>&euro;@Math.Round((total+totalConsumptions) / 100, 2).ToString("F")</b>
+                                        @{ Total += total + totalConsumptions; }
                                     </td>
                                 </tr>
                             }
@@ -78,6 +80,13 @@
                         </tbody>
                     </table>
                 </td>
+            </tr>
+        }
+
+        @if(Total > 0)
+        {
+            <tr>
+                <td colspan="2" class="white-text grey center-align"><h6>Eindtotaal: <b>&euro;@Math.Round(Total / 100, 2).ToString("F")</b></h6></td>
             </tr>
         }
     </tbody>
@@ -129,7 +138,12 @@
                         M.toast({ html: 'Activiteiten successvol verwerkt!', classes: 'green' });
                         OverstagJS.Loader.init(Billing.mergeInvoices);
                     } else {
-                        M.toast({ html: r.error, classes: 'red' });
+                        if (r.status == 'warning') {
+                            M.toast({ html: r.warning, classes: 'orange' });
+                        } else {
+                            M.toast({ html: r.error, classes: 'red' });
+                            console.log(r);
+                        }
                         $('#_progbar').hide();
                     }
                 },'json');
@@ -146,8 +160,9 @@
                         M.toast({ html: r.warning, classes: 'orange' });
                     } else {
                         M.toast({ html: r.error, classes: 'red' });
-                        console.log(r.debuginfo);
+                        console.log(r);
                     }
+                    $('#_progbar').hide();
                 }
             }, 'json').done(function () {
                 OverstagJS.Loader.hide();

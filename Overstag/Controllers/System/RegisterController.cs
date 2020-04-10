@@ -16,10 +16,11 @@ using Mollie.Api.Models.Customer;
 using Mollie.Api.Client.Abstract;
 using Mollie.Api.Client;
 using System.Text;
+using System.Text.Json;
 
 namespace Overstag.Controllers
 {
-    public class RegisterController : Controller
+    public class RegisterController : OverstagController
     {
         public IActionResult Index()
             => View("Login");
@@ -48,8 +49,7 @@ namespace Overstag.Controllers
         /// <returns></returns>
         public IActionResult Authenticate([FromQuery]string appName, [FromQuery]string callbackUrl)
         {
-            string token = HttpContext.Session.GetString("Token");
-            if(string.IsNullOrEmpty(token))
+            if(!isLoggedIn)
             {
                 ViewBag.RedirectURL = "RELOAD";
                 return View("Login");
@@ -95,8 +95,7 @@ namespace Overstag.Controllers
         public async Task<IActionResult> Logout([FromQuery]string token)
         {
             //Important session variables
-            HttpContext.Session.Remove("Token");
-            HttpContext.Session.Remove("Type");
+            HttpContext.Session.Remove("CurrentUser");
 
             if (!string.IsNullOrEmpty(token))
             {
@@ -144,7 +143,7 @@ namespace Overstag.Controllers
                     //Check if user already exists
                     string testun = string.Empty;
                     string testem = "";
-                    try { testun = context.Accounts.Where(a => a.Username == account.Username).FirstOrDefault().Username; } catch { testun = ""; }
+                    try { testun = context.Accounts.Where(a => a.Username.ToLower() == account.Username.ToLower()).FirstOrDefault().Username; } catch { testun = ""; }
                     try { testem = context.Accounts.Where(a => a.Email == account.Email).FirstOrDefault().Email; } catch { testem = ""; }
                     
                     if (!string.IsNullOrEmpty(testun))
@@ -198,8 +197,7 @@ namespace Overstag.Controllers
                             await context.SaveChangesAsync();
 
                             //Set important session variables
-                            HttpContext.Session.SetString("Token", account.Token);
-                            HttpContext.Session.SetInt32("Type", account.Type);
+                            base.setUser(account);
 
                             string remember = await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
 
@@ -244,8 +242,7 @@ namespace Overstag.Controllers
                                 if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
                                 {
                                     //Set important session variables
-                                    HttpContext.Session.SetString("Token", account.Token);
-                                    HttpContext.Session.SetInt32("Type", account.Type);
+                                    base.setUser(account);
                                 }
 
                                 string remember = (no2fa) ? await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
@@ -348,8 +345,7 @@ namespace Overstag.Controllers
                     var a = context.Accounts.First(e => e.Token == token);
 
                     //Set important session variables
-                    HttpContext.Session.SetString("Token", a.Token);
-                    HttpContext.Session.SetInt32("Type", a.Type);
+                    base.setUser(a);
 
                     string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString()).Result;
                     HttpContext.Session.SetString("Remember", remember);
@@ -384,7 +380,7 @@ namespace Overstag.Controllers
         [HttpGet("Register/joinFamily/{token}")]
         public async Task<IActionResult> JoinFamily(string token)
         {
-            if(string.IsNullOrEmpty(HttpContext.Session.GetString("Token")))
+            if(!isLoggedIn)
             {
                 HttpContext.Session.SetString("JoinFamily",token);
                 ViewBag.RedirectURL = "/Register/joinFamily/" + token;
@@ -409,7 +405,7 @@ namespace Overstag.Controllers
                     }
                     else
                     {
-                        var user = context.Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
+                        var user = currentUser;
                         if(user.Id == family.ParentID)
                         {
                             string[] error = { "U kunt uzelf niet koppelen aan uw eigen gezin.", "<i>Log uzelf uit en probeer de link opnieuw te openen.</i>", "<br><button class=\"btn btn-large blue waves-effect center-align\" onclick=\"OverstagJS.General.logout();\">Uitloggen</button>" };
@@ -427,6 +423,86 @@ namespace Overstag.Controllers
 
                 }
             }
+        }
+
+        public IActionResult Unregister()
+        {
+            if(!isLoggedIn)
+            {
+                ViewBag.RedirectURL = "/Register/Unregister";
+                return View("Login");
+            }
+
+            var account = new OverstagContext().Accounts.Include(g => g.Invoices).Include(i => i.Subscriptions).First(k => k.Id == currentUser.Id);
+            ViewBag.AllowtoDelete = true;
+            ViewBag.Name = account.Firstname;
+
+            if (account.Invoices.Count(f => !f.Payed) > 0)
+            {
+                ViewBag.AllowtoDelete = false;
+                ViewBag.Message = "Er staan nog onbetaalde facturen open. Zorg er eerst voor dat deze afgerond zijn en kom dan hier terug.";
+            }
+
+            if (account.Subscriptions.Count(f => !f.Payed) > 0)
+            {
+                ViewBag.AllowtoDelete = false;
+                ViewBag.Message = "Er zijn nog ongefactureerde activiteiten of activiteiten waarvoor je nog ingeschreven staat. Zorg er eerst voor dat deze verwijderd/betaald zijn.";
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> postDeleteAccount([FromForm]string password)
+        {
+            if (!isLoggedIn)
+            {
+                return Json(new { status = "error", error = "Je bent niet ingelogd. Log opnieuw in a.u.b." });
+            }
+
+            using (var context = new OverstagContext())
+            {
+                var account = context.Accounts.Include(f => f.Auths).Include(g => g.Invoices).Include(h => h.Payments).Include(i => i.Subscriptions).Include(j => j.Votes).Include(x => x.Transactions).First(k => k.Id == currentUser.Id);
+
+                if (!Encryption.PBKDF2.Verify(account.Password, password))
+                    return Json(new { status = "error", error = "Wachtwoord is onjuist" });
+
+                if (account.Invoices.Count(f => !f.Payed) > 0)
+                    return Json(new { status = "error", error = "Er staan nog onbetaalde facturen open." });
+
+                if (account.Subscriptions.Count(f => !f.Payed) > 0)
+                    return Json(new { status = "error", error = "Er staan nog activiteiten open." });
+
+                try
+                {
+                    //All data is removed thanks to cascade and the includes
+                    //Remove mollie integration
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(account.MollieID))
+                        {
+                            CustomerClient customerClient = new CustomerClient(Core.General.Credentials.mollieApiToken);
+                            await customerClient.DeleteCustomerAsync(account.MollieID);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        return Json(new { status = "warning", warning = "Mollie integratie verwijderen mislukt", debuginfo = e.ToString() });
+                    }
+
+                    //Remove account
+                    context.Accounts.Remove(account);
+                    await context.SaveChangesAsync();
+
+                    return Json(new { status = "success" });
+                }
+                catch (Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                }
+
+            }
+
         }
 
     }

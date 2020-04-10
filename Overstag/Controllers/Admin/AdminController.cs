@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
+using System.Text.Json;
 
 namespace Overstag.Controllers
 {
@@ -23,9 +24,7 @@ namespace Overstag.Controllers
             using(var context = new OverstagContext())
             {
                 var user = context.Accounts.First(f => f.Token == Uri.UnescapeDataString(token));
-                HttpContext.Session.SetString("Token", user.Token);
-                HttpContext.Session.SetInt32("Type", user.Type);
-                HttpContext.Session.SetString("Name", user.Username);
+                HttpContext.Session.SetString("CurrentUser", JsonSerializer.Serialize(user));
                 HttpContext.Response.Redirect("/User");
                 return Content("OK");
             }

@@ -320,24 +320,7 @@
 
                 },
                 delaccount: function () {
-                    var pass = prompt('Typ je wachtwoord in om door te gaan');
-
-                    if (pass == null || pass == '')
-                        return;
-
-                    if (confirm('Account verwijderen? Zeker weten?')) {
-                        $.post("/User/postDeleteAccount", { Token: '@Uri.EscapeDataString(Model.Token)', Password: pass }, function (response) {
-                            if (response.status == 'success') {
-                                M.toast({ html: 'Account verwijderd', classes: 'green' });
-                                localStorage.setItem("logout", true);
-                                OverstagJS.General.logout();
-                            }
-                            else {
-                                M.toast({ html: response.error, classes: 'red' });
-                            }
-                        }, 'json');
-
-                    }
+                    window.location.href = "/Register/Unregister";
                 },
                 toggle2fa: function () {
                     var use = $('#cb2fa').prop('checked');

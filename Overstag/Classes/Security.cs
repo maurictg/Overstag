@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using SshNet.Security.Cryptography;
 
 namespace Overstag.Encryption
 {
@@ -54,14 +55,17 @@ namespace Overstag.Encryption
     public static class SHA
     {
         public static string S256(string input)
+            => hash(input, new SHA256Managed());
+
+        public static string S1(string input)
+            => hash(input, new SHA1Managed());
+
+        private static string hash(string input, HashAlgorithm algorithm)
         {
-            var crypt = new SHA256Managed();
             var hash = new StringBuilder();
-            byte[] crypto = crypt.ComputeHash(Encoding.UTF8.GetBytes(input));
+            byte[] crypto = algorithm.ComputeHash(Encoding.UTF8.GetBytes(input));
             foreach (byte b in crypto)
-            {
                 hash.Append(b.ToString("x2"));
-            }
             return hash.ToString();
         }
     }
@@ -218,7 +222,7 @@ namespace Overstag.Security
         /// </summary>
         /// <param name="token">The user's token</param>
         /// <returns>the secret or null</returns>
-        public static string GenerateSecret(string token)
+        public static Account GenerateSecretForAccount(string token)
         {
             try
             {
@@ -230,7 +234,7 @@ namespace Overstag.Security
                     a.TwoFactorCodes = string.Join(',',TFA.GenerateBackupCodes());
                     context.Accounts.Update(a);
                     context.SaveChanges();
-                    return secret;
+                    return a;
                 }
             }
             catch

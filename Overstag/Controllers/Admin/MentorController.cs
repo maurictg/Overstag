@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Overstag.Controllers
 {
-    public class MentorController : Controller
+    public class MentorController : OverstagController
     {
         /// <summary>
         /// Get Mentor homepage
@@ -19,7 +19,7 @@ namespace Overstag.Controllers
         /// <returns>View</returns>
         public IActionResult Index()
         {
-            ViewBag.Token = HttpContext.Session.GetString("Token");
+            ViewBag.Token = currentUser.Token;
             return View();
         }
 

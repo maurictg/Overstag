@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Overstag.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : OverstagController
     {
         /// <summary>
         /// Register new loginToken
@@ -44,8 +44,7 @@ namespace Overstag.Controllers
                             var user = context.Accounts.First(f => f.Id == auth.User.Id);
 
                             //Important session variables
-                            HttpContext.Session.SetString("Token", user.Token);
-                            HttpContext.Session.SetInt32("Type", user.Type);
+                            base.setUser(user);
 
                             return Json(new { status = "success" });
                         }

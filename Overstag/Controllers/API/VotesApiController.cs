@@ -10,17 +10,36 @@ using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
-    [Route("api/vote")]
+    [Route("api/votes")]
     public class VotesApiController : OverstagApiController
     {
         [HttpGet]
-        [Route("{id}/up")]
+        [Route("")]
+        public async Task<IActionResult> ListVotes([FromQuery]bool withIdeas)
+        {
+            using (var context = new OverstagContext())
+            {
+                List<Idea> ideas = await context.Ideas.ToListAsync();
+
+                var user = await context.Accounts.Include(f => f.Votes).ThenInclude(h => h.Idea).FirstOrDefaultAsync(g => g.Id == getUserId());
+                List<VoteInfo> votes = new List<VoteInfo>();
+                user.Votes.ForEach(f => votes.Add(f.ToVoteInfo(withIdeas)));
+
+                return Json(new { status = "success", count = votes.Count, votes });
+            }
+        }
+
+        [HttpGet]
+        [Route("{id}/upvote")]
         public async Task<IActionResult> Upvote(int id)
         {
             if (getUser().Type == 1)
                 return Json(new { status = "warning", message = "Parent is not allowed to vote" });
             else
             {
+                if (!new OverstagContext().Ideas.Any(f => f.Id == id))
+                    return Json(new { status = "error", error = "Idea not found." });
+
                 string res = await Vote(id, true);
                 if (res == "OK")
                     return Json(new { status = "success" });
@@ -30,13 +49,16 @@ namespace Overstag.Controllers.API
         }
 
         [HttpGet]
-        [Route("{id}/down")]
+        [Route("{id}/downvote")]
         public async Task<IActionResult> Downvote(int id)
         {
             if (getUser().Type == 1)
                 return Json(new { status = "warning", message = "Parent is not allowed to vote" });
             else
             {
+                if (!new OverstagContext().Ideas.Any(f => f.Id == id))
+                    return Json(new { status = "error", error = "Idea not found." });
+
                 string res = await Vote(id, false);
                 if (res == "OK")
                     return Json(new { status = "success" });

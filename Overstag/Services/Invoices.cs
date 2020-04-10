@@ -120,14 +120,14 @@ namespace Overstag.Services
         {
             using (var context = new OverstagContext())
             {
-                var cuser = context.Accounts
+                var parent = context.Accounts
                     .Include(g => g.Subscriptions).ThenInclude(i => i.Event)
                     .Include(h => h.Invoices).First(f => f.Id == parentID);
 
                 var family = context.Families
                     .Include(g => g.Members).ThenInclude(h => h.Subscriptions).ThenInclude(i => i.Event)
                     .Include(g => g.Members).ThenInclude(h => h.Invoices)
-                    .First(f => f.ParentID == cuser.Id);
+                    .First(f => f.ParentID == parent.Id);
 
                 if (family.Members.Count() == 0)
                     return true;
@@ -170,21 +170,28 @@ namespace Overstag.Services
                 if (Subs.Count() == 0)
                     return true;
 
+                List<Participate> existingSubscriptions = parent.Subscriptions.ToList();
+                
                 foreach (var sub in Subs)
-                    cuser.Subscriptions.Add(new Participate { Event = sub.Key, FriendCount = (byte)sub.Value.Item1, AdditionsCost = sub.Value.Item2, Payed = true });
+                {
+                    if(!existingSubscriptions.Any(f => f.EventID == sub.Key.Id))
+                    {
+                        parent.Subscriptions.Add(new Participate { Event = sub.Key, FriendCount = (byte)sub.Value.Item1, AdditionsCost = sub.Value.Item2, Payed = true });
+                    }
+                }
 
                 await context.Invoices.AddAsync(new Invoice()
                 {
                     AdditionsCost = Subs.Values.Sum(f => f.Item2),
                     EventIDs = string.Join(',', Subs.Select(f => f.Key.Id)),
-                    User = cuser,
+                    User = parent,
                     Payed = false,
                     Timestamp = DateTime.Now,
                     InvoiceID = Encryption.Random.rHash("INV" + DateTime.Now.ToLongTimeString()),
                     Amount = (Subs.Sum(f => (f.Key.Cost * (1 + f.Value.Item1))) + Subs.Sum(f => f.Value.Item2))
                 });
 
-                context.Accounts.Update(cuser);
+                context.Accounts.Update(parent);
                 await context.SaveChangesAsync();
 
                 

@@ -60,7 +60,7 @@
             } else if (r.status == 'warning') {
                 M.toast({ html: 'Toestemming geven gelukt, maar het lukt niet om de gegevens door te geven aan de applicatie.', classes: 'orange' });
             } else {
-                M.toast({ html: `<span>Toestemming geven mislukt</span><button class="btn-flat white-text toast-action" onclick="window.location.reload();">Opnieuw proberen</button>`, classes: 'red', displayLength: 10000 });
+                M.toast({ html: `<span>Toestemming geven mislukt</span><button class="btn-flat white-text toast-action" onclick="window.location.reload();">Opnieuw</button>`, classes: 'red', displayLength: 10000 });
             }
 
             $('.btna').addClass('disabled');

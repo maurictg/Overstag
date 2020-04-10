@@ -18,22 +18,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Controllers
 {
-    public class AccountancyController : Controller
+    public class AccountancyController : OverstagController
     {
-        private Account currentUser = null;
-
-        /// <summary>
-        /// Gets the current user
-        /// </summary>
-        /// <returns>All account info of the current user</returns>
-        public Account currentuser()
-        {
-            if (currentUser == null)
-                currentUser = new OverstagContext().Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
-
-            return currentUser;
-        }
-
         /// <summary>
         /// Get a range of transactions
         /// </summary>
@@ -195,7 +181,7 @@ namespace Overstag.Controllers
                 {
                     t.When = (t.When < DateTime.Now.AddYears(-25)) ? DateTime.Now : t.When;
                     t.Timestamp = DateTime.Now;
-                    t.UserId = currentuser().Id;
+                    t.UserId = currentUser.Id;
                     context.Transactions.Add(t);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
@@ -280,7 +266,7 @@ namespace Overstag.Controllers
                         payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
                         context.Invoices.Update(invoice);
                         context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {invoice.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = currentuser().Id });
+                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {invoice.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = currentUser.Id });
                         await context.SaveChangesAsync();
                         return Json(new { status = "success", payid = payment.PaymentID });
                     }

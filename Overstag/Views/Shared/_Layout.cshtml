@@ -1,4 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Http
+@{ 
+    var user = Overstag.Controllers.OverstagController.GetCurrentUser(Context);
+    var loggedin = user != null;
+}
 <!DOCTYPE html>
 <!-- OVERSTAG (C) @DateTime.Now.Year MaurICT (github.com/maurictg/Overstag) -->
 <html lang="nl-nl">
@@ -22,8 +26,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link rel="canonical" href="@ViewBag.Canonical" />
     <script>
-        let loggedin = ('@Html.Raw(Context.Session.GetString("Token")!=null)' == 'True');
-        let usertype = @Html.Raw(Context.Session.GetInt32("Type") != null ? Context.Session.GetInt32("Type") : -1);
+        let loggedin = ('@loggedin' == 'True');
+        let usertype = @Html.Raw(loggedin ? user.Type : -1);
 
         $(function () {
             if (loggedin) {

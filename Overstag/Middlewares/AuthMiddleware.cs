@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Overstag.Controllers;
 using Overstag.Models;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +63,8 @@ namespace Overstag.Middlewares
                     }
                 }
 
-                int? type = c.Session.GetInt32("Type");
+                int? type = (OverstagController.GetCurrentUser(c) == null) ? null : (int?)OverstagController.GetCurrentUser(c).Type;
+
                 int code = 400;
                 string redirect = "";
                 bool loggedin = (type != null);

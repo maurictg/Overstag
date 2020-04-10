@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Overstag.Controllers;
 
 namespace Overstag
 {
@@ -14,7 +15,14 @@ namespace Overstag
 
         public void OnGet()
         {
-            this.Token = HttpContext.Session.GetString("Token");
+            try
+            {
+                this.Token = OverstagController.GetCurrentUser(HttpContext).Token;
+            }
+            catch
+            {
+                this.Token = null;
+            }
         }
     }
 }

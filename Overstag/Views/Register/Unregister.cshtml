@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Account verwijderen";
+}
+
+@section Stylesheets {
+<style>
+    .warning-stripe {
+        color: white;
+        background: repeating-linear-gradient( 45deg, #bf6408, #bf6408 10px, #000000 10px, #000000 20px );
+        margin-top: -0.2em;
+        padding-bottom: 0.2em;
+    }
+</style>
+}
+
+<div class="row"></div>
+<div class="row">
+    <div id="card" style="display: none;" class="card col s12 m10 offset-m1 center-align rounded">
+        <div class="card-content">
+            <div class="row center-align">
+                <h2 class="warning-stripe">&#9888;&nbsp;Danger zone&nbsp;&#9888;</h2>
+                <h3 class="blue-middle-text">Account verwijderen</h3>
+
+                @if (!ViewBag.AllowtoDelete)
+                {
+                    <div class="card-panel red">
+                        <h5 class="white-text">@ViewBag.Message</h5>
+                    </div>
+                }
+                else
+                {
+                    <p class="flow-text">Hi, jammer dat je hebt besloten jouw account te verwijderen! Wanneer je besluit door te gaan, worden alle gegevens die wij van jou hebben verwijderd. <br />Ook de gegevens die gedeeld zijn met Mollie worden verwijderd.</p>
+                    <br /><p class="flow-text">Zorg er daarom voor dat je bijvoorbeeld jouw facturen hebt gedownload als PDF, want al deze gegevens worden verwijderd en kun je niet meer bij ons opvragen.<br /> <b>Bedenk dat deze actie niet ongedaan kan worden gemaakt!</b></p>
+                    <br /><p class="flow-text">Mocht je er spijt van krijgen, dan kun je altijd opnieuw een account aanmaken.</p>
+                    <br />
+
+                    <p>
+                        <label>
+                            <input type="checkbox" id="cbAccept" class="filled-in" onchange="Unregister.toggleButton();" />
+                            <span>Ik heb het gelezen en wil mijn account verwijderen</span>
+                        </label>
+                    </p><br />
+
+                    <button id="btnNext" class="btn btn-large orange disabled waves-effect" onclick="$('#card').hide(); $('#passcard').fadeIn('slow');">Volgende</button>
+                }
+
+                <br />
+                </div>
+        </div>
+    </div>
+
+    <div id="passcard" style="display: none;" class="card col s12 m10 offset-m1 center-align rounded">
+        <div class="card-content">
+            <div class="row center-align">
+                <h2 class="warning-stripe">&#9888;&nbsp;Danger zone&nbsp;&#9888;</h2>
+                <h3 class="blue-middle-text">Account verwijderen</h3><br/>
+                <h5>Hi <b>@ViewBag.Name</b>! Voer je wachtwoord in ter authenticatie</h5><br/>
+
+                <div class="row">
+                    <div class="input-field col s12 m6 offset-m3">
+                        <i class="material-icons prefix">lock_outline</i>
+                        <input id="tbPassword" type="password" placeholder="Wachtwoord">
+                        <label for="tbPassword">Wachtwoord</label>
+                    </div>
+                </div>
+
+                <button id="btnDelete" onclick="Unregister.post();" class="btn disabled btn-large waves-effect red">Account verwijderen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#card').fadeIn('slow');
+        $('#cbAccept').prop('checked', false);
+        Unregister.init();
+    });
+
+    var Unregister = {
+        toggleButton: function () {
+            if ($('#cbAccept').prop('checked')==true) {
+                $('#btnNext').removeClass('disabled');
+            } else {
+                $('#btnNext').addClass('disabled');
+            }
+        },
+        init: function () {
+            $('#tbPassword').on('keyup', function () {
+                if ($('#tbPassword').val().length > 0) {
+                    $('#btnDelete').removeClass('disabled');
+                } else {
+                    $('#btnDelete').addClass('disabled');
+                }
+            });
+        },
+        post: function () {
+            $('#_progbar').show();
+            $.post('/Register/postDeleteAccount', { password: $('#tbPassword').val() }, function (r) {
+                if (r.status == 'success') {
+                    M.toast({
+                        html: 'Account successvol verwijderd!', classes: 'green', completeCallback: function () {
+                            localStorage.setItem("logout", true);
+                            OverstagJS.General.logout();
+                        }
+                    });
+                } else {
+                    if (r.status == 'warning') {
+                        M.toast({ html: r.warning, classes: 'orange' });
+                    } else {
+                        M.toast({ html: r.error, classes: 'red' });
+                    }
+                    console.log(r);
+                    $('#tbPassword').val('');
+                    $('#btnDelete').addClass('disabled');
+                    $('#_progbar').hide();
+                }
+            },'json');
+        }
+    };
+</script>

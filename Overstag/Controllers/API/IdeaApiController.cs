@@ -55,22 +55,5 @@ namespace Overstag.Controllers.API
             else
                 return Json(new { status = "success", idea = a.ToIdeaInfo() });
         }
-
-
-        [HttpGet]
-        [Route("votes")]
-        public async Task<IActionResult> ListVotes([FromQuery]bool withIdeas)
-        {
-            using (var context = new OverstagContext())
-            {
-                List<Idea> ideas = await context.Ideas.ToListAsync();
-
-                var user = await context.Accounts.Include(f => f.Votes).ThenInclude(h => h.Idea).FirstOrDefaultAsync(g => g.Id == getUserId());
-                List<VoteInfo> votes = new List<VoteInfo>();
-                user.Votes.ForEach(f => votes.Add(f.ToVoteInfo(withIdeas)));
-
-                return Json(new { status = "success", count = votes.Count, votes });
-            }
-        }
     }
 }

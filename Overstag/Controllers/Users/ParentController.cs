@@ -9,15 +9,8 @@ using Overstag.Models;
 
 namespace Overstag.Controllers
 {
-    public class ParentController : Controller
+    public class ParentController : OverstagController
     {
-        /// <summary>
-        /// Gets the current user
-        /// </summary>
-        /// <returns>Overstag Account model</returns>
-        public Account currentuser() 
-            => new OverstagContext().Accounts.First(f => f.Token == HttpContext.Session.GetString("Token"));
-
         /// <summary>
         /// Get parent index page with family info or create new family if not exist
         /// </summary>
@@ -26,12 +19,12 @@ namespace Overstag.Controllers
         {
             using(var context = new OverstagContext())
             {
-                bool has = (context.Families.FirstOrDefault(f => (f.ParentID == currentuser().Id))!=null);
+                bool has = (context.Families.FirstOrDefault(f => (f.ParentID == currentUser.Id))!=null);
 
                 if(!has)
                     CreateFamily();
 
-                return View(context.Families.Include(f => f.Members).First(f => f.ParentID == currentuser().Id));
+                return View(context.Families.Include(f => f.Members).First(f => f.ParentID == currentUser.Id));
             }
         }
 
@@ -46,7 +39,7 @@ namespace Overstag.Controllers
                 var family = context.Families
                     .Include(f => f.Members).ThenInclude(g => g.Subscriptions).ThenInclude(h => h.Event)
                     //.Include(f => f.Members).ThenInclude(g => g.Invoices) <-- This is how you also include invoices
-                    .First(i => i.ParentID == currentuser().Id);
+                    .First(i => i.ParentID == currentUser.Id);
 
                 return View(family.Members);
             }
@@ -63,8 +56,8 @@ namespace Overstag.Controllers
                 {
                     context.Families.Add(new Family()
                     {
-                        ParentID = currentuser().Id,
-                        Token = Encryption.Random.rHash(currentuser().Token)
+                        ParentID = currentUser.Id,
+                        Token = Encryption.Random.rHash(currentUser.Token)
                     });
                     context.SaveChanges();
                 }
@@ -89,7 +82,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id);
+                    var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentUser.Id);
                     family.Members.Remove(context.Accounts.First(f => f.Id == id));
                     context.Families.Update(family);
                     await context.SaveChangesAsync();
@@ -111,7 +104,7 @@ namespace Overstag.Controllers
             List<Exception> exceptions = new List<Exception>();
             using(var context = new OverstagContext())
             {
-                foreach (var member in context.Families.Include(f => f.Members).First(g => g.ParentID == currentuser().Id).Members)
+                foreach (var member in context.Families.Include(f => f.Members).First(g => g.ParentID == currentUser.Id).Members)
                 {
                     bool result = await Services.Invoices.Create(member.Id);
                     if (!result)
@@ -136,12 +129,12 @@ namespace Overstag.Controllers
         {
             try
             {
-                await Services.Invoices.MergeFamilyInvoices(currentuser().Id);
+                await Services.Invoices.MergeFamilyInvoices(currentUser.Id);
                 return Json(new { status = "success" });
             }
             catch(Exception e)
             {
-                return Json(new { status = "error", debuginfo = e.ToString() });
+                return Json(new { status = "error", error = "Het samenvoegen van de facturen is mislukt. Neem even contact met ons op", debuginfo = e.ToString() });
             }
         }
     }
