@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore;
 using Overstag.Models;
 
 /// <summary>
@@ -24,7 +25,7 @@ namespace Overstag.Models
         {
             //Connection string
 #if DEBUG
-            //optionsBuilder.UseMySQL(Core.General.Credentials.mySqlLiveCString);
+            //optionsBuilder.UseMySql(Core.General.Credentials.mySqlLiveCString);
             optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
             //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlLiveCString);
 
@@ -81,6 +82,7 @@ namespace Overstag.Models
             mb.Entity<Account>()
                 .HasMany(f => f.Payments)
                 .WithOne(g => g.User)
+                .HasForeignKey(h => h.UserId)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
             //One to many (account aan Transaction)

@@ -126,8 +126,8 @@
                     @if (ViewBag.Payment != null)
                     {
                         Overstag.Models.Payment p = ViewBag.Payment;
-                        DateTime dt = p.PayedAt ?? new DateTime(2000, 1, 1);
-                        bool validated = (Model.Payed == (p.PayedAt != null && !string.IsNullOrEmpty(p.PaymentID) && p.Invoice.InvoiceID == Model.InvoiceID && Convert.ToInt32(p.Status) == 6));
+                        DateTime dt = p.PaidAt ?? new DateTime(2000, 1, 1);
+                        bool validated = (Model.Payed == p.IsPayed());
                         <br />
                         <table class="responsive-table">
                             <thead>
@@ -140,7 +140,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><b>@p.PaymentID</b></td>
+                                    <td><b>@p.PaymentId</b></td>
                                     <td>@p.PlacedAt.ToString("dd-MM-yyyy hh:mm:ss")</td>
                                     <td>@dt.ToString("dd-MM-yyyy hh:mm:ss")</td>
                                     <td><b class="@Html.Raw((validated) ? "green-text" : "red-text")">@Html.Raw((validated) ? "Ja" : "Nee")</b></td>
@@ -168,14 +168,25 @@
             <button class="btn btn-large green waves-effect" id="btnprint" onclick="Invoice.startPrint();">Printen</button>
             @if (!Model.Payed)
             {
-                <button class="btn btn-large blue waves-effect" id="btnnext" onclick="Invoice.checkout();">Betalen &rarr;</button>
+                <a class="btn btn-large blue waves-effect modal-trigger" id="btnnext" href="#mdPay">Betalen &rarr;</a>
             }
         </div>
     </div>
 </div>
 
-<form id="frmCheckout" style="display: none;" method="post" action="/Pay/Checkout">
-    <input name="invoiceid" value="@Uri.EscapeDataString(Model.InvoiceID)" />
+<!-- Modal Structure -->
+<div id="mdPay" class="modal">
+    <div class="modal-content center-align">
+        <h4>Kies een betaalmethode</h4>
+        <h2 class="center-align"><b>&euro;&nbsp;@Math.Round((double)Model.Amount / 100, 2).ToString("F")</b></h2>
+        <button class="btn btn-large orange waves-effect" style="margin-top: 1em;">Bankoverschrijving</button>
+        <button class="btn btn-large red waves-effect" style="margin-top: 1em;">IDeal</button>
+    </div>
+</div>
+
+<form id="frmCheckout" style="display: none;" method="post" action="/Pay/Checkout/@Uri.EscapeDataString(Model.InvoiceID)">
+    <input name="type" id="checkout_type" value="0" />
+    <input name="iban" id="checkout_iban" value="" />
 </form>
 
 <script>

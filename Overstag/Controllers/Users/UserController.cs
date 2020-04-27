@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 using Overstag.Models.NoDB;
-using Mollie.Api.Client;
 using System.Net;
 using System.Text;
 using System.IO;
@@ -37,7 +36,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>Logins object</returns>
         public IActionResult getLogins()
-            => Json(new OverstagContext().Auths.Where(f => f.UserId == currentUser.Id).ToList());
+            => Json(new OverstagContext().Auths.Where(f => f.UserId == currentUser.Id).OrderByDescending(g => g.Registered).ToList());
 
         /// <summary>
         /// Remove login by its id

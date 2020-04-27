@@ -20,7 +20,10 @@ namespace Overstag.Core
         /// </summary>
         /// <returns>Credentials object</returns>
         public Credentials Get()
-            => JsonSerializer.Deserialize<Credentials>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "credentials.json")));
+        {
+            Console.WriteLine("Reading credentials from file...");
+            return JsonSerializer.Deserialize<Credentials>(File.ReadAllText(Path.Combine(Environment.CurrentDirectory, "credentials.json")));
+        }
     }
 
     public static class General

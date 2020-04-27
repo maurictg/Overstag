@@ -32,9 +32,9 @@ namespace Overstag.Services
 
     public class SocketHandler
     {
-        private ConcurrentDictionary<ConnectionData, WebSocket> _connections = new ConcurrentDictionary<ConnectionData, WebSocket>();
-        private ConcurrentBag<ConnectionPool> _pools = new ConcurrentBag<ConnectionPool>();
-        private int _counter = 0;
+        private static ConcurrentDictionary<ConnectionData, WebSocket> _connections = new ConcurrentDictionary<ConnectionData, WebSocket>();
+        private static ConcurrentBag<ConnectionPool> _pools = new ConcurrentBag<ConnectionPool>();
+        private static int _counter = 0;
 
         /// <summary>
         /// Generate random unique ID hash

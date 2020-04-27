@@ -22,17 +22,11 @@ namespace Overstag.Controllers.API
         [Route("")]
         public async Task<IActionResult> List([FromQuery]DateTime? after)
         {
-            List<Event> events = new List<Event>();
-            List<ActivityInfo> activities = new List<ActivityInfo>();
+            List<Event> events = (after == null) 
+                ? await new OverstagContext().Events.ToListAsync() 
+                : await new OverstagContext().Events.Where(f => f.When > Convert.ToDateTime(after)).ToListAsync();
 
-            if (after == null)
-                events = await new OverstagContext().Events.ToListAsync();
-            else
-                events = await new OverstagContext().Events.Where(f => f.When > Convert.ToDateTime(after)).ToListAsync();
-
-            events.ForEach(f => activities.Add(f.ToActivityInfo()));
-
-            return Json(new { status = "success", count = activities.Count(), activities });
+            return Json(new { status = "success", count = events.Count(), activities = events.Select(x => x.ToActivityInfo()) });
         }
 
         [HttpGet]
