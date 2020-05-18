@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
+using Mollie.Api.Models.Payment;
 
 namespace Overstag.Models
 {
-    public enum PayType { MOLLIE, BANK, CRYPTO, NONE };
+    public enum PayType { MOLLIE = 0, BANK = 1, CRYPTO = 2 };
 
     public class Payment
     {
@@ -15,10 +16,11 @@ namespace Overstag.Models
         public DateTime PlacedAt { get; set; }
         public DateTime? PaidAt { get; set; }
         public PayType PayType { get; set; }
-        public Mollie.Api.Models.Payment.PaymentStatus? Status { get; set; }
+        public PaymentStatus? Status { get; set; }
         public string Metadata { get; set; }
 
-        public bool IsPayed() => (Status == Mollie.Api.Models.Payment.PaymentStatus.Paid);
+        public bool IsPaid() => (Status == PaymentStatus.Paid);
+        public bool IsFailed() => (Status == PaymentStatus.Canceled || Status == PaymentStatus.Expired || Status == PaymentStatus.Failed);
 
         //Relations
         [JsonIgnore]

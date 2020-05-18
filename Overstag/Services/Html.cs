@@ -15,5 +15,50 @@ namespace Overstag.Services
 
         public static string MV(bool man)
            => ManWoman(man).Replace("Man","M").Replace("Vrouw","V");
+
+        public static string Euro(int cents, bool withSpace = false) 
+            => $"&euro;{(withSpace? "&nbsp;":"")}{Math.Round((double)cents / 100, 2):F}";
+
+        public static string PayStatus(Mollie.Api.Models.Payment.PaymentStatus? status)
+        {
+            string title = "Onbekend";
+            string color = "grey";
+
+            switch (status)
+            {
+                case Mollie.Api.Models.Payment.PaymentStatus.Open:
+                    title = "Open";
+                    color = "blue";
+                    break;
+                case Mollie.Api.Models.Payment.PaymentStatus.Canceled:
+                    title = "Geannuleerd";
+                    color = "orange";
+                    break;
+                case Mollie.Api.Models.Payment.PaymentStatus.Pending:
+                    title = "In afwachting";
+                    color = "teal";
+                    break;
+                case Mollie.Api.Models.Payment.PaymentStatus.Authorized:
+                    title = "Geauthoriseerd";
+                    color = "blue";
+                    break;
+                case Mollie.Api.Models.Payment.PaymentStatus.Expired:
+                    title = "Verlopen";
+                    color = "orange";
+                    break;
+                case Mollie.Api.Models.Payment.PaymentStatus.Failed:
+                    title = "Mislukt";
+                    color = "red";
+                    break;
+                case Mollie.Api.Models.Payment.PaymentStatus.Paid:
+                    title = "Betaald";
+                    color = "green";
+                    break;
+                default:
+                    break;
+            }   
+
+            return $"<b class=\"{color}-text\">{title}</b>";
+        }
     }
 }

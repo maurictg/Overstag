@@ -36,6 +36,9 @@ namespace Overstag.Models
                 Payment = (Payed) ? Payment : null
             };
         }
+
+        public bool IsPaid()
+            => (Payment != null) ? (Payment.IsPaid() && Payed) : Payed;
     }
 
     //Xtended invoice

@@ -28,7 +28,7 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 var trans = context.Transactions.OrderByDescending(f => f.When).ToList();
-                
+
                 int[] typesIn = { 1, 2, 3, 4, 5, 6 };
                 int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28, 29 };
 
@@ -73,15 +73,25 @@ namespace Overstag.Controllers
         [Route("Accountancy/Declaration/{id}")]
         public IActionResult Declaration(int id)
         {
-            using(var context = new OverstagContext())
+            using (var context = new OverstagContext())
             {
                 var declaration = context.Transactions.Include(f => f.User).FirstOrDefault(f => f.Id == id);
                 string[] error = { "Declaratie niet gevonden", "Probeer een andere." };
                 if (declaration != null)
-                    return View("~/Views/Mentor/Accountancy/Declaration.cshtml",declaration);
+                    return View("~/Views/Mentor/Accountancy/Declaration.cshtml", declaration);
                 else
                     return View("~/Views/Error/Custom.cshtml", error);
             }
+        }
+
+        /// <summary>
+        /// List all payments
+        /// </summary>
+        /// <returns>View with list<payment></payment></returns>
+        public async Task<IActionResult> Payments()
+        {
+            var payments = await new OverstagContext().Payments.Include(a => a.User).Include(b => b.Invoice).OrderByDescending(f => f.PlacedAt).ToListAsync();
+            return View("~/Views/Mentor/Accountancy/Payments.cshtml", payments);
         }
 
         /// <summary>

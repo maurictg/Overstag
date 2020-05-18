@@ -1,0 +1,57 @@
+﻿@model List<Overstag.Models.Payment>
+@{
+    Layout = "_AccountancyLayout";
+}
+
+    <div class="row">
+        <h2 class="blue-middle-text center-align">Betalingen</h2>
+
+        <table class="responsive-table">
+            <thead>
+                <tr>
+                    <th>Voornaam</th>
+                    <th>Achternaam</th>
+                    <th>Bedrag</th>
+                    <th>Betaald</th>
+                    <th>Status</th>
+                    <th>Betaalmethode</th>
+                    <th>Geplaatst op</th>
+                    <th>Betaald op?</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.User.Firstname</td>
+                        <td>@item.User.Lastname</td>
+                        <td>@Html.Raw(Overstag.Services.Html.Euro(item.Invoice.Amount))</td>
+                        <td>@Html.Raw(Overstag.Services.Html.YesNo(item.IsPaid()))</td>
+                        <td>@Html.Raw(Overstag.Services.Html.PayStatus(item.Status))</td>
+                        <td>@item.PayType.ToString()</td>
+                        <td>@item.PlacedAt.ToString("dd-MM-yyyy HH:mm")</td>
+                        <td>@((item.PaidAt == null)?"?":Convert.ToDateTime(item.PaidAt).ToString("dd-MM-yyyy HH:mm"))</td>
+                        <td>
+                            <a target="_blank" class="btn btn-small blue" href="/Pay/Invoice/@Uri.EscapeDataString(item.Invoice.InvoiceID)">Factuur &rarr;</a>
+                            <a class="btn transparent waves-effect btn-small btnsetting black-text" data-id="@item.Id" data-type="@((int)item.PayType)" data-status="@((int)item.Status)"><i class="material-icons">settings</i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+<script>
+    let Payment = function () {
+        return {
+            init: () => {
+                $('#_payments, #_mpayments').addClass('active');
+            }
+        };
+    }();
+
+    $(function () {
+        Payment.init();
+    });
+</script>

@@ -7,7 +7,7 @@ namespace Overstag.Models.API
 {
     public class SubscriptionInfo
     {
-        public ActivityInfo? Activity { get; set; }
+        public ActivityInfo Activity { get; set; }
         public int EventID { get; set; }
         public bool Factured { get; set; }
         public double DrinksCost { get; set; }
