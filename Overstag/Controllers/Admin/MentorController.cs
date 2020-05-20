@@ -128,7 +128,7 @@ namespace Overstag.Controllers
                     {
                         var parti = eve.Participators.ToList();
                         var e = eve.Participators.First(f => f.UserID == id);
-                        if (!e.Payed)
+                        if (!e.Paid)
                         {
                             eve.Participators.Remove(e);
                         }
@@ -172,7 +172,7 @@ namespace Overstag.Controllers
                 try
                 {
                     var user = eve.Participators.First(f => f.UserID == userid);
-                    if (user.Payed)
+                    if (user.Paid)
                         return Json(new { status = "error", error = "Gebruiker heeft al betaald" });
 
                     user.AdditionsCost = amount;

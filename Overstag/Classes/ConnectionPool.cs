@@ -30,6 +30,10 @@ namespace Overstag.Classes
 
                 switch (data.t)
                 {
+                    case "echo":
+                        returnData = data.data;
+                        break;
+
                     case "createData": //Fill pool with data
                         this.Data = data.data;
                         break;

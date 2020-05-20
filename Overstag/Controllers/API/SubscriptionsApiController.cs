@@ -24,7 +24,7 @@ namespace Overstag.Controllers.API
 
                 foreach (var item in user.Subscriptions)
                 {
-                    if (item.Payed && !withFactured)
+                    if (item.Paid && !withFactured)
                         continue;
 
                     inf.Add(item.ToSubscriptionInfo(withActivity));

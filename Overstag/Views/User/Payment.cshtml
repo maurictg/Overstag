@@ -1,4 +1,4 @@
-﻿@model Overstag.Models.NoDB.UnpayedEvents
+﻿@model Overstag.Models.NoDB.UnPaidEvents
 @using Microsoft.AspNetCore.Http
 @using Microsoft.EntityFrameworkCore;
 @{
@@ -17,7 +17,7 @@
             @if (!ViewBag.IsParent)
             {
                 <h3 class="center-align blue-dark-text">Niet-gefactureerde activiteiten</h3>
-                <div id="unpayedevents">
+                <div id="unPaidevents">
                     @if (Model.UnfacturedEvents.Count() > 0)
                     {
                         <table class="responsive-table">
@@ -100,12 +100,12 @@
                                         <h6>Totaal: <b>&euro;@Math.Round((double)item.Amount / 100, 2).ToString("F")</b></h6>
                                     </div>
                                     <div class="col s4">
-                                        <h6>Betaald: @Html.Raw(Overstag.Services.Html.YesNo(item.Payed))</h6>
+                                        <h6>Betaald: @Html.Raw(Overstag.Services.Html.YesNo(item.Paid))</h6>
                                     </div>
                                 </div>
                                 <div class="collapsible-body">
                                     <div class="col s3">
-                                        @if (!item.Payed)
+                                        @if (!item.Paid)
                                         {
                                             <a class="waves-effect waves-light btn green" onclick="Payment.getPay('@Uri.EscapeDataString(item.InvoiceID)')">Betalen &rarr;</a>
                                             <br />
@@ -161,7 +161,7 @@
                         }
                     </ul>
 
-                    @if (Model.Invoices.Where(f => f.Payed == false).Count() > 1)
+                    @if (Model.Invoices.Where(f => f.Paid == false).Count() > 1)
                     {
                         @Html.Raw("&nbsp;")<button class="btn blue-dark waves-effect modal-trigger" data-target="minvoice">&rarr; Facturen samenvoegen &larr;</button><br /><br />
                     }

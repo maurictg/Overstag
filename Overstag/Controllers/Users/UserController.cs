@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 using Overstag.Models.NoDB;
-using Mollie.Api.Client;
 using System.Net;
 using System.Text;
 using System.IO;
@@ -37,7 +36,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <returns>Logins object</returns>
         public IActionResult getLogins()
-            => Json(new OverstagContext().Auths.Where(f => f.UserId == currentUser.Id).ToList());
+            => Json(new OverstagContext().Auths.Where(f => f.UserId == currentUser.Id).OrderByDescending(g => g.Registered).ToList());
 
         /// <summary>
         /// Remove login by its id
@@ -92,9 +91,9 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Get all unpayed events and invoices
+        /// Get all unPaid events and invoices
         /// </summary>
-        /// <returns>View with invoices and unpayed events</returns>
+        /// <returns>View with invoices and unPaid events</returns>
         public IActionResult Payment()
         {
             using(var context = new OverstagContext())
@@ -103,17 +102,17 @@ namespace Overstag.Controllers
                 ViewBag.Age = Core.General.getAge(user.Birthdate);
 
                 List<Event> events = context.Events.ToList();
-                List<Event> unpayedEvents = new List<Event>();
+                List<Event> unPaidEvents = new List<Event>();
                 List<Invoice> invoices = context.Invoices.Include(g => g.User).ThenInclude(h => h.Subscriptions).Where(f => f.User.Id == user.Id).ToList();
                 List<XInvoice> iinvoices = new List<XInvoice>();
 
                 foreach(var p in user.Subscriptions)
                 {
-                    if(!p.Payed)
+                    if(!p.Paid)
                     {
                         var e = events.First(f => f.Id == p.EventID);
-                        if (!unpayedEvents.Contains(e) && Core.General.DateIsPassed(e.When))
-                            unpayedEvents.Add(e);
+                        if (!unPaidEvents.Contains(e) && Core.General.DateIsPassed(e.When))
+                            unPaidEvents.Add(e);
                     }
                 }
 
@@ -126,11 +125,11 @@ namespace Overstag.Controllers
                 ViewBag.HasFamily = (user.Family != null);
                 ViewBag.IsParent = (user.Type == 1);
 
-                return View("Payment", new UnpayedEvents()
+                return View("Payment", new UnPaidEvents()
                 {
                     Invoices = iinvoices,
                     Subscriptions = user.Subscriptions,
-                    UnfacturedEvents = unpayedEvents.OrderBy(f => f.When).ToList()
+                    UnfacturedEvents = unPaidEvents.OrderBy(f => f.When).ToList()
                 });
             }
         }
@@ -362,7 +361,7 @@ namespace Overstag.Controllers
             try
             {
                 request.Timestamp = DateTime.Now;
-                request.Payed = false;
+                request.Paid = false;
                 request.UserId = currentUser.Id;
                 request.Type = 29; //Declaratie
                 request.Amount = request.Amount * -1;
@@ -465,7 +464,7 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Generates invoice from all unpayed events of current user
+        /// Generates invoice from all unPaid events of current user
         /// </summary>
         /// <returns>Json (status = success or status = error with details)</returns>
         [HttpGet]
@@ -483,7 +482,7 @@ namespace Overstag.Controllers
             using(var context = new OverstagContext())
             {
                 var user = context.Accounts.Include(f => f.Invoices).First(f => f.Id == currentUser.Id);
-                var invoices = user.Invoices.Where(f => !f.Payed).ToList();
+                var invoices = user.Invoices.Where(f => !f.Paid).ToList();
                 if (invoices.Count() > 1)
                 {
                     Invoice i = new Invoice();
@@ -504,7 +503,7 @@ namespace Overstag.Controllers
                     i.EventIDs = string.Join(',', EventIDS);
                     i.Amount = bill;
                     i.AdditionsCost = additions;
-                    i.Payed = false;
+                    i.Paid = false;
                     i.Timestamp = DateTime.Now;
 
                     try

@@ -16,6 +16,8 @@ using Mollie.Api.Models.Payment.Request;
 using Mollie.Api.Models.Payment.Response;
 using Mollie.Api.Models.Payment;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Overstag.Controllers
 {
@@ -28,7 +30,7 @@ namespace Overstag.Controllers
         /// <returns>View with invoice and its details</returns>
         [Route("Pay/Direct/{invoiceid}")]
         [Route("Pay/Invoice/{invoiceid}")]
-        public IActionResult Index(string invoiceid)
+        public IActionResult Index(string invoiceid, [FromQuery]bool showPayment)
         {
             invoiceid = Uri.UnescapeDataString(invoiceid);
             using(var context = new OverstagContext())
@@ -42,16 +44,39 @@ namespace Overstag.Controllers
                 }
                 else
                 {
-                    if(invoice.Payed)
+                    if(invoice.Paid || showPayment)
                     {
                         //Validate payment
                         var payment = context.Payments.Include(f => f.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == invoice.InvoiceID);
-                        if (payment != null && !string.IsNullOrEmpty(payment.PaymentID))
+                        if (payment != null)
                             ViewBag.Payment = payment;
                     }
 
+                    if (showPayment)
+                        ViewBag.showPayment = true;
+
+#if MOLLIE_ENABLED
+                    ViewBag.MollieEnabled = true;
+#endif
+
                     return View(Services.Invoices.GetXInvoice(invoice.Id));
                 }
+            }
+        }
+
+        [HttpPut]
+        public async Task<JsonResult> SetMetaData([FromForm]string metadata, [FromForm]int id)
+        {
+            using(var context = new OverstagContext())
+            {
+                var payment = await context.Payments.FindAsync(id);
+                if (payment == null)
+                    return Json(new { status = "error", error = "Betaling niet gevonden" });
+
+                payment.Metadata = metadata;
+                context.Payments.Update(payment);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
             }
         }
 
@@ -60,99 +85,98 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="invoiceid">The invoice token/invoiceID</param>
         /// <returns>View</returns>
-        [HttpPost("Pay/Checkout")]
-        public async Task<IActionResult> Checkout([FromForm]string invoiceid)
+        [HttpPost("Pay/Checkout/{invoiceId}")]
+        public async Task<IActionResult> Checkout(string invoiceId, [FromForm]int type)
         {
-            bool createPayment = true;
-
-            using (var context = new OverstagContext())
+            using(var context = new OverstagContext())
             {
-                var invoice = await context.Invoices.Include(x => x.User).Include(y => y.Payment).FirstOrDefaultAsync(f => f.InvoiceID == Uri.UnescapeDataString(invoiceid));
+                var invoice = context.Invoices.Include(a => a.Payment).Include(b => b.User).FirstOrDefault(f => f.InvoiceID == Uri.UnescapeDataString(invoiceId));
+                var paymentType = (PayType)type;
 
-                if(invoice == null)
-                {
-                    string[] error = { "Factuur niet gevonden", "Waarschijnlijk klopt de link niet. <br/><i>Als het probleem blijft optreden neem dan contact met ons op.</i>" };
-                    return View("~/Views/Error/Custom.cshtml", error);
-                }
+                if (invoice == null)
+                    return View("~/Views/Error/Custom.cshtml", new string[] { "Factuur niet gevonden", "De factuur die u probeert te betalen is niet gevonden. Probeer het opnieuw, en als het niet lukt neem dan contact met ons op" });
 
-
-                if(invoice.Payment != null)
-                {
-                    bool save = false;
-                    if (invoice.Payment.Status == PaymentStatus.Paid)
-                    {
-                        save = true;
-                        invoice.Payed = true;
-                    }
-                    else if(invoice.Payment.Status == PaymentStatus.Canceled || invoice.Payment.Status == PaymentStatus.Expired || invoice.Payment.Status == PaymentStatus.Failed)
-                    {
-                        save = true;
-                        invoice.Payment = null;
-                    }
-                    else if (invoice.Payment.Status == null)
-                        createPayment = false;
-
-                    try
-                    {
-                        if (save)
-                        {
-                            context.Invoices.Update(invoice);
-                            await context.SaveChangesAsync();
-                        }
-                    }
-                    catch(Exception e) { throw e; }
-                }
-
-                if (invoice.Payed)
-                {
-                    string[] error = { "Factuur is al betaald", "<i>Wat probeer je? Ik zou echt werkelijk niet weten waarom je een factuur 2 keer zou betalen...</i>" };
-                    return View("~/Views/Error/Custom.cshtml", error);
-                }
-
-                //Viewbag info
                 ViewBag.Amount = invoice.Amount;
 
-                if (!createPayment)
-                    return View(invoice.Payment);
-
-
-                var user = invoice.User;
-                string cost = Math.Round((double)invoice.Amount / 100, 2).ToString("F").Replace(",", ".");
-
-                string url = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Done/{Uri.EscapeDataString(invoice.InvoiceID)}";
-                string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
-
-                //Create payment
-                PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);               
-
-                IdealPaymentRequest pr = new IdealPaymentRequest()
+                Payment p = new Payment()
                 {
-                    Amount = new Amount(Currency.EUR, cost),
-                    Description = $"Overstag factuur #{invoice.Id}",
-                    RedirectUrl = url,
-                    Locale = "nl_NL",
-                    CustomerId = user.MollieID,
-#if !DEBUG
-                    WebhookUrl = webhook
-#endif
+                    InvoiceId = invoice.Id,
+                    PayType = paymentType,
+                    PlacedAt = DateTime.Now,
+                    UserId = invoice.UserID
                 };
 
-                pr.SetMetadata(Uri.EscapeDataString(invoice.InvoiceID));
-#if MOLLIE_ENABLED
-                PaymentResponse ps = await pc.CreatePaymentAsync(pr);
-                ViewBag.PayLink = ps.Links.Checkout.Href;
-#endif
-                context.Payments.Add(new Payment()
+                if (invoice.Payment != null)
                 {
-                    Invoice = invoice,
-                    User = invoice.User,
-                    PlacedAt = DateTime.Now,
-#if MOLLIE_ENABLED
-                    PaymentID = ps.Id,
-                    Status = ps.Status
-#endif
-                });
+                    if (invoice.Payment.IsPaid())
+                    {
+                        invoice.Paid = true;
+                        context.Invoices.Update(invoice);
+                        await context.SaveChangesAsync();
+                        return View("~/Views/Error/Custom.cshtml", new string[] { "Factuur is al betaald.", "De factuur die u probeert te betalen is al betaald." });
+                    }
 
+                    if(!invoice.Payment.IsFailed())
+                    {
+                        p = invoice.Payment;
+
+#if MOLLIE_ENABLED
+                        if(!p.IsPaid() && p.PayType == PayType.MOLLIE)
+                        {
+                            //Get url
+                            PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
+                            PaymentResponse ps = await pc.GetPaymentAsync(p.PaymentId);
+                            if (ps.Links.Checkout != null) //Still open for payment
+                            {
+                                ViewBag.PayLink = ps.Links.Checkout.Href;
+                            }
+                        }
+#endif
+
+                        return View(p);
+                    }
+                }
+
+
+                switch (paymentType)
+                {
+                    case PayType.MOLLIE:
+                        {
+                            string cost = Math.Round((double)invoice.Amount / 100, 2).ToString("F").Replace(",", ".");
+                            string redirect = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Invoice/{Uri.EscapeDataString(invoice.InvoiceID)}?showPayment=true";
+                            string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
+
+                            PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
+                            IdealPaymentRequest pr = new IdealPaymentRequest()
+                            {
+                                Amount = new Amount(Currency.EUR, cost),
+                                Description = $"Overstag factuur #{invoice.Id}",
+                                RedirectUrl = redirect,
+                                Locale = "nl_NL",
+                                CustomerId = invoice.User.MollieID,
+                                Metadata = Uri.EscapeDataString(invoice.InvoiceID)
+#if !DEBUG
+                                WebhookUrl = webhook
+#endif
+                            };
+
+#if MOLLIE_ENABLED
+                            PaymentResponse ps = await pc.CreatePaymentAsync(pr);
+                            ViewBag.PayLink = ps.Links.Checkout.Href;
+                            p.PaymentId = ps.Id;
+                            p.Status = ps.Status;
+#endif
+                        }
+                        break;
+                    case PayType.BANK:
+                        //Create payment request via bank or tikkie
+                        p.Status = PaymentStatus.Open;
+                        break;
+                    default:
+                        return View("~/Views/Error/Custom.cshtml", new string[] { "Betaalmethode niet ondersteund", "De betaalmethode die u heeft gekozen wordt niet ondersteund." });
+                }
+
+                context.Payments.Add(p);
                 await context.SaveChangesAsync();
 
                 return View(context.Payments.Include(x => x.Invoice).First(f => f.Invoice.InvoiceID == invoice.InvoiceID));
@@ -174,29 +198,9 @@ namespace Overstag.Controllers
                     return Json(new { status = "error", error = "Betaling niet gevonden!" });
 
                 if (payment.Status == PaymentStatus.Paid)
-                    return Json(new { status = "payed", error = "Betaling is al betaald." });
+                    return Json(new { status = "Paid", error = "Betaling is al betaald." });
 
                 context.Payments.Remove(payment);
-
-                /*if(!string.IsNullOrEmpty(payment.PaymentID))
-                {
-                    try
-                    {
-#if MOLLIE_ENABLED
-                        PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
-
-                        var t = await pc.GetPaymentAsync(payment.PaymentID);
-                        if(t.IsCancelable)
-                            await pc.DeletePaymentAsync(payment.PaymentID);
-                        else
-                            return Json(new { status = "warning", error = "Betaling kan niet verwijderd worden." });
-#endif
-                    }
-                    catch (Exception e)
-                    {
-                        return Json(new { status = "warning", error = "IDeal betaling verwijderen mislukt.", debuginfo = e.Message });
-                    }
-                }*/
 
                 try
                 {
@@ -207,27 +211,6 @@ namespace Overstag.Controllers
                 {
                     return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.Message });
                 }
-            }
-        }
-
-        /// <summary>
-        /// Redirect page for Mollie
-        /// </summary>
-        /// <param name="id">The invoice's token or invoiceID</param>
-        /// <returns>View</returns>
-        [HttpGet("Pay/Done/{id}")]
-        public IActionResult Done(string id)
-        { 
-            using(var context = new OverstagContext())
-            {
-                var payment = context.Payments.Include(x => x.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == Uri.UnescapeDataString(id));
-                if (payment == null)
-                {
-                    string[] error = { "Betaling niet gevonden", "Waarschijnlijk is de URL onjuist.<br/><i>Als het probleem blijft optreden neem dan contact met ons op.</i>" };
-                    return View("~/Views/Error/Custom.cshtml", error);
-                }
-
-                return View("Done",payment.PaymentID);
             }
         }
 
@@ -258,23 +241,33 @@ namespace Overstag.Controllers
 
                 using (var context = new OverstagContext())
                 {
-                    var payment = context.Payments.Include(x => x.Invoice).Include(y => y.User).FirstOrDefault(f => f.PaymentID == id);
+                    var payment = context.Payments.Include(x => x.Invoice).Include(y => y.User).FirstOrDefault(f => f.PaymentId == id);
                     if (payment != null)
                     {
                         payment.Status = ps.Status;
-                        payment.PayedAt = ps.PaidAt;
+                        payment.PaidAt = ps.PaidAt;
 
                         var invoice = payment.Invoice;
                         if (invoice != null)
                         {
                             if (payment.Status == PaymentStatus.Paid)
                             {
-                                invoice.Payed = true;
-                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentID}) van factuur door {payment.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = payment.User.Id });
+                                invoice.Paid = true;
+                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentId}) van factuur door {payment.User.Firstname}", When = DateTime.Now, Type = 1, Paid = true, UserId = payment.User.Id });
                             }
-                            
-                            //if(payment.Status != PaymentStatus.Open)
-                            //HttpContext.Session.Remove("PayUrl");
+
+                            string json = JsonConvert.SerializeObject(
+                                new { 
+                                    klantNr = (ps.CustomerId ?? "-"), aanvraagKosten = ((ps.ApplicationFee != null) ? ps.ApplicationFee.Amount.ToString() : "-"), 
+                                    betaaldOp = ((ps.PaidAt == null) ? "-" : ((DateTime)ps.PaidAt).ToString("dd-MM-yyyy 'om' HH:mm:ss")),  
+                                    betaalMeth = ((ps.Method != null) ? ps.Method.Value.ToString() : "?"),
+                                    orderNr = (ps.OrderId ?? "-"),
+                                    kosten = (ps.Amount == null) ? "?" : ps.Amount.ToString(),
+                                    kostenRest = (ps.AmountRemaining == null) ? "?" : ps.AmountRemaining.ToString(),
+                                    omschrijving = ps.Description
+                                }, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+
+                            payment.Metadata = json;
 
                             context.Invoices.Update(invoice);
                             context.Payments.Update(payment);
@@ -301,15 +294,24 @@ namespace Overstag.Controllers
         /// <param name="id"></param>
         /// <returns>JSON (status = success with data or status = error with details)</returns>
         [HttpGet("Pay/GetPayment/{id}")]
-        public IActionResult GetPayment(string id)
+        public async Task<IActionResult> GetPayment(int id, [FromQuery]bool htmlOnly, [FromQuery]bool force)
         {
             try
             {
                 using (var context = new OverstagContext())
                 {
-                    var payment = context.Payments.Include(f => f.Invoice).First(f => f.PaymentID == id);
+                    var payment = await context.Payments.Include(f => f.Invoice).FirstAsync(f => f.Id == id);
                     payment.Invoice.InvoiceID = Uri.EscapeDataString(payment.Invoice.InvoiceID);
-                    return Json(new { status = "success", data = payment });
+
+                    if(force && payment.PayType == PayType.MOLLIE)
+                    {
+                        await UpdatePayment(payment.PaymentId);
+                    }
+
+                    if(htmlOnly)
+                        return Json(new { status = "success", html = Services.Html.PayStatus(payment.Status), payStatus = (int)payment.Status });
+                    else
+                        return Json(new { status = "success", data = payment, html = Services.Html.PayStatus(payment.Status), payStatus = (int)payment.Status });
                 }
             }
             catch(Exception e)

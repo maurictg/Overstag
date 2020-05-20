@@ -35,7 +35,7 @@ namespace Overstag.Services
                     int additions = 0;
                     List<int> eventIDS = new List<int>();
 
-                    var subs = user.Subscriptions.Where(f => !f.Payed && Core.General.DateIsPassed(f.Event.When));
+                    var subs = user.Subscriptions.Where(f => !f.Paid && Core.General.DateIsPassed(f.Event.When));
 
                     if (subs.Count() == 0)
                         return true;
@@ -44,7 +44,7 @@ namespace Overstag.Services
                     {
                         additions += sub.AdditionsCost;
                         total += (sub.Event.Cost * (sub.FriendCount + 1));
-                        sub.Payed = true;
+                        sub.Paid = true;
                         eventIDS.Add(sub.EventID);
                     }
 
@@ -55,7 +55,7 @@ namespace Overstag.Services
                         Amount = total + additions,
                         AdditionsCost = additions,
                         EventIDs = string.Join(',',eventIDS),
-                        Payed = false,
+                        Paid = false,
                         Payment = null,
                         Timestamp = DateTime.Now,
                         User = user,
@@ -106,7 +106,7 @@ namespace Overstag.Services
                 EventIDs = i.EventIDs,
                 Payment = i.Payment,
                 PaymentID = i.PaymentID,
-                Payed = i.Payed,
+                Paid = i.Paid,
                 Amount = i.Amount,
                 Events = EventAndFriends,
                 Timestamp = i.Timestamp,
@@ -116,7 +116,7 @@ namespace Overstag.Services
             };
         }
 
-        public static async Task<bool> MergeFamilyInvoices(int parentID, bool sendmail = false)
+        public static async Task<bool> MergeFamilyInvoices(int parentID)
         {
             using (var context = new OverstagContext())
             {
@@ -138,10 +138,10 @@ namespace Overstag.Services
 
                 foreach (var member in family.Members)
                 {
-                    if (member.Invoices.Count(f => !f.Payed) == 0)
+                    if (member.Invoices.Count(f => !f.Paid) == 0)
                         continue;
 
-                    foreach (var invoice in member.Invoices.Where(f => !f.Payed))
+                    foreach (var invoice in member.Invoices.Where(f => !f.Paid))
                     {
                         List<Participate> participates = new List<Participate>();
 
@@ -176,7 +176,7 @@ namespace Overstag.Services
                 {
                     if(!existingSubscriptions.Any(f => f.EventID == sub.Key.Id))
                     {
-                        parent.Subscriptions.Add(new Participate { Event = sub.Key, FriendCount = (byte)sub.Value.Item1, AdditionsCost = sub.Value.Item2, Payed = true });
+                        parent.Subscriptions.Add(new Participate { Event = sub.Key, FriendCount = (byte)sub.Value.Item1, AdditionsCost = sub.Value.Item2, Paid = true });
                     }
                 }
 
@@ -185,7 +185,7 @@ namespace Overstag.Services
                     AdditionsCost = Subs.Values.Sum(f => f.Item2),
                     EventIDs = string.Join(',', Subs.Select(f => f.Key.Id)),
                     User = parent,
-                    Payed = false,
+                    Paid = false,
                     Timestamp = DateTime.Now,
                     InvoiceID = Encryption.Random.rHash("INV" + DateTime.Now.ToLongTimeString()),
                     Amount = (Subs.Sum(f => (f.Key.Cost * (1 + f.Value.Item1))) + Subs.Sum(f => f.Value.Item2))

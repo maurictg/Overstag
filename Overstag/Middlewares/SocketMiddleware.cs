@@ -28,14 +28,7 @@ namespace Overstag.Middlewares
             {
                 byte type = (!string.IsNullOrEmpty(context.Request.Query["type"])) ? Convert.ToByte(context.Request.Query["type"]) : (byte)0;
                 bool broadcast = string.IsNullOrEmpty(context.Request.Query["noBroadcast"]);
-                string name = (!string.IsNullOrEmpty(context.Request.Query["name"])) ? context.Request.Query["name"].ToString() : "Anonymous";
-                //bool authenticated = false;
-
-                /*
-                if (context.Session.GetInt32("Type") != null)
-                    if (context.Session.GetInt32("Type") > 1)
-                        authenticated = true;
-                */
+                string name = (!string.IsNullOrEmpty(context.Request.Query["name"].ToString())) ? context.Request.Query["name"].ToString() : "Anonymous";
 
                 WebSocket ws = await context.WebSockets.AcceptWebSocketAsync();
                 await Handler.Add(ws, type, broadcast, false, name);

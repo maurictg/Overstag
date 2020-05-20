@@ -1,153 +1,156 @@
-﻿@model List<Overstag.Models.NoDB.MPayment>
-@{ 
-    ViewBag.Title = "Betalingen";
+﻿@model List<Overstag.Models.Payment>
+@{
     Layout = "_AccountancyLayout";
-    string[] Status = { "Open", "Geannuleerd", "In afwachting", "Geauthoriseerd", "Verlopen", "Mislukt", "Betaald" };
-    string[] StatusColors = { "blue", "orange", "yellow darken-1", "green", "orange", "red", "green" };
 }
 
-<h2 class="center-align blue-middle-text">Betalingen</h2>
+<div class="row">
+    <h2 class="blue-middle-text center-align">Betalingen</h2>
 
-<button class="btn transparent waves-effect right" onclick="Payment.syncPayments();">
-    <i class="material-icons blue-light-text">refresh</i>
-</button>
-<div>
-    @if (Model.Any())
-    {
-        <table class="responsive-table highlight">
-            <thead>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Voornaam</th>
+                <th>Achternaam</th>
+                <th>Bedrag</th>
+                <th>Betaald</th>
+                <th>Status</th>
+                <th>Betaalmethode</th>
+                <th>Kenmerk</th>
+                <th>Geplaatst op</th>
+                <th>Betaald op?</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
                 <tr>
-                    <th>Voornaam</th>
-                    <th>Achternaam</th>
-                    <th>Factuur gemaakt op</th>
-                    <th>Betaling geplaatst op</th>
-                    <th>Betaald</th>
-                    <th># (IDeal ID)</th>
-                    <th>IDEAL status</th>
-                    <th>Betaald op</th>
-                    <th>Kosten</th>
-                    <th>Acties</th>
+                    <td>@item.User.Firstname</td>
+                    <td>@item.User.Lastname</td>
+                    <td>@Html.Raw(Overstag.Services.Html.Euro(item.Invoice.Amount))</td>
+                    <td>@Html.Raw(Overstag.Services.Html.YesNo(item.IsPaid()))</td>
+                    <td>@Html.Raw(Overstag.Services.Html.PayStatus(item.Status))</td>
+                    <td>@item.PayType.ToString()</td>
+                    <td>@item.PaymentId</td>
+                    <td>@item.PlacedAt.ToString("dd-MM-yyyy HH:mm")</td>
+                    <td>@((item.PaidAt == null)?"?":Convert.ToDateTime(item.PaidAt).ToString("dd-MM-yyyy HH:mm"))</td>
+                    <td>
+                        <a target="_blank" class="btn btn-small blue" href="/Pay/Invoice/@Uri.EscapeDataString(item.Invoice.InvoiceID)">Factuur &rarr;</a>
+                        <button class="btn transparent waves-effect btn-small btnsetting black-text @(item.IsPaid()?" disabled":"")" data-id="@item.Id" data-type="@((int)item.PayType)" data-status="@((int)item.Status)"><i class="material-icons">settings</i></button>
+                        @if (!string.IsNullOrEmpty(item.Metadata))
+                        {
+                            <button class="btn transparent waves-effect btn-small btninfo black-text" data-meta="@item.Metadata"><i class="material-icons">info</i></button>
+                        }
+                    </td>
                 </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="mdSettings" class="modal">
+    <div class="modal-content center-align">
+        <h3>Betaling aanpassen</h3>
+        <br/>
+        <button id="btnMarkAsPaid" onclick="Payment.setPayment(0);" class="btn btn-large waves-effect blue modal-close">Markeren als betaald</button>
+        <button id="btnCancel" onclick="Payment.setPayment(1);" class="btn btn-large waves-effect orange modal-close">Annuleren</button>
+        <button id="btnDelete" onclick="Payment.setPayment(2);" class="btn btn-large waves-effect red modal-close">Verwijderen</button>
+        <button id="btnUpdate" onclick="Payment.setPayment(4);" class="btn btn-large waves-effect green modal-close">Bijwerken</button>
+        <br/>
+    </div>
+</div>
+
+<div id="mdInfo" class="modal">
+    <div class="modal-content center-align">
+        <h3>Betalingsgegevens:</h3>
+        <table class="responsive-table">
+            <thead>
+                <tr id="metaheaders"></tr>
             </thead>
             <tbody>
-                @foreach (var i in Model)
-                {
-                <tr>
-                    <td><b>@i.User.Firstname</b></td>
-                    <td><b>@i.User.Lastname</b></td>
-                    <td>@i.Invoice.Timestamp.ToString("dd-MM-yyyy HH:mm:ss")</td>
-                    <td>@i.Payment.PlacedAt.ToString("dd-MM-yyyy HH:mm:ss")</td>
-                    <td>@Html.Raw((!i.Invoice.Payed) ? "<b class=\"red-text\">Nee</b>" : "<b class=\"green-text\">Ja</b>")</td>
-                    <td>@Html.Raw((i.Payment.PaymentID != null) ? i.Payment.PaymentID : "<b>?</b>")</td>
-                    <td>@Html.Raw((i.Payment.Status != null) ? $"<b class=\"{StatusColors[Convert.ToInt32(i.Payment.Status)]}-text\">{Status[Convert.ToInt32(i.Payment.Status)]}</b>" : "<b>?</b>")</td>
-                    <td>@Convert.ToDateTime(i.Payment.PayedAt).ToString("dd-MM-yyyy HH:mm:ss")</td>
-                    <td>&euro;@Math.Round((double)i.Invoice.Amount / 100, 2).ToString("F")</td>
-                    <th>
-                        @if (i.Payment.Status == null || (int)i.Payment.Status == 0)
-                        {
-                            <a class="btn orange setpayed waves-effect" data-iid="@i.Invoice.Id" data-pid="@i.Payment.Id" href="#">Markeren als betaald</a>
-                        }
-
-                        @if (i.Payment.Status == null || (int)i.Payment.Status == 0 || (int)i.Payment.Status == 6)
-                        {
-                            <a class="btn blue waves-effect" target="_blank" href="/Pay/Invoice/@Uri.EscapeDataString(i.Invoice.InvoiceID)">Factuur openen</a>
-                        }
-
-                        @if (i.Payment.Status == null || ((int)i.Payment.Status < 6 && (int)i.Payment.Status != 0))
-                        {
-                            <a class="btn red removepayed waves-effect" data-pid="@i.Payment.Id" href="#">Verwijderen</a>
-                        }
-                    </th>
-                </tr>
-                }
+                <tr id="metadata"></tr>
             </tbody>
         </table>
-    }
-    else
-    {
-        <hr /><h3 class="center-align">Geen betalingen gevonden</h3><hr />
-    }
-</div>
-
-<div id="areusure" class="modal">
-    <div class="modal-content">
-        <h4>Weet je zeker dat je deze betaling wilt markeren als betaald?</h4>
-        <p>Hiermee wordt als ware een valse ideal betaling aangemaakt.<br /><b> Dit kan in principe niet meer ongedaan worden gemaakt.</b></p>
+        <br />
     </div>
     <div class="modal-footer">
-        <button class="modal-close btn green waves-effect">Annuleren</button>
-        <button onclick="Payment.setPayed();" class="btn modal-close red waves-effect">Markeren als betaald</button>
-    </div>
-</div>
-
-<div id="suredelete" class="modal">
-    <div class="modal-content">
-        <h4>Weet je zeker dat je deze betaling wilt verwijderen?</h4>
-        <b> Dit kan niet meer ongedaan worden gemaakt!</b><
-    </div>
-    <div class="modal-footer">
-        <button class="modal-close btn green waves-effect">Annuleren</button>
-        <button onclick="Payment.delete();" class="btn modal-close red waves-effect">Verwijderen</button>
+        <button class="modal-close btn waves-effect blue">Sluiten</button>
     </div>
 </div>
 
 <script>
-    var iid = 0;
-    var pid = 0;
+    let Payment = function () {
+        return {
+            init: () => {
+                $('#_payments, #_mpayments').addClass('active');
+                Payment.mapEvents();
+            },
+            mapEvents: () => {
+                $('.btnsetting').click(function() {
+                    let id = $(this).data('id');
+                    let type = $(this).data('type');
+                    let status = $(this).data('status');
 
-    var Payment = {
-        init: function () {
-            $('#_pay, #_mpay').addClass('active');
-            Payment.mapEvents();
-        },
-        mapEvents: function () {
-            $('.setpayed').off().on('click', function () {
-                iid = $(this).data('iid');
-                pid = $(this).data('pid');
-                M.Modal.getInstance($('#areusure')).open();
-            });
-            $('.removepayed').off().on('click', function () {
-                pid = $(this).data('pid');
-                M.Modal.getInstance($('#suredelete')).open();
-            });
-        },
-        setPayed: function () {
-            $('#_progbar').show();
-            $.post('/Accountancy/markAsPayed', { payed: 1, payid: pid, invoiceid: iid }, function (r) {
-                if (r.status == 'success') {
-                    M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
-                    Core.doReload(500);
-                } else {
-                    M.toast({ html: r.error, classes: 'red' });
+                    //MarkAsPaid, Cancel, Delete, Update
+                    let buttons;
+
+                    $('#mdSettings').data('id', id);
+
+                    switch (Number(type)) {
+                        case 0:
+                            buttons = [false, false, false, true];
+                            break;
+                        case 1:
+                            buttons = [true, true, true, false];
+                            break;
+                        default:
+                            buttons = [false, false, false, false];
+                            break;
+                    }
+
+                    Payment.toggle($('#btnMarkAsPaid'), buttons[0]);
+                    Payment.toggle($('#btnCancel'), buttons[1]);
+                    Payment.toggle($('#btnDelete'), buttons[2]);
+                    Payment.toggle($('#btnUpdate'), buttons[3]);
+                    M.Modal.getInstance($('#mdSettings')).open();
+                });
+
+                $('.btninfo').click(function () {
+                    let metadata = $(this).data('meta');
+                    if (metadata) {
+                        let headers = '';
+                        let bodies = '';
+                        for (let [k, v] of Object.entries(metadata)) {
+                            headers += `<th>${k.charAt(0).toUpperCase() + k.slice(1)}</th>`;
+                            bodies += `<td>${v}</td>`;
+                        }
+                        $('#metaheaders').html(headers);
+                        $('#metadata').html(bodies);
+                        M.Modal.getInstance($('#mdInfo')).open();
+                    } else
+                        $(this.remove());
+                });
+            },
+            toggle: (e, show) => {
+                if (show)
+                    $(e).show();
+                else
+                    $(e).hide();
+            },
+            setPayment: (action) => {
+                let id = $('#mdSettings').data('id');
+                $('#_progbar').show();
+                $.post('/Accountancy/SetStatus', { id: id, action: action }, (r) => {
                     $('#_progbar').hide();
-                }
-            });
-        },
-        delete: function() {
-            $('#_progbar').show();
-            $.post('/Accountancy/removePayment', { payid: pid }, function (r) {
-                if (r.status == 'success') {
-                    M.toast({ html: 'Betaling verwijderd', classes: 'green' });
-                    Core.doReload(500);
-                } else {
-                    M.toast({ html: r.error, classes: 'red' });
-                    $('#_progbar').hide();
-                }
-            });
-        },
-        syncPayments: function() {
-            $('#_progbar').show();
-            $.getJSON('/Accountancy/UpdatePayments', function (r) {
-                if (r.status == 'success') {
-                    M.toast({ html: 'Betalingen bijgewerkt.', classes: 'blue' });
-                    Core.doReload(500);
-                } else {
-                    M.toast({ html: r.error, classes: 'red' });
-                    $('#_progbar').hide();
-                }
-            });
-        }
-    };
+                    if (r.status == 'success') {
+                        M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green', displayLength: 1500, completeCallback: () => { window.location.reload(); } });
+                    } else {
+                        M.toast({ html: r.error, classes: 'red' });
+                    }
+                });
+            }
+        };
+    }();
 
     $(function () {
         Payment.init();

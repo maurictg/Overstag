@@ -13,7 +13,7 @@ namespace Overstag.Accountancy
         public DateTime Timestamp { get; set; }
         public string Description { get; set; }
 
-        public bool Payed { get; set; }
+        public bool Paid { get; set; }
         public string Metadata { get; set; } //JSON data
 
         public int UserId { get; set; }

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
-using SshNet.Security.Cryptography;
 
 namespace Overstag.Encryption
 {

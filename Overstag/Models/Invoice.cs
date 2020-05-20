@@ -13,7 +13,7 @@ namespace Overstag.Models
         public DateTime Timestamp { get; set; }
         public string EventIDs { get; set; }
         public int AdditionsCost { get; set; }
-        public bool Payed { get; set; }
+        public bool Paid { get; set; }
         public string InvoiceID { get; set; }
 
         //Relations
@@ -32,10 +32,13 @@ namespace Overstag.Models
                 ActivityIds = EventIDs.Split(',').Select(f => Convert.ToInt32(f)).ToArray(),
                 InvoiceID = InvoiceID,
                 InvoiceURL = url+Uri.EscapeDataString(InvoiceID),
-                Payed = Payed,
-                Payment = (Payed) ? Payment : null
+                Paid = Paid,
+                Payment = (Paid) ? Payment : null
             };
         }
+
+        public bool IsPaid()
+            => (Payment != null) ? (Payment.IsPaid() && Paid) : Paid;
     }
 
     //Xtended invoice

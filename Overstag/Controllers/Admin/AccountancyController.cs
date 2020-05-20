@@ -11,9 +11,6 @@ using Overstag.Models;
 using Overstag.Models.NoDB;
 using Overstag.Accountancy;
 using Microsoft.EntityFrameworkCore;
-using Mollie.Api.Client;
-using Mollie.Api.Models.Payment.Response;
-using Mollie.Api.Models.Payment;
 using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Controllers
@@ -31,7 +28,7 @@ namespace Overstag.Controllers
             using (var context = new OverstagContext())
             {
                 var trans = context.Transactions.OrderByDescending(f => f.When).ToList();
-                
+
                 int[] typesIn = { 1, 2, 3, 4, 5, 6 };
                 int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28, 29 };
 
@@ -59,7 +56,7 @@ namespace Overstag.Controllers
 
                 return View("~/Views/Mentor/Accountancy/Index.cshtml", new _Transactions()
                 {
-                    Balance = trans.Where(g => g.Payed).Sum(f => f.Amount),
+                    Balance = trans.Where(g => g.Paid).Sum(f => f.Amount),
                     BalanceWithDC = trans.Sum(f => f.Amount),
                     In = trans.Where(f => f.Amount > 0).Sum(g => g.Amount),
                     Out = trans.Where(f => f.Amount < 0).Sum(g => g.Amount),
@@ -72,98 +69,79 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// Sync payments with mollie server
-        /// </summary>
-        /// <returns></returns>
-        public async Task<IActionResult> UpdatePayments()
-        {
-#if !MOLLIE_ENABLED
-            return Json(new { status = "error", error = "IDeal is uitgeschakeld. Kan betalingen niet verversen" });
-#endif
-
-            using(var context = new OverstagContext())
-            {
-                try
-                {
-                    foreach (var payment in context.Payments)
-                    {
-                        if (payment.Status != null)
-                        {
-                            if (new List<int>() { 0, 2, 3}.Contains((int)payment.Status))
-                            {
-                                PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
-                                PaymentResponse ps = await pc.GetPaymentAsync(payment.PaymentID);
-
-                                payment.PayedAt = ps.PaidAt;
-                                payment.Status = ps.Status;
-
-                                if ((int)payment.Status == 6)
-                                {
-                                    var invoice = context.Invoices.Find(payment.Invoice.Id);
-                                    if (invoice != null)
-                                    {
-                                        invoice.Payed = true;
-                                        context.Invoices.Update(invoice);
-                                        await context.SaveChangesAsync();
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    return Json(new { status = "success" });
-                }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.ToString() });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get view with payments
-        /// </summary>
-        /// <returns>View with all payments in the database</returns>
-        public IActionResult Payments()
-        {
-            List<MPayment> payments = new List<MPayment>();
-            using (var context = new OverstagContext())
-            {
-                var pms = context.Payments.Include(x => x.User).Include(y => y.Invoice).OrderBy(f => f.PayedAt == null).OrderByDescending(f => f.PlacedAt).ToList();
-                foreach (var pm in pms)
-                {
-                    try
-                    {
-                        var user = pm.User;
-                        var invoice = pm.Invoice;
-                        payments.Add(new MPayment()
-                        {
-                            Invoice = invoice,
-                            User = user,
-                            Payment = pm
-                        });
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
-            }
-            return View("~/Views/Mentor/Accountancy/Payments.cshtml",payments);
-        }
 
         [Route("Accountancy/Declaration/{id}")]
         public IActionResult Declaration(int id)
         {
-            using(var context = new OverstagContext())
+            using (var context = new OverstagContext())
             {
                 var declaration = context.Transactions.Include(f => f.User).FirstOrDefault(f => f.Id == id);
                 string[] error = { "Declaratie niet gevonden", "Probeer een andere." };
                 if (declaration != null)
-                    return View("~/Views/Mentor/Accountancy/Declaration.cshtml",declaration);
+                    return View("~/Views/Mentor/Accountancy/Declaration.cshtml", declaration);
                 else
                     return View("~/Views/Error/Custom.cshtml", error);
+            }
+        }
+
+        /// <summary>
+        /// List all payments
+        /// </summary>
+        /// <returns>View with list<payment></payment></returns>
+        public async Task<IActionResult> Payments()
+        {
+            var payments = await new OverstagContext().Payments.Include(a => a.User).Include(b => b.Invoice).OrderByDescending(f => f.PlacedAt).ToListAsync();
+            return View("~/Views/Mentor/Accountancy/Payments.cshtml", payments);
+        }
+
+        [HttpPost()]
+        public async Task<IActionResult> SetStatus([FromForm]int id, [FromForm]int action)
+        {
+            PayType[] allowedTypes = { PayType.BANK };
+            using(var context = new OverstagContext())
+            {
+                var payment = await context.Payments.Include(a => a.Invoice).Include(b => b.User).FirstOrDefaultAsync(f => f.Id == id);
+
+                if (payment == null)
+                    return Json(new { status = "error", error = "Betaling niet gevonden." });
+
+                if(action == 4) //Update payment
+                    return await new PayController().UpdatePayment(payment.PaymentId);
+
+                if (!allowedTypes.Contains(payment.PayType))
+                    return Json(new { status = "error", error = "Dit type betaling kan niet worden aangepast." });
+
+                if (payment.IsPaid())
+                    return Json(new { status = "error", error = "Deze betaling is al afgerond, en kan daarom niet meer worden aangepast" });
+
+                switch (action)
+                {
+                    case 0: //Mark as Paid
+                        {
+                            payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Paid;
+                            payment.PaymentId = "Betaalverzoek";
+                            payment.PaidAt = DateTime.Now;
+                            payment.Invoice.Paid = true;
+                            context.Transactions.Add(new Transaction() { UserId = currentUser.Id, Paid = false, Timestamp = DateTime.Now, When = DateTime.Now.Date, Type = 1, Amount = payment.Invoice.Amount, Description = $"[BANK] Betaling van factuur #{payment.Invoice.Id} door {payment.User.Firstname} {payment.User.Lastname}" });
+                        }
+                        break;
+                    case 1: //Cancel
+                        payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Canceled;
+                        break;
+                    case 2: //Delete
+                        payment.Invoice = null;
+                        payment.User = null;
+                        context.Payments.Remove(payment);
+                        break;
+                    default:
+                        return Json(new { status = "error", error = "Deze actie wordt niet ondersteund" });
+                }
+
+                if(action != 2)
+                    context.Payments.Update(payment);
+
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
             }
         }
 
@@ -219,14 +197,14 @@ namespace Overstag.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> setTransactionAsPayed([FromForm]int id)
+        public async Task<IActionResult> setTransactionAsPaid([FromForm]int id)
         {
             try
             {
                 using (var context = new OverstagContext())
                 {
                     var t = await context.Transactions.FirstAsync(f => f.Id == id);
-                    t.Payed = true;
+                    t.Paid = true;
                     context.Transactions.Update(t);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
@@ -238,73 +216,8 @@ namespace Overstag.Controllers
             }
         }
 
-        /// <summary>
-        /// Mark a payment as payed
-        /// </summary>
-        /// <param name="payed">0 or 1: not payed or payed</param>
-        /// <param name="payid">The payment's id</param>
-        /// <param name="invoiceid">The id of the invoice</param>
-        /// <returns>JSON, status = success or status = error</returns>
-        [HttpPost]
-        public async Task<JsonResult> markAsPayed([FromForm]int payed, [FromForm]int payid, [FromForm]int invoiceid)
-        {
-            using (var context = new OverstagContext())
-            {
-                try
-                {
-                    var invoice = context.Invoices.Include(x => x.User).First(f => f.Id == invoiceid);
-                    var payment = context.Payments.First(f => f.Id == payid);
-
-                    if (payed == 0 || payed == 1)
-                    {
-                        DateTime? nd = null;
-                        Mollie.Api.Models.Payment.PaymentStatus? np = null;
-
-                        invoice.Payed = (payed == 1);
-                        payment.PayedAt = (payed == 1) ? DateTime.Now : nd;
-                        payment.PaymentID = (payed == 1) ? Encryption.Random.rCode(10) : null;
-                        payment.Status = (payed == 1) ? Mollie.Api.Models.Payment.PaymentStatus.Paid : np;
-                        context.Invoices.Update(invoice);
-                        context.Payments.Update(payment);
-                        context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[MENTOR] Betaling (#{payment.PaymentID}) van factuur door {invoice.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = currentUser.Id });
-                        await context.SaveChangesAsync();
-                        return Json(new { status = "success", payid = payment.PaymentID });
-                    }
-                    else
-                        return Json(new { status = "error", error = "BOOL payed moet 0 of 1 zijn" });
-                }
-                catch (Exception e)
-                {
-                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
-                }
-            }
-        }
-
-        /// <summary>
-        /// Removes payment by it's id
-        /// </summary>
-        /// <param name="payid">The payment its id</param>
-        /// <returns>Json, status = success or error</returns>
-        public async Task<IActionResult> removePayment([FromForm]int payid)
-        {
-            using(var context = new OverstagContext())
-            {
-                try
-                {
-                    var payment = context.Payments.First(f => f.Id == payid);
-                    context.Payments.Remove(payment);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = e.Message });
-                }
-            }
-        }
-
         public IActionResult Invoices()
-            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Payed).OrderByDescending(g => g.Timestamp).Include(h => h.User).ToList());
+            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Paid).OrderByDescending(g => g.Timestamp).Include(h => h.User).ToList());
 
         /// <summary>
         /// Automatize invoicing for all users
@@ -326,7 +239,7 @@ namespace Overstag.Controllers
 
                 foreach (var user in users)
                 {
-                    if(user.Subscriptions.Count(f => !f.Payed) >= amount && user.Family == null)
+                    if(user.Subscriptions.Count(f => !f.Paid) >= amount && user.Family == null)
                     {
                         bool result = await Services.Invoices.Create(user.Id);
                         if (!result)
@@ -351,7 +264,7 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Process unpayed events per family
+        /// Process unPaid events per family
         /// </summary>
         /// <returns>json with info</returns>
         public async Task<JsonResult> processPUE()
