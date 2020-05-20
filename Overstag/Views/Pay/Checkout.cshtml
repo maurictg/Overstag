@@ -142,7 +142,7 @@
         },
         redirect: function () {
             cancelPayment = false;
-            window.location.href = '/Pay/Invoice/@Uri.EscapeDataString(ViewBag.InvoiceURL)?isHook=true';
+            window.location.href = '/Pay/Invoice/@Uri.EscapeDataString(ViewBag.InvoiceURL)?showPayment=true';
         }
     }
 

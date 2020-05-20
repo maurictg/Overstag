@@ -237,11 +237,8 @@ namespace Overstag.Controllers
                             if (Encryption.PBKDF2.Verify(account.Password, Password))
                             {
                                 bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
-                                //Login is juist, redirect naar page, zet sessie variablen
-
-                                if (no2fa) //door de sessievariablen niet te setten bij 2fa ben je alsnog niet ingelogd
+                                if (no2fa)
                                 {
-                                    //Set important session variables
                                     base.setUser(account);
                                 }
 

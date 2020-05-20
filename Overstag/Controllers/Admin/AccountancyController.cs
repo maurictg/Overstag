@@ -94,6 +94,57 @@ namespace Overstag.Controllers
             return View("~/Views/Mentor/Accountancy/Payments.cshtml", payments);
         }
 
+        [HttpPost()]
+        public async Task<IActionResult> SetStatus([FromForm]int id, [FromForm]int action)
+        {
+            PayType[] allowedTypes = { PayType.BANK };
+            using(var context = new OverstagContext())
+            {
+                var payment = await context.Payments.Include(a => a.Invoice).Include(b => b.User).FirstOrDefaultAsync(f => f.Id == id);
+
+                if (payment == null)
+                    return Json(new { status = "error", error = "Betaling niet gevonden." });
+
+                if(action == 4) //Update payment
+                    return await new PayController().UpdatePayment(payment.PaymentId);
+
+                if (!allowedTypes.Contains(payment.PayType))
+                    return Json(new { status = "error", error = "Dit type betaling kan niet worden aangepast." });
+
+                if (payment.IsPaid())
+                    return Json(new { status = "error", error = "Deze betaling is al afgerond, en kan daarom niet meer worden aangepast" });
+
+                switch (action)
+                {
+                    case 0: //Mark as payed
+                        {
+                            payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Paid;
+                            payment.PaymentId = "Betaalverzoek";
+                            payment.PaidAt = DateTime.Now;
+                            payment.Invoice.Payed = true;
+                            context.Transactions.Add(new Transaction() { UserId = currentUser.Id, Payed = false, Timestamp = DateTime.Now, When = DateTime.Now.Date, Type = 1, Amount = payment.Invoice.Amount, Description = $"[BANK] Betaling van factuur #{payment.Invoice.Id} door {payment.User.Firstname} {payment.User.Lastname}" });
+                        }
+                        break;
+                    case 1: //Cancel
+                        payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Canceled;
+                        break;
+                    case 2: //Delete
+                        payment.Invoice = null;
+                        payment.User = null;
+                        context.Payments.Remove(payment);
+                        break;
+                    default:
+                        return Json(new { status = "error", error = "Deze actie wordt niet ondersteund" });
+                }
+
+                if(action != 2)
+                    context.Payments.Update(payment);
+
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
+            }
+        }
+
         /// <summary>
         /// Add transaction to database
         /// </summary>

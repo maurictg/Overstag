@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    @if(ViewBag.IsHook == true && ViewBag.Payment != null)
+    @if(ViewBag.showPayment == true && ViewBag.Payment != null)
     {
         Overstag.Models.Payment p  = ViewBag.Payment;
 
@@ -36,7 +36,7 @@
                         </div>
                     </div>
                     <p>Ververst automatisch over <b id="seconds">10</b> seconden</p>
-                    <button class="btn waves-effect green">Verversen</button>
+                    <button id="btnrefresh" onclick="Payment.refresh();" class="btn waves-effect green disabled">Verversen</button>
                     <button class="btn waves-effect orange" onclick="Payment.cancel();">Stoppen</button>
                     <button class="btn waves-effect blue" onclick="$('#info, #buttons').fadeToggle();">Toon factuur</button>
                 </div>
@@ -197,7 +197,7 @@
             <button class="btn btn-large green waves-effect" id="btnprint" onclick="Invoice.startPrint();">Printen</button>
             @if (!Model.Payed && (ViewBag.Payment == null || !((Overstag.Models.Payment)ViewBag.Payment).IsPaid()))
             {
-                <a class="btn btn-large blue btnckt waves-effect modal-trigger" id="btnnext" href="#mdPay">Betalen &rarr;</a>
+                <a class="btn btn-large blue btnckt waves-effect modal-trigger" id="btnPay" href="#mdPay">Betalen &rarr;</a>
             }
         </div>
     </div>
@@ -217,7 +217,7 @@
     <input name="type" id="checkout_type" value="0" />
 </form>
 
-@if(ViewBag.IsHook == true && ViewBag.Payment != null)
+@if(ViewBag.showPayment == true && ViewBag.Payment != null)
 {
     Overstag.Models.Payment p = ViewBag.Payment;
 
@@ -232,6 +232,7 @@
                 Payment.start();
                 $('#info').hide();
                 $('#buttons').hide();
+                $('#btnPay').addClass('disabled');
 
                 if (status == 1 || status > 3 || payType == 1)
                     Payment.stop();
@@ -265,6 +266,13 @@
                 $('#refreshbar').css('width', val + '%')
                 $('#seconds').html(Math.round(val / 10));
             },
+            refresh: function () {
+                count = 5;
+                val = 100;
+                Payment.pause();
+                Payment.getStatus(Payment.start);
+                $('#btnrefresh').addClass('disabled');
+            },
             getStatus: function (callback) {
                 $('#_progbar').show();
                 $.get(`/Pay/GetPayment/@p.Id?htmlOnly=true&force=${(count++ >= 5)}`, function (r) {
@@ -279,6 +287,9 @@
                             Payment.stop();
                         }
 
+                        if (count == 2)
+                            $('#btnrefresh').removeClass('disabled');
+
                         if (count >= 6)
                             count = 0;
                     } else {
@@ -292,14 +303,14 @@
 }
 
 <script>
-    var isHook = ('@ViewBag.IsHook'=='True');
+    var showPayment = ('@ViewBag.showPayment'=='True');
     var invoiceid = '@Uri.EscapeDataString(Model.InvoiceID)';
     var cancelPayment = true;
 
     var Invoice = {
         init: function () {
             $('#_invoice, #_minvoice').addClass('active');
-            if (!isHook)
+            if (!showPayment)
                 M.Collapsible.getInstance($('#info')).open(2);
             else
                 Payment.init();
@@ -308,12 +319,12 @@
             var elem = document.querySelector('.collapsible.expandable');
             var instance = M.Collapsible.init(elem, { accordion: false });
             instance.open(0); instance.open(1); instance.open(2);
-            $('nav, #btnprint, #btnnext').hide();
+            $('nav, #btnprint, #btnPay').hide();
             M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 500, completeCallback: function() { Invoice.doPrint() } });
         },
         doPrint: function () {
             window.print();
-            $('nav, #btnprint, #btnnext').show();
+            $('nav, #btnprint, #btnPay').show();
             var elem = document.querySelector('.collapsible.expandable');
             var instance = M.Collapsible.init(elem, { accordion: true });
             instance.close(0); instance.close(1); instance.close(2);

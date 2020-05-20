@@ -16,6 +16,8 @@ using Mollie.Api.Models.Payment.Request;
 using Mollie.Api.Models.Payment.Response;
 using Mollie.Api.Models.Payment;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Overstag.Controllers
 {
@@ -28,7 +30,7 @@ namespace Overstag.Controllers
         /// <returns>View with invoice and its details</returns>
         [Route("Pay/Direct/{invoiceid}")]
         [Route("Pay/Invoice/{invoiceid}")]
-        public IActionResult Index(string invoiceid, [FromQuery]bool isHook)
+        public IActionResult Index(string invoiceid, [FromQuery]bool showPayment)
         {
             invoiceid = Uri.UnescapeDataString(invoiceid);
             using(var context = new OverstagContext())
@@ -42,7 +44,7 @@ namespace Overstag.Controllers
                 }
                 else
                 {
-                    if(invoice.Payed || isHook)
+                    if(invoice.Payed || showPayment)
                     {
                         //Validate payment
                         var payment = context.Payments.Include(f => f.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == invoice.InvoiceID);
@@ -50,8 +52,8 @@ namespace Overstag.Controllers
                             ViewBag.Payment = payment;
                     }
 
-                    if (isHook)
-                        ViewBag.IsHook = true;
+                    if (showPayment)
+                        ViewBag.showPayment = true;
 
                     return View(Services.Invoices.GetXInvoice(invoice.Id));
                 }
@@ -135,7 +137,7 @@ namespace Overstag.Controllers
                     case PayType.MOLLIE:
                         {
                             string cost = Math.Round((double)invoice.Amount / 100, 2).ToString("F").Replace(",", ".");
-                            string redirect = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Invoice/{Uri.EscapeDataString(invoice.InvoiceID)}?isHook=true";
+                            string redirect = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Invoice/{Uri.EscapeDataString(invoice.InvoiceID)}?showPayment=true";
                             string webhook = $"{string.Format("{0}://{1}", HttpContext.Request.Scheme, HttpContext.Request.Host)}/Pay/Webhook";
 
                             PaymentClient pc = new PaymentClient(Core.General.Credentials.mollieApiToken);
@@ -247,6 +249,19 @@ namespace Overstag.Controllers
                                 invoice.Payed = true;
                                 context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentId}) van factuur door {payment.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = payment.User.Id });
                             }
+
+                            string json = JsonConvert.SerializeObject(
+                                new { 
+                                    klantNr = (ps.CustomerId ?? "-"), aanvraagKosten = ((ps.ApplicationFee != null) ? ps.ApplicationFee.Amount.ToString() : "-"), 
+                                    betaaldOp = ((ps.PaidAt == null) ? "-" : ((DateTime)ps.PaidAt).ToString("dd-MM-yyyy 'om' HH:mm:ss")),  
+                                    betaalMeth = ((ps.Method != null) ? ps.Method.Value.ToString() : "?"),
+                                    orderNr = (ps.OrderId ?? "-"),
+                                    kosten = (ps.Amount == null) ? "?" : ps.Amount.ToString(),
+                                    kostenRest = (ps.AmountRemaining == null) ? "?" : ps.AmountRemaining.ToString(),
+                                    omschrijving = ps.Description
+                                }, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+
+                            payment.Metadata = json;
 
                             context.Invoices.Update(invoice);
                             context.Payments.Update(payment);
