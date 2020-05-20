@@ -17,14 +17,14 @@ namespace Overstag.Controllers.API
     {
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> List([FromQuery]bool hidePayed)
+        public async Task<IActionResult> List([FromQuery]bool hidePaid)
         {
             //Get invoices
             List<Invoice> invoices = await new OverstagContext().Invoices.Include(g => g.Payment).Where(f => f.UserID == getUserId()).ToListAsync();
-            int count = (hidePayed) ? invoices.Count(f => !f.Payed) : invoices.Count();
+            int count = (hidePaid) ? invoices.Count(f => !f.Paid) : invoices.Count();
             List<InvoiceInfo> inv = invoices.Select(h => h.toInvoiceInfo(string.Format("{0}://{1}/Pay/Invoice/", HttpContext.Request.Scheme, HttpContext.Request.Host))).ToList();
 
-            return Json(new { status = "success", count, invoices = (hidePayed) ? inv.Where(f => !f.Payed).ToList() : inv });
+            return Json(new { status = "success", count, invoices = (hidePaid) ? inv.Where(f => !f.Paid).ToList() : inv });
         }
 
         [HttpGet]

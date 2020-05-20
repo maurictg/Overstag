@@ -61,7 +61,7 @@ namespace Overstag.Controllers.API
             var user = await new OverstagContext().Accounts.Include(f => f.Subscriptions).ThenInclude(g => g.Event).Include(f => f.Family).FirstAsync(f => f.Id == getUserId());
             foreach (var s in user.Subscriptions)
             {
-                if (!s.Payed && !activities.Any(f => f.EventID == s.EventID) && Core.General.DateIsPassed(s.Event.When))
+                if (!s.Paid && !activities.Any(f => f.EventID == s.EventID) && Core.General.DateIsPassed(s.Event.When))
                     activities.Add(s.Event.ToActivityInfo());
             }
 

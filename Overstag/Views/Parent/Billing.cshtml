@@ -34,11 +34,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (u.Subscriptions.Count(f => !f.Payed && Overstag.Core.General.DateIsPassed(f.Event.When)) > 0)
+                            @if (u.Subscriptions.Count(f => !f.Paid && Overstag.Core.General.DateIsPassed(f.Event.When)) > 0)
                             {
                                 double total = 0;
                                 double totalConsumptions = 0;
-                                @foreach (var e in u.Subscriptions.Where(f => !f.Payed && Overstag.Core.General.DateIsPassed(f.Event.When)))
+                                @foreach (var e in u.Subscriptions.Where(f => !f.Paid && Overstag.Core.General.DateIsPassed(f.Event.When)))
                                 {
                                     eventcnt++;
                                     total += (double)(e.Event.Cost * (e.FriendCount+1));
@@ -154,7 +154,7 @@
             $.get('/Parent/MergeInvoices', function (r) {
                 if (r.status == 'success') {
                     M.toast({ html: 'Facturen successvol samengevoegd!', classes: 'green' })
-                    Core.doReload(1000);
+                    Core.doReload(1500);
                 } else {
                     if (r.status == 'warning') {
                         M.toast({ html: r.warning, classes: 'orange' });

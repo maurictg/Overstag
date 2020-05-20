@@ -130,7 +130,7 @@
                 } else if (r.status == 'success') {
                     M.toast({ html: 'Betaling geannuleerd! U kunt nu dit tabblad sluiten.', displayLength: 6000, classes: 'blue', completeCallback: function() { window.location.href = '/Pay/Invoice/@Uri.EscapeDataString(ViewBag.InvoiceURL)'; } });
                     $('#warning').hide();
-                } else if (r.status == 'payed') {
+                } else if (r.status == 'Paid') {
                     M.toast({ html: r.error, classes: 'blue' });
                     setTimeout(Checkout.done, 700);
                 }

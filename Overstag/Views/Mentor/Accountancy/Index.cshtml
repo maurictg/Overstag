@@ -61,16 +61,16 @@
                 <tbody>
                     @foreach (var t in Model.Transactions)
                     {
-                        <tr class="@Html.Raw(t.Payed?"":"grey lighten-1 debitcredit hide")" id="t-@t.Id">
+                        <tr class="@Html.Raw(t.Paid?"":"grey lighten-1 debitcredit hide")" id="t-@t.Id">
                             <td>@Html.Raw((t.Amount > 0) ? $"<b class=\"green-text text-accent-4\">+ &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F")}</b>" : $"<b class=\"red-text\">- &euro;{Math.Round((double)t.Amount / 100, 2).ToString("F").Replace("-", "")}</b>")</td>
                             <td>@t.When.ToString("dd-MM-yyyy")</td>
                             <td>@t.Description</td>
                             <td>@Html.Raw((t.Type != null) ? Overstag.Accountancy.Transactions.Types[Convert.ToInt32(t.Type)] : "-")</td>
                             <td>
                                 <button class="btn-small red waves-effect modal-trigger" data-target="areusure" onclick="$('#btndelete').data('id','@t.Id')">Verwijderen</button>
-                                @if (!t.Payed)
+                                @if (!t.Paid)
                                 {
-                                    <button class="btn-small blue waves-effect modal-trigger" id="btnsp-@t.Id" data-target="areusure2" onclick="$('#btnsetpayed').data('id','@t.Id')">Definitief maken</button>
+                                    <button class="btn-small blue waves-effect modal-trigger" id="btnsp-@t.Id" data-target="areusure2" onclick="$('#btnsetPaid').data('id','@t.Id')">Definitief maken</button>
                                 }
                                 @if(t.Type == 29)
                                 {
@@ -213,7 +213,7 @@
         </div>
         <div class="modal-footer">
             <button class="modal-close btn orange waves-effect">Annuleren</button>
-            <button id="btnsetpayed" onclick="Transactions.setPayed($('#btnsetpayed').data('id'));" class="btn green waves-effect modal-close">Jazeker</button>
+            <button id="btnsetPaid" onclick="Transactions.setPaid($('#btnsetPaid').data('id'));" class="btn green waves-effect modal-close">Jazeker</button>
         </div>
     </div>
 
@@ -247,8 +247,8 @@
                 }
             });
         },
-        setPayed: function (id) {
-            $.post('/Accountancy/setTransactionAsPayed', { id: id }, function (r) {
+        setPaid: function (id) {
+            $.post('/Accountancy/setTransactionAsPaid', { id: id }, function (r) {
                 if (r.status == 'success') {
                     M.toast({ html: 'Wijzigingen opgeslagen', classes: 'green' });
                     $('#t-' + id).removeClass('grey lighten-1 debitcredit');
@@ -385,7 +385,7 @@
                     type = $('#selaf option:selected').val();
                 }
                 $('#_progbar').show();
-                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val(), Type: type, When: $('#when').val(), Payed: ($('#isDC').prop('checked')) }, function (r) {
+                $.post('/Accountancy/addTransaction', { Amount: amount, Description: $('#desc').val(), Type: type, When: $('#when').val(), Paid: ($('#isDC').prop('checked')) }, function (r) {
                     if (r.status == 'success') {
                         M.toast({ html: 'Transactie toegevoegd', classes: 'green' });
                         Core.doReload(500);

@@ -52,7 +52,7 @@
     <div class="modal-content center-align">
         <h3>Betaling aanpassen</h3>
         <br/>
-        <button id="btnMarkAsPayed" onclick="Payment.setPayment(0);" class="btn btn-large waves-effect blue modal-close">Markeren als betaald</button>
+        <button id="btnMarkAsPaid" onclick="Payment.setPayment(0);" class="btn btn-large waves-effect blue modal-close">Markeren als betaald</button>
         <button id="btnCancel" onclick="Payment.setPayment(1);" class="btn btn-large waves-effect orange modal-close">Annuleren</button>
         <button id="btnDelete" onclick="Payment.setPayment(2);" class="btn btn-large waves-effect red modal-close">Verwijderen</button>
         <button id="btnUpdate" onclick="Payment.setPayment(4);" class="btn btn-large waves-effect green modal-close">Bijwerken</button>
@@ -91,7 +91,7 @@
                     let type = $(this).data('type');
                     let status = $(this).data('status');
 
-                    //MarkAsPayed, Cancel, Delete, Update
+                    //MarkAsPaid, Cancel, Delete, Update
                     let buttons;
 
                     $('#mdSettings').data('id', id);
@@ -108,7 +108,7 @@
                             break;
                     }
 
-                    Payment.toggle($('#btnMarkAsPayed'), buttons[0]);
+                    Payment.toggle($('#btnMarkAsPaid'), buttons[0]);
                     Payment.toggle($('#btnCancel'), buttons[1]);
                     Payment.toggle($('#btnDelete'), buttons[2]);
                     Payment.toggle($('#btnUpdate'), buttons[3]);

@@ -434,13 +434,13 @@ namespace Overstag.Controllers
             ViewBag.AllowtoDelete = true;
             ViewBag.Name = account.Firstname;
 
-            if (account.Invoices.Count(f => !f.Payed) > 0)
+            if (account.Invoices.Count(f => !f.Paid) > 0)
             {
                 ViewBag.AllowtoDelete = false;
                 ViewBag.Message = "Er staan nog onbetaalde facturen open. Zorg er eerst voor dat deze afgerond zijn en kom dan hier terug.";
             }
 
-            if (account.Subscriptions.Count(f => !f.Payed) > 0)
+            if (account.Subscriptions.Count(f => !f.Paid) > 0)
             {
                 ViewBag.AllowtoDelete = false;
                 ViewBag.Message = "Er zijn nog ongefactureerde activiteiten of activiteiten waarvoor je nog ingeschreven staat. Zorg er eerst voor dat deze verwijderd/betaald zijn.";
@@ -464,10 +464,10 @@ namespace Overstag.Controllers
                 if (!Encryption.PBKDF2.Verify(account.Password, password))
                     return Json(new { status = "error", error = "Wachtwoord is onjuist" });
 
-                if (account.Invoices.Count(f => !f.Payed) > 0)
+                if (account.Invoices.Count(f => !f.Paid) > 0)
                     return Json(new { status = "error", error = "Er staan nog onbetaalde facturen open." });
 
-                if (account.Subscriptions.Count(f => !f.Payed) > 0)
+                if (account.Subscriptions.Count(f => !f.Paid) > 0)
                     return Json(new { status = "error", error = "Er staan nog activiteiten open." });
 
                 try

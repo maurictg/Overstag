@@ -1,7 +1,7 @@
 ﻿#define MOLLIE_ENABLED
 
 //COMMENT this to enable mollie
-//#undef MOLLIE_ENABLED
+#undef MOLLIE_ENABLED
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +44,7 @@ namespace Overstag.Controllers
                 }
                 else
                 {
-                    if(invoice.Payed || showPayment)
+                    if(invoice.Paid || showPayment)
                     {
                         //Validate payment
                         var payment = context.Payments.Include(f => f.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefault(f => f.Invoice.InvoiceID == invoice.InvoiceID);
@@ -54,6 +54,10 @@ namespace Overstag.Controllers
 
                     if (showPayment)
                         ViewBag.showPayment = true;
+
+#if MOLLIE_ENABLED
+                    ViewBag.MollieEnabled = true;
+#endif
 
                     return View(Services.Invoices.GetXInvoice(invoice.Id));
                 }
@@ -106,7 +110,7 @@ namespace Overstag.Controllers
                 {
                     if (invoice.Payment.IsPaid())
                     {
-                        invoice.Payed = true;
+                        invoice.Paid = true;
                         context.Invoices.Update(invoice);
                         await context.SaveChangesAsync();
                         return View("~/Views/Error/Custom.cshtml", new string[] { "Factuur is al betaald.", "De factuur die u probeert te betalen is al betaald." });
@@ -116,6 +120,7 @@ namespace Overstag.Controllers
                     {
                         p = invoice.Payment;
 
+#if MOLLIE_ENABLED
                         if(!p.IsPaid() && p.PayType == PayType.MOLLIE)
                         {
                             //Get url
@@ -126,6 +131,7 @@ namespace Overstag.Controllers
                                 ViewBag.PayLink = ps.Links.Checkout.Href;
                             }
                         }
+#endif
 
                         return View(p);
                     }
@@ -192,7 +198,7 @@ namespace Overstag.Controllers
                     return Json(new { status = "error", error = "Betaling niet gevonden!" });
 
                 if (payment.Status == PaymentStatus.Paid)
-                    return Json(new { status = "payed", error = "Betaling is al betaald." });
+                    return Json(new { status = "Paid", error = "Betaling is al betaald." });
 
                 context.Payments.Remove(payment);
 
@@ -246,8 +252,8 @@ namespace Overstag.Controllers
                         {
                             if (payment.Status == PaymentStatus.Paid)
                             {
-                                invoice.Payed = true;
-                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentId}) van factuur door {payment.User.Firstname}", When = DateTime.Now, Type = 1, Payed = true, UserId = payment.User.Id });
+                                invoice.Paid = true;
+                                context.Transactions.Add(new Accountancy.Transaction { Amount = invoice.Amount, Description = $"[IDEAL] Betaling (#{payment.PaymentId}) van factuur door {payment.User.Firstname}", When = DateTime.Now, Type = 1, Paid = true, UserId = payment.User.Id });
                             }
 
                             string json = JsonConvert.SerializeObject(

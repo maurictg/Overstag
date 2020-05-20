@@ -56,7 +56,7 @@ namespace Overstag.Controllers
 
                 return View("~/Views/Mentor/Accountancy/Index.cshtml", new _Transactions()
                 {
-                    Balance = trans.Where(g => g.Payed).Sum(f => f.Amount),
+                    Balance = trans.Where(g => g.Paid).Sum(f => f.Amount),
                     BalanceWithDC = trans.Sum(f => f.Amount),
                     In = trans.Where(f => f.Amount > 0).Sum(g => g.Amount),
                     Out = trans.Where(f => f.Amount < 0).Sum(g => g.Amount),
@@ -116,13 +116,13 @@ namespace Overstag.Controllers
 
                 switch (action)
                 {
-                    case 0: //Mark as payed
+                    case 0: //Mark as Paid
                         {
                             payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Paid;
                             payment.PaymentId = "Betaalverzoek";
                             payment.PaidAt = DateTime.Now;
-                            payment.Invoice.Payed = true;
-                            context.Transactions.Add(new Transaction() { UserId = currentUser.Id, Payed = false, Timestamp = DateTime.Now, When = DateTime.Now.Date, Type = 1, Amount = payment.Invoice.Amount, Description = $"[BANK] Betaling van factuur #{payment.Invoice.Id} door {payment.User.Firstname} {payment.User.Lastname}" });
+                            payment.Invoice.Paid = true;
+                            context.Transactions.Add(new Transaction() { UserId = currentUser.Id, Paid = false, Timestamp = DateTime.Now, When = DateTime.Now.Date, Type = 1, Amount = payment.Invoice.Amount, Description = $"[BANK] Betaling van factuur #{payment.Invoice.Id} door {payment.User.Firstname} {payment.User.Lastname}" });
                         }
                         break;
                     case 1: //Cancel
@@ -197,14 +197,14 @@ namespace Overstag.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> setTransactionAsPayed([FromForm]int id)
+        public async Task<IActionResult> setTransactionAsPaid([FromForm]int id)
         {
             try
             {
                 using (var context = new OverstagContext())
                 {
                     var t = await context.Transactions.FirstAsync(f => f.Id == id);
-                    t.Payed = true;
+                    t.Paid = true;
                     context.Transactions.Update(t);
                     await context.SaveChangesAsync();
                     return Json(new { status = "success" });
@@ -217,7 +217,7 @@ namespace Overstag.Controllers
         }
 
         public IActionResult Invoices()
-            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Payed).OrderByDescending(g => g.Timestamp).Include(h => h.User).ToList());
+            => View("~/Views/Mentor/Accountancy/Invoices.cshtml", new OverstagContext().Invoices.Where(f => !f.Paid).OrderByDescending(g => g.Timestamp).Include(h => h.User).ToList());
 
         /// <summary>
         /// Automatize invoicing for all users
@@ -239,7 +239,7 @@ namespace Overstag.Controllers
 
                 foreach (var user in users)
                 {
-                    if(user.Subscriptions.Count(f => !f.Payed) >= amount && user.Family == null)
+                    if(user.Subscriptions.Count(f => !f.Paid) >= amount && user.Family == null)
                     {
                         bool result = await Services.Invoices.Create(user.Id);
                         if (!result)
@@ -264,7 +264,7 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Process unpayed events per family
+        /// Process unPaid events per family
         /// </summary>
         /// <returns>json with info</returns>
         public async Task<JsonResult> processPUE()

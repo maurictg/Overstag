@@ -29,7 +29,7 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Get unpayed events per user
+        /// Get unPaid events per user
         /// </summary>
         /// <returns>View</returns>
         public IActionResult Billing()
@@ -112,7 +112,7 @@ namespace Overstag.Controllers
                 }
 
                 if (exceptions.Count() > 0)
-                    return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken." });
+                    return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken.", debuginfo = string.Join(',',exceptions.Select(x => x.Message)) });
                 else
                     return Json(new { status = "success" });
             }

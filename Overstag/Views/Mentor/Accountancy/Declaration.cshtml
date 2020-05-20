@@ -28,7 +28,7 @@
                 <td>&euro;@Math.Round((double)Model.Amount / 100, 2).ToString("F")</td>
                 <td>@Model.Description</td>
                 <td id="type-@Model.Id"></td>
-                <td>@Html.Raw(Overstag.Services.Html.YesNo(Model.Payed))</td>
+                <td>@Html.Raw(Overstag.Services.Html.YesNo(Model.Paid))</td>
             </tr>
             <tr>
                 <td colspan="7" class="center-align photodata" data-id="@Model.Id" data-json="@Model.Metadata">Laden...</td>

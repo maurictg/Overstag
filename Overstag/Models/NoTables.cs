@@ -16,7 +16,7 @@ namespace Overstag.Models.NoDB
         public List<SSub> Participators;
     }
 
-    public struct UnpayedEvents
+    public struct UnPaidEvents
     {
         public List<XInvoice> Invoices;
         public List<Event> UnfacturedEvents;

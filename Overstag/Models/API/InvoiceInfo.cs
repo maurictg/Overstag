@@ -14,7 +14,7 @@ namespace Overstag.Models.API
         public string InvoiceID { get; set; }
         public string InvoiceURL { get; set; }
 
-        public bool Payed { get; set; }
+        public bool Paid { get; set; }
         public Payment Payment { get; set; }
     }
 }

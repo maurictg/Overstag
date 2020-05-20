@@ -79,7 +79,7 @@ namespace Overstag.Models
         public Account User { get; set; }
         public int EventID { get; set; }
         public Event Event { get; set; }
-        public bool Payed { get; set; }
+        public bool Paid { get; set; }
 
         public int AdditionsCost { get; set; }
         public byte FriendCount { get; set; }
@@ -89,7 +89,7 @@ namespace Overstag.Models
             return new API.SubscriptionInfo
             {
                 Activity = (!withActivity || Event == null) ? null : Event.ToActivityInfo(),
-                Factured = Payed,
+                Factured = Paid,
                 FriendCount = FriendCount,
                 DrinksCost = Math.Round((double)AdditionsCost / 100, 2),
                 EventID = EventID

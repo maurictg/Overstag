@@ -147,16 +147,16 @@
                                 <td>@Model.Timestamp.ToString("HH:mm:ss")</td>
                                 <td><i>@Model.InvoiceID</i></td>
                                 <td><b>@Html.Raw(Overstag.Services.Html.Euro(Model.Amount))</b></td>
-                                <td>@Html.Raw(Overstag.Services.Html.YesNo(Model.Payed))</td>
+                                <td>@Html.Raw(Overstag.Services.Html.YesNo(Model.Paid))</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    @if (ViewBag.Payment != null && Model.Payed)
+                    @if (ViewBag.Payment != null && Model.Paid)
                     {
                         Overstag.Models.Payment p = ViewBag.Payment;
                         DateTime dt = p.PaidAt ?? new DateTime(2000, 1, 1);
-                        bool validated = (Model.Payed == p.IsPaid());
+                        bool validated = (Model.Paid == p.IsPaid());
                         <br />
                         <table class="responsive-table">
                             <thead>
@@ -180,7 +180,7 @@
                     }
                     else
                     {
-                        if (Model.Payed)
+                        if (Model.Paid)
                         {
                             @Html.Raw("<h5 class=\"red-text\">Er is iets fout gegaan met de validatie. Neem a.u.b. contact op met de beheerder</h5>")
                         }
@@ -195,7 +195,7 @@
     <div class="row" id="buttons">
         <div class="col s12 center-align">
             <button class="btn btn-large green waves-effect" id="btnprint" onclick="Invoice.startPrint();">Printen</button>
-            @if (!Model.Payed && (ViewBag.Payment == null || !((Overstag.Models.Payment)ViewBag.Payment).IsPaid()))
+            @if (!Model.Paid && (ViewBag.Payment == null || !((Overstag.Models.Payment)ViewBag.Payment).IsPaid()))
             {
                 <a class="btn btn-large blue btnckt waves-effect modal-trigger" id="btnPay" href="#mdPay">Betalen &rarr;</a>
             }
@@ -208,8 +208,8 @@
     <div class="modal-content center-align">
         <h4>Kies een betaalmethode</h4>
         <h2 class="center-align"><b>&euro;&nbsp;@Math.Round((double)Model.Amount / 100, 2).ToString("F")</b></h2>
-        <button class="btn btnckt btn-large orange modal-close" onclick="Invoice.checkout(1);" style="margin-top: 1em;">Bankoverschrijving</button>
-        <button class="btn btnckt btn-large red modal-close" onclick="Invoice.checkout(0);" style="margin-top: 1em;">IDeal</button>
+        <button class="btn btnckt btn-large orange modal-close" onclick="Invoice.checkout(1);" style="margin-top: 1em;">Betaalverzoek</button>
+        <button class="btn btnckt btn-large red modal-close @((ViewBag.MollieEnabled == null)?" disabled":"")" onclick="Invoice.checkout(0);" style="margin-top: 1em;">IDeal</button>
     </div>
 </div>
 
