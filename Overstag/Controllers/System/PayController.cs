@@ -64,7 +64,7 @@ namespace Overstag.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         public async Task<JsonResult> SetMetaData([FromForm]string metadata, [FromForm]int id)
         {
             using(var context = new OverstagContext())
@@ -154,7 +154,7 @@ namespace Overstag.Controllers
                                 RedirectUrl = redirect,
                                 Locale = "nl_NL",
                                 CustomerId = invoice.User.MollieID,
-                                Metadata = Uri.EscapeDataString(invoice.InvoiceID)
+                                Metadata = Uri.EscapeDataString(invoice.InvoiceID),
 #if !DEBUG
                                 WebhookUrl = webhook
 #endif

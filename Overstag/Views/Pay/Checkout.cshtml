@@ -95,13 +95,13 @@
             $('.btncheckout').addClass('disabled');
             $.ajax({
                 url: '/Pay/SetMetaData',
+                type: 'POST',
                 data: {
                     metadata: JSON.stringify({
                         contact: $('#tbMailPhone').val()
                     }),
-                    id: @Model.Id
+                    id: @Model.Id,
                 },
-                type: 'PUT',
                 success: function (res) {
                     if (res.status == 'success') {
                         M.toast({ html: 'Betaling geplaatst', classes: 'green', displayLength: 1000, completeCallback: Checkout.redirect });
