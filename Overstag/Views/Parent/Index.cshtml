@@ -5,7 +5,7 @@
 }
 
     <div>
-        <h3 class="center-align blue-dark-text">Mijn gezin</h3>
+        <h3 class="center-align o-blue-text text-darken">Mijn gezin</h3>
         <table>
             <thead>
                 <tr>
@@ -33,7 +33,7 @@
         {
             <div class="center-align">
                 <br />
-                <a href="/Parent/Billing" class="waves-effect waves-light btn blue-dark">Betalingen en facturering</a>
+                <a href="/Parent/Billing" class="waves-effect waves-light btn o-blue darken">Betalingen en facturering</a>
             </div>
         }
         <br />
@@ -41,7 +41,7 @@
 
 @if (Model.Members.Count() == 0)
 {
-    <div class="tap-target blue-dark" id="tt" data-target="fab">
+    <div class="tap-target o-blue darken" id="tt" data-target="fab">
         <div class="tap-target-content white-text">
             <h5>Gezinsleden toevoegen</h5>
             <p>Klik hier om gezinsleden toe te voegen</p>
@@ -51,7 +51,7 @@
 
 
 <div class="fixed-action-btn">
-    <a id="fab" class="btn-floating btn-large blue-dark waves-effect" onclick="Parent.openLink()">
+    <a id="fab" class="btn-floating btn-large o-blue darken waves-effect" onclick="Parent.openLink()">
         <i class="large material-icons">add</i>
     </a>
 </div>

@@ -316,8 +316,7 @@
                 Payment.init();
         },
         startPrint: function () {
-            var elem = document.querySelector('.collapsible.expandable');
-            var instance = M.Collapsible.init(elem, { accordion: false });
+            var instance = M.Collapsible.init($('.collapsible.expandable'), { accordion: false });
             instance.open(0); instance.open(1); instance.open(2);
             $('nav, #btnprint, #btnPay').hide();
             M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 500, completeCallback: function() { Invoice.doPrint() } });
@@ -325,8 +324,7 @@
         doPrint: function () {
             window.print();
             $('nav, #btnprint, #btnPay').show();
-            var elem = document.querySelector('.collapsible.expandable');
-            var instance = M.Collapsible.init(elem, { accordion: true });
+            var instance = M.Collapsible.init($('.collapsible.expandable'), { accordion: true });
             instance.close(0); instance.close(1); instance.close(2);
             $('#printedat').hide();
         },

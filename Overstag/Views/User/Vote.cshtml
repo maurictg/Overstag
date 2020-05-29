@@ -3,11 +3,11 @@
     Layout = "_UserLayout";
 }
 
-<h2 class="center-align blue-middle-text">Ideeën voor activiteiten</h2>
+<h2 class="center-align o-blue-text text-middle">Ideeën voor activiteiten</h2>
 <div class="row">
     <div class="col m1 offset-m11 s2 offset-s10">
         <button class="btn transparent waves-effect" onclick="Vote.load();">
-            <i class="material-icons blue-light-text">refresh</i>
+            <i class="material-icons o-blue-text">refresh</i>
         </button>
     </div>
 </div>
@@ -15,36 +15,36 @@
     <h3 class="center-align">Laden...</h3>
 </div>
 
-<h3 class="blue-middle-text center-align">Idee toevoegen</h3>
+<h3 class="o-blue-text text-middle center-align">Idee toevoegen</h3>
 
 <div class="row">
     <div class="col s12 m3">
         <div class="input-field">
             <input placeholder="Titel" id="tbtitle" type="text" class="validate">
-            <span class="helper-text blue-light-text">Titel</span>
+            <span class="helper-text o-blue-text">Titel</span>
         </div>
     </div>
     <div class="col s12 m6">
         <div class="input-field">
             <input placeholder="Omschrijving" id="tbdesc" type="text" class="validate">
-            <span class="helper-text blue-light-text">Omschrijving</span>
+            <span class="helper-text o-blue-text">Omschrijving</span>
         </div>
     </div>
     <div class="col s12 m3">
         <div class="input-field">
             <i class="material-icons prefix">euro</i>
             <input data-regex="[0-9]+(\,[0-9][0-9])" placeholder="10,00" class="validate" id="tbcost" type="text">
-            <span id="spancost" class="helper-text blue-light-text" data-error="Vul een geldig bedrag in op deze manier: €10,00 Dus met 2 decimalen">Geschatte kosten in € p.p. Als je het niet weet laat dan leeg</span>
+            <span id="spancost" class="helper-text o-blue-text" data-error="Vul een geldig bedrag in op deze manier: €10,00 Dus met 2 decimalen">Geschatte kosten in € p.p. Als je het niet weet laat dan leeg</span>
         </div>
     </div>
     <div class="col s12 center-align">
-        <button class="waves-effect waves-light btn blue-dark" id="btnadd" onclick="Vote.addIdea();">Toevoegen</button>
+        <button class="waves-effect waves-light btn o-blue darken" id="btnadd" onclick="Vote.addIdea();">Toevoegen</button>
     </div>
     <br />
 </div>
 
 <div class="fixed-action-btn">
-    <a class="btn-floating btn-large blue-dark waves-effect" href="/User/Events">
+    <a class="btn-floating btn-large o-blue darken waves-effect" href="/User/Events">
         <i class="large material-icons">arrow_back</i>
     </a>
 </div>

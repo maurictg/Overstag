@@ -1,0 +1,20 @@
+{
+  "name": "materialize-src",
+  "version": "1.0.0",
+  "description": "<p align=\"center\">   <a href=\"http://materializecss.com/\">     <img src=\"http://materializecss.com/res/materialize.svg\" width=\"150\">   </a> </p>",
+  "main": "index.js",
+  "dependencies": {
+    "css-minify": "^1.0.1",
+    "lessc": "^1.0.2",
+    "node-sass": "^4.14.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "scss": "node-sass sass -o css",
+    "less": "lessc less/overstag.less css/overstag.css",
+    "minify": "css-minify -d css"
+  },
+  "author": "",
+  "license": "ISC"
+}

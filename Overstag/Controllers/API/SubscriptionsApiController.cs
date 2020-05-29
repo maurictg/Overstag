@@ -15,7 +15,7 @@ namespace Overstag.Controllers.API
     {
         [HttpGet]
         [Route("")]
-        public async Task<IActionResult> List([FromQuery]bool withFactured, [FromQuery]bool withActivity)
+        public async Task<IActionResult> List([FromQuery]bool withFactured, [FromQuery]bool withActivity, [FromQuery]DateTime? after)
         {
             using (var context = new OverstagContext())
             {
@@ -25,6 +25,9 @@ namespace Overstag.Controllers.API
                 foreach (var item in user.Subscriptions)
                 {
                     if (item.Paid && !withFactured)
+                        continue;
+
+                    if (after != null && Core.General.DateIsPassed(item.Event.When))
                         continue;
 
                     inf.Add(item.ToSubscriptionInfo(withActivity));
@@ -56,9 +59,11 @@ namespace Overstag.Controllers.API
                 var part = user.Subscriptions.Where(e => e.EventID == eventId).FirstOrDefault();
                 if (part == null)
                 {
-                    user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id, FriendCount = (friendCount != null) ? Convert.ToByte(friendCount) : (byte)0 });
+                    var subscription = new Participate { UserID = user.Id, EventID = eve.Id, FriendCount = (friendCount != null) ? Convert.ToByte(friendCount) : (byte)0 };
+                    user.Subscriptions.Add(subscription);
                     await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
+
+                    return Json(new { status = "success", subscription = subscription.ToSubscriptionInfo() });
                 }
                 else
                     return Json(new { status = "warning", error = "Can't subscribe: subscription already exist", dutchError = "Je bent al ingeschreven voor deze activiteit" });

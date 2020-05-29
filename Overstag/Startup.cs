@@ -11,6 +11,7 @@ using Overstag.Services;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace Overstag
 {
@@ -52,7 +53,11 @@ namespace Overstag
             app.UseResponseCaching();
             app.UseResponseCompression();
             app.UseSession();
-            app.UseStaticFiles();
+
+            var fep = new FileExtensionContentTypeProvider();
+            fep.Mappings[".less"] = "plain/text";
+
+            app.UseStaticFiles(new StaticFileOptions() { ContentTypeProvider = fep });
             app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
 

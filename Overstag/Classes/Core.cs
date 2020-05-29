@@ -28,6 +28,8 @@ namespace Overstag.Core
 
     public static class General
     {
+        public static bool isDebug { get { return IsDebug(); } }
+
         private static Credentials _credentials;
         public static Credentials Credentials { 
             get {
@@ -44,5 +46,13 @@ namespace Overstag.Core
         public static int getAge(DateTime bd)
          => (new DateTime(DateTime.Now.Year, bd.Month, bd.Day) > DateTime.Now ? (DateTime.Now.Year - bd.Year)-1 : (DateTime.Now.Year - bd.Year));
 
+        private static bool IsDebug()
+        {
+#if DEBUG
+            return true;
+#else
+            return false;
+#endif
+        }
     }
 }

@@ -83,7 +83,7 @@
             init: function () {
                 $('#_title').html('&nbsp;Lasergame LIVE Mentor');
                 $('#_title').parent().removeClass('green darken-4').addClass('blue-grey darken-3');
-                $('body').addClass('blue-dark white-text');
+                $('body').addClass('o-blue darken white-text');
                 OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handler);
             },
             handler: function (data) {

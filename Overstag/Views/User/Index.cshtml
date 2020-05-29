@@ -6,7 +6,7 @@
 
 <div class="row">
     <div class="center-align flow-text col s10 offset-s1">
-        &nbsp;<h3 class="blue-middle-text">Welkom <b>@Model.Firstname</b>!</h3>
+        &nbsp;<h3 class="o-blue-text text-middle">Welkom <b>@Model.Firstname</b>!</h3>
         &nbsp;<h5>Navigeer via het <b>menu</b></h5>
         <p>
             Om jezelf in te schrijven voor een activiteit, navigeer je via het menu naar &quot;<a href="/User/Events"><b>Activiteiten</b></a>&quot;.<br />
@@ -18,7 +18,7 @@
         @if (Model.Type != 1)
         {
             <a class="btn btn-large orange darken-4 waves-effect waves-light" href="/User/Events"><b>Inschrijven</b></a>
-            <a class="btn btn-large blue-light waves-effect waves-light" href="/User/Vote"><b>Voten</b></a>
+            <a class="btn btn-large o-blue waves-effect waves-light" href="/User/Vote"><b>Voten</b></a>
         }
 
         @if (Model.Type == 1)
@@ -28,7 +28,7 @@
 
         @if (Model.Type >= 2)
         {
-            <a class="btn btn-large green darken-4 waves-effect waves-light" href="/Mentor"><b>Overstag Bestuur</b></a>
+            <a class="btn btn-large o-orange lighten waves-effect waves-light" href="/Mentor"><b>Overstag Bestuur</b></a>
         }
 
         @if (Model.Type >= 3)

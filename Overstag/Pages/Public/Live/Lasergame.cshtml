@@ -65,9 +65,9 @@
     var Lasergame = {
         init: function () {
             $('#_title').html('&nbsp;Lasergame LIVE');
-            $('#_title').parent().removeClass('blue-light').addClass('blue-grey darken-3');
+            $('#_title').parent().removeClass('o-blue').addClass('blue-grey darken-3');
             $('#nav-mobile>li>a').addClass('blue-grey-text text-darken-3');
-            $('body').removeClass('blue-dark').addClass('black');
+            $('body').removeClass('o-blue darken').addClass('black');
 
             OverstagLive.init('wss://@HttpContext.Request.Host/ws?type=1&noBroadcast=1', Lasergame.handle, Lasergame.close, true)
 

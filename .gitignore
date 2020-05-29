@@ -8,3 +8,5 @@ Overstag/.vscode/tasks.json
 .idea/
 .vs/
 .vscode/
+node_modules/
+css-dist/

@@ -16,7 +16,7 @@
         {
             @if (!ViewBag.IsParent)
             {
-                <h3 class="center-align blue-dark-text">Niet-gefactureerde activiteiten</h3>
+                <h3 class="center-align o-blue-text text-darken">Niet-gefactureerde activiteiten</h3>
                 <div id="unPaidevents">
                     @if (Model.UnfacturedEvents.Count() > 0)
                     {
@@ -73,7 +73,7 @@
                         </table>
                         <br />
                         <div class="center-align">
-                            <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger blue-dark">Factuur genereren</a>
+                            <a href="#ginvoice" class="waves-effect waves-light btn modal-trigger o-blue darken">Factuur genereren</a>
                         </div>
                         <br /><br />
                     }
@@ -84,7 +84,7 @@
                 </div>
             }
 
-            <h3 class="center-align blue-dark-text">Facturen</h3>
+            <h3 class="center-align o-blue-text text-darken">Facturen</h3>
             <div id="factures">
                 @if (Model.Invoices.Count() > 0)
                 {
@@ -112,7 +112,7 @@
                                         }
                                         else
                                         {
-                                            <a class="waves-effect waves-light btn blue-dark" target="_blank" href="/Pay/Invoice/@Uri.EscapeDataString(item.InvoiceID)">Factuur openen &rarr;</a>
+                                            <a class="waves-effect waves-light btn o-blue darken" target="_blank" href="/Pay/Invoice/@Uri.EscapeDataString(item.InvoiceID)">Factuur openen &rarr;</a>
                                         }
                                     </div>
                                     <table class="responsive-table">
@@ -163,7 +163,7 @@
 
                     @if (Model.Invoices.Where(f => f.Paid == false).Count() > 1)
                     {
-                        @Html.Raw("&nbsp;")<button class="btn blue-dark waves-effect modal-trigger" data-target="minvoice">&rarr; Facturen samenvoegen &larr;</button><br /><br />
+                        @Html.Raw("&nbsp;")<button class="btn o-blue darken waves-effect modal-trigger" data-target="minvoice">&rarr; Facturen samenvoegen &larr;</button><br /><br />
                     }
                 }
                 else
@@ -176,9 +176,9 @@
             {
                 <br/><br/>
                 <div class="row center-align">
-                    <h3 class="blue-dark-text">Kosten declareren</h3>
+                    <h3 class="o-blue-text text-darken">Kosten declareren</h3>
                     <p>Heb je kosten gemaakt voor Overstag, bijvoorbeeld benzinekosten of boodschappen? Declareer ze hier!</p>
-                    <a class="btn blue-dark waves-effect" href="/User/Declaration">Klik hier</a>
+                    <a class="btn o-blue darken waves-effect" href="/User/Declaration">Klik hier</a>
                     <br/><br/>
                 </div>
             }
