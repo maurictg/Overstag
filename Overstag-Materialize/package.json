@@ -11,8 +11,8 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "scss": "node-sass sass -o css",
-    "less": "lessc less/overstag.less css/overstag.css",
+    "sass": "node-sass sass -o css",
+    "less": "lessc ../Overstag/wwwroot/less/overstag.less ../Overstag/wwwroot/css/overstag.css",
     "minify": "css-minify -d css"
   },
   "author": "",
