@@ -25,8 +25,8 @@ namespace Overstag.Models
         {
             //Connection string
 #if DEBUG
-            //optionsBuilder.UseMySql(Core.General.Credentials.mySqlLiveCString);
-            optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
+            optionsBuilder.UseMySql(Core.General.Credentials.mySqlConnectionString);
+            //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlDebugCString);
             //optionsBuilder.UseSqlServer(Core.General.Credentials.msSqlLiveCString);
 
             optionsBuilder.EnableSensitiveDataLogging();
