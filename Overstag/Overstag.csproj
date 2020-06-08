@@ -36,6 +36,7 @@
   <ItemGroup>
     <Folder Include="Partials\" />
     <Folder Include="Uploads\" />
+    <Folder Include="wwwroot\icons\" />
   </ItemGroup>
 
 </Project>

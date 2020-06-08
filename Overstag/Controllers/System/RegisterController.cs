@@ -38,6 +38,9 @@ namespace Overstag.Controllers
         public IActionResult Register()
             => View();
 
+        public IActionResult Privacy()
+            => View();
+
         /// <summary>
         /// Get authenticate page for application
         /// 

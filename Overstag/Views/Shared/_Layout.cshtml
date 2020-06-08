@@ -80,6 +80,20 @@
         <li id="_mreg"><a href="/Register">Aanmelden</a></li>
     </ul>
 
+    @{
+        var userAgent = Context.Request.Headers["User-Agent"].ToString();
+        bool iexplorer = (userAgent.Contains("MSIE") || userAgent.Contains("Trident"));
+    }
+
+    @if (iexplorer)
+    {
+        <br/>
+        <div class="material-alert error">
+            Internet explorer wordt niet ondersteund
+            <button type="button" class="close-alert" onclick="$(this).parent().fadeOut();">×</button>
+        </div>
+    }
+
     @RenderBody()
 
     @if (DateTime.Now.Month == 12 || DateTime.Now.Month == 1)

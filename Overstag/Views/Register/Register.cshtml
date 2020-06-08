@@ -5,6 +5,7 @@
     ViewBag.Keywords = "overstag, overstag rilland, overstag reimerswaal, stichting overstag, overstag account, registreren, account aanmaken";
     ViewBag.Canonical = "https://stoverstag.nl/aanmelden";
 }
+
 @section Stylesheets {
     <link rel="stylesheet" type="text/css" href="~/icons/material-icons-outlined.css" />
 }
@@ -86,7 +87,7 @@
                     <div class="input-field col s12 m5">
                         <i class="material-icons-outlined prefix">phone</i>
                         <input type="text" maxlength="12" id="Phone" placeholder="Telefoonnummer" />
-                        <label for="Phone">Telefoonnummer</label>
+                        <label for="Phone">Telefoonnummer (niet verplicht)</label>
                     </div>
                 </div>
                 <div class="row">
@@ -124,11 +125,11 @@
                     <p>
                         <label>
                             <input type="checkbox" class="filled-in" id="avg" />
-                            <span>Ik ga akkoord met de <a href="~/pdf/voorwaarden.pdf" target="_blank">privacyvoorwaarden</a></span>
+                            <span>Ik ga akkoord met de <a href="/Register/Privacy" target="_blank">privacyvoorwaarden</a></span>
                         </label>
                     </p>
                     <div class="row">
-                        <a class="overstagbtn waves-effect rounded col m6 offset-m3 s12" id="register">Registreren</a>
+                        <a class="overstagbtn waves-effect rounded col m6 offset-m3 s12 disabled" id="register">Registreren</a>
                     </div>
                 </div>
             </form>
@@ -147,6 +148,7 @@
             $("#_reg, #_mreg").addClass("active");
             Register.mapEvents();
             $('#cardregister').fadeIn('slow');
+            $('#avg').prop('checked', false);
         },
 
         mapEvents: function () {
@@ -165,6 +167,13 @@
 
             $('#register').click(function () {
                 Register.register();
+            });
+
+            $('#avg').on('change', function () {
+                if ($('#avg').prop('checked'))
+                    $('#register').removeClass('disabled');
+                else
+                    $('#register').addClass('disabled');
             });
         },
 

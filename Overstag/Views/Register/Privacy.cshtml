@@ -1,0 +1,53 @@
+﻿@model Overstag.Models.Account
+@{
+    ViewBag.Title = "Overstag - Privacy";
+}
+
+@section Stylesheets {
+    <link rel="stylesheet" type="text/css" href="~/icons/material-icons-outlined.css" />
+}
+
+<div class="row"></div>
+<div class="row">
+    <div class="col s12 m10 offset-m1" id="cardprivacy" style="display: none;">
+        <div class="card-panel rounded" style="display: block; margin-left: auto; margin-right: auto">
+            <div class="row"></div>
+            <h3 class="o-blue-text center-align">Privacyverklaring</h3><br />
+
+            <h4 class="o-blue-text text-darken">Cookies</h4>
+            <p class="flow-text">
+                Overstag gebruikt slechts 1 cookie: <i>.AspNetCore.Session</i>. Deze functionele cookie is nodig om ingelogd te blijven. De site kan niet functioneren zonder deze cookie.
+            </p>
+
+            <h4 class="o-blue-text text-darken">Opslag van gegevens</h4>
+            <p class="flow-text">
+                Overstag neemt uw privacy serieus. Wachtwoorden worden niet opgeslagen, maar <a href="https://nl.wikipedia.org/wiki/Hashfunctie" target="_blank">gehashed</a> en met de privacygevoelige gegevens wordt zorgvuldig omgegaan. Gegevens worden niet langer opgeslagen dan dat nodig is en alle gegevens worden verwijderd wanneer u besluit uw account te verwijderen.
+            </p>
+
+            <h4 class="o-blue-text text-darken">Verwerking van gegevens</h4>
+            <p class="flow-text">
+                Alle gegevens worden opgeslagen en niet gedeeld met derde partijen, uitgezonderd de voornaam, achternaam en het emailadres. Deze gegevens worden gedeeld met Mollie voor het afhandelen van betalingen. Bij het verwijderen van je account worden deze gegevens ook bij de derde partij (Mollie) verwijderd. Er wordt geen data gedeeld met andere derde partijen.
+            </p>
+
+            <h4 class="o-blue-text text-darken">Privacyovereenkomst</h4>
+            <p class="flow-text">
+                Bij het aanmaken van een account wordt u gevraagd akkoord te gaan met de voorwaarden die beschreven staan in dit document. Wanneer u hier mee akkoord gaat, geldt dit als <a href="https://autoriteitpersoonsgegevens.nl/nl/onderwerpen/algemene-informatie-avg/mag-u-persoonsgegevens-verwerken" target="_blank">toestemming</a> voor de verwerking van uw gegevens. Omdat de verwerking van gegevens noodzakelijk is bij het aanmaken van een account moet u hier mee akkoord gaan om een account aan te maken.   
+            </p>
+            <p class="flow-text">
+                Als u vragen of twijfels heeft bij onze privacyverklaring of een klacht in wilt dienen, neem dan <a href="/Home/Contact">contact</a> met ons op.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    Privacy = {
+        init: function () {
+            $('#cardprivacy').fadeIn('slow');
+        }
+    }
+
+    $(function () {
+        Privacy.init();
+    });
+</script>
