@@ -5,7 +5,6 @@ GO
 USE overstag
 GO
 
-
 CREATE TABLE [Events] (
     [Id] int NOT NULL IDENTITY,
     [Title] nvarchar(max) NULL,
@@ -68,8 +67,7 @@ CREATE TABLE [Accounts] (
     [TwoFactorCodes] nvarchar(max) NULL,
     [FamilyId] int NULL,
     CONSTRAINT [PK_Accounts] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_Accounts_Families_FamilyId] FOREIGN KEY ([FamilyId]) REFERENCES [Families] ([Id]) ON DELETE NO ACTION
-);
+    CONSTRAINT [FK_Accounts_Families_FamilyId] FOREIGN KEY ([FamilyId]) REFERENCES [Families] ([Id]) ON DELETE NO ACTION);
 
 GO
 
@@ -80,7 +78,7 @@ CREATE TABLE [Auths] (
     [Registered] datetime2 NOT NULL,
     [UserId] int NOT NULL,
     CONSTRAINT [PK_Auths] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_Auths_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION                                                      
+    CONSTRAINT [FK_Auths_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION
 );
 
 GO
@@ -91,11 +89,11 @@ CREATE TABLE [Invoices] (
     [Timestamp] datetime2 NOT NULL,
     [EventIDs] nvarchar(max) NULL,
     [AdditionsCost] int NOT NULL,
-    [Payed] bit NOT NULL,
+    [Paid] bit NOT NULL,
     [InvoiceID] nvarchar(max) NULL,
     [UserID] int NOT NULL,
     CONSTRAINT [PK_Invoices] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_Invoices_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION                                                   
+    CONSTRAINT [FK_Invoices_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION
 );
 
 GO
@@ -103,11 +101,13 @@ GO
 CREATE TABLE [Participate] (
     [UserID] int NOT NULL,
     [EventID] int NOT NULL,
-    [Payed] bit NOT NULL,
+    [Paid] bit NOT NULL,
     [AdditionsCost] int NOT NULL,
     [FriendCount] tinyint NOT NULL,
     CONSTRAINT [PK_Participate] PRIMARY KEY ([EventID], [UserID]),
-    CONSTRAINT [FK_Participate_Events_EventID] FOREIGN KEY ([EventID]) REFERENCES [Events] ([Id]) ON DELETE CASCADE,                                                       CONSTRAINT [FK_Participate_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE CASCADE                                                  );
+    CONSTRAINT [FK_Participate_Events_EventID] FOREIGN KEY ([EventID]) REFERENCES [Events] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_Participate_Accounts_UserID] FOREIGN KEY ([UserID]) REFERENCES [Accounts] ([Id]) ON DELETE CASCADE
+);
 
 GO
 
@@ -118,12 +118,11 @@ CREATE TABLE [Transactions] (
     [When] datetime2 NOT NULL,
     [Timestamp] datetime2 NOT NULL,
     [Description] nvarchar(max) NULL,
-    [Payed] bit NOT NULL,
+    [Paid] bit NOT NULL,
     [Metadata] nvarchar(max) NULL,
     [UserId] int NOT NULL,
     CONSTRAINT [PK_Transactions] PRIMARY KEY ([Id]),
-    CONSTRAINT [FK_Transactions_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION
-);
+    CONSTRAINT [FK_Transactions_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION);
 
 GO
 
@@ -140,15 +139,41 @@ GO
 
 CREATE TABLE [Payments] (
     [Id] int NOT NULL IDENTITY,
-    [PaymentID] nvarchar(max) NULL,
-    [Status] int NULL,
+    [PaymentId] nvarchar(max) NULL,
     [PlacedAt] datetime2 NOT NULL,
-    [PayedAt] datetime2 NULL,
-    [UserId] int NULL,
+    [PaidAt] datetime2 NULL,
+    [PayType] int NOT NULL,
+    [Status] int NULL,
+    [Metadata] nvarchar(max) NULL,
+    [UserId] int NOT NULL,
     [InvoiceId] int NOT NULL,
     CONSTRAINT [PK_Payments] PRIMARY KEY ([Id]),
     CONSTRAINT [FK_Payments_Invoices_InvoiceId] FOREIGN KEY ([InvoiceId]) REFERENCES [Invoices] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_Payments_Accounts_UserId] FOREIGN KEY ([UserId]) REFERENCES [Accounts] ([Id]) ON DELETE NO ACTION
 );
 
+GO
+
+CREATE INDEX [IX_Accounts_FamilyId] ON [Accounts] ([FamilyId]);
+GO
+
+CREATE INDEX [IX_Auths_UserId] ON [Auths] ([UserId]);
+GO
+
+CREATE INDEX [IX_Invoices_UserID] ON [Invoices] ([UserID]);
+GO
+
+CREATE INDEX [IX_Participate_UserID] ON [Participate] ([UserID]);
+GO
+
+CREATE UNIQUE INDEX [IX_Payments_InvoiceId] ON [Payments] ([InvoiceId]);
+GO
+
+CREATE INDEX [IX_Payments_UserId] ON [Payments] ([UserId]);
+GO
+
+CREATE INDEX [IX_Transactions_UserId] ON [Transactions] ([UserId]);
+GO
+
+CREATE INDEX [IX_Vote_UserID] ON [Vote] ([UserID]);
 GO
