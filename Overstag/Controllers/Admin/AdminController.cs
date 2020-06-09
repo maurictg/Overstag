@@ -15,9 +15,18 @@ namespace Overstag.Controllers
         public IActionResult Index()
             => View();
 
+        /// <summary>
+        /// Get all users from the database
+        /// </summary>
+        /// <returns>JSON</returns>
         public IActionResult getUsers()
             => Json(new OverstagContext().Accounts.OrderBy(f => f.Firstname).ToList());
 
+        /// <summary>
+        /// Login as a specified user
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <returns>Nothing, it redirects to /User</returns>
         [Route("Admin/loginAs/{token}")]
         public IActionResult loginAs(string token)
         {
@@ -30,6 +39,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Update user type
+        /// </summary>
+        /// <param name="id">The user's id</param>
+        /// <param name="type">The new type</param>
+        /// <returns>JSON(status=success)</returns>
         public IActionResult saveType([FromQuery]int id, [FromQuery]byte type)
         {
             using(var context = new OverstagContext())
@@ -42,6 +57,10 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Auto generate database
+        /// </summary>
+        /// <returns>A response message</returns>
         public IActionResult InitDB()
         {
             try

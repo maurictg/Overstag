@@ -29,6 +29,11 @@ namespace Overstag.Controllers.API
             return Json(new { status = "success", count = events.Count(), activities = events.Select(x => x.ToActivityInfo()) });
         }
 
+        /// <summary>
+        /// Get an activity by its ID
+        /// </summary>
+        /// <param name="id">The activity's id</param>
+        /// <returns>JSON</returns>
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetActivityById(int id)
@@ -40,6 +45,11 @@ namespace Overstag.Controllers.API
                 return Json(new { status = "success", activity = a.ToActivityInfo() });
         }
 
+        /// <summary>
+        /// List all activity-ids
+        /// </summary>
+        /// <param name="after">(Optional) show only ids of events after this date</param>
+        /// <returns>JSON</returns>
         [HttpGet]
         [Route("ids")]
         public async Task<IActionResult> ListIds([FromQuery]DateTime? after)

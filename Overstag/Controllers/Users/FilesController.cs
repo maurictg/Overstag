@@ -11,7 +11,11 @@ namespace Overstag.Controllers.Users
 {
     public class FilesController : Controller
     {
-       
+        /// <summary>
+        /// Serve an anonymous file from the database by its token
+        /// </summary>
+        /// <param name="token">The file's token</param>
+        /// <returns>File or JSON</returns>
         [HttpGet]
         [Route("Files/Serve/{token}")]
         public IActionResult Serve(string token)
@@ -38,6 +42,11 @@ namespace Overstag.Controllers.Users
             }
         }
 
+        /// <summary>
+        /// Upload file(s) to the server
+        /// </summary>
+        /// <param name="files">One or multiple form-encoded files</param>
+        /// <returns>JSON</returns>
         [HttpPost("Files/UploadFiles")]
         [RequestSizeLimit(1000000000)] //1GB MAX
         public async Task<IActionResult> UploadFiles(IList<IFormFile> files)

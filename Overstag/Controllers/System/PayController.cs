@@ -64,6 +64,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Set the meta data of an payment
+        /// </summary>
+        /// <param name="metadata">A string, JSON</param>
+        /// <param name="id">The payment its ID</param>
+        /// <returns>JSON, status</returns>
         [HttpPost]
         public async Task<JsonResult> SetMetaData([FromForm]string metadata, [FromForm]int id)
         {
@@ -81,9 +87,10 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Creates a Mollie payment
+        /// Creates a payment
         /// </summary>
-        /// <param name="invoiceid">The invoice token/invoiceID</param>
+        /// <param name="invoiceId">The token of an invoice</param>
+        /// <param name="type">The payment type</param>
         /// <returns>View</returns>
         [HttpPost("Pay/Checkout/{invoiceId}")]
         public async Task<IActionResult> Checkout(string invoiceId, [FromForm]int type)
@@ -184,10 +191,10 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Cancel and delete payment by invoice ID
+        /// Cancel and delete payment by its id
         /// </summary>
-        /// <param name="payid">The paymentid</param>
-        /// <returns></returns>
+        /// <param name="id">The payment its id</param>
+        /// <returns>JSON</returns>
         [HttpPost("Pay/Cancel")]
         public async Task<IActionResult> CancelPayment([FromForm]int id)
         {

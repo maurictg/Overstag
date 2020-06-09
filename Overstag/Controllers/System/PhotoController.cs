@@ -20,9 +20,10 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
-        /// Creates a QR-code
+        /// Creates a QR-code of a from a user's secret and username
         /// </summary>
-        /// <param name="input">String to create a QR with (URI-encoded)</param>
+        /// <param name="secret">The user's secret</param>
+        /// <param name="username">The user's username</param>
         /// <returns>Image file</returns>
         [HttpGet]
         [Route("/Photo/GetQR/{secret}/{username}")]
@@ -38,15 +39,16 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Return a random wallpaper. Not used right now
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("/Photo/RandomWallpaper")]
         public IActionResult Wallpaper()
         {
-            Random rnd = new Random();
             var files = Directory.GetFiles(Path.Combine(_env.WebRootPath, "img", "wallpapers"), "*.jpg");
-            return File(System.IO.File.ReadAllBytes(files[rnd.Next(files.Length)]), "image/jpeg");
+            return File(System.IO.File.ReadAllBytes(files[new Random().Next(files.Length)]), "image/jpeg");
         }
-
-
         
     }
 }

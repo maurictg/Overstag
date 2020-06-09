@@ -5,22 +5,22 @@
     <div>
         <div class="row">
             <div class="col s12 m6 offset-m3">
-                <h4 class="o-blue-text center-align"><b>Hallo @Model.Firstname</b></h4><br />
-                <div class="card-panel" style="display: block; margin-left: auto; margin-right: auto">
+                <h3 class="o-blue-text text-lighten center-align"><b>Hallo @Model.Firstname</b></h3><br />
+                <div class="card-panel rounded" style="display: block; margin-left: auto; margin-right: auto">
                     <h6 class="center-align grey-text">Verzin een nieuw wachtwoord voor je account.</h6><br />
                     <div class="input-field">
                         <i class="material-icons prefix">lock</i>
-                        <input type="password" class="checki" id="Password1" placeholder="Nieuw wachtwoord" />
+                        <input type="password" class="checki" id="Password1" />
                         <label for="Password1">Nieuw wachtwoord</label>
                     </div>
                     <div class="input-field">
                         <i class="material-icons prefix">lock</i>
-                        <input type="password" class="checki" id="Password2" placeholder="Nieuw wachtwoord herhalen" />
+                        <input type="password" class="checki" id="Password2" />
                         <label for="Password2">Nieuw wachtwoord herhalen</label>
                     </div>
                     <div class="card-action center-align">
                         <br />
-                        <a class="btn o-blue btn-large waves-effect" id="btnsubmit">Opslaan</a><br />
+                        <a class="overstagbtn rounded waves-effect" id="btnsubmit">Opslaan</a><br />
                         <span id="tbhelper" style="color: red;">Vul alle velden in</span>
                     </div>
                 </div>
@@ -56,6 +56,7 @@
             if (isValid) {
                 $('#_progbar').show();
                 $('#btnsubmit').addClass('disabled');
+                $('.checki').prop('disabled', true);
                 $.post("/Register/postPassreset", { Token: '@Uri.EscapeDataString(Model.Token)', Password: $('#Password1').val() }, function (response) {
                     if (response.status == 'success') {
                         $('.checki').val('');
@@ -65,6 +66,7 @@
                         //status = error
                         M.toast({ html: response.error, classes: 'red' });
                         $('#btnsubmit').removeClass('disabled');
+                        $('.checki').prop('disabled', false);
                         $('.checki').val('');
                     }
                 },'json').fail(function () {
