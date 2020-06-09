@@ -207,6 +207,7 @@ namespace Overstag.Controllers
 
         /// <summary>
         /// Set a transaction as payed
+        /// </summary>
         /// <param name="id">The transaction's id</param>
         /// <returns>JSON</returns>
         [HttpPost]
