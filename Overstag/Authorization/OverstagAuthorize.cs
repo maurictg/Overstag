@@ -31,9 +31,9 @@ namespace Overstag.Authorization
             if (user != null)
             {
                 var userRole = user.Type;
-                if (_allowedRoles.All(x => x != userRole)) filterContext.Result = new RedirectResult("/Error/403");
+                if (_allowedRoles.All(x => x != userRole)) filterContext.Result = new RedirectResult($"/Error/403?r={filterContext.HttpContext.Request.Path}");
             }
-            else filterContext.Result = new RedirectResult("/Error/401");
+            else filterContext.Result = new RedirectResult($"/Error/401?r={filterContext.HttpContext.Request.Path}");
         }
     }
 }
