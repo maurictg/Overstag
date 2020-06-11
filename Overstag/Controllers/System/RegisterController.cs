@@ -17,6 +17,7 @@ using Mollie.Api.Client.Abstract;
 using Mollie.Api.Client;
 using System.Text;
 using System.Text.Json;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
@@ -363,6 +364,7 @@ namespace Overstag.Controllers
         /// <param name="code">The restoration code</param>
         /// <returns>Json (status = success with the secret or status = error)</returns>
         [HttpGet]
+        [OverstagAuthorize]
         [Route("Register/Restore2FA/{token}/{code}")]
         public JsonResult Restore2FA(string token, string code)
         {
@@ -377,6 +379,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="token">The family token</param>
         /// <returns>HTML content</returns>
+        [OverstagAuthorize]
         [HttpGet("Register/joinFamily/{token}")]
         public async Task<IActionResult> JoinFamily(string token)
         {
@@ -425,6 +428,8 @@ namespace Overstag.Controllers
             }
         }
 
+        
+        [OverstagAuthorize]
         public IActionResult Unregister()
         {
             if(!isLoggedIn)
@@ -453,6 +458,7 @@ namespace Overstag.Controllers
         }
 
         [HttpPost]
+        [OverstagAuthorize]
         public async Task<IActionResult> postDeleteAccount([FromForm]string password)
         {
             if (!isLoggedIn)

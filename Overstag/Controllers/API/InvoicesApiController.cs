@@ -9,9 +9,11 @@ using Overstag.Models;
 using Overstag.Models.API;
 using Newtonsoft.Json;
 using System.Collections;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers.API
 {
+    [OverstagAuthorize]
     [Route("api/invoices")]
     public class InvoicesApiController : OverstagApiController
     {

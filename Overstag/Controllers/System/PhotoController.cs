@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
+    [OverstagAuthorize]
     public class PhotoController : Controller
     {
         private readonly IWebHostEnvironment _env;

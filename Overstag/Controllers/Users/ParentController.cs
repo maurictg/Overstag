@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Overstag.Authorization;
 using Overstag.Models;
 
 namespace Overstag.Controllers
 {
+    [OverstagAuthorize(1,2,3)]
     public class ParentController : OverstagController
     {
         /// <summary>
