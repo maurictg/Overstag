@@ -7,16 +7,15 @@ namespace Overstag.Controllers
 {
     public class OverstagController : Controller
     { 
-        protected Account currentUser { get { return JsonSerializer.Deserialize<Account>(HttpContext.Session.GetString("CurrentUser")); } }
-        protected bool isLoggedIn { get { return !string.IsNullOrEmpty(HttpContext.Session.GetString("CurrentUser")); } }
-        protected void setUser(Account user) => HttpContext.Session.SetString("CurrentUser", JsonSerializer.Serialize(user));
+        protected Account currentUser => JsonSerializer.Deserialize<Account>(HttpContext.Session.GetString("CurrentUser"));
+        protected bool isLoggedIn => !string.IsNullOrEmpty(HttpContext.Session.GetString("CurrentUser"));
+        protected void setUser(Account user) => HttpContext.Session.Set("CurrentUser", JsonSerializer.SerializeToUtf8Bytes(user));
 
         public static Account GetCurrentUser(HttpContext context)
         {
             if (!string.IsNullOrEmpty(context.Session.GetString("CurrentUser")))
-                return JsonSerializer.Deserialize<Account>(context.Session.GetString("CurrentUser"));
-            else
-                return null;
+                return JsonSerializer.Deserialize<Account>(context.Session.Get("CurrentUser"));
+            else return null;
         }
     }
 }
