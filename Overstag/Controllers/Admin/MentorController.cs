@@ -12,7 +12,7 @@ using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
-    [OverstagAuthorize(3)]
+    [OverstagAuthorize(2, 3)]
     public class MentorController : OverstagController
     {
         /// <summary>
