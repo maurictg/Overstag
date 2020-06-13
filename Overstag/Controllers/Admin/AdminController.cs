@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
 using System.Text.Json;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
+    [OverstagAuthorize(3)]
     public class AdminController : Controller
     {
         public IActionResult Index()

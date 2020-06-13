@@ -58,7 +58,6 @@ namespace Overstag
             fep.Mappings[".less"] = "plain/text";
 
             app.UseStaticFiles(new StaticFileOptions() { ContentTypeProvider = fep });
-            app.UseMiddleware<Middlewares.Authentication>();
             app.UseRouting();
 
             app.UseWebSockets();

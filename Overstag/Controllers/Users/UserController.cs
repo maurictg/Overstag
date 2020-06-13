@@ -11,9 +11,11 @@ using System.Net;
 using System.Text;
 using System.IO;
 using System.Web;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
+    [OverstagAuthorize]
     public class UserController : OverstagController
     {
        /// <summary>
