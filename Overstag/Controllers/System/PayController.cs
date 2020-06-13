@@ -18,11 +18,9 @@ using Mollie.Api.Models.Payment;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
-using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
-    [OverstagAuthorize]
     public class PayController : Controller
     {
         /// <summary>
