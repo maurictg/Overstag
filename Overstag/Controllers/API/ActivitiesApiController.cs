@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Overstag.Authorization;
 using Overstag.Models;
 using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
-    [OverstagAuthorize]
     [Route("api/activities")]
     public class ActivitiesApiController : OverstagApiController
     {

@@ -4,7 +4,7 @@ using Overstag.Models;
 
 namespace Overstag.Controllers.API
 {
-    [OverstagAuthorize]
+    [ApiAuthorize]
     public class OverstagApiController : Controller
     {
         protected int getUserId() => getUser().Id;

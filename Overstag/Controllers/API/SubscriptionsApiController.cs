@@ -7,11 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Overstag.Authorization;
 
 namespace Overstag.Controllers.API
 {
-    [OverstagAuthorize]
     [Route("api/subscriptions")]
     public class SubscriptionsApiController : OverstagApiController
     {

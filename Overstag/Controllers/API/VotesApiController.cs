@@ -11,7 +11,6 @@ using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
-    [OverstagAuthorize]
     [Route("api/votes")]
     public class VotesApiController : OverstagApiController
     {

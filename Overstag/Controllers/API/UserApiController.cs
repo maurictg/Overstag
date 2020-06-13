@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Overstag.Authorization;
 using Overstag.Models;
-using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
-    [OverstagAuthorize]
     [Route("api/user")]
     public class UserApiController : OverstagApiController
     {
