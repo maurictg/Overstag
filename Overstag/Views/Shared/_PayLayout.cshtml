@@ -21,12 +21,12 @@
     <nav>
         <div class="nav-wrapper green">
             <a href="#" class="brand-logo center">Overstag Pay</a>
-            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <a href="#" data-target="_mnav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="left hide-on-med-and-down">
                 <li class="navitem"><a href="/Home">Home</a></li>
                 <li class="navitem" id="_invoice"><a href="@Html.Raw((ViewBag.InvoiceURL!=null) ? "/Pay/Invoice/"+Uri.EscapeDataString(ViewBag.InvoiceURL) : "#")">Factuur</a></li>
             </ul>
-            <ul class="sidenav" id="mobile-demo">
+            <ul class="sidenav" id="_mnav">
                 <li class="navitem"><a href="/Home">Home</a></li>
                 <li class="navitem" id="_minvoice"><a href="@Html.Raw((ViewBag.InvoiceURL!=null) ? "/Pay/Invoice/"+Uri.EscapeDataString(ViewBag.InvoiceURL) : "#")">Factuur</a></li>
             </ul>

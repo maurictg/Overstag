@@ -96,6 +96,15 @@
 .overstag-dark .card-panel:not(.o-blue):not(.red) {
   background-color: #444444 !important;
 }
+.overstag-dark .sidenav {
+  background-color: #333333 !important;
+}
+.overstag-dark .sidenav li.active {
+  background-color: #04507D !important;
+}
+.overstag-dark .sidenav li > a {
+  color: white !important;
+}
 .overstag-dark .collection,
 .overstag-dark .collection-item {
   background-color: #333333 !important;
