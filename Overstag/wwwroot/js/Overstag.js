@@ -54,6 +54,8 @@
                     if (localStorage.getItem('darktheme')) {
                         if (localStorage.getItem('darktheme') === 'true')
                             this.setDark();
+                        else
+                            this.setLight();
                     }
                     else {
                         localStorage.setItem('darktheme', 'false');
