@@ -10,9 +10,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.Globalization;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
+    [OverstagAuthorize(2, 3)]
     public class MentorController : OverstagController
     {
         /// <summary>

@@ -12,9 +12,11 @@ using Overstag.Models.NoDB;
 using Overstag.Accountancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
+    [OverstagAuthorize(3)]
     public class AccountancyController : OverstagController
     {
         /// <summary>

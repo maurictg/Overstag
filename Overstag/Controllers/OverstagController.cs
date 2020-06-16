@@ -7,16 +7,9 @@ namespace Overstag.Controllers
 {
     public class OverstagController : Controller
     { 
-        /// <summary>
-        /// Get the account of the user that is logged in
-        /// </summary>
-        protected Account currentUser { get { return JsonSerializer.Deserialize<Account>(HttpContext.Session.GetString("CurrentUser")); } }
-
-        /// <summary>
-        /// Validate if the user is logged in
-        /// </summary>
-        protected bool isLoggedIn { get { return !string.IsNullOrEmpty(HttpContext.Session.GetString("CurrentUser")); } }
-        protected void setUser(Account user) => HttpContext.Session.SetString("CurrentUser", JsonSerializer.Serialize(user));
+        protected Account currentUser => JsonSerializer.Deserialize<Account>(HttpContext.Session.GetString("CurrentUser"));
+        protected bool isLoggedIn => !string.IsNullOrEmpty(HttpContext.Session.GetString("CurrentUser"));
+        protected void setUser(Account user) => HttpContext.Session.Set("CurrentUser", JsonSerializer.SerializeToUtf8Bytes(user));
 
         /// <summary>
         /// Get current user from session
@@ -26,9 +19,8 @@ namespace Overstag.Controllers
         public static Account GetCurrentUser(HttpContext context)
         {
             if (!string.IsNullOrEmpty(context.Session.GetString("CurrentUser")))
-                return JsonSerializer.Deserialize<Account>(context.Session.GetString("CurrentUser"));
-            else
-                return null;
+                return JsonSerializer.Deserialize<Account>(context.Session.Get("CurrentUser"));
+            else return null;
         }
     }
 }

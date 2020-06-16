@@ -6,9 +6,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Overstag.Authorization;
 
 namespace Overstag.Controllers.Users
 {
+    [OverstagAuthorize]
     public class FilesController : Controller
     {
         /// <summary>
