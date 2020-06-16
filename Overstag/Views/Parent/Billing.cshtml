@@ -136,7 +136,7 @@
                 $.get('/Parent/GenerateInvoice', function (r) {
                     if (r.status == 'success') {
                         M.toast({ html: 'Activiteiten successvol verwerkt!', classes: 'green' });
-                        OverstagJS.Loader.init(Billing.mergeInvoices);
+                        Overstag.Loader.init(Billing.mergeInvoices);
                     } else {
                         if (r.status == 'warning') {
                             M.toast({ html: r.warning, classes: 'orange' });
@@ -150,7 +150,7 @@
             });
         },
         mergeInvoices: function () {
-            OverstagJS.Loader.show();
+            Overstag.Loader.show();
             $.get('/Parent/MergeInvoices', function (r) {
                 if (r.status == 'success') {
                     M.toast({ html: 'Facturen successvol samengevoegd!', classes: 'green' })
@@ -165,7 +165,7 @@
                     $('#_progbar').hide();
                 }
             }, 'json').done(function () {
-                OverstagJS.Loader.hide();
+                Overstag.Loader.hide();
             });
         }
     }

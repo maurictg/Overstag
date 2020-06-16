@@ -417,7 +417,7 @@ namespace Overstag.Controllers
                         var user = currentUser;
                         if(user.Id == family.ParentID)
                         {
-                            string[] error = { "U kunt uzelf niet koppelen aan uw eigen gezin.", "<i>Log uzelf uit en probeer de link opnieuw te openen.</i>", "<br><button class=\"btn btn-large blue waves-effect center-align\" onclick=\"OverstagJS.General.logout();\">Uitloggen</button>" };
+                            string[] error = { "U kunt uzelf niet koppelen aan uw eigen gezin.", "<i>Log uzelf uit en probeer de link opnieuw te openen.</i>", "<br><button class=\"btn btn-large blue waves-effect center-align\" onclick=\"Overstag.General.logout();\">Uitloggen</button>" };
                             return View("~/Views/Error/Custom.cshtml", error);
                         }
                         else

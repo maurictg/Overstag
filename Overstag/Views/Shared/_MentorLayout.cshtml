@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/Overstag.min.js"></script>
+    <script type="text/javascript" src="~/js/overstag.min.js"></script>
     <script type="text/javascript" src="~/js/moment.min.js"></script>
     <script type="text/javascript" src="~/js/chart.min.js"></script>
     @RenderSection("Scripts", required: false)
@@ -37,7 +37,7 @@
                 <li id="_stats"><a href="/Mentor/Stats">Statistieken</a></li>
                 <li id="_finance"><a href="/Accountancy/Index/500">Financiën</a></li>
                 <li><a href="/User">Mijn account</a></li>
-                <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
+                <li id="_mreg"><a href="#" onclick="Overstag.General.logout();"><b>Uitloggen</b></a></li>
             </ul>
             <div class="progress" id="_progbar" style="display: none;">
                 <div class="indeterminate"></div>
@@ -54,7 +54,7 @@
         <li id="_mstats"><a href="/Mentor/Stats">Statistieken</a></li>
         <li id="_mfinance"><a href="/Accountancy/Index/500">Financiën</a></li>
         <li><a href="/User">Mijn account</a></li>
-        <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
+        <li id="_mreg"><a href="#" onclick="Overstag.General.logout();"><b>Uitloggen</b></a></li>
     </ul>
 
     @RenderBody()

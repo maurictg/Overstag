@@ -113,16 +113,16 @@
                     M.toast({ html: r.error, classes: 'red' });
                 }
             }).done(function () {
-                setTimeout(OverstagJS.Loader.hide, 200);
+                setTimeout(Overstag.Loader.hide, 200);
                 Core.doReload(1500);
             }).fail(function () {
-                OverstagJS.Loader.hide();
+                Overstag.Loader.hide();
                 $('#_progbar').hide();
                 M.toast({ html: 'Er is iets flink fout gegaan', classes: 'red' });
             });
         },
         preGenerate: function () {
-            OverstagJS.Loader.show();
+            Overstag.Loader.show();
             $('#_progbar').show();
             $('#btngenerate').addClass('disabled');
 
@@ -142,7 +142,7 @@
             });
         },
         preInit: function () {
-            OverstagJS.Loader.init(Invoice.init);
+            Overstag.Loader.init(Invoice.init);
         }
     };
 

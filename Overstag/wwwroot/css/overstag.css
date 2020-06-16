@@ -38,9 +38,19 @@
   -webkit-align-items: center;
   -ms-flex-align: center;
   align-items: center;
+  color: #fff;
 }
-.material-alert .material-icons {
-  margin-right: 10px;
+.material-alert.info {
+  background-color: #039be5;
+}
+.material-alert.error {
+  background-color: #c62828;
+}
+.material-alert.warning {
+  background-color: #fbc02d;
+}
+.material-alert.success {
+  background-color: #43a047;
 }
 .material-alert .close-alert {
   -webkit-appearance: none;
@@ -58,23 +68,52 @@
   top: 16px;
   right: 5px;
 }
-.material-alert.info {
-  background-color: #039be5;
-  color: #fff;
+.material-alert .material-icons {
+  margin-right: 10px;
 }
-.material-alert.success {
-  background-color: #43a047;
-  color: #fff;
+.overstag-dark {
+  background-color: #333333 !important;
+  color: white;
 }
-.material-alert.error {
-  background-color: #c62828;
-  color: #fff;
+.overstag-dark,
+.overstag-dark .o-blue {
+  background-color: #333333 !important;
 }
-.material-alert.danger {
-  background-color: #c62828;
-  color: #fff;
+.overstag-dark.o-blue {
+  background-color: #333333 !important;
 }
-.material-alert.warning {
-  background-color: #fbc02d;
-  color: #fff;
+.overstag-dark.o-blue.darken,
+.overstag-dark .o-blue-darken {
+  background-color: #222222 !important;
+}
+.overstag-dark .o-blue.darken {
+  background-color: #222222 !important;
+}
+.overstag-dark body {
+  background-color: #222222 !important;
+}
+.overstag-dark .card:not(.o-blue),
+.overstag-dark .card-panel:not(.o-blue):not(.red) {
+  background-color: #444444 !important;
+}
+.overstag-dark .collection,
+.overstag-dark .collection-item {
+  background-color: #333333 !important;
+}
+.overstag-dark .o-blue-text.text-darken {
+  color: #0B86CF !important;
+}
+.overstag-dark .nav-wrapper li.active .o-blue {
+  background-color: #04507D;
+}
+.overstag-dark i.material-icons,
+.overstag-dark input {
+  color: white;
+}
+.overstag-dark .collapsible,
+.overstag-dark .collapsible-header,
+.overstag-dark .modal,
+.overstag-dark .modal-content,
+.overstag-dark .modal-footer {
+  background-color: #222222;
 }
