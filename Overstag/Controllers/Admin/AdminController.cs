@@ -17,38 +17,38 @@ namespace Overstag.Controllers
         public IActionResult Index()
             => View();
 
-        public IActionResult getUsers()
-            => Json(new OverstagContext().Accounts.OrderBy(f => f.Firstname).ToList());
+        public async Task<IActionResult> getUsers()
+        {
+            await using var context = new OverstagContext();
+            return Json(await context.Accounts.OrderBy(f => f.Firstname).ToListAsync());
+        }
 
         [Route("Admin/loginAs/{token}")]
-        public IActionResult loginAs(string token)
+        public async Task<IActionResult> loginAs(string token)
         {
-            using(var context = new OverstagContext())
-            {
-                var user = context.Accounts.First(f => f.Token == Uri.UnescapeDataString(token));
-                HttpContext.Session.SetString("CurrentUser", JsonSerializer.Serialize(user));
-                HttpContext.Response.Redirect("/User");
-                return Content("OK");
-            }
+            await using var context = new OverstagContext();
+            var user = await context.Accounts.FirstAsync(f => f.Token == Uri.UnescapeDataString(token));
+            HttpContext.Session.SetString("CurrentUser", JsonSerializer.Serialize(user));
+            HttpContext.Response.Redirect("/User");
+            return Content("OK");
         }
 
-        public IActionResult saveType([FromQuery]int id, [FromQuery]byte type)
+        public async Task<IActionResult> saveType([FromQuery]int id, [FromQuery]byte type)
         {
-            using(var context = new OverstagContext())
-            {
-                var user = context.Accounts.Find(id);
-                user.Type = type;
-                context.Accounts.Update(user);
-                context.SaveChanges();
-                return Json(new { status = "success" });
-            }
+            await using var context = new OverstagContext();
+            var user = await context.Accounts.FindAsync(id);
+            user.Type = type;
+            context.Accounts.Update(user);
+            context.SaveChanges();
+            return Json(new { status = "success" });
         }
 
-        public IActionResult InitDB()
+        public async Task<IActionResult> InitDB()
         {
             try
             {
-                new OverstagContext().Database.EnsureCreated();
+                await using var context = new OverstagContext();
+                await context.Database.EnsureCreatedAsync();
                 return Content("Database created!");
             }catch(Exception e)
             {

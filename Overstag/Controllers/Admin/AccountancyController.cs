@@ -25,65 +25,59 @@ namespace Overstag.Controllers
         /// <param name="amount">A range. Default 500</param>
         /// <returns>View with transactions</returns>
         [Route("Accountancy/Index/{amount?}")]
-        public IActionResult Index(int? amount)
+        public async Task<IActionResult> Index(int? amount)
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var trans = context.Transactions.OrderByDescending(f => f.When).ToList();
+
+            int[] typesIn = { 1, 2, 3, 4, 5, 6 };
+            int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28, 29 };
+
+            Dictionary<int, int> OPT = new Dictionary<int, int>();
+            Dictionary<int, int> IPT = new Dictionary<int, int>();
+            typesIn.ToList().ForEach(f => IPT.Add(f, trans.Where(g => g.Type == f).Sum(h => h.Amount)));
+            typesOut.ToList().ForEach(f => OPT.Add(f, trans.Where(g => g.Type == f).Sum(h => h.Amount)));
+
+            List<_Transaction> ts = new List<_Transaction>();
+            int balance = 0;
+
+            var results = trans.ToArray().Reverse().GroupBy(a => a.When.Date, b => b.Amount,
+                (c, d) => new { When = c, Amount = d.Sum() });
+
+            foreach (var item in results)
             {
-                var trans = context.Transactions.OrderByDescending(f => f.When).ToList();
+                balance += item.Amount;
 
-                int[] typesIn = { 1, 2, 3, 4, 5, 6 };
-                int[] typesOut = { 21, 22, 23, 24, 25, 26, 27, 28, 29 };
-
-                Dictionary<int, int> OPT = new Dictionary<int, int>();
-                Dictionary<int, int> IPT = new Dictionary<int, int>();
-                typesIn.ToList().ForEach(f => IPT.Add(f, trans.Where(g => g.Type == f).Sum(h => h.Amount)));
-                typesOut.ToList().ForEach(f => OPT.Add(f, trans.Where(g => g.Type == f).Sum(h => h.Amount)));
-
-                List<_Transaction> ts = new List<_Transaction>();
-                int balance = 0;
-
-                var results = trans.ToArray().Reverse().GroupBy(a => a.When.Date, b => b.Amount,
-                    (c, d) => new { When = c, Amount = d.Sum() });
-
-                foreach (var item in results)
+                ts.Add(new _Transaction()
                 {
-                    balance += item.Amount;
-
-                    ts.Add(new _Transaction()
-                    {
-                        When = item.When.ToString("dd-MM-yyyy"),
-                        Amount = Math.Round((double)balance / 100, 2).ToString("F").Replace(",", ".")
-                    });
-                }
-
-                return View("~/Views/Mentor/Accountancy/Index.cshtml", new _Transactions()
-                {
-                    Balance = trans.Where(g => g.Paid).Sum(f => f.Amount),
-                    BalanceWithDC = trans.Sum(f => f.Amount),
-                    In = trans.Where(f => f.Amount > 0).Sum(g => g.Amount),
-                    Out = trans.Where(f => f.Amount < 0).Sum(g => g.Amount),
-                    OutPerType = OPT,
-                    InPerType = IPT,
-                    Transactions_ = ts,
-                    Transactions = trans.Take((amount != null) ? Convert.ToInt32(amount) : trans.Count()).ToList(),
-                    Limit = (amount != null) ? Convert.ToInt32(amount) : -1
+                    When = item.When.ToString("dd-MM-yyyy"),
+                    Amount = Math.Round((double)balance / 100, 2).ToString("F").Replace(",", ".")
                 });
             }
+
+            return View("~/Views/Mentor/Accountancy/Index.cshtml", new _Transactions()
+            {
+                Balance = trans.Where(g => g.Paid).Sum(f => f.Amount),
+                BalanceWithDC = trans.Sum(f => f.Amount),
+                In = trans.Where(f => f.Amount > 0).Sum(g => g.Amount),
+                Out = trans.Where(f => f.Amount < 0).Sum(g => g.Amount),
+                OutPerType = OPT,
+                InPerType = IPT,
+                Transactions_ = ts,
+                Transactions = trans.Take((amount != null) ? Convert.ToInt32(amount) : trans.Count()).ToList(),
+                Limit = (amount != null) ? Convert.ToInt32(amount) : -1
+            });
         }
 
 
         [Route("Accountancy/Declaration/{id}")]
-        public IActionResult Declaration(int id)
+        public async Task<ActionResult> Declaration(int id)
         {
-            using (var context = new OverstagContext())
-            {
-                var declaration = context.Transactions.Include(f => f.User).FirstOrDefault(f => f.Id == id);
-                string[] error = { "Declaratie niet gevonden", "Probeer een andere." };
-                if (declaration != null)
-                    return View("~/Views/Mentor/Accountancy/Declaration.cshtml", declaration);
-                else
-                    return View("~/Views/Error/Custom.cshtml", error);
-            }
+            await using var context = new OverstagContext();
+            var declaration = await context.Transactions.Include(f => f.User).FirstOrDefaultAsync(f => f.Id == id);
+            string[] error = { "Declaratie niet gevonden", "Probeer een andere." };
+            if (declaration != null) return View("~/Views/Mentor/Accountancy/Declaration.cshtml", declaration);
+            else return View("~/Views/Error/Custom.cshtml", error);
         }
 
         /// <summary>
@@ -92,7 +86,11 @@ namespace Overstag.Controllers
         /// <returns>View with list<payment></payment></returns>
         public async Task<IActionResult> Payments()
         {
-            var payments = await new OverstagContext().Payments.Include(a => a.User).Include(b => b.Invoice).OrderByDescending(f => f.PlacedAt).ToListAsync();
+            await using var context = new OverstagContext();
+            var payments = await context.Payments
+                .Include(a => a.User)
+                .Include(b => b.Invoice)
+                .OrderByDescending(f => f.PlacedAt).ToListAsync();
             return View("~/Views/Mentor/Accountancy/Payments.cshtml", payments);
         }
 
@@ -100,51 +98,48 @@ namespace Overstag.Controllers
         public async Task<IActionResult> SetStatus([FromForm]int id, [FromForm]int action)
         {
             PayType[] allowedTypes = { PayType.BANK };
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var payment = await context.Payments.Include(a => a.Invoice).Include(b => b.User).FirstOrDefaultAsync(f => f.Id == id);
+
+            if (payment == null) return Json(new { status = "error", error = "Betaling niet gevonden." });
+
+            if(action == 4) //Update payment
+                return await new PayController().UpdatePayment(payment.PaymentId);
+
+            if (!allowedTypes.Contains(payment.PayType))
+                return Json(new { status = "error", error = "Dit type betaling kan niet worden aangepast." });
+
+            if (payment.IsPaid())
+                return Json(new { status = "error", error = "Deze betaling is al afgerond, en kan daarom niet meer worden aangepast" });
+
+            switch (action)
             {
-                var payment = await context.Payments.Include(a => a.Invoice).Include(b => b.User).FirstOrDefaultAsync(f => f.Id == id);
-
-                if (payment == null)
-                    return Json(new { status = "error", error = "Betaling niet gevonden." });
-
-                if(action == 4) //Update payment
-                    return await new PayController().UpdatePayment(payment.PaymentId);
-
-                if (!allowedTypes.Contains(payment.PayType))
-                    return Json(new { status = "error", error = "Dit type betaling kan niet worden aangepast." });
-
-                if (payment.IsPaid())
-                    return Json(new { status = "error", error = "Deze betaling is al afgerond, en kan daarom niet meer worden aangepast" });
-
-                switch (action)
+                case 0: //Mark as Paid
                 {
-                    case 0: //Mark as Paid
-                        {
-                            payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Paid;
-                            payment.PaymentId = "Betaalverzoek";
-                            payment.PaidAt = DateTime.Now;
-                            payment.Invoice.Paid = true;
-                            context.Transactions.Add(new Transaction() { UserId = currentUser.Id, Paid = false, Timestamp = DateTime.Now, When = DateTime.Now.Date, Type = 1, Amount = payment.Invoice.Amount, Description = $"[BANK] Betaling van factuur #{payment.Invoice.Id} door {payment.User.Firstname} {payment.User.Lastname}" });
-                        }
-                        break;
-                    case 1: //Cancel
-                        payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Canceled;
-                        break;
-                    case 2: //Delete
-                        payment.Invoice = null;
-                        payment.User = null;
-                        context.Payments.Remove(payment);
-                        break;
-                    default:
-                        return Json(new { status = "error", error = "Deze actie wordt niet ondersteund" });
+                    payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Paid;
+                    payment.PaymentId = "Betaalverzoek";
+                    payment.PaidAt = DateTime.Now;
+                    payment.Invoice.Paid = true;
+                    await context.Transactions.AddAsync(new Transaction() { UserId = currentUser.Id, Paid = false, Timestamp = DateTime.Now, When = DateTime.Now.Date, Type = 1, Amount = payment.Invoice.Amount, Description = $"[BANK] Betaling van factuur #{payment.Invoice.Id} door {payment.User.Firstname} {payment.User.Lastname}" });
                 }
-
-                if(action != 2)
-                    context.Payments.Update(payment);
-
-                await context.SaveChangesAsync();
-                return Json(new { status = "success" });
+                    break;
+                case 1: //Cancel
+                    payment.Status = Mollie.Api.Models.Payment.PaymentStatus.Canceled;
+                    break;
+                case 2: //Delete
+                    payment.Invoice = null;
+                    payment.User = null;
+                    context.Payments.Remove(payment);
+                    break;
+                default:
+                    return Json(new { status = "error", error = "Deze actie wordt niet ondersteund" });
             }
+
+            if(action != 2)
+                context.Payments.Update(payment);
+
+            await context.SaveChangesAsync();
+            return Json(new { status = "success" });
         }
 
         /// <summary>
@@ -157,15 +152,13 @@ namespace Overstag.Controllers
         {
             try
             {
-                using (var context = new OverstagContext())
-                {
-                    t.When = (t.When < DateTime.Now.AddYears(-25)) ? DateTime.Now : t.When;
-                    t.Timestamp = DateTime.Now;
-                    t.UserId = currentUser.Id;
-                    context.Transactions.Add(t);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
+                await using var context = new OverstagContext();
+                t.When = (t.When < DateTime.Now.AddYears(-25)) ? DateTime.Now : t.When;
+                t.Timestamp = DateTime.Now;
+                t.UserId = currentUser.Id;
+                await context.Transactions.AddAsync(t);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
             }
             catch(Exception e)
             {
@@ -183,13 +176,11 @@ namespace Overstag.Controllers
         {
             try
             {
-                using (var context = new OverstagContext())
-                {
-                    var t = await context.Transactions.FirstAsync(f => f.Id == id);
-                    context.Transactions.Remove(t);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
+                await using var context = new OverstagContext();
+                var t = await context.Transactions.FirstAsync(f => f.Id == id);
+                context.Transactions.Remove(t);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -203,14 +194,12 @@ namespace Overstag.Controllers
         {
             try
             {
-                using (var context = new OverstagContext())
-                {
-                    var t = await context.Transactions.FirstAsync(f => f.Id == id);
-                    t.Paid = true;
-                    context.Transactions.Update(t);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
+                await using var context = new OverstagContext();
+                var t = await context.Transactions.FirstAsync(f => f.Id == id);
+                t.Paid = true;
+                context.Transactions.Update(t);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -237,7 +226,7 @@ namespace Overstag.Controllers
 
             using (var context = new OverstagContext())
             {
-                var users = context.Accounts.Include(p => p.Subscriptions).Include(f => f.Family).ToList();
+                var users = await context.Accounts.Include(p => p.Subscriptions).Include(f => f.Family).ToListAsync();
 
                 foreach (var user in users)
                 {
@@ -271,41 +260,36 @@ namespace Overstag.Controllers
         /// <returns>json with info</returns>
         public async Task<JsonResult> processPUE()
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            int count = 0;
+            int failed = 0;
+            int succeed = 0;
+            List<string> exceptions = new List<string>();
+
+            foreach (var family in await context.Families.Include(f => f.Members).Where(x=>x.Members.Any()).ToListAsync())
             {
-                int count = 0;
-                int failed = 0;
-                int succeed = 0;
-                List<string> exceptions = new List<string>();
-
-                foreach (var family in context.Families.Include(f => f.Members).ToList())
+                foreach (var member in family.Members)
                 {
-                    if (family.Members.Count() == 0)
-                        continue;
-
-                    foreach (var member in family.Members)
-                    {
-                        count++;
-                        bool result = await Services.Invoices.Create(member.Id);
-                        if (!result)
-                            failed++;
-                        else
-                            succeed++;
-                    }
-
-                    try
-                    {
-                        await Services.Invoices.MergeFamilyInvoices(family.ParentID);
-                    }
-                    catch(Exception e)
-                    {
-                        Services.Invoices.error = e;
+                    count++;
+                    bool result = await Services.Invoices.Create(member.Id);
+                    if (!result)
                         failed++;
-                    }
+                    else
+                        succeed++;
                 }
 
-                return Json(new { status = "success", count, succeed, failed, exceptions });
+                try
+                {
+                    await Services.Invoices.MergeFamilyInvoices(family.ParentID);
+                }
+                catch(Exception e)
+                {
+                    Services.Invoices.error = e;
+                    failed++;
+                }
             }
+
+            return Json(new { status = "success", count, succeed, failed, exceptions });
         }
     }
 }
