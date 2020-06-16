@@ -103,7 +103,7 @@
 .overstag-dark .o-blue-text.text-darken {
   color: #0B86CF !important;
 }
-.overstag-dark .nav-wrapper li.active .o-blue {
+.overstag-dark .nav-wrapper.o-blue li.active {
   background-color: #04507D;
 }
 .overstag-dark i.material-icons,
