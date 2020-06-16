@@ -18,34 +18,26 @@ namespace Overstag.Controllers.API
         [Route("")]
         public async Task<IActionResult> ListVotes([FromQuery]bool withIdeas)
         {
-            using (var context = new OverstagContext())
-            {
-                List<Idea> ideas = await context.Ideas.ToListAsync();
-
-                var user = await context.Accounts.Include(f => f.Votes).ThenInclude(h => h.Idea).FirstOrDefaultAsync(g => g.Id == getUserId());
-                List<VoteInfo> votes = new List<VoteInfo>();
-                user.Votes.ForEach(f => votes.Add(f.ToVoteInfo(withIdeas)));
-
-                return Json(new { status = "success", count = votes.Count, votes });
-            }
+            await using var context = new OverstagContext();
+            var user = await context.Accounts.Include(f => f.Votes).ThenInclude(h => h.Idea).FirstOrDefaultAsync(g => g.Id == getUserId());
+            List<VoteInfo> votes = user.Votes.Select(f => f.ToVoteInfo()).ToList(); 
+            return Json(new { status = "success", count = votes.Count, votes });
         }
 
         [HttpGet]
         [Route("{id}/upvote")]
         public async Task<IActionResult> Upvote(int id)
         {
-            if (getUser().Type == 1)
-                return Json(new { status = "warning", message = "Parent is not allowed to vote" });
+            if (getUser().Type == 1) return Json(new { status = "warning", message = "Parent is not allowed to vote" });
             else
             {
-                if (!new OverstagContext().Ideas.Any(f => f.Id == id))
+                await using var context = new OverstagContext();
+                if (!context.Ideas.Any(f => f.Id == id))
                     return Json(new { status = "error", error = "Idea not found." });
 
                 string res = await Vote(id, true);
-                if (res == "OK")
-                    return Json(new { status = "success" });
-                else
-                    return Json(new { status = "error", error = "Something went wrong" });
+                if (res == "OK") return Json(new { status = "success" });
+                else return Json(new { status = "error", error = "Something went wrong" });
             }
         }
 
@@ -57,44 +49,41 @@ namespace Overstag.Controllers.API
                 return Json(new { status = "warning", message = "Parent is not allowed to vote" });
             else
             {
-                if (!new OverstagContext().Ideas.Any(f => f.Id == id))
+                await using var context = new OverstagContext();
+                if (!context.Ideas.Any(f => f.Id == id))
                     return Json(new { status = "error", error = "Idea not found." });
 
                 string res = await Vote(id, false);
-                if (res == "OK")
-                    return Json(new { status = "success" });
-                else
-                    return Json(new { status = "error", error = "Something went wrong" });
+                if (res == "OK") return Json(new { status = "success" });
+                else return Json(new { status = "error", error = "Something went wrong" });
             }
         }
 
         private async Task<string> Vote(int id, bool upvote)
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
-                try
-                {
-                    var user = context.Accounts.Include(f => f.Votes).First(u => u.Id == getUserId());
+                var user = await context.Accounts.Include(f => f.Votes).FirstAsync(u => u.Id == getUserId());
 
-                    if (user.Votes.Any(u => u.IdeaID == id))
-                        user.Votes.First(u => u.IdeaID == id).Upvote = upvote;
-                    else
-                    {
-                        user.Votes.Add(new Models.Vote
-                        {
-                            IdeaID = id,
-                            UserID = user.Id,
-                            Upvote = upvote
-                        });
-                    }
-                    context.Accounts.Update(user);
-                    await context.SaveChangesAsync();
-                    return "OK";
-                }
-                catch (Exception e)
+                if (user.Votes.Any(u => u.IdeaID == id))
+                    user.Votes.First(u => u.IdeaID == id).Upvote = upvote;
+                else
                 {
-                    return e.ToString();
+                    user.Votes.Add(new Models.Vote
+                    {
+                        IdeaID = id,
+                        UserID = user.Id,
+                        Upvote = upvote
+                    });
                 }
+                context.Accounts.Update(user);
+                await context.SaveChangesAsync();
+                return "OK";
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
             }
         }
     }

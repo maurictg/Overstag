@@ -15,9 +15,10 @@ namespace Overstag.Controllers.API
         [Route("")]
         public async Task<IActionResult> List()
         {
+            await using var context = new OverstagContext();
             List<IdeaVoteInfo> ideai = new List<IdeaVoteInfo>();
-            var ideas = await new OverstagContext().Ideas.Include(f => f.Votes).ToListAsync();
-            var userVotes = await new OverstagContext().Accounts.Include(f => f.Votes).FirstOrDefaultAsync(g => g.Id == getUserId());
+            var ideas = await context.Ideas.Include(f => f.Votes).ToListAsync();
+            var userVotes = await context.Accounts.Include(f => f.Votes).FirstOrDefaultAsync(g => g.Id == getUserId());
 
             foreach (var item in ideas)
             {
@@ -48,7 +49,8 @@ namespace Overstag.Controllers.API
         [Route("{id}")]
         public async Task<IActionResult> GetIdeaById(int id)
         {
-            var a = await new OverstagContext().Ideas.FindAsync(id);
+            await using var context = new OverstagContext();
+            var a = await context.Ideas.FindAsync(id);
             if (a == null)
                 return Json(new { status = "error", error = "Idea not found" });
             else

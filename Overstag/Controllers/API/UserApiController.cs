@@ -21,12 +21,9 @@ namespace Overstag.Controllers.API
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {
-            using (var context = new OverstagContext())
-            {
-                context.Auths.Remove((Auth)HttpContext.Items["Auth"]);
-                await context.SaveChangesAsync();
-            }
-
+            await using var context = new OverstagContext();
+            context.Auths.Remove((Auth)HttpContext.Items["Auth"]);
+            await context.SaveChangesAsync();
             return Json(new { status = "success" });
         }
     }

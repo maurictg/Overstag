@@ -21,9 +21,10 @@ namespace Overstag.Controllers.API
         [Route("")]
         public async Task<IActionResult> List([FromQuery]DateTime? after)
         {
+            await using var context = new OverstagContext();
             List<Event> events = (after == null) 
-                ? await new OverstagContext().Events.ToListAsync() 
-                : await new OverstagContext().Events.Where(f => f.When > Convert.ToDateTime(after)).ToListAsync();
+                ? await context.Events.ToListAsync() 
+                : await context.Events.Where(f => f.When > Convert.ToDateTime(after)).ToListAsync();
 
             return Json(new { status = "success", count = events.Count(), activities = events.Select(x => x.ToActivityInfo()) });
         }
@@ -32,7 +33,8 @@ namespace Overstag.Controllers.API
         [Route("{id}")]
         public async Task<IActionResult> GetActivityById(int id)
         {
-            var a = await new OverstagContext().Events.FindAsync(id);
+            await using var context = new OverstagContext();
+            var a = await context.Events.FindAsync(id);
             if (a == null)
                 return Json(new { status = "error", error = "Activity not found" });
             else
@@ -43,11 +45,12 @@ namespace Overstag.Controllers.API
         [Route("ids")]
         public async Task<IActionResult> ListIds([FromQuery]DateTime? after)
         {
+            await using var context = new OverstagContext();
             List<int> ids = new List<int>();
             if (after == null)
-                ids = await new OverstagContext().Events.Select(f => f.Id).ToListAsync();
+                ids = await context.Events.Select(f => f.Id).ToListAsync();
             else
-                ids = await new OverstagContext().Events.Where(f => f.When > Convert.ToDateTime(after)).Select(g => g.Id).ToListAsync();
+                ids = await context.Events.Where(f => f.When > Convert.ToDateTime(after)).Select(g => g.Id).ToListAsync();
 
             return Json(new { status = "success", count = ids.Count(), activities = ids });
         }
@@ -56,11 +59,12 @@ namespace Overstag.Controllers.API
         [Route("unfactured")]
         public async Task<IActionResult> GetUnfactured()
         {
+            await using var context = new OverstagContext();
             List<ActivityInfo> activities = new List<ActivityInfo>();
-            var user = await new OverstagContext().Accounts.Include(f => f.Subscriptions).ThenInclude(g => g.Event).Include(f => f.Family).FirstAsync(f => f.Id == getUserId());
+            var user = await context.Accounts.Include(f => f.Subscriptions).ThenInclude(g => g.Event).Include(f => f.Family).FirstAsync(f => f.Id == getUserId());
             foreach (var s in user.Subscriptions)
             {
-                if (!s.Paid && !activities.Any(f => f.EventID == s.EventID) && Core.General.DateIsPassed(s.Event.When))
+                if (!s.Paid && activities.All(f => f.EventID != s.EventID) && Core.General.DateIsPassed(s.Event.When))
                     activities.Add(s.Event.ToActivityInfo());
             }
 
