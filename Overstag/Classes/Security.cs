@@ -93,10 +93,12 @@ namespace Overstag.Encryption
 
             //Create salt of 16 byte's.
             byte[] salt = new byte[16];
-            new RNGCryptoServiceProvider().GetBytes(salt);
+            using var generator = new RNGCryptoServiceProvider();
+            generator.GetBytes(salt);
 
             //Create hash of [length] byte's.
-            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
+            using var rfc =  new Rfc2898DeriveBytes(input, salt, iterations); 
+            byte[] hash = rfc.GetBytes(length);
 
             //Combine salt and hash.
             byte[] combinedBytes = new byte[16 + length];
@@ -125,10 +127,12 @@ namespace Overstag.Encryption
 
             //Create salt of 16 byte's.
             byte[] salt = new byte[16];
-            new RNGCryptoServiceProvider().GetBytes(salt);
+            using var generator = new RNGCryptoServiceProvider();
+            generator.GetBytes(salt);
 
             //Create hash of [length] byte's.
-            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
+            using var rfc =  new Rfc2898DeriveBytes(input, salt, iterations); 
+            byte[] hash = rfc.GetBytes(length);
 
             //Combine salt and hash.
             byte[] combinedBytes = new byte[16 + length];
@@ -166,7 +170,8 @@ namespace Overstag.Encryption
             Buffer.BlockCopy(hashedBytes, 0, salt, 0, 16);
 
             //Generate hash of input, to compare it with hashedBytes
-            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
+            using var rfc =  new Rfc2898DeriveBytes(input, salt, iterations); 
+            byte[] hash = rfc.GetBytes(length);
 
             //Compare the result's.
             for (int i = 0; i < length; i++)
@@ -200,7 +205,8 @@ namespace Overstag.Encryption
             Buffer.BlockCopy(hashedBytes, 0, salt, 0, 16);
 
             //Generate hash of Input, to compare it with hashedBytes.
-            byte[] hash = new Rfc2898DeriveBytes(input, salt, iterations).GetBytes(length);
+            using var rfc =  new Rfc2898DeriveBytes(input, salt, iterations); 
+            byte[] hash = rfc.GetBytes(length);
 
             //Compare the result's.
             for (int i = 0; i < length; i++)
