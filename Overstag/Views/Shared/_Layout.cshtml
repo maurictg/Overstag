@@ -19,7 +19,7 @@
 
     <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/Overstag.min.js"></script>
+    <script type="text/javascript" src="~/js/overstag.min.js"></script>
     @RenderSection("Scripts", required: false)
 
 
@@ -36,8 +36,8 @@
                 $('#_reg a').text('Uitloggen');
                 $('#_mreg a').attr('href', '#');
                 $('#_mreg a').text('Uitloggen');
-                $('#_reg a').attr('onclick', 'OverstagJS.General.logout();');
-                $('#_mreg a').attr('onclick', 'OverstagJS.General.logout();');
+                $('#_reg a').attr('onclick', 'Overstag.General.logout();');
+                $('#_mreg a').attr('onclick', 'Overstag.General.logout();');
 
                 $('.hidden').show();
 
@@ -57,7 +57,7 @@
     <nav>
         <div class="nav-wrapper o-blue">
             <a href="#" id="_title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
-            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <a href="#" data-target="_mnav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li id="_home"><a href="/Home">Home</a></li>
                 <li id="_about"><a href="/Home/About">Over ons</a></li>
@@ -71,7 +71,7 @@
             </div>
         </div>
     </nav>
-    <ul class="sidenav" id="mobile-demo">
+    <ul class="sidenav" id="_mnav">
         <li id="_mhome"><a href="/Home">Home</a></li>
         <li id="_mabout"><a href="/Home/About">Over ons</a></li>
         <li id="_mcontact"><a href="/Home/Contact">Contact</a></li>

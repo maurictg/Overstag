@@ -6,6 +6,12 @@ namespace Overstag.Controllers
 {
     public class ErrorController : Controller
     {
+        /// <summary>
+        /// Display an error page
+        /// </summary>
+        /// <param name="code">The HTTP status code</param>
+        /// <param name="r">optional, a redirect URL</param>
+        /// <returns>Renders an error page</returns>
         [Route("Error/{code}")]
         public IActionResult Default(int code, [FromQuery]string r)
         {
@@ -38,13 +44,14 @@ namespace Overstag.Controllers
             {
                 ViewBag.Message = "Onvoldoende rechten";
                 ViewBag.Description = "De kaptitein verbiedt een matroos om hier te komen";
-                ViewBag.showLogin = true;
+                ViewBag.showLogout = true;
+                ViewBag.showHome = true;
             }
             else
             if (code == 404)
             {
                 ViewBag.Message = "Pagina niet gevonden";
-                ViewBag.Description = "<i>Oh, the lost his compass...</i>?<br>Het schip heeft een verkeerde route gevaren";
+                ViewBag.Description = "<i>Oh, the captain lost his compass...</i>?<br>Het schip heeft een verkeerde route gevaren";
                 ViewBag.showHome = true;
             }
             else
@@ -63,11 +70,6 @@ namespace Overstag.Controllers
             }
 
             return View();
-        }
-
-        public IActionResult Test()
-        {
-            return Ok();
         }
     }
 }

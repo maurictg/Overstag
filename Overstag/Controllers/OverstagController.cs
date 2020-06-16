@@ -11,6 +11,11 @@ namespace Overstag.Controllers
         protected bool isLoggedIn => !string.IsNullOrEmpty(HttpContext.Session.GetString("CurrentUser"));
         protected void setUser(Account user) => HttpContext.Session.Set("CurrentUser", JsonSerializer.SerializeToUtf8Bytes(user));
 
+        /// <summary>
+        /// Get current user from session
+        /// </summary>
+        /// <param name="context">Httpcontext with session in it</param>
+        /// <returns>Account</returns>
         public static Account GetCurrentUser(HttpContext context)
         {
             if (!string.IsNullOrEmpty(context.Session.GetString("CurrentUser")))

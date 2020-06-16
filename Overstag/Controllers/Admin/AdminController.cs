@@ -17,12 +17,22 @@ namespace Overstag.Controllers
         public IActionResult Index()
             => View();
 
+
+        /// <summary>
+        /// Get all users from the database
+        /// </summary>
+        /// <returns>JSON</returns>
         public async Task<IActionResult> getUsers()
         {
             await using var context = new OverstagContext();
             return Json(await context.Accounts.OrderBy(f => f.Firstname).ToListAsync());
         }
 
+        /// <summary>
+        /// Login as a specified user
+        /// </summary>
+        /// <param name="token">The user's token</param>
+        /// <returns>Nothing, it redirects to /User</returns>
         [Route("Admin/loginAs/{token}")]
         public async Task<IActionResult> loginAs(string token)
         {
@@ -33,6 +43,12 @@ namespace Overstag.Controllers
             return Content("OK");
         }
 
+        /// <summary>
+        /// Update user type
+        /// </summary>
+        /// <param name="id">The user's id</param>
+        /// <param name="type">The new type</param>
+        /// <returns>JSON(status=success)</returns>
         public async Task<IActionResult> saveType([FromQuery]int id, [FromQuery]byte type)
         {
             await using var context = new OverstagContext();
@@ -43,6 +59,10 @@ namespace Overstag.Controllers
             return Json(new { status = "success" });
         }
 
+        /// <summary>
+        /// Auto generate database
+        /// </summary>
+        /// <returns>A response message</returns>
         public async Task<IActionResult> InitDB()
         {
             try

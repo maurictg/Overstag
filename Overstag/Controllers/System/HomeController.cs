@@ -24,15 +24,13 @@ namespace Overstag.Controllers
         [Route("contact")]
         public IActionResult Contact() 
             => View();
-
-
-        [Route("Home/Events")]
-        [Route("agenda")]
         
         /// <summary>
         /// Get all events from the database
         /// </summary>
-        /// <returns>List(Event)</returns>
+        /// <returns>View with List(Event)</returns>
+        [Route("Home/Events")]
+        [Route("agenda")]
         public async Task<IActionResult> Events()
         {
             await using var context = new OverstagContext();

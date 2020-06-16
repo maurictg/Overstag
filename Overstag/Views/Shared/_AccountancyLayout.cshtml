@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/Overstag.min.js"></script>
+    <script type="text/javascript" src="~/js/overstag.min.js"></script>
     <script type="text/javascript" src="~/js/moment.min.js"></script>
     <script type="text/javascript" src="~/js/chart.min.js"></script>
     <link rel="stylesheet" type="text/css" href="~/css/overstag-materialize.min.css" />
@@ -20,7 +20,7 @@
     <nav>
         <div class="nav-wrapper red darken-4">
             <a href="#" id="_title" class="brand-logo">&nbsp;Financiën</a>
-            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <a href="#" data-target="_mnav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li><a href="/Home">Home</a></li>
                 <li id="_home"><a href="/Mentor">Bestuur home</a></li>
@@ -28,21 +28,21 @@
                 <li id="_invoices"><a href="/Accountancy/Invoices">Facturering</a></li>
                 <li id="_payments"><a href="/Accountancy/Payments">Betalingen</a></li>
                 <li><a href="/User">Mijn account</a></li>
-                <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
+                <li id="_mreg"><a href="#" onclick="Overstag.General.logout();"><b>Uitloggen</b></a></li>
             </ul>
             <div class="progress" id="_progbar" style="display: none;">
                 <div class="indeterminate"></div>
             </div>
         </div>
     </nav>
-    <ul class="sidenav" id="mobile-demo">
+    <ul class="sidenav" id="_mnav">
         <li><a href="/Home">Home</a></li>
         <li id="_mhome"><a href="/Mentor">Bestuur home</a></li>
         <li id="_macc"><a href="/Accountancy/Index/500">Financiën home</a></li>
         <li id="_minvoices"><a href="/Accountancy/Invoices">Facturering</a></li>
         <li id="_mpayments"><a href="/Accountancy/Payments">Betalingen</a></li>
         <li><a href="/User">Mijn account</a></li>
-        <li id="_mreg"><a href="#" onclick="OverstagJS.General.logout();"><b>Uitloggen</b></a></li>
+        <li id="_mreg"><a href="#" onclick="Overstag.General.logout();"><b>Uitloggen</b></a></li>
     </ul>
 
     @RenderBody()

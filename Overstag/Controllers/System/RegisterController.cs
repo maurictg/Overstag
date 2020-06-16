@@ -49,7 +49,6 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="appName">The name of the application that requests the api token</param>
         /// <param name="callbackUrl">The url to send the api token to. Optional, must be URL ENCODED!!!</param>
-        /// <param name="id">A id to post to your callback url for your database. Optional</param>
         /// <returns></returns>
         public IActionResult Authenticate([FromQuery]string appName, [FromQuery]string callbackUrl)
         {
@@ -96,6 +95,11 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Logout from the system and remove auth if exists
+        /// </summary>
+        /// <param name="token">The auth token</param>
+        /// <returns></returns>
         public async Task<IActionResult> Logout([FromQuery]string token)
         {
             //Important session variables
@@ -222,7 +226,8 @@ namespace Overstag.Controllers
         /// <summary>
         /// Tries to sign in into the system
         /// </summary>
-        /// <param name="a">The login info</param>
+        /// <param name="Username">The username or email address</param>
+        /// <param name="Password">The password</param>
         /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public async Task<JsonResult> postLogin([FromForm]string Username, [FromForm]string Password)
@@ -264,7 +269,7 @@ namespace Overstag.Controllers
         /// <summary>
         /// Sends an email to the user with the password reset info
         /// </summary>
-        /// <param name="a">The account info (email adress)</param>
+        /// <param name="Email">The user's email adress</param>
         /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
         public JsonResult postMailreset([FromForm]string Email)
@@ -328,6 +333,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="token">The user's token</param>
         /// <param name="code">The validation code</param>
+        /// <param name="datetime">The timestamp of the client to avoid time issues</param>
         /// <returns>Json (status = success or error)</returns>
         [HttpPost]
         [Route("Register/Validate2FA")]
@@ -411,7 +417,7 @@ namespace Overstag.Controllers
                         var user = currentUser;
                         if(user.Id == family.ParentID)
                         {
-                            string[] error = { "U kunt uzelf niet koppelen aan uw eigen gezin.", "<i>Log uzelf uit en probeer de link opnieuw te openen.</i>", "<br><button class=\"btn btn-large blue waves-effect center-align\" onclick=\"OverstagJS.General.logout();\">Uitloggen</button>" };
+                            string[] error = { "U kunt uzelf niet koppelen aan uw eigen gezin.", "<i>Log uzelf uit en probeer de link opnieuw te openen.</i>", "<br><button class=\"btn btn-large blue waves-effect center-align\" onclick=\"Overstag.General.logout();\">Uitloggen</button>" };
                             return View("~/Views/Error/Custom.cshtml", error);
                         }
                         else
@@ -428,7 +434,10 @@ namespace Overstag.Controllers
             }
         }
 
-        
+        /// <summary>
+        /// Render delete account page
+        /// </summary>
+        /// <returns></returns>
         [OverstagAuthorize]
         public IActionResult Unregister()
         {
@@ -457,6 +466,11 @@ namespace Overstag.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Delete account
+        /// </summary>
+        /// <param name="password">The user's password</param>
+        /// <returns>JSON</returns>
         [HttpPost]
         [OverstagAuthorize]
         public async Task<IActionResult> postDeleteAccount([FromForm]string password)

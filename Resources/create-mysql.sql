@@ -1,3 +1,7 @@
+DROP DATABASE overstag IF EXISTS;
+CREATE DATABASE overstag;
+USE overstag;
+
 CREATE TABLE `Events` (
     `Id` int NOT NULL AUTO_INCREMENT,
     `Title` longtext CHARACTER SET utf8mb4 NULL,

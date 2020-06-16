@@ -5,7 +5,7 @@
             $('#_reg, #_mreg').addClass('active');
             $('#progbar2, #mailhelper').hide();
             this.mapEvents();
-            OverstagJS.General.restoreMe(Login.toggleWith, true, Login.redirect);
+            Overstag.General.restoreMe(Login.toggleWith, true, Login.redirect);
         },
         mapEvents() {
             $('#Password').keydown((e) => {
