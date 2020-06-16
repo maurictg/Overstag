@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Overstag.Models;
 using System;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Overstag.Controllers
 {
@@ -26,17 +28,17 @@ namespace Overstag.Controllers
 
         [Route("Home/Events")]
         [Route("agenda")]
+        
         /// <summary>
         /// Get all events from the database
         /// </summary>
         /// <returns>List(Event)</returns>
-        public IActionResult Events()
+        public async Task<IActionResult> Events()
         {
-            var events = new OverstagContext().Events.ToList();
-            ViewBag.Passed = events.Where(e => Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray().Reverse().ToArray();
+            await using var context = new OverstagContext();
+            var events = await context.Events.ToListAsync();
+            ViewBag.Passed = events.Where(e => Core.General.DateIsPassed(e.When)).OrderByDescending(e => e.When).ToArray();
             return View(events.Where(e => !Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray());
         }
-            
-
     }
 }

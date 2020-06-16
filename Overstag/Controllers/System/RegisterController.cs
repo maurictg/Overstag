@@ -466,49 +466,52 @@ namespace Overstag.Controllers
                 return Json(new { status = "error", error = "Je bent niet ingelogd. Log opnieuw in a.u.b." });
             }
 
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var account = await context.Accounts
+                .Include(f => f.Auths)
+                .Include(g => g.Invoices)
+                .Include(h => h.Payments)
+                .Include(i => i.Subscriptions)
+                .Include(j => j.Votes)
+                .Include(x => x.Transactions)
+                .FirstAsync(k => k.Id == currentUser.Id);
+
+            if (!Encryption.PBKDF2.Verify(account.Password, password))
+                return Json(new { status = "error", error = "Wachtwoord is onjuist" });
+
+            if (account.Invoices.Count(f => !f.Paid) > 0)
+                return Json(new { status = "error", error = "Er staan nog onbetaalde facturen open." });
+
+            if (account.Subscriptions.Count(f => !f.Paid) > 0)
+                return Json(new { status = "error", error = "Er staan nog activiteiten open." });
+
+            try
             {
-                var account = context.Accounts.Include(f => f.Auths).Include(g => g.Invoices).Include(h => h.Payments).Include(i => i.Subscriptions).Include(j => j.Votes).Include(x => x.Transactions).First(k => k.Id == currentUser.Id);
-
-                if (!Encryption.PBKDF2.Verify(account.Password, password))
-                    return Json(new { status = "error", error = "Wachtwoord is onjuist" });
-
-                if (account.Invoices.Count(f => !f.Paid) > 0)
-                    return Json(new { status = "error", error = "Er staan nog onbetaalde facturen open." });
-
-                if (account.Subscriptions.Count(f => !f.Paid) > 0)
-                    return Json(new { status = "error", error = "Er staan nog activiteiten open." });
-
+                //All data is removed thanks to cascade and the includes
+                //Remove mollie integration
                 try
                 {
-                    //All data is removed thanks to cascade and the includes
-                    //Remove mollie integration
-                    try
+                    if (!string.IsNullOrEmpty(account.MollieID))
                     {
-                        if (!string.IsNullOrEmpty(account.MollieID))
-                        {
-                            CustomerClient customerClient = new CustomerClient(Core.General.Credentials.mollieApiToken);
-                            await customerClient.DeleteCustomerAsync(account.MollieID);
-                        }
+                        CustomerClient customerClient = new CustomerClient(Core.General.Credentials.mollieApiToken);
+                        await customerClient.DeleteCustomerAsync(account.MollieID);
                     }
-                    catch(Exception e)
-                    {
-                        return Json(new { status = "warning", warning = "Mollie integratie verwijderen mislukt", debuginfo = e.ToString() });
-                    }
-
-                    //Remove account
-                    context.Accounts.Remove(account);
-                    await context.SaveChangesAsync();
-
-                    return Json(new { status = "success" });
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
-                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                    return Json(new { status = "warning", warning = "Mollie integratie verwijderen mislukt", debuginfo = e.ToString() });
                 }
 
-            }
+                //Remove account
+                context.Accounts.Remove(account);
+                await context.SaveChangesAsync();
 
+                return Json(new { status = "success" });
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+            }
         }
 
     }

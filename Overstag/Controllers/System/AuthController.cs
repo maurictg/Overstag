@@ -16,12 +16,12 @@ namespace Overstag.Controllers
         /// <param name="token">The user's token</param>
         /// <returns>JSON {status, token} -> new token to login</returns>
         [HttpPost]
-        public async Task<JsonResult> Register([FromForm]string token)
+        public async Task<JsonResult> Register([FromForm] string token)
         {
             token = Uri.UnescapeDataString(token);
 
             string ttoken = await Security.Auth.Register(token, HttpContext.Connection.RemoteIpAddress.ToString());
-            return Json(new { status = "success", token = Uri.EscapeDataString(ttoken) });
+            return Json(new {status = "success", token = Uri.EscapeDataString(ttoken)});
         }
 
         /// <summary>
@@ -30,41 +30,37 @@ namespace Overstag.Controllers
         /// <param name="token">The auth token</param>
         /// <returns>JSON, status = success or status = error</returns>
         [HttpPost]
-        public async Task<JsonResult> Login([FromForm]string token)
+        public async Task<JsonResult> Login([FromForm] string token)
         {
-            return await Task.Run(() => {
-                token = Uri.UnescapeDataString(token);
-                using (var context = new OverstagContext())
+            token = Uri.UnescapeDataString(token);
+            await using var context = new OverstagContext();
+            if (context.Auths.Any(f => f.Token == token))
+            {
+                var auth = await context.Auths.Include(f => f.User).FirstAsync(f => f.Token == token);
+                if (auth.Registered > DateTime.Now.AddMonths(-2))
                 {
-                    if (context.Auths.Any(f => f.Token == token))
-                    {
-                        var auth = context.Auths.Include(f => f.User).First(f => f.Token == token);
-                        if (auth.Registered > DateTime.Now.AddMonths(-2))
-                        {
-                            var user = context.Accounts.First(f => f.Id == auth.User.Id);
+                    var user = await context.Accounts.FirstAsync(f => f.Id == auth.User.Id);
 
-                            //Important session variables
-                            base.setUser(user);
+                    //Important session variables
+                    base.setUser(user);
 
-                            return Json(new { status = "success" });
-                        }
-                        else
-                        {
-                            try
-                            {
-                                context.Auths.Remove(auth);
-                                context.SaveChanges();
-                            }
-                            catch (Exception e)
-                            {
-                                return Json(new { status = "error", error = e.Message });
-                            }
-                        }
-                    }
-
-                    return Json(new { status = "error" });
+                    return Json(new {status = "success"});
                 }
-            });
+                else
+                {
+                    try
+                    {
+                        context.Auths.Remove(auth);
+                        await context.SaveChangesAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        return Json(new {status = "error", error = e.Message});
+                    }
+                }
+            }
+
+            return Json(new {status = "error"});
         }
     }
 }
