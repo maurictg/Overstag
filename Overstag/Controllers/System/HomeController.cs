@@ -23,20 +23,19 @@ namespace Overstag.Controllers
         public IActionResult Contact() 
             => View();
 
-
-        [Route("Home/Events")]
-        [Route("agenda")]
+        
         /// <summary>
         /// Get all events from the database
         /// </summary>
-        /// <returns>List(Event)</returns>
+        /// <returns>View with List(Event)</returns>
+        [Route("Home/Events")]
+        [Route("agenda")]
         public IActionResult Events()
         {
             var events = new OverstagContext().Events.ToList();
             ViewBag.Passed = events.Where(e => Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray().Reverse().ToArray();
             return View(events.Where(e => !Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray());
         }
-            
 
     }
 }

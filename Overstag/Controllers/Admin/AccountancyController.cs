@@ -71,7 +71,11 @@ namespace Overstag.Controllers
             }
         }
 
-
+        /// <summary>
+        /// View declaration details from user
+        /// </summary>
+        /// <param name="id">The id</param>
+        /// <returns>A view with info</returns>
         [Route("Accountancy/Declaration/{id}")]
         public IActionResult Declaration(int id)
         {
@@ -96,7 +100,13 @@ namespace Overstag.Controllers
             return View("~/Views/Mentor/Accountancy/Payments.cshtml", payments);
         }
 
-        [HttpPost()]
+        /// <summary>
+        /// Set the status of a payment
+        /// </summary>
+        /// <param name="id">The payment's id</param>
+        /// <param name="action">The action to do  with the payment</param>
+        /// <returns>JSON</returns>
+        [HttpPost]
         public async Task<IActionResult> SetStatus([FromForm]int id, [FromForm]int action)
         {
             PayType[] allowedTypes = { PayType.BANK };
@@ -197,7 +207,11 @@ namespace Overstag.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Set a transaction as payed
+        /// </summary>
+        /// <param name="id">The transaction's id</param>
+        /// <returns>JSON</returns>
         [HttpPost]
         public async Task<IActionResult> setTransactionAsPaid([FromForm]int id)
         {

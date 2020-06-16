@@ -8,6 +8,8 @@ using Overstag.Models.NoDB;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Globalization;
 using Overstag.Authorization;
 
 namespace Overstag.Controllers
@@ -190,6 +192,12 @@ namespace Overstag.Controllers
             }
         }
 
+        /// <summary>
+        /// Add user to an event
+        /// </summary>
+        /// <param name="eventid">The eventID</param>
+        /// <param name="userid">The user's ID to be added</param>
+        /// <returns>JSON(status = success or error)</returns>
         [HttpGet("Mentor/addUser/{eventid}/{userid}")]
         public async Task<IActionResult> addUser(int eventid, int userid)
         {
@@ -249,7 +257,7 @@ namespace Overstag.Controllers
         /// <param name="e">The event form object</param>
         /// <returns>Json: status = success or status = error</returns>
         [HttpPost]
-        public async Task<IActionResult> postEvent(Event e)
+        public async Task<IActionResult> postEvent([FromForm]int id, [FromForm]string title, [FromForm]string description, [FromForm]string when, [FromForm]int cost)
         {
             try
             {
@@ -257,16 +265,19 @@ namespace Overstag.Controllers
                 {
                     var eve = new Event();
 
-                    if (e.Id != -1)
-                        eve = context.Events.First(f => f.Id == e.Id);
+                    if (id != -1)
+                    {
+                        eve = await context.Events.FindAsync(id);
+                        eve.Id = id;
+                    }
 
-                    eve.Title = e.Title;
-                    eve.Description = e.Description;
-                    eve.When = e.When;
-                    eve.Cost = e.Cost;
-                    eve.Type = (byte)(e.Title.ToLower().Contains("chill") ? 0 : 1);
+                    eve.Title = title;
+                    eve.Description = description;
+                    eve.When = DateTime.ParseExact(when, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture);
+                    eve.Cost = cost;
+                    eve.Type = (byte)(title.ToLower().Contains("chill") ? 0 : 1);
 
-                    if (e.Id == -1)
+                    if (id == -1)
                         context.Events.Add(eve);
                     else
                         context.Events.Update(eve);
