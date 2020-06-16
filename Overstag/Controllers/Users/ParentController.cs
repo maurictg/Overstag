@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Internal;
 using Overstag.Authorization;
 using Overstag.Models;
 
@@ -17,58 +18,46 @@ namespace Overstag.Controllers
         /// Get parent index page with family info or create new family if not exist
         /// </summary>
         /// <returns>View with info</returns>
-        public IActionResult Index()
+        public async Task <IActionResult> Index()
         {
-            using(var context = new OverstagContext())
-            {
-                bool has = (context.Families.FirstOrDefault(f => (f.ParentID == currentUser.Id))!=null);
-
-                if(!has)
-                    CreateFamily();
-
-                return View(context.Families.Include(f => f.Members).First(f => f.ParentID == currentUser.Id));
-            }
+            await using var context = new OverstagContext();
+            if(!context.Families.Any()) await CreateFamily();
+            return View(await context.Families.Include(f => f.Members).FirstAsync(f => f.ParentID == currentUser.Id));
         }
 
         /// <summary>
         /// Get unPaid events per user
         /// </summary>
         /// <returns>View</returns>
-        public IActionResult Billing()
+        public async Task<IActionResult> Billing()
         {
-            using(var context = new OverstagContext())
-            {
-                var family = context.Families
-                    .Include(f => f.Members).ThenInclude(g => g.Subscriptions).ThenInclude(h => h.Event)
-                    //.Include(f => f.Members).ThenInclude(g => g.Invoices) <-- This is how you also include invoices
-                    .First(i => i.ParentID == currentUser.Id);
+            await using var context = new OverstagContext();
+            var family = await context.Families
+                .Include(f => f.Members)
+                .FirstAsync(i => i.ParentID == currentUser.Id);
 
-                return View(family.Members);
-            }
+            return View(family.Members);
         }
 
         /// <summary>
         /// Create a new family with currentuser as parent
         /// </summary>
-        private void CreateFamily()
+        private async Task CreateFamily()
         {
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
-                try
+                await context.Families.AddAsync(new Family()
                 {
-                    context.Families.Add(new Family()
-                    {
-                        ParentID = currentUser.Id,
-                        Token = Encryption.Random.rHash(currentUser.Token)
-                    });
-                    context.SaveChanges();
-                }
-                catch(Exception e)
-                {
-                    throw e;
-                }
+                    ParentID = currentUser.Id,
+                    Token = Encryption.Random.rHash(currentUser.Token)
+                });
+                await context.SaveChangesAsync();
             }
-            
+            catch(Exception e)
+            {
+                throw e;
+            }
         }
 
         /// <summary>
@@ -80,20 +69,18 @@ namespace Overstag.Controllers
         [Route("Parent/Remove/{id}")]
         public async Task<IActionResult> Remove(int id)
         {
-            using(var context = new OverstagContext())
+            try
             {
-                try
-                {
-                    var family = context.Families.Include(f => f.Members).First(g => g.ParentID == currentUser.Id);
-                    family.Members.Remove(context.Accounts.First(f => f.Id == id));
-                    context.Families.Update(family);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", error = "Verwijderen is mislukt", debuginfo = e });
-                }
+                await using var context = new OverstagContext();
+                var family = await context.Families.Include(f => f.Members).FirstAsync(g => g.ParentID == currentUser.Id);
+                family.Members.Remove(context.Accounts.First(f => f.Id == id));
+                context.Families.Update(family);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Verwijderen is mislukt", debuginfo = e });
             }
         }
 
@@ -104,20 +91,18 @@ namespace Overstag.Controllers
         public async Task<IActionResult> GenerateInvoice()
         {
             List<Exception> exceptions = new List<Exception>();
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            foreach (var member in (await context.Families.Include(f => f.Members).FirstAsync(g => g.ParentID == currentUser.Id)).Members)
             {
-                foreach (var member in context.Families.Include(f => f.Members).First(g => g.ParentID == currentUser.Id).Members)
-                {
-                    bool result = await Services.Invoices.Create(member.Id);
-                    if (!result)
-                        exceptions.Add(Services.Invoices.error);
-                }
-
-                if (exceptions.Count() > 0)
-                    return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken.", debuginfo = string.Join(',',exceptions.Select(x => x.Message)) });
-                else
-                    return Json(new { status = "success" });
+                bool result = await Services.Invoices.Create(member.Id);
+                if (!result)
+                    exceptions.Add(Services.Invoices.error);
             }
+
+            if (exceptions.Any())
+                return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken.", debuginfo = string.Join(',',exceptions.Select(x => x.Message)) });
+            else
+                return Json(new { status = "success" });
         }
 
         /*

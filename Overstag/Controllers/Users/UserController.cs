@@ -22,23 +22,28 @@ namespace Overstag.Controllers
         /// Get user homepage
         /// </summary>
         /// <returns>User homepage (view)</returns>
-        public IActionResult Index() => 
-            View(currentUser);
+        public IActionResult Index() => View(currentUser);
 
-        
-        /// <summary>
-        /// Get settings with user info
-        /// </summary>
-        /// <returns>View with User modal including family info</returns>
-        public IActionResult Settings() 
-            => View(new OverstagContext().Accounts.Include(f => f.Family).First(g => g.Id == currentUser.Id));
 
-        /// <summary>
-        /// Get saved logins
-        /// </summary>
-        /// <returns>Logins object</returns>
-        public IActionResult getLogins()
-            => Json(new OverstagContext().Auths.Where(f => f.UserId == currentUser.Id).OrderByDescending(g => g.Registered).ToList());
+       /// <summary>
+       /// Get settings with user info
+       /// </summary>
+       /// <returns>View with User modal including family info</returns>
+       public async Task<IActionResult> Settings()
+       {
+          await using var context = new OverstagContext();
+          return View(await context.Accounts.Include(f => f.Family).FirstAsync(g => g.Id == currentUser.Id)); 
+       }
+
+       /// <summary>
+       /// Get saved logins
+       /// </summary>
+       /// <returns>Logins object</returns>
+       public async Task<IActionResult> getLogins()
+       {
+          await using var context = new OverstagContext();
+          return Json(context.Auths.Where(f => f.UserId == currentUser.Id).OrderByDescending(g => g.Registered).ToListAsync());
+       }
 
         /// <summary>
         /// Remove login by its id
@@ -48,19 +53,17 @@ namespace Overstag.Controllers
         [HttpGet("User/removeLogin/{id}")]
         public async Task<IActionResult> removeLogin(int id)
         {
-            using(var context = new OverstagContext())
+            try
             {
-                try
-                {
-                    var login = context.Auths.Find(id);
-                    context.Auths.Remove(login);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", error = "Verwijderen mislukt door interne fout", debuginfo = e.ToString() });
-                }
+                await using var context = new OverstagContext();
+                var login = await context.Auths.FindAsync(id);
+                context.Auths.Remove(login);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Verwijderen mislukt door interne fout", debuginfo = e.ToString() });
             }
         }
 
@@ -68,72 +71,68 @@ namespace Overstag.Controllers
         /// Get events page with all subscriptions
         /// </summary>
         /// <returns>View</returns>
-        public IActionResult Events()
+        public async Task<IActionResult> Events()
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var user = await context.Accounts.Include(a => a.Subscriptions).FirstAsync(p => p.Id == currentUser.Id);
+            var parti = user.Subscriptions.ToList();
+
+            List<ISubscription> events = new List<ISubscription>();
+
+            foreach (var eve in await context.Events.Where(e => e.When.Date >= DateTime.Today).OrderBy(e => e.When).ToListAsync())
             {
-                var user = context.Accounts.Include(a => a.Subscriptions).First(p => p.Id == currentUser.Id);
-                var parti = user.Subscriptions.ToList();
-
-                List<ISubscription> events = new List<ISubscription>();
-
-                foreach (var eve in context.Events.Where(e => e.When.Date >= DateTime.Today).OrderBy(e => e.When).ToList())
+                bool hasparti = parti.Any(f => f.EventID == eve.Id);
+                events.Add(new ISubscription()
                 {
-                    bool hasparti = parti.Any(f => f.EventID == eve.Id);
-                    events.Add(new ISubscription()
-                    {
-                        Event = eve,
-                        Subscribed = hasparti,
-                        Friends = (hasparti ? parti.First(f => f.EventID == eve.Id).FriendCount : 0)
-                    });
-                }
-
-                return View(events);
+                    Event = eve,
+                    Subscribed = hasparti,
+                    Friends = (hasparti ? parti.First(f => f.EventID == eve.Id).FriendCount : 0)
+                });
             }
+
+            return View(events);
         }
 
         /// <summary>
         /// Get all unPaid events and invoices
         /// </summary>
         /// <returns>View with invoices and unPaid events</returns>
-        public IActionResult Payment()
+        public async Task<IActionResult> Payment()
         {
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var user = await context.Accounts.Include(f => f.Subscriptions).Include(f => f.Family).FirstAsync(f => f.Id == currentUser.Id);
+            ViewBag.Age = Core.General.getAge(user.Birthdate);
+
+            List<Event> events = context.Events.ToList();
+            List<Event> unPaidEvents = new List<Event>();
+            List<Invoice> invoices = await context.Invoices.Include(g => g.User).ThenInclude(h => h.Subscriptions).Where(f => f.User.Id == user.Id).ToListAsync();
+            List<XInvoice> iinvoices = new List<XInvoice>();
+
+            foreach(var p in user.Subscriptions)
             {
-                var user = context.Accounts.Include(f => f.Subscriptions).Include(f => f.Family).First(f => f.Id == currentUser.Id);
-                ViewBag.Age = Core.General.getAge(user.Birthdate);
-
-                List<Event> events = context.Events.ToList();
-                List<Event> unPaidEvents = new List<Event>();
-                List<Invoice> invoices = context.Invoices.Include(g => g.User).ThenInclude(h => h.Subscriptions).Where(f => f.User.Id == user.Id).ToList();
-                List<XInvoice> iinvoices = new List<XInvoice>();
-
-                foreach(var p in user.Subscriptions)
+                if(!p.Paid)
                 {
-                    if(!p.Paid)
-                    {
-                        var e = events.First(f => f.Id == p.EventID);
-                        if (!unPaidEvents.Contains(e) && Core.General.DateIsPassed(e.When))
-                            unPaidEvents.Add(e);
-                    }
+                    var e = events.First(f => f.Id == p.EventID);
+                    if (!unPaidEvents.Contains(e) && Core.General.DateIsPassed(e.When))
+                        unPaidEvents.Add(e);
                 }
-
-                if(invoices.Count() > 0)
-                {
-                    foreach(var i in invoices)
-                        iinvoices.Add(Services.Invoices.GetXInvoice(i));
-                }
-
-                ViewBag.HasFamily = (user.Family != null);
-                ViewBag.IsParent = (user.Type == 1);
-
-                return View("Payment", new UnPaidEvents()
-                {
-                    Invoices = iinvoices,
-                    Subscriptions = user.Subscriptions,
-                    UnfacturedEvents = unPaidEvents.OrderBy(f => f.When).ToList()
-                });
             }
+
+            if(invoices.Any())
+            {
+                foreach(var i in invoices)
+                    iinvoices.Add(Services.Invoices.GetXInvoice(i));
+            }
+
+            ViewBag.HasFamily = (user.Family != null);
+            ViewBag.IsParent = (user.Type == 1);
+
+            return View("Payment", new UnPaidEvents()
+            {
+                Invoices = iinvoices,
+                Subscriptions = user.Subscriptions,
+                UnfacturedEvents = unPaidEvents.OrderBy(f => f.When).ToList()
+            });
         }
 
 
@@ -143,22 +142,20 @@ namespace Overstag.Controllers
         /// <param name="eventID">The event's id</param>
         /// <returns>JSON serialized</returns>
         [Route("User/getSubscribers/{eventID}")]
-        public JsonResult getSubscribers(int eventID)
+        public async Task<JsonResult> getSubscribers(int eventID)
         {
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
-                try
-                {
-                    List<int> subs = context.Events.Include(f => f.Participators)
-                        .First(g => g.Id == eventID).Participators.Select(f => f.UserID).ToList();
-                    subs.Remove(currentUser.Id);
-                    List<string> Users = context.Accounts.Where(f => subs.Contains(f.Id)).Select(f => $"{f.Firstname} {f.Lastname}").ToList();
-                    return Json(new { status = "success", data = Users.ToArray() });
-                }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", debuginfo = e.Message });
-                }
+                List<int> subs = (await context.Events.Include(f => f.Participators)
+                    .FirstAsync(g => g.Id == eventID)).Participators.Select(f => f.UserID).ToList();
+                subs.Remove(currentUser.Id);
+                List<string> Users = context.Accounts.Where(f => subs.Contains(f.Id)).Select(f => $"{f.Firstname} {f.Lastname}").ToList();
+                return Json(new { status = "success", data = Users.ToArray() });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", debuginfo = e.Message });
             }
         }
 
@@ -166,17 +163,21 @@ namespace Overstag.Controllers
         /// Renders all ideas with up and downvotes from user
         /// </summary>
         /// <returns>A View with votes</returns>
-        public IActionResult Ideas()
+        public async Task<IActionResult> Ideas()
         {
+            await using var context = new OverstagContext();
             ViewBag.UserID = currentUser.Id;
-            return View(new OverstagContext().Ideas.Include(f => f.Votes).OrderBy(b => (b.Votes.Count(i => i.Upvote)- b.Votes.Count(i => !i.Upvote))).ToArray().Reverse().ToList());
+            return View(await context.Ideas.Include(f => f.Votes).OrderByDescending(b => (b.Votes.Count(i => i.Upvote)- b.Votes.Count(i => !i.Upvote))).ToListAsync());
         }
 
         public IActionResult Vote() 
             => View();
 
-        public IActionResult Declaration()
-            => View(new OverstagContext().Transactions.Include(x => x.User).Where(f => f.User.Id == currentUser.Id && f.Type == 29).OrderByDescending(g => g.Timestamp).ToList());
+        public async Task<IActionResult> Declaration()
+        {
+            await using var context = new OverstagContext(); 
+            return View(await context.Transactions.Include(x => x.User).Where(f => f.User.Id == currentUser.Id && f.Type == 29).OrderByDescending(g => g.Timestamp).ToListAsync());
+        }
 
         /// <summary>
         /// Post a new idea to the server
@@ -191,9 +192,9 @@ namespace Overstag.Controllers
 
             try
             {
-                using (var context = new OverstagContext())
+                await using (var context = new OverstagContext())
                 {
-                    context.Ideas.Add(idea);
+                    await context.Ideas.AddAsync(idea);
                     await context.SaveChangesAsync();
                 }
                 return Json(new { status = "success" });
@@ -216,31 +217,29 @@ namespace Overstag.Controllers
             if (currentUser.Type == 1)
                 return Json(new { status = "error", error = "Als ouder kunt u niet stemmen voor een activiteit." });
 
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
-                try
-                {
-                    var user = context.Accounts.Include(f => f.Votes).First(u => u.Id == currentUser.Id);
+                var user = await context.Accounts.Include(f => f.Votes).FirstAsync(u => u.Id == currentUser.Id);
 
-                    if (user.Votes.Any(u => u.IdeaID == id))
-                        user.Votes.First(u => u.IdeaID == id).Upvote = (like==1);
-                    else
-                    {
-                        user.Votes.Add(new Models.Vote
-                        {
-                            IdeaID = id,
-                            UserID = user.Id,
-                            Upvote = (like==1)
-                        });
-                    }
-                    context.Accounts.Update(user);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch(Exception e)
+                if (user.Votes.Any(u => u.IdeaID == id))
+                    user.Votes.First(u => u.IdeaID == id).Upvote = (like==1);
+                else
                 {
-                    return Json(new { status = "error", error = "Mislukt vanwege interne fout", devinfo = e });
+                    user.Votes.Add(new Models.Vote
+                    {
+                        IdeaID = id,
+                        UserID = user.Id,
+                        Upvote = (like==1)
+                    });
                 }
+                context.Accounts.Update(user);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Mislukt vanwege interne fout", devinfo = e });
             }
         }
 
@@ -255,31 +254,27 @@ namespace Overstag.Controllers
             if (currentUser.Type == 1)
                 return Json(new { status = "error", error = "Als ouder kunt u zich niet inschrijven voor een activiteit." });
 
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
-                try
+                var user = await context.Accounts.Include(f => f.Subscriptions).FirstAsync(a => a.Id == currentUser.Id);
+                var eve = context.Events.First(e => e.Id == p.EventID);
+
+                if (DateTime.Today > eve.When.Date)
+                    return Json(new { status = "error", error = "Deze activiteit is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
+
+                var part = user.Subscriptions.FirstOrDefault(e => e.EventID == p.EventID);
+                if(part == null)
                 {
-                    var user = context.Accounts.Include(f => f.Subscriptions).First(a => a.Id == currentUser.Id);
-                    var eve = context.Events.First(e => e.Id == p.EventID);
-
-                    if (DateTime.Today > eve.When.Date)
-                        return Json(new { status = "error", error = "Deze activiteit is al voorbij. U kunt zich hiervoor niet meer inschrijven" });
-
-                    var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
-                    if(part == null)
-                    {
-                        user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id });
-                        await context.SaveChangesAsync();
-                        return Json(new { status = "success" });
-                    }
-                    else
-                        return Json(new { status = "error", error = "Je bent al ingeschreven voor deze activiteit!" });
+                    user.Subscriptions.Add(new Participate { UserID = user.Id, EventID = eve.Id });
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
                 }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
-                }
-
+                else return Json(new { status = "error", error = "Je bent al ingeschreven voor deze activiteit!" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
             }
         }
 
@@ -291,42 +286,37 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<IActionResult> postDeleteEvent(Participate p)
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
+                var user = await context.Accounts.Include(f => f.Subscriptions).FirstAsync(a => a.Id == currentUser.Id);
+                var eve = await context.Events.FirstAsync(e => e.Id == p.EventID);
+
+                if (Core.General.DateIsPassed(eve.When))
+                    return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer uitschrijven" });
+
                 try
                 {
-                    var user = context.Accounts.Include(f => f.Subscriptions).First(a => a.Id == currentUser.Id);
-                    var eve = context.Events.First(e => e.Id == p.EventID);
-
-                    if (Core.General.DateIsPassed(eve.When))
-                        return Json(new { status = "error", error = "Dit event is al voorbij. U kunt zich hiervoor niet meer uitschrijven" });
-
-                    try
+                    var part = user.Subscriptions.FirstOrDefault(e => e.EventID == p.EventID);
+                    if (part == null)
                     {
-                        var part = user.Subscriptions.Where(e => e.EventID == p.EventID).FirstOrDefault();
-                        if (part == null)
-                        {
-                            return Json(new { status = "error", error = "Je bent al uitgeschreven voor deze activiteit" });
-                        }
-                        else
-                        {
-                            user.Subscriptions.Remove(part);
-                            await context.SaveChangesAsync();
-                            return Json(new { status = "success" });
-                        }
+                        return Json(new { status = "error", error = "Je bent al uitgeschreven voor deze activiteit" });
                     }
-                    catch(Exception e)
+                    else
                     {
-                        return Json(new { status = "error", error = "Er is een error opgetreden: NULL", debuginfo = e.ToString() });
+                        user.Subscriptions.Remove(part);
+                        await context.SaveChangesAsync();
+                        return Json(new { status = "success" });
                     }
-
-
                 }
-                catch (Exception e)
+                catch(Exception e)
                 {
-                    return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
+                    return Json(new { status = "error", error = "Er is een error opgetreden: NULL", debuginfo = e.ToString() });
                 }
-
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() });
             }
         }
 
@@ -339,21 +329,19 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<IActionResult> SubscribeFriends([FromForm]int id, [FromForm]int amount)
         {
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            try
             {
-                try
-                {
-                    var user = context.Accounts.Include(f => f.Subscriptions).First(f => f.Id == currentUser.Id);
-                    var part = user.Subscriptions.First(f => f.EventID == id);
-                    part.FriendCount = (byte)((amount>0) ? amount : 0);
-                    context.Accounts.Update(user);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch(Exception e)
-                {
-                    return Json(new { status = "error", error = e.Message });
-                }
+                var user = await context.Accounts.Include(f => f.Subscriptions).FirstAsync(f => f.Id == currentUser.Id);
+                var part = user.Subscriptions.First(f => f.EventID == id);
+                part.FriendCount = (byte)((amount>0) ? amount : 0);
+                context.Accounts.Update(user);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
+            }
+            catch(Exception e)
+            {
+                return Json(new { status = "error", error = e.Message });
             }
         }
 
@@ -367,12 +355,10 @@ namespace Overstag.Controllers
                 request.UserId = currentUser.Id;
                 request.Type = 29; //Declaratie
                 request.Amount = request.Amount * -1;
-                using (var context = new OverstagContext())
-                {
-                    context.Transactions.Add(request);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
+                await using var context = new OverstagContext();
+                await context.Transactions.AddAsync(request);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
             }
             catch(Exception e)
             {
@@ -388,36 +374,33 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<IActionResult> postPasswordChange([FromForm]string Oldpass, [FromForm]string Newpass)
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var cuser = currentUser;
+            if (Encryption.PBKDF2.Verify(cuser.Password, Oldpass))
             {
-                var cuser = currentUser;
-                if (Encryption.PBKDF2.Verify(cuser.Password, Oldpass))
+                try
                 {
-                    try
-                    {
-                        cuser.Password = Encryption.PBKDF2.Hash(Newpass);
-                        cuser.Token = Encryption.Random.rHash(Encryption.SHA.S256(cuser.Firstname) + cuser.Username);
-                        context.Accounts.Update(cuser);
-                        await context.SaveChangesAsync();
-                        base.setUser(cuser);
+                    cuser.Password = Encryption.PBKDF2.Hash(Newpass);
+                    cuser.Token = Encryption.Random.rHash(Encryption.SHA.S256(cuser.Firstname) + cuser.Username);
+                    context.Accounts.Update(cuser);
+                    await context.SaveChangesAsync();
+                    base.setUser(cuser);
 
-                        var mail = new Services.PassWarningMail(cuser);
-                        if (!mail.SendAsync().Result)
-                            return Json(new { status = "warning", error = "Mail verzonden mislukt", debuginfo = mail.error.ToString() });
-                        else
-                            return Json(new { status = "success" });
-                    }
-                    catch(Exception e)
-                    {
-                        return Json(new { status = "error", error = "Er is een interne fout opgetreden.",debuginfo = e.ToString() });
-                    }
+                    var mail = new Services.PassWarningMail(cuser);
+                    if (!mail.SendAsync().Result)
+                        return Json(new { status = "warning", error = "Mail verzonden mislukt", debuginfo = mail.error.ToString() });
+                    else
+                        return Json(new { status = "success" });
                 }
-                else
+                catch(Exception e)
                 {
-                    return Json(new { status = "error", error = "Huidig wachtwoord onjuist" });
+                    return Json(new { status = "error", error = "Er is een interne fout opgetreden.",debuginfo = e.ToString() });
                 }
             }
-
+            else
+            {
+                return Json(new { status = "error", error = "Huidig wachtwoord onjuist" });
+            }
         }
 
         /// <summary>
@@ -428,40 +411,38 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<IActionResult> postInfoChange(Account a)
         {
-            using (var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var cuser = await context.Accounts.FirstAsync(f => f.Id == currentUser.Id);
+            cuser.Firstname = a.Firstname;
+            cuser.Lastname = a.Lastname;
+            cuser.Adress = a.Adress;
+            cuser.Residence = a.Residence;
+            cuser.Postalcode = a.Postalcode;
+            cuser.Phone = a.Phone;
+
+            //Check if email is in use
+            var x = await context.Accounts.FirstOrDefaultAsync(f => f.Email == a.Email);
+            if (x != null && x.Token != cuser.Token)
+                return Json(new { status = "error", error = "Emailadres is al in gebruik!" });
+            else
+                cuser.Email = a.Email;
+
+            //Check if username is in use
+            var y = await context.Accounts.FirstOrDefaultAsync(f => f.Username == a.Username);
+            if (y != null && y.Token != cuser.Token)
+                return Json(new { status = "error", error = "Gebruikersnaam is al in gebruik!" });
+            else
+                cuser.Username = a.Username;
+
+            try
             {
-                var cuser = context.Accounts.First(f => f.Id == currentUser.Id);
-                cuser.Firstname = a.Firstname;
-                cuser.Lastname = a.Lastname;
-                cuser.Adress = a.Adress;
-                cuser.Residence = a.Residence;
-                cuser.Postalcode = a.Postalcode;
-                cuser.Phone = a.Phone;
-
-                //Check if email is in use
-                var x = context.Accounts.FirstOrDefault(f => f.Email == a.Email);
-                if (x != null && x.Token != cuser.Token)
-                    return Json(new { status = "error", error = "Emailadres is al in gebruik!" });
-                else
-                    cuser.Email = a.Email;
-
-                //Check if username is in use
-                var y = context.Accounts.FirstOrDefault(f => f.Username == a.Username);
-                if (y != null && y.Token != cuser.Token)
-                    return Json(new { status = "error", error = "Gebruikersnaam is al in gebruik!" });
-                else
-                    cuser.Username = a.Username;
-
-                try
-                {
-                    context.Accounts.Update(cuser);
-                    await context.SaveChangesAsync();
-                    return Json(new { status = "success" });
-                }
-                catch (Exception e)
-                {
-                    return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.ToString() });
-                }
+                context.Accounts.Update(cuser);
+                await context.SaveChangesAsync();
+                return Json(new { status = "success" });
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = "Er is een interne fout opgetreden.", debuginfo = e.ToString() });
             }
         }
 
@@ -481,49 +462,47 @@ namespace Overstag.Controllers
 
         public async Task<JsonResult> MergeInvoices()
         {
-            using(var context = new OverstagContext())
+            await using var context = new OverstagContext();
+            var user = await context.Accounts.Include(f => f.Invoices).FirstAsync(f => f.Id == currentUser.Id);
+            var invoices = user.Invoices.Where(f => !f.Paid).ToList();
+            if (invoices.Count() > 1)
             {
-                var user = context.Accounts.Include(f => f.Invoices).First(f => f.Id == currentUser.Id);
-                var invoices = user.Invoices.Where(f => !f.Paid).ToList();
-                if (invoices.Count() > 1)
-                {
-                    Invoice i = new Invoice();
+                Invoice i = new Invoice();
 
-                    int additions = 0;
-                    int bill = 0;
-                    List<string> EventIDS = new List<string>();
+                int additions = 0;
+                int bill = 0;
+                List<string> EventIDS = new List<string>();
                     
-                    foreach(var invoice in invoices)
-                    {
-                        additions += invoice.AdditionsCost;
-                        bill += invoice.Amount;
-                        i.InvoiceID = invoice.InvoiceID;
-                        EventIDS.AddRange(invoice.EventIDs.Split(',').ToList());
-                        user.Invoices.Remove(invoice);
-                    }
-
-                    i.EventIDs = string.Join(',', EventIDS);
-                    i.Amount = bill;
-                    i.AdditionsCost = additions;
-                    i.Paid = false;
-                    i.Timestamp = DateTime.Now;
-
-                    try
-                    {
-                        user.Invoices.Add(i);
-                        context.Accounts.Update(user);
-                        await context.SaveChangesAsync();
-                        return Json(new { status = "success" });
-                    }
-                    catch(Exception e)
-                    {
-                        return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = e.ToString() });
-                    }
-                }
-                else
+                foreach(var invoice in invoices)
                 {
-                    return Json(new { status = "error", error = "Om samen te voegen heb je meer dan 1 openstaande factuur nodig" });
+                    additions += invoice.AdditionsCost;
+                    bill += invoice.Amount;
+                    i.InvoiceID = invoice.InvoiceID;
+                    EventIDS.AddRange(invoice.EventIDs.Split(',').ToList());
+                    user.Invoices.Remove(invoice);
                 }
+
+                i.EventIDs = string.Join(',', EventIDS);
+                i.Amount = bill;
+                i.AdditionsCost = additions;
+                i.Paid = false;
+                i.Timestamp = DateTime.Now;
+
+                try
+                {
+                    user.Invoices.Add(i);
+                    context.Accounts.Update(user);
+                    await context.SaveChangesAsync();
+                    return Json(new { status = "success" });
+                }
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is iets fout gegaan", debuginfo = e.ToString() });
+                }
+            }
+            else
+            {
+                return Json(new { status = "error", error = "Om samen te voegen heb je meer dan 1 openstaande factuur nodig" });
             }
         }
 
@@ -612,8 +591,8 @@ namespace Overstag.Controllers
                             request.ContentType = "application/x-www-form-urlencoded";
                             request.ContentLength = data.Length;
 
-                            using (var stream = request.GetRequestStream())
-                                stream.Write(data, 0, data.Length);
+                            await using (var stream = request.GetRequestStream())
+                                await stream.WriteAsync(data, 0, data.Length);
 
                             var response = (HttpWebResponse)request.GetResponse();
                             var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
@@ -647,25 +626,21 @@ namespace Overstag.Controllers
         /// Leave the family
         /// </summary>
         /// <returns>Json (status = success or status = error with details)</returns>
-        public IActionResult LeaveFamily()
+        public async Task<IActionResult> LeaveFamily()
         {
             try
             {
-                using (var context = new OverstagContext())
-                {
-                    var user = context.Accounts.Include(f => f.Family).First(u => u.Id == currentUser.Id);
-                    user.Family = null;
-                    context.Accounts.Update(user);
-                    context.SaveChanges();
-                    return Json(new { status = "success" });
-                }
+                await using var context = new OverstagContext();
+                var user = await context.Accounts.Include(f => f.Family).FirstAsync(u => u.Id == currentUser.Id);
+                user.Family = null;
+                context.Accounts.Update(user);
+                context.SaveChanges();
+                return Json(new { status = "success" });
             }
             catch(Exception e)
             {
                 return Json(new { status = "error", debuginfo = e });
             }
-            
         }
-        
     }
 }
