@@ -1,0 +1,239 @@
+﻿@page
+@{
+    ViewBag.Title = "Login with Vue";
+    Layout = "_Layout";
+    ViewBag.NoJQ = true;
+}
+
+@section Scripts {
+    <script src="~/js/vue.js"></script>
+}
+
+@section Styles {
+    <style>
+        .v-fade {
+            display: inherit !important; /* override v-show display: none */
+            transition: opacity 0.5s;
+        }
+
+        .v-fade[style*="display: none;"] {
+            opacity: 0;
+            pointer-events: none; /* disable user interaction */
+            user-select: none; /* disable user selection */
+        }
+
+        input[type=password] + label {
+            pointer-events: none;
+            *{
+                pointer-events: all;
+            }
+        }
+
+    </style>
+}
+
+<div class="o-blue darken" style="height: 100%; vertical-align: middle;">
+    <div class="row">
+        <div class="row"></div>
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <div class="card rounded v-fade" id="loginCard" v-show="visible">
+                <div class="card-content">
+                    <h3 class="center-align o-blue-text text-middle">Inloggen (Demo)</h3>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">mail_outline</i>
+                            <input id="Username" class="checki bigger-input" v-model="username" :disabled="disabled" type="text">
+                            <label for="Username" id="lUsername">Gebruikersnaam/email</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">lock_outline</i>
+                            <input id="Password" v-on:keydown="enter" class="checki bigger-input" v-model="password" :disabled="disabled" type="password">
+                            <label for="password" id="lPassword">Wachtwoord</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <a class="overstagbtn col s12 waves-effect rounded" v-on:click="signIn" v-bind:class="{disabled: (disabled || !clickable)}" id="btnlogin">Inloggen</a>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s4">
+                            <p id="noaccount" class="margin left-align">
+                                <a href="/Register/Register"><b>Geen account?</b></a>
+                            </p>
+                        </div>
+                        <div class="input-field col s8">
+                            <p class="margin right-align">
+                                <a class="red-text" href="#"><b>Dit is een demo-pagina</b></a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col s12">
+            <div class="card rounded">
+                <div class="card-content row">
+                    <div class="container">
+                        <h4 class="red-text">Vue JS demo</h4>
+                        <button class="btn waves-effect" onclick="app.toggle()">Hide/Show</button>
+                        <button class="btn waves-effect" onclick="app.disabled = !app.disabled;">Enable/disable</button>
+                    </div>
+                    <h5 id="msgDemo" title="Title attribuut werkt">Rendering demo: {{ message }}</h5>
+                    <button onclick="time.visible = !time.visible;">Toggle</button>
+                    <h5 id="timeDemo" v-if="visible" v-bind:title="message">Binding demo (hover over dit)</h5>
+                    <br/>
+                    <h5>For loop</h5>
+                    <div id="todoList">
+                        <ol>
+                            <li v-for="t in todos">
+                                {{ t.text }}
+                            </li>
+                        </ol>
+                    </div>
+
+                    <h5>Onclick handler</h5>
+                    <div id="reverse">
+                        <p>{{ message }}</p>
+                        <button v-on:click="reverse">Reverse message</button>
+                    </div>
+
+                    <h5>View models</h5>
+
+                    <div id="mvvm">
+                        <h6>{{ bericht }}</h6>
+                        <div class="input-field col s6">
+                            <input placeholder="Type something" v-model="bericht" type="text" >
+                            <label for="tbBinding">MVVM demo</label>
+                        </div>
+                    </div>
+
+                    <br/>
+                    <br/><br/>
+                    <h5>Web components</h5>
+                    <div id="components">
+                        <ol>
+                            <todo-item v-for="item in items" v-bind:todo="item" v-bind:key="item.id"></todo-item>
+                        </ol>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    //App
+
+    let app = new Vue({
+        el: '#loginCard',
+        data: {
+            visible: true,
+            disabled: false,
+            clickable: true,
+            username: '',
+            password: ''
+        },
+        methods: {
+            toggle() {
+                this.visible = !this.visible;
+            },
+            enter(e) {
+                if (e.keyCode == 13)
+                    this.signIn();
+            },
+            signIn() {
+                this.disabled = true;
+                //Using ZeptoJS
+                $.post('/Register/postLogin', { Username: this.username, Password: this.password }, (data) => {
+                    if (data.status === 'success') {
+                        console.log(data);
+                        M.toast({ html: 'OK', classes: 'green' })
+                    } else {
+                        M.toast({ html: data.error, classes: 'red' })
+                    }
+
+                    setTimeout(() => { this.disabled = false; M.updateTextFields(); }, 1000);
+                    this.username = '';
+                    this.password = '';
+                });
+            }
+        }
+    });
+</script>
+
+<script>
+    //Web components
+    Vue.component('todo-item', {
+        // The todo-item component now accepts a
+        // "prop", which is like a custom attribute.
+        // This prop is called todo.
+        props: ['todo'],
+        template: '<li>{{ todo.text }}</li>'
+    });
+
+    var todoComp = new Vue({
+        el: '#components',
+        data: {
+            items: [
+                { id: 0, text: 'Vegetables' },
+                { id: 1, text: 'Cheese' },
+                { id: 2, text: 'Whatever else humans are supposed to eat' }
+            ]
+        }
+    })
+
+
+</script>
+
+<script>
+    let msg = new Vue({
+        el: '#msgDemo',
+        data: {
+            message: 'Hello world!'
+        }
+    });
+
+    let time = new Vue({
+        el: '#timeDemo',
+        data: {
+            message: new Date().toLocaleTimeString(),
+            visible: true
+        }
+    });
+
+    let todoList = new Vue({
+        el: '#todoList',
+        data: {
+            todos: [
+                { text: 'Learn JavaScript' },
+                { text: 'Learn Vue' },
+                { text: 'Build something awesome' }
+            ]
+        }
+    });
+
+    let reverse = new Vue({
+        el: '#reverse',
+        data: {
+            message: 'tiaardegmo nedrow nak tsket ezeD'
+        },
+        methods: {
+            reverse() {
+                this.message = this.message.split('').reverse().join('');
+            }
+        }
+    });
+
+    let mvvm = new Vue({
+        el: '#mvvm',
+        data: {
+            bericht: 'Hello world!'
+        }
+    });
+
+
+</script>

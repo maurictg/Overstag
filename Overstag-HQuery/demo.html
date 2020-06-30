@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo</title>
+    <script src="/lib/vue.js"></script>
+    <script src="/js/selector.js"></script>
+    <script src="/js/helpers.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/effects.css">
+    <style>
+        /**
+ * Add box sizing to everything
+ * @link http://www.paulirish.com/2012/box-sizing-border-box-ftw/
+ */
+/* line 38, src/sass/components/_normalize.scss */
+*,
+*:before,
+*:after {
+	box-sizing: border-box;
+}
+
+/**
+ * Layout
+ */
+body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+	font-size: 112.5%;
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 40em;
+	width: 88%;
+}
+
+/**
+ * Forms
+ */
+[type="text"],
+[type="email"],
+select,
+textarea {
+	display: block;
+	margin-bottom: 1em;
+	width: 100%;
+}
+
+textarea {
+	height: 8em;
+}
+
+label {
+	display: block;
+	font-weight: bold;
+	margin-bottom: 0.25em;
+}
+
+.label-plain {
+	font-weight: normal;
+}
+    </style>
+</head>
+<body>
+    Hello!
+
+    <p id="henk" class="test">Henk</p>
+
+    <p class="message">Hallo</p>
+    <p class="message">Wereld</p>
+
+    <button id="click">Click me</button>
+
+    <input type="text" value="Hello!">
+
+    <form id="frm">
+
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" value="Mike Wazowski">
+    
+        <label for="address">Address</label>
+        <input type="text" name="address" id="address" value="123 Scare Avenue, Monstropolis">
+    
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" value="mikew@monstersinc.com">
+    
+        <label for="hear-about-us">How did you hear about us?</label>
+        <select name="hear-about-us" id="hear-about-us">
+            <option value=""></option>
+            <option value="google">Google</option>
+            <option value="referral">Referred by a Friend</option>
+            <option value="tv" selected>A TV Ad</option>
+            <option value="radio">A Radio Ad</option>
+        </select>
+      
+          <label for="hear-about-us-multi">How did you hear about us?</label>
+        <select name="hear-about-us-multi" id="hear-about-us-multi" multiple>
+            <option value=""></option>
+            <option value="google">Google</option>
+            <option value="referral" selected>Referred by a Friend</option>
+            <option value="tv" selected>A TV Ad</option>
+            <option value="radio">A Radio Ad</option>
+        </select>
+    
+        <label id="more">Additional thoughts?</label>
+        <textarea name="more" id="more">Laughter produces more energy than screams!</textarea>
+    
+        <p><strong>Do you agree to our terms of service?</strong></p>
+        <label class="label-plain">
+            <input type="radio" name="tos" value="yes" checked>
+            Yes
+        </label>
+        <label class="label-plain">
+            <input type="radio" name="tos" value="no">
+            No
+        </label>
+    
+        <p><strong>Pick your favorite university.</strong></p>
+      
+      <label class="label-plain">
+            <input type="checkbox" name="scare-tech">
+            Scare Tech
+        </label>
+    
+        <label class="label-plain">
+            <input type="checkbox" name="mu" checked>
+            Monster University
+        </label>
+    
+    
+    </form>
+    <p><button onclick="console.log(S('#frm').serialize())">Submit</button></p>
+</body>
+</html>

@@ -42,7 +42,7 @@ namespace Overstag.Controllers
        public async Task<IActionResult> getLogins()
        {
           await using var context = new OverstagContext();
-          return Json(context.Auths.Where(f => f.UserId == currentUser.Id).OrderByDescending(g => g.Registered).ToListAsync());
+          return Json(await context.Auths.Where(f => f.UserId == currentUser.Id).OrderByDescending(g => g.Registered).ToListAsync());
        }
 
         /// <summary>

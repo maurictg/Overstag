@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
-using Newtonsoft.Json;
 using Overstag.Services;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;

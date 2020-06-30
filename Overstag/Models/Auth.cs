@@ -12,6 +12,7 @@ namespace Overstag.Models
 
         //Relations
         public int UserId { get; set; }
+
         [JsonIgnore]
         public Account User { get; set; }
     }

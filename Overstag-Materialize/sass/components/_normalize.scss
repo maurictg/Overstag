@@ -449,7 +449,14 @@ template {
 
 /* Fix materialize error */
 input + label {
-  pointer-events: all;
+  pointer-events: all; //I dont know why i choose all
+  * {
+      pointer-events: all;
+  }
+}
+
+input[type=password] + label {
+  pointer-events: none;
   * {
       pointer-events: all;
   }
