@@ -11,6 +11,7 @@ let H = function() {
         else if(s instanceof _c) console.log(s);
         else return;
 
+        _c.prototype.Q = s; //Store query in prototype.Q
         //Copy prototype objects to main object for console logout and array usage
         this.E.forEach((v, k) => {
             this[k] = v;
@@ -65,8 +66,12 @@ let H = function() {
     }
 
     fn.off = function() {
-        this.replace(this.clone());
-        return this;
+        this.each((x, i) => {
+            let n = x.cloneNode(true);
+            this.E[i].parentNode.replaceChild(n, x);
+        });
+        //Return a new instance, to refresh node list
+        return new _c(this.Q);
     }
     
     /**

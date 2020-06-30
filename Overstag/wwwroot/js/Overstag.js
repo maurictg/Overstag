@@ -5,7 +5,7 @@
             this.mapEvents();
         },
         mapEvents: function () {
-            $('#btnsnow').click(this.Theme.letItSnow);
+            $('#btnsnow').on('click', this.Theme.letItSnow);
         },
         Loader: function () {
             return {
@@ -37,18 +37,6 @@
                 setLight: function () {
                     $('body').removeClass('overstag-dark');
                     localStorage.setItem('darktheme', 'false');
-                },
-                letItSnow: function () {
-                    $("<link/>", {
-                        rel: "stylesheet",
-                        type: "text/css",
-                        href: "/css/particles.css"
-                    }).appendTo("head");
-                    $.getScript('/js/particles.min.js', function () {
-                        particlesJS.load('particles-js', '/js/particlesjs-config.json', function () {
-                            $('#btnsnow').fadeOut();
-                        });
-                    });
                 },
                 init: function () {
                     if (localStorage.getItem('darktheme')) {

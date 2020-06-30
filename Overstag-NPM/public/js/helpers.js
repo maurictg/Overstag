@@ -46,9 +46,9 @@ H.ajax = function(o, cb) {
     }
 }
 
-H.post = (url, data, callback, type = 'json', reqType = 'urlencoded') => S.ajax({url: url, method: 'POST', data: data, responseType: type, requestType: reqType}, callback);
-H.get = (url, callback, type = 'text') => S.ajax({url: url, method: 'GET', responseType: type}, callback);
-H.getJSON = (url, cb) => S.get(url, cb, 'json');
+H.post = (url, data, callback, type = 'json', reqType = 'urlencoded') => H.ajax({url: url, method: 'POST', data: data, responseType: type, requestType: reqType}, callback);
+H.get = (url, callback, type = 'text') => H.ajax({url: url, method: 'GET', responseType: type}, callback);
+H.getJSON = (url, cb) => H.get(url, cb, 'json');
 
 //Serialize JSON to url-encoded
 H.serializeJSON = (json) => {

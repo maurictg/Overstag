@@ -12,14 +12,48 @@
     <meta name="keywords" content="@ViewBag.Keywords" />
     <meta name="google-site-verification" content="sYX4bBfxEv4Mg3974SRhXeQ6-JRTfaUTOyKNw_tqT5A" />
 
-    <link rel="stylesheet" type="text/css" href="~/css/overstag.min.css" />
+    @if (Overstag.Core.General.isDebug)
+    {
+        <link rel="stylesheet/less" type="text/css" href="~/less/overstag.less" />
+        <script src="~/js/less.min.js"></script>
+    }
+    else
+    {
+        <link rel="stylesheet" type="text/css" href="~/css/overstag.min.css" />
+    }
+
     <link rel="stylesheet" type="text/css" href="~/css/overstag-materialize.min.css" />
     <link rel="stylesheet" type="text/css" href="~/icons/material-icons.css" />
     @RenderSection("Stylesheets", required: false)
 
-    <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
+    @if (ViewBag.NoJQ != null)
+    {
+        <script src="~/js/hquery.min.js"></script>
+        if (Overstag.Core.General.isDebug)
+        {
+            <script src="~/js/vue.js"></script>
+        }
+        else
+        {
+            <script src="~/js/vue.min.js"></script>
+        }
+    }
+    else
+    {
+        <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
+    }
+
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/overstag.min.js"></script>
+
+    @if (Overstag.Core.General.isDebug)
+    {
+        <script type="text/javascript" src="~/js/overstag.js"></script>
+    }
+    else
+    {
+        <script type="text/javascript" src="~/js/overstag.min.js"></script>
+    }
+
     @RenderSection("Scripts", required: false)
 
 
@@ -96,24 +130,10 @@
 
     @RenderBody()
 
-    @if (DateTime.Now.Month == 12 || DateTime.Now.Month == 1)
-    {
-        <div class="fixed-action-btn hide-on-small-and-down">
-            <a class="btn-floating btn-large" id="btnsnow">
-                <i class="large o-blue material-icons waves-effect">star_border</i>
-            </a>
-        </div>
-
-        <div id="particles-js"></div>
-    }
-
     <script>
-        $(document).ready(function () {
-            $('.sidenav').sidenav();
-            $('.slider').slider();
-            $('.modal').modal();
-            $('.materialboxed').materialbox();
-        });
+        (function () {
+            M.AutoInit();
+        }());
     </script>
 
     <div id="_data"></div>

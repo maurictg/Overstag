@@ -16,19 +16,11 @@
             transition: opacity 0.5s;
         }
 
-        .v-fade[style*="display: none;"] {
-            opacity: 0;
-            pointer-events: none; /* disable user interaction */
-            user-select: none; /* disable user selection */
-        }
-
-        input[type=password] + label {
-            pointer-events: none;
-            *{
-                pointer-events: all;
+            .v-fade[style*="display: none;"] {
+                opacity: 0;
+                pointer-events: none; /* disable user interaction */
+                user-select: none; /* disable user selection */
             }
-        }
-
     </style>
 }
 
@@ -84,7 +76,7 @@
                     <h5 id="msgDemo" title="Title attribuut werkt">Rendering demo: {{ message }}</h5>
                     <button onclick="time.visible = !time.visible;">Toggle</button>
                     <h5 id="timeDemo" v-if="visible" v-bind:title="message">Binding demo (hover over dit)</h5>
-                    <br/>
+                    <br />
                     <h5>For loop</h5>
                     <div id="todoList">
                         <ol>
@@ -105,13 +97,13 @@
                     <div id="mvvm">
                         <h6>{{ bericht }}</h6>
                         <div class="input-field col s6">
-                            <input placeholder="Type something" v-model="bericht" type="text" >
+                            <input placeholder="Type something" v-model="bericht" type="text">
                             <label for="tbBinding">MVVM demo</label>
                         </div>
                     </div>
 
-                    <br/>
-                    <br/><br/>
+                    <br />
+                    <br /><br />
                     <h5>Web components</h5>
                     <div id="components">
                         <ol>
@@ -124,6 +116,11 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    (function () { Overstag.init(); }());
+</script>
 
 <script>
     //App
