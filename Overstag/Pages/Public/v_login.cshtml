@@ -1,0 +1,138 @@
+﻿@page
+@{
+    ViewBag.Title = "Overstag - Inloggen";
+    Layout = "_Layout";
+    ViewBag.NoJQ = true;
+}
+
+<div class="o-blue darken" style="height: 100%; vertical-align: middle;">
+    <div class="row" id="app">
+        <div class="row"></div>
+        <h2 class="white-text center-align" v-show="!visible">Momentje...</h2>
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <div class="card rounded v-fade" v-show="visible">
+                <div class="card-content">
+                    <h3 class="center-align o-blue-text text-middle">Inloggen</h3>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">mail_outline</i>
+                            <input id="Username" v-on:keydown="enter($event, false)" class="checki bigger-input" v-model="username" :disabled="disabled" type="text">
+                            <label for="Username">Gebruikersnaam/email</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <i class="material-icons prefix">lock_outline</i>
+                            <input id="Password" v-on:keydown="enter($event, true)" class="checki bigger-input" v-model="password" :disabled="disabled" type="password">
+                            <label for="password">Wachtwoord</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <a class="overstagbtn col s12 waves-effect rounded" v-on:click="signIn" v-bind:class="{disabled: (disabled || !clickable)}">Inloggen</a>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <p class="margin left-align">
+                                <a href="/Register/Register"><b>Geen account?</b></a>
+                            </p>
+                        </div>
+                        <div class="input-field col s6">
+                            <p class="margin right-align">
+                                <a class="modal-trigger" href="#"><b>Wachtwoord vergeten?</b></a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const redirectUrl = '@ViewBag.RedirectURL';
+</script>
+
+<script>
+    const noJQ = true;
+    $('#_progbar').show();
+
+    let app = new Vue({
+        el: '#app',
+        mounted() {
+            Overstag.General.restoreMe(() => { $('#_progbar').hide(); this.visible = true }, () => this.redirect);
+        },
+        data: {
+            visible: false,
+            disabled: false,
+            clickable: true,
+            username: '',
+            password: ''
+        },
+        methods: {
+            enter(e, t) {
+                if (e.keyCode == 13) {
+                    if (t) this.signIn();
+                    else $('#Password')[0].focus();
+                }
+            },
+            signIn() {
+                if (this.isValid()) {
+                    this.disabled = true;
+                    $.post('/Register/postLogin', { Username: this.username, Password: this.password }, (r, s) => {
+                        if (s === 200) {
+                            this.disabled = false;
+                            if (r.status === 'success') {
+                                this.type = r.type;
+
+                                if (r.twofactor === 'yes') {
+                                    //Handle 2fa
+                                    this.token = r.token;
+                                }
+                                else {
+                                    this.redirect();
+                                    localStorage.setItem('remember', r.remember);
+                                }
+                            } else {
+                                M.toast({ html: r.error, classes: 'red' });
+                                this.username = this.password = '';
+                                Vue.nextTick(() => $('#Username')[0].focus());
+                            }
+                        } else {
+                            M.toast({ html: 'Er is iets fout gegaan', classes: 'red' });
+                        }
+                    });
+                    this.disabled = true;
+                } else {
+                    M.toast({ html: 'Vul a.u.b alle velden in', classes: 'blue' });
+                }
+            },
+            isValid() {
+                let v = true;
+                $('.checki').each((e) => {
+                    if (e.value.trim() === '')
+                        v = false;
+                });
+                return v;
+            },
+            redirect() {
+                if (redirectUrl && redirectUrl !== '') {
+                    if (redirectUrl === 'RELOAD')
+                        window.location.reload();
+                    else
+                        window.location.href = redirectUrl;
+                    return;
+                }
+
+                let url = (type) => ({
+                    0: '/User',
+                    1: '/User',
+                    2: '/Mentor',
+                    3: '/Admin'
+                })[type];
+
+                $('#_progbar').show();
+                window.location.href = url(this.type);
+            }
+        }
+    });
+</script>

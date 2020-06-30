@@ -74,17 +74,11 @@
                             } else {
                                 console.log('Cant restore login');
                                 localStorage.removeItem('remember');
+
+                                if (callback !== undefined && callback !== null) {
+                                    callback(params);
+                                }
                             }
-                        }).done(function () {
-                            if (callback !== undefined && callback !== null) {
-                                callback(params);
-                            }
-                            return true;
-                        }).fail(function () {
-                            if (callback !== undefined && callback !== null) {
-                                callback(params);
-                            }
-                            return false;
                         });
                     }
                     else {

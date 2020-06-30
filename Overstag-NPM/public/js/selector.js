@@ -79,12 +79,12 @@ let H = function() {
      */
 
     fn.html = function(h) {
-        if(h) this.each((e) => e.innerHTML = h);
+        if(h || h === '') this.each((e) => e.innerHTML = h);
         else return this.E[0].innerHTML;
     }
     
     fn.text = function(t) {
-        if(t) this.each((e) => e.textContent = t);
+        if(t || t === '') this.each((e) => e.textContent = t);
         else return this.E[0].innerText;
     }
 
@@ -120,7 +120,7 @@ let H = function() {
     }
 
     fn.val = function(v) {
-        if(v) this.each((e) => e.value = v);
+        if(v || v === '') this.each((e) => e.value = v);
         else return this.E[0].value;
     }
 

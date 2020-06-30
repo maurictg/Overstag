@@ -2067,6 +2067,11 @@ input + label {
   input + label * {
     pointer-events: all; }
 
+input[type=password] + label {
+  pointer-events: none; }
+  input[type=password] + label * {
+    pointer-events: all; }
+
 html {
   box-sizing: border-box; }
 
@@ -4352,7 +4357,7 @@ body.keyboard-focused .dropdown-content li:focus {
   margin-right: 5px; }
   .chip:focus {
     outline: none;
-    background-color: #26a69a;
+    background-color: #3096D3;
     color: #fff; }
   .chip > img {
     float: left;
@@ -4376,8 +4381,8 @@ body.keyboard-focused .dropdown-content li:focus {
   outline: none;
   transition: all .3s; }
   .chips.focus {
-    border-bottom: 1px solid #26a69a;
-    box-shadow: 0 1px 0 0 #26a69a; }
+    border-bottom: 1px solid #3096D3;
+    box-shadow: 0 1px 0 0 #3096D3; }
   .chips:hover {
     cursor: text; }
   .chips .input {

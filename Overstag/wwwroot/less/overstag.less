@@ -152,3 +152,14 @@
         background-color: @darktheme-dark;
     }
 }
+
+.v-fade {
+    display: inherit !important;
+    transition: opacity 0.5s !important;
+}
+
+.v-fade[style*="display: none;"] {
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+}
