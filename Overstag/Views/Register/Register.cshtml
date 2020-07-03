@@ -67,11 +67,11 @@
                         <p>
                             Geslacht:&nbsp;
                             <label>
-                                <input value="0" class="with-gap" name="sex" type="radio" checked />
+                                <input value="true" class="with-gap" name="sex" type="radio" checked />
                                 <span>M</span>&nbsp;
                             </label>
                             <label>
-                                <input value="1" class="with-gap" name="sex" type="radio" />
+                                <input value="false" class="with-gap" name="sex" type="radio" />
                                 <span>V</span>
                             </label>
                         </p>
@@ -224,7 +224,7 @@
                 Adress: $('#Adress').val(),
                 Postalcode: $('#Postalcode').val(),
                 Residence: $('#Residence').val(),
-                Gender: ($('input[name=sex]:checked').val() == 0),
+                Gender: $('input[name=sex]:checked').val(),
                 Type: $('input[name=type]:checked').val(),
                 Birthdate: $('#Birthdate').val(),
                 Phone: $('#Phone').val()

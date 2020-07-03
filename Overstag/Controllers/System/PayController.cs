@@ -36,6 +36,7 @@ namespace Overstag.Controllers
             await using var context = new OverstagContext();
             var invoice = await context.Invoices.FirstOrDefaultAsync(f => f.InvoiceID == invoiceid);
 
+            
             if (invoice == null)
             {
                 string[] error = { "Factuur niet gevonden", "Waarschijnlijk klopt de link niet. <br/><i>Als het probleem blijft optreden neem dan contact met ons op.</i>" };
@@ -43,7 +44,13 @@ namespace Overstag.Controllers
             }
             else
             {
-                if(invoice.Paid || showPayment)
+                if (invoice.UserID == null)
+                {
+                    string[] error = { "Account verwijderd", "De gebruiker van wie deze factuur was heeft zijn of haar account verwijderd. <br/><i>Als u de data nodig heeft kunt u nog de printversie bij ons opvragen.</i>" };
+                    return View("~/Views/Error/Custom.cshtml", error);
+                }
+
+                if (invoice.Paid || showPayment)
                 {
                     //Validate payment
                     var payment = await context.Payments.Include(f => f.Invoice).OrderByDescending(f => f.PlacedAt).FirstOrDefaultAsync(f => f.Invoice.InvoiceID == invoice.InvoiceID);
@@ -105,7 +112,7 @@ namespace Overstag.Controllers
                 InvoiceId = invoice.Id,
                 PayType = paymentType,
                 PlacedAt = DateTime.Now,
-                UserId = invoice.UserID
+                UserId = (int)invoice.UserID
             };
 
             if (invoice.Payment != null)

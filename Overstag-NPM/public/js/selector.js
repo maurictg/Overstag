@@ -4,18 +4,24 @@ let H = function() {
     /* Constructor _c */
     let _c = function(s) {
         if(!s) return;
-        
-        //Store nodelist in prototype.E (E means Elements)
-        if(typeof s === 'string') _c.prototype.E = document.querySelectorAll(s);
-        else if(s instanceof NodeList) _c.prototype.E = s;
-        else if(s instanceof _c) console.log(s);
-        else return;
 
-        _c.prototype.Q = s; //Store query in prototype.Q
-        //Copy prototype objects to main object for console logout and array usage
-        this.E.forEach((v, k) => {
-            this[k] = v;
-        });
+        let nodes = [];
+        if(typeof s === 'string') nodes = document.querySelectorAll(s);
+        else if(s instanceof NodeList || s instanceof HTMLCollection || s instanceof _c || (s instanceof Array && s.length > 0 && s[0] instanceof HTMLElement)) nodes = s;
+        else if(s instanceof HTMLElement) nodes[0] = s;
+        else if(s instanceof Function) {
+            if (document.readyState === "complete" || (document.readyState !== "loading" && !document.documentElement.doScroll)) s();
+            else document.addEventListener("DOMContentLoaded", s);
+            return;
+        }
+        
+        this.length = (s instanceof _c) ? s.length : nodes.length;
+
+        //Store query in prototype.Q
+        _c.prototype.Q = s; 
+
+        //Store objects in this
+        for (let i = 0; i < this.length; i++) this[i] = nodes[i];
     }
 
     /* Shorthand */
@@ -28,9 +34,7 @@ let H = function() {
     /* Each callback(e, i) */
     fn.each = function(cb) {
         if (!cb || typeof cb !== 'function') return;
-        for (var i = 0; i < this.E.length; i++) {
-            cb(this.E[i], i);
-        }
+        for (var i = 0; i < this.length; i++) cb(this[i], i);
         return this;
     }
 
@@ -68,41 +72,63 @@ let H = function() {
     fn.off = function() {
         this.each((x, i) => {
             let n = x.cloneNode(true);
-            this.E[i].parentNode.replaceChild(n, x);
+            this[i].parentNode.replaceChild(n, x);
+            this[i] = n; //Also replace in selector
         });
-        //Return a new instance, to refresh node list
-        return new _c(this.Q);
+        return this;
+    }
+
+    fn.skip = function(n) {
+        if(this.length < (n + 1)) return;
+        return new _c(Array.prototype.slice.call(this, n));
+    }
+
+    fn.take = function(n) {
+        return new _c(Array.prototype.slice.call(this, 0, Math.min(this.length, n)));
+    } 
+
+    fn.children = function() {
+        return new _c(this[0].children);
+    }
+
+    fn.focus = function() {
+        this[0].focus();
+        return this;
     }
     
     /**
      * Non-chaining functions (getters/setters)
      */
 
+    fn.toArray = function() {
+        return Array.prototype.slice.call(this);
+    }
+
     fn.html = function(h) {
         if(h || h === '') this.each((e) => e.innerHTML = h);
-        else return this.E[0].innerHTML;
+        else return this[0].innerHTML;
     }
     
     fn.text = function(t) {
         if(t || t === '') this.each((e) => e.textContent = t);
-        else return this.E[0].innerText;
+        else return this[0].innerText;
     }
 
     fn.css = function(n, v) {
         if(!n) return;
         if(v) this.each((e) => e.style[n] = v);
-        else return this.E[0].style[n];
+        else return this[0].style[n];
     }
 
     fn.attr = function(n, v) {
         if(!n) return;
         if(v) this.each((e) => e.setAttribute(n, v));
-        else return this.E[0].getAttribute(n);
+        else return this[0].getAttribute(n);
     }
 
     fn.rmAttr = function(n) {
-        if(n) this.each((e) => e.removeAttribute(n));
-        else return;
+        if(!n) return;
+        else this.each((e) => e.removeAttribute(n));
     }
 
     fn.data = function(n, v) {
@@ -121,27 +147,23 @@ let H = function() {
 
     fn.val = function(v) {
         if(v || v === '') this.each((e) => e.value = v);
-        else return this.E[0].value;
+        else return this[0].value;
     }
 
     fn.clone = function() {
-        return this.E[0].cloneNode(true);
-    }
-    
-    fn.first = function() {
-        return this.E[0];
+        return this[0].cloneNode(true);
     }
 
     //Serialize form to url-encoded formdata or JSON
     fn.serialize = function(json = false) {
         let d = {};
-        let form = this.E[0];
-        Array.prototype.slice.call(form.elements).forEach(function(f) {
+        let form = this[0];
+        Array.prototype.slice.call(form.elements).forEach((f) => {
             if (!f.name || f.disabled || ['file', 'reset', 'submit', 'button'].indexOf(f.type) > -1) return;
             if (f.type === 'select-multiple') {
-                Array.prototype.slice.call(f.options).forEach(function (option) {
-                    if (!option.selected) return;
-                    d[f.name] = option.value;
+                Array.prototype.slice.call(f.options).forEach((o) => {
+                    if (!o.selected) return;
+                    d[f.name] = o.value;
                 });
                 return;
             }

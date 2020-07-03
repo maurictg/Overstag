@@ -93,9 +93,9 @@
                                     <td>@string.Concat(e.Key.Description.Take(30))@((e.Key.Description.Length>30)?"...":"")</td>
                                     <td>@e.Key.When.ToString("dd-MM-yyyy") om @e.Key.When.ToString("HH:mm")</td>
                                     <td>
-                                        @if (e.Value > 0)
+                                        @if (e.Value.Item1 > 0)
                                         {
-                                            @Html.Raw($"Ja, <b>{e.Value}</b>, (+&euro;{Math.Round((double)(e.Key.Cost * e.Value) / 100, 2).ToString("F")})")
+                                            @Html.Raw($"Ja, <b>{e.Value}</b>, (+&euro;{Math.Round((double)(e.Key.Cost * e.Value.Item1) / 100, 2).ToString("F")})")
                                         }
                                         else
                                         {
@@ -103,9 +103,9 @@
                                         }
                                     </td>
                                     <td>&euro;@Math.Round((double)e.Key.Cost / 100, 2).ToString("F")</td>
-                                    <td><b>&euro;@Math.Round((double)e.Key.Cost * (e.Value + 1) / 100, 2).ToString("F")</b></td>
+                                    <td><b>&euro;@Math.Round((double)e.Key.Cost * (e.Value.Item1 + 1) / 100, 2).ToString("F")</b></td>
                                 </tr>
-                                total += (e.Key.Cost * (e.Value + 1));
+                                total += (e.Key.Cost * (e.Value.Item1 + 1));
                             }
                             <tr>
                                 <td colspan="6">
@@ -186,7 +186,6 @@
                         }
                     }
                     <br />
-                    <h6 id="printed_at" style="display: none;">Factuur geprint op: <b>@DateTime.Now.ToString("dd-MM-yyyy")&nbsp;om&nbsp;@DateTime.Now.ToString("HH:mm")</b></h6>
                 </div>
             </li>
         </ul>
@@ -194,7 +193,7 @@
 
     <div class="row" id="buttons">
         <div class="col s12 center-align">
-            <button class="btn btn-large green waves-effect" id="btnprint" onclick="Invoice.startPrint();">Printen</button>
+            <a class="btn btn-large green waves-effect" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)" id="btnprint">Printen</a>
             @if (!Model.Paid && (ViewBag.Payment == null || !((Overstag.Models.Payment)ViewBag.Payment).IsPaid()))
             {
                 <a class="btn btn-large blue btnckt waves-effect modal-trigger" id="btnPay" href="#mdPay">Betalen &rarr;</a>
@@ -314,19 +313,6 @@
                 M.Collapsible.getInstance($('#info')).open(2);
             else
                 Payment.init();
-        },
-        startPrint: function () {
-            var instance = M.Collapsible.init($('.collapsible.expandable'), { accordion: false });
-            instance.open(0); instance.open(1); instance.open(2);
-            $('nav, #btnprint, #btnPay').hide();
-            M.toast({ html: "Printen...", classes: "blue rounded", displayLength: 500, completeCallback: function() { Invoice.doPrint() } });
-        },
-        doPrint: function () {
-            window.print();
-            $('nav, #btnprint, #btnPay').show();
-            var instance = M.Collapsible.init($('.collapsible.expandable'), { accordion: true });
-            instance.close(0); instance.close(1); instance.close(2);
-            $('#printedat').hide();
         },
         checkout: function (type) {
             $('#checkout_type').val(type);

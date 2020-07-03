@@ -27,13 +27,16 @@ namespace Overstag.Authorization
         /// <param name="filterContext"></param>
         public void OnAuthorization(AuthorizationFilterContext filterContext)
         {
-            var user = OverstagController.GetCurrentUser(filterContext.HttpContext);
-            if (user != null)
+            if(!_allowedRoles.Contains(-1))
             {
-                var userRole = user.Type;
-                if (_allowedRoles.All(x => x != userRole)) filterContext.Result = new RedirectResult($"/Error/403?r={filterContext.HttpContext.Request.Path}");
+                var user = OverstagController.GetCurrentUser(filterContext.HttpContext);
+                if (user != null)
+                {
+                    var userRole = user.Type;
+                    if (_allowedRoles.All(x => x != userRole)) filterContext.Result = new RedirectResult($"/Error/403?r={filterContext.HttpContext.Request.Path}");
+                }
+                else filterContext.Result = new RedirectResult($"/Error/401?r={filterContext.HttpContext.Request.Path}");
             }
-            else filterContext.Result = new RedirectResult($"/Error/401?r={filterContext.HttpContext.Request.Path}");
         }
     }
 }

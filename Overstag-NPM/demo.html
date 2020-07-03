@@ -8,6 +8,7 @@
     <script src="/js/selector.js"></script>
     <script src="/js/helpers.js"></script>
     <link rel="stylesheet" type="text/css" href="/css/effects.css">
+    <link rel="icon" href="data:,">
     <style>
         /**
  * Add box sizing to everything
@@ -71,6 +72,12 @@ label {
 
     <input type="text" value="Hello!">
 
+    <div id="div">
+        <div id="div2">
+            <p id="div3">Hoi</p>
+        </div>
+    </div>
+
     <form id="frm">
 
         <label for="name">Name</label>
@@ -127,6 +134,13 @@ label {
     
     
     </form>
-    <p><button onclick="console.log(S('#frm').serialize())">Submit</button></p>
+    <p><button onclick="console.log(H('#frm').serialize())">Submit</button></p>
+
+    <script>
+        $(() => {console.log('hoi')});
+        $(function(){
+            console.log('Hello');
+        });
+    </script>
 </body>
 </html>

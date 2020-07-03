@@ -13,6 +13,10 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'demo.html'));
 });
 
+app.get('/material', (req, res) => {
+    res.sendFile(path.join(__dirname, 'materializedemo.html'))
+});
+
 app.get('/test', (req, res) => {
     res.json({status: 'success', data: 'hoi'});
 });

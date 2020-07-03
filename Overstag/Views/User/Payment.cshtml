@@ -134,9 +134,9 @@
                                                     <td>@e.Key.When.ToString("D", culture) om @e.Key.When.ToString("t", culture)</td>
                                                     <td>@e.Key.Description</td>
                                                     <td>
-                                                        @if (e.Value > 0)
+                                                        @if (e.Value.Item1 > 0)
                                                         {
-                                                            @Html.Raw($"Ja, <b>{e.Value}</b>, (+&euro;{Math.Round((double)(e.Key.Cost * e.Value) / 100, 2).ToString("F")})")
+                                                            @Html.Raw($"Ja, <b>{e.Value}</b>, (+&euro;{Math.Round((double)(e.Key.Cost * e.Value.Item1) / 100, 2).ToString("F")})")
                                                         }
                                                         else
                                                         {
@@ -144,7 +144,7 @@
                                                         }
                                                     </td>
                                                     <td>&euro;@Math.Round((double)e.Key.Cost / 100, 2).ToString("F")</td>
-                                                    <td><b>&euro;@Math.Round((double)e.Key.Cost * (e.Value + 1) / 100, 2).ToString("F")</b></td>
+                                                    <td><b>&euro;@Math.Round((double)e.Key.Cost * (e.Value.Item1 + 1) / 100, 2).ToString("F")</b></td>
                                                 </tr>
                                             }
 

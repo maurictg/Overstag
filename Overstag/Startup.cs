@@ -11,6 +11,8 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 using Microsoft.AspNetCore.StaticFiles;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 
 namespace Overstag
 {
@@ -20,6 +22,9 @@ namespace Overstag
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var loader = new Classes.AssemblyLoader();
+            loader.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Uploads")));
             services.AddMvc();

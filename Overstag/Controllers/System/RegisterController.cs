@@ -74,6 +74,13 @@ namespace Overstag.Controllers
         }
 
         /// <summary>
+        /// Takes the user to a page to ask for the email address to send a password reset link
+        /// </summary>
+        /// <returns>View</returns>
+        [Route("Register/Passreset")]
+        public IActionResult ResetPassword() => View("ResetPassword");
+
+        /// <summary>
         /// Resets the password of the user
         /// </summary>
         /// <param name="token">The user's token</param>
@@ -337,15 +344,16 @@ namespace Overstag.Controllers
         /// <returns>Json (status = success or error)</returns>
         [HttpPost]
         [Route("Register/Validate2FA")]
-        public JsonResult Validate2FA([FromForm]string token, [FromForm]string code, [FromForm]string datetime)
+        public JsonResult Validate2FA([FromForm]string token, [FromForm]string code, [FromForm]long datetime)
         {
-            DateTime now = DateTime.ParseExact(datetime, "dd-MM-yyyy HH:mm:ss",CultureInfo.InvariantCulture);
+            //DateTime now = DateTime.ParseExact(datetime, "dd-MM-yyyy HH:mm:ss",CultureInfo.InvariantCulture);
+            DateTime dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(Convert.ToDouble(datetime)).ToLocalTime();
 
-            if(now < DateTime.Now.AddMinutes(-2))
+            if (dt < DateTime.Now.AddMinutes(-2))
                 return Json(new { status = "timeout" });
 
             token = Uri.UnescapeDataString(token);
-            if (Security.TFA.Validate(code, token,now))
+            if (Security.TFA.Validate(code, token, dt))
             {
                 using(var context = new OverstagContext())
                 {
@@ -360,7 +368,7 @@ namespace Overstag.Controllers
                 }
             }                
             else
-                return Json(new { status = "error" });
+                return Json(new { status = "wrong" });
         }
 
         /// <summary>
@@ -370,7 +378,6 @@ namespace Overstag.Controllers
         /// <param name="code">The restoration code</param>
         /// <returns>Json (status = success with the secret or status = error)</returns>
         [HttpGet]
-        [OverstagAuthorize]
         [Route("Register/Restore2FA/{token}/{code}")]
         public JsonResult Restore2FA(string token, string code)
         {

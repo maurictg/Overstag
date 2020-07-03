@@ -8,12 +8,76 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Authorization;
+using DinkToPdf.Contracts;
+using Overstag.Services;
+using DinkToPdf;
 
 namespace Overstag.Controllers.Users
 {
     [OverstagAuthorize]
     public class FilesController : Controller
     {
+        private IConverter _converter;
+
+        public FilesController(IConverter converter)
+            => _converter = converter;
+
+        public async Task<IActionResult> InvoicePdf([FromQuery]string token, [FromQuery]bool download)
+        {
+            if (token != null && System.IO.File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Uploads", Uri.UnescapeDataString(token))))
+            {
+                var res = new FileContentResult(await System.IO.File.ReadAllBytesAsync(Path.Combine(Directory.GetCurrentDirectory(), "Uploads", Uri.UnescapeDataString(token))), "application/pdf");
+                if (download) res.FileDownloadName = "overstag-factuur.pdf";
+                return res;
+            }
+            else
+            {
+                string[] error = { "Bestand niet gevonden", "Voor deze factuur is geen bestand gegenereerd" };
+                return View("~/Views/Error/Custom.cshtml", error);
+            }
+        }
+
+        public IActionResult GenerateInvoicePdf([FromQuery]int id)
+        {
+            try
+            {
+                var invoice = Invoices.GetXInvoice(id);
+
+                var globalSettings = new GlobalSettings
+                {
+                    ColorMode = ColorMode.Color,
+                    Orientation = Orientation.Portrait,
+                    PaperSize = PaperKind.A4,
+                    Margins = new MarginSettings { Top = 10 },
+                    DocumentTitle = "Overstag factuur #" + invoice.GetInvoiceNumber()
+                };
+
+                var objectSettings = new ObjectSettings
+                {
+                    PagesCount = true,
+                    HtmlContent = Pdf.GenerateInvoiceHtml(invoice, HttpContext),
+                    WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "css", "overstag-materialize.min.css") },
+                    HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
+                    FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Stichting Overstag" }
+                };
+
+                var pdf = new HtmlToPdfDocument()
+                {
+                    GlobalSettings = globalSettings,
+                    Objects = { objectSettings }
+                };
+
+                var file = _converter.Convert(pdf);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", invoice.InvoiceID);
+                System.IO.File.WriteAllBytes(path, file);
+                return Json(new { status = "success" });
+            }
+            catch (Exception e)
+            {
+                return Json(new { status = "error", error = "Factuur maken mislukt", debuginfo = e.ToString() });
+            }
+        }
+
         /// <summary>
         /// Serve an anonymous file from the database by its token
         /// </summary>

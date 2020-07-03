@@ -16,12 +16,18 @@ namespace Overstag.Models
         public bool Paid { get; set; }
         public string InvoiceID { get; set; }
 
+        public string Fullname { get; set; }
+        public string Address { get; set; }
+        public int Number { get; set; }
+
         //Relations
         public Account User { get; set;  }
-        public int UserID { get; set; }
+        public int? UserID { get; set; }
         public Payment Payment { get; set; }
         public int PaymentID;
 
+        public string GetInvoiceNumber() => $"{this.Timestamp.Year}-{this.Number.ToString().PadLeft(2, '0')}";
+        public string GetInvoiceURL(HttpContext c) => $"{string.Format("{0}://{1}", c.Request.Scheme, c.Request.Host)}/Pay/Invoice/{Uri.EscapeDataString(this.InvoiceID)}";
         public InvoiceInfo toInvoiceInfo(string url = "/Pay/Invoice/")
         {
             return new InvoiceInfo()
@@ -44,6 +50,6 @@ namespace Overstag.Models
     //Xtended invoice
     public class XInvoice : Invoice
     {
-        public Dictionary<Event, int> Events { get; set; }
+        public Dictionary<Event, (int, int)> Events { get; set; }
     }
 }

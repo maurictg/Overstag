@@ -464,13 +464,17 @@ namespace Overstag.Controllers
         {
             await using var context = new OverstagContext();
             var user = await context.Accounts.Include(f => f.Invoices).FirstAsync(f => f.Id == currentUser.Id);
-            var invoices = user.Invoices.Where(f => !f.Paid).ToList();
+            var invoices = user.Invoices.Where(f => !f.Paid).OrderByDescending(x => x.Timestamp).ToList();
+
             if (invoices.Count() > 1)
             {
                 Invoice i = new Invoice();
 
                 int additions = 0;
                 int bill = 0;
+                int number = invoices.Min(x => x.Number);
+                string address = invoices.First().Address; //latest address
+                string fullname = invoices.First().Fullname;
                 List<string> EventIDS = new List<string>();
                     
                 foreach(var invoice in invoices)
@@ -479,7 +483,7 @@ namespace Overstag.Controllers
                     bill += invoice.Amount;
                     i.InvoiceID = invoice.InvoiceID;
                     EventIDS.AddRange(invoice.EventIDs.Split(',').ToList());
-                    user.Invoices.Remove(invoice);
+                    context.Invoices.Remove(invoice);
                 }
 
                 i.EventIDs = string.Join(',', EventIDS);
@@ -487,6 +491,9 @@ namespace Overstag.Controllers
                 i.AdditionsCost = additions;
                 i.Paid = false;
                 i.Timestamp = DateTime.Now;
+                i.Fullname = fullname;
+                i.Address = address;
+                i.Number = number;
 
                 try
                 {

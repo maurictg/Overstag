@@ -35,7 +35,8 @@
                     localStorage.setItem('darktheme', 'true');
                 },
                 setLight: function () {
-                    $('body').removeClass('overstag-dark');
+                    if (noJQ) $('body').rmClass('overstag-dark');
+                    else $('body').removeClass('overstag-dark');
                     localStorage.setItem('darktheme', 'false');
                 },
                 init: function () {
@@ -67,8 +68,8 @@
                     if (localStorage.getItem('remember')) {
                         $.post('/Auth/Login', { token: localStorage.getItem('remember') }, function (r) {
                             if (r.status === 'success') {
-                                if (successcallback !== undefined && successcallback !== null) {
-                                    successcallback();
+                                if (successcallback && successcallback !== null) {
+                                    successcallback(r.type);
                                 }
                                 console.log('Login restored!');
                             } else {

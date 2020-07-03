@@ -11,9 +11,9 @@ using Overstag.Authorization;
 
 namespace Overstag.Controllers
 {
-    [OverstagAuthorize(3)]
     public class AdminController : Controller
     {
+        [OverstagAuthorize(3)]
         public IActionResult Index()
             => View();
 
@@ -22,6 +22,7 @@ namespace Overstag.Controllers
         /// Get all users from the database
         /// </summary>
         /// <returns>JSON</returns>
+        [OverstagAuthorize(3)]
         public async Task<IActionResult> getUsers()
         {
             await using var context = new OverstagContext();
@@ -33,6 +34,7 @@ namespace Overstag.Controllers
         /// </summary>
         /// <param name="token">The user's token</param>
         /// <returns>Nothing, it redirects to /User</returns>
+        [OverstagAuthorize(3)]
         [Route("Admin/loginAs/{token}")]
         public async Task<IActionResult> loginAs(string token)
         {
@@ -49,6 +51,7 @@ namespace Overstag.Controllers
         /// <param name="id">The user's id</param>
         /// <param name="type">The new type</param>
         /// <returns>JSON(status=success)</returns>
+        [OverstagAuthorize(3)]
         public async Task<IActionResult> saveType([FromQuery]int id, [FromQuery]byte type)
         {
             await using var context = new OverstagContext();
@@ -63,6 +66,7 @@ namespace Overstag.Controllers
         /// Auto generate database
         /// </summary>
         /// <returns>A response message</returns>
+        [OverstagAuthorize(-1)]
         public async Task<IActionResult> InitDB()
         {
             try

@@ -29,13 +29,16 @@
     @if (ViewBag.NoJQ != null)
     {
         <script src="~/js/hquery.min.js"></script>
-        if (Overstag.Core.General.isDebug)
+        if (ViewBag.Vue != null)
         {
-            <script src="~/js/vue.js"></script>
-        }
-        else
-        {
-            <script src="~/js/vue.min.js"></script>
+            if (Overstag.Core.General.isDebug)
+            {
+                <script src="~/js/vue.js"></script>
+            }
+            else
+            {
+                <script src="~/js/vue.min.js"></script>
+            }
         }
     }
     else
@@ -43,6 +46,7 @@
         <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
     }
 
+    <script>const noJQ = @Html.Raw((ViewBag.NoJQ != null) ? "true" : "false");</script>
     <script type="text/javascript" src="~/js/materialize.min.js"></script>
 
     @if (Overstag.Core.General.isDebug)

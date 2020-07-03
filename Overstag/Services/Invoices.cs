@@ -4,19 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Overstag.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
 
 namespace Overstag.Services
 {
     public class Invoices
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public Invoices(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
-
-
         public static Exception error;
         public static string invoiceId;
         public static async Task<bool> Create(int userId)
@@ -50,6 +42,9 @@ namespace Overstag.Services
 
                     invoiceId = Encryption.Random.rHash(user.Token + DateTime.Now.ToLongTimeString());
 
+                    var latestInvoices = user.Invoices.Where(x => x.Timestamp.Year == DateTime.Now.Year).ToList();
+                    var invoiceNr = (latestInvoices.Count() > 0) ? latestInvoices.Max(x => x.Number) + 1 : 1;
+
                     await context.Invoices.AddAsync(new Invoice()
                     {
                         Amount = total + additions,
@@ -59,7 +54,10 @@ namespace Overstag.Services
                         Payment = null,
                         Timestamp = DateTime.Now,
                         User = user,
-                        InvoiceID = invoiceId
+                        InvoiceID = invoiceId,
+                        Address = $"{user.Adress}, {user.Postalcode} {user.Residence}",
+                        Fullname = $"{user.Firstname} {user.Lastname}",
+                        Number = invoiceNr
                     });
 
                     context.Accounts.Update(user);
@@ -92,12 +90,12 @@ namespace Overstag.Services
         public static XInvoice GetXInvoice(Invoice i)
         {
             List<int> eventIDS = i.EventIDs.Split(',').Select(f => Convert.ToInt32(f)).ToList();
-            Dictionary<Event, int> EventAndFriends = new Dictionary<Event, int>();
+            Dictionary<Event, (int, int)> EventAndFriendsAdditions = new Dictionary<Event, (int,int)>();
 
             foreach (int eventID in eventIDS)
             {
                 var sub = i.User.Subscriptions.First(f => f.EventID == eventID);
-                EventAndFriends.Add(sub.Event, sub.FriendCount);
+                EventAndFriendsAdditions.Add(sub.Event, (sub.FriendCount, sub.AdditionsCost));
             }
 
             return new XInvoice()
@@ -108,11 +106,14 @@ namespace Overstag.Services
                 PaymentID = i.PaymentID,
                 Paid = i.Paid,
                 Amount = i.Amount,
-                Events = EventAndFriends,
+                Events = EventAndFriendsAdditions,
                 Timestamp = i.Timestamp,
                 User = i.User,
                 InvoiceID = i.InvoiceID,
-                AdditionsCost = i.AdditionsCost
+                AdditionsCost = i.AdditionsCost,
+                Address = i.Address,
+                Fullname = i.Fullname,
+                Number = i.Number
             };
         }
 
@@ -180,6 +181,8 @@ namespace Overstag.Services
                     }
                 }
 
+                var latestInvoices = parent.Invoices.Where(x => x.Timestamp.Year == DateTime.Now.Year).ToList();
+
                 await context.Invoices.AddAsync(new Invoice()
                 {
                     AdditionsCost = Subs.Values.Sum(f => f.Item2),
@@ -188,7 +191,10 @@ namespace Overstag.Services
                     Paid = false,
                     Timestamp = DateTime.Now,
                     InvoiceID = Encryption.Random.rHash("INV" + DateTime.Now.ToLongTimeString()),
-                    Amount = (Subs.Sum(f => (f.Key.Cost * (1 + f.Value.Item1))) + Subs.Sum(f => f.Value.Item2))
+                    Amount = (Subs.Sum(f => (f.Key.Cost * (1 + f.Value.Item1))) + Subs.Sum(f => f.Value.Item2)),
+                    Number = (latestInvoices.Count() > 0) ? latestInvoices.Max(x => x.Number) + 1 : 1,
+                    Address = $"{parent.Adress}, {parent.Postalcode} {parent.Residence}",
+                    Fullname = $"{parent.Firstname} {parent.Lastname}"
                 });
 
                 context.Accounts.Update(parent);

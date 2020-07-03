@@ -44,7 +44,7 @@ namespace Overstag.Controllers
                     //Important session variables
                     base.setUser(user);
 
-                    return Json(new {status = "success"});
+                    return Json(new {status = "success", type = user.Type});
                 }
                 else
                 {

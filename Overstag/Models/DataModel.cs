@@ -76,7 +76,7 @@ namespace Overstag.Models
             mb.Entity<Account>()
                 .HasMany(f => f.Invoices)
                 .WithOne(g => g.User)
-                .OnDelete(DeleteBehavior.ClientCascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             //One to many (account aan payments)
             mb.Entity<Account>()
@@ -101,7 +101,8 @@ namespace Overstag.Models
             mb.Entity<Invoice>()
                 .HasOne(f => f.Payment)
                 .WithOne(g => g.Invoice)
-                .HasForeignKey<Payment>(x => x.InvoiceId);
+                .HasForeignKey<Payment>(x => x.InvoiceId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
         }
 
