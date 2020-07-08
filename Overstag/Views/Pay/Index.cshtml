@@ -137,6 +137,7 @@
                                 <th>Datum</th>
                                 <th>Tijd</th>
                                 <th>Factuurkenmerk</th>
+                                <th>Factuurnummer</th>
                                 <th>Totaalbedrag</th>
                                 <th>Betaald</th>
                             </tr>
@@ -146,6 +147,7 @@
                                 <td>@Model.Timestamp.ToString("dd-MM-yyyy")</td>
                                 <td>@Model.Timestamp.ToString("HH:mm:ss")</td>
                                 <td><i>@Model.InvoiceID</i></td>
+                                <td>@Model.GetInvoiceNumber()</td>
                                 <td><b>@Html.Raw(Overstag.Services.Html.Euro(Model.Amount))</b></td>
                                 <td>@Html.Raw(Overstag.Services.Html.YesNo(Model.Paid))</td>
                             </tr>
@@ -161,6 +163,7 @@
                         <table class="responsive-table">
                             <thead>
                                 <tr>
+                                    <th>Betaald met</th>
                                     <th>Betalingskenmerk</th>
                                     <th>Geplaatst op</th>
                                     <th>Betaald op</th>
@@ -169,7 +172,8 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><b>@p.PaymentId</b></td>
+                                    <td>@p.PayType</td>
+                                    <td>@p.PaymentId</td>
                                     <td>@p.PlacedAt.ToString("dd-MM-yyyy hh:mm:ss")</td>
                                     <td>@dt.ToString("dd-MM-yyyy hh:mm:ss")</td>
                                     <td>@Html.Raw(Overstag.Services.Html.YesNo(validated))</td>
@@ -193,10 +197,11 @@
 
     <div class="row" id="buttons">
         <div class="col s12 center-align">
-            <a class="btn btn-large green waves-effect" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)" id="btnprint">Printen</a>
+            <a class="btn btn-large o-blue waves-effect" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)" id="btnprint">Printen</a>
+            <a class="btn btn-large o-orange waves-effect" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)&download=true&name=@Uri.EscapeDataString($"Overstag factuur {Model.GetInvoiceNumber()}")" id="btnprint">Downloaden</a>
             @if (!Model.Paid && (ViewBag.Payment == null || !((Overstag.Models.Payment)ViewBag.Payment).IsPaid()))
             {
-                <a class="btn btn-large blue btnckt waves-effect modal-trigger" id="btnPay" href="#mdPay">Betalen &rarr;</a>
+                <a class="btn btn-large green btnckt waves-effect modal-trigger" id="btnPay" href="#mdPay">Betalen &rarr;</a>
             }
         </div>
     </div>

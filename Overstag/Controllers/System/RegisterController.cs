@@ -220,7 +220,7 @@ namespace Overstag.Controllers
                         }
                         catch (Exception e)
                         {
-                            return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nNeem a.u.b contact met ons op.", debuginfo = e, code = 2 });
+                            return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nNeem a.u.b contact met ons op.", debuginfo = e.ToString(), code = 2 });
                         }
 
                     }

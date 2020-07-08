@@ -14,7 +14,6 @@ using DinkToPdf;
 
 namespace Overstag.Controllers.Users
 {
-    [OverstagAuthorize]
     public class FilesController : Controller
     {
         private IConverter _converter;
@@ -22,12 +21,13 @@ namespace Overstag.Controllers.Users
         public FilesController(IConverter converter)
             => _converter = converter;
 
-        public async Task<IActionResult> InvoicePdf([FromQuery]string token, [FromQuery]bool download)
+        [OverstagAuthorize(-1)]
+        public async Task<IActionResult> InvoicePdf([FromQuery]string token, [FromQuery]bool download, [FromQuery]string name)
         {
             if (token != null && System.IO.File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "Uploads", Uri.UnescapeDataString(token))))
             {
                 var res = new FileContentResult(await System.IO.File.ReadAllBytesAsync(Path.Combine(Directory.GetCurrentDirectory(), "Uploads", Uri.UnescapeDataString(token))), "application/pdf");
-                if (download) res.FileDownloadName = "overstag-factuur.pdf";
+                if (download) res.FileDownloadName =  (name == null) ? "overstag-factuur.pdf" : Uri.UnescapeDataString(name)+".pdf";
                 return res;
             }
             else
@@ -37,6 +37,7 @@ namespace Overstag.Controllers.Users
             }
         }
 
+        [OverstagAuthorize]
         public IActionResult GenerateInvoicePdf([FromQuery]int id)
         {
             try
@@ -84,6 +85,7 @@ namespace Overstag.Controllers.Users
         /// <param name="token">The file's token</param>
         /// <returns>File or JSON</returns>
         [HttpGet]
+        [OverstagAuthorize]
         [Route("Files/Serve/{token}")]
         public async Task<IActionResult> Serve(string token)
         {
@@ -113,6 +115,7 @@ namespace Overstag.Controllers.Users
         /// <param name="files">One or multiple form-encoded files</param>
         /// <returns>JSON</returns>
         [HttpPost("Files/UploadFiles")]
+        [OverstagAuthorize]
         [RequestSizeLimit(1000000000)] //1GB MAX
         public async Task<IActionResult> UploadFiles(IList<IFormFile> files)
         {

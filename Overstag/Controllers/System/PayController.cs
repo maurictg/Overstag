@@ -35,7 +35,6 @@ namespace Overstag.Controllers
             invoiceid = Uri.UnescapeDataString(invoiceid);
             await using var context = new OverstagContext();
             var invoice = await context.Invoices.FirstOrDefaultAsync(f => f.InvoiceID == invoiceid);
-
             
             if (invoice == null)
             {
@@ -144,6 +143,11 @@ namespace Overstag.Controllers
 
                     return View(p);
                 }
+                else
+                {
+                    //Remove old payment
+                    context.Payments.Remove(invoice.Payment);
+                }
             }
 
 
@@ -159,7 +163,7 @@ namespace Overstag.Controllers
                     IdealPaymentRequest pr = new IdealPaymentRequest()
                     {
                         Amount = new Amount(Currency.EUR, cost),
-                        Description = $"Overstag factuur #{invoice.Id}",
+                        Description = $"Overstag factuur #{invoice.GetInvoiceNumber()}",
                         RedirectUrl = redirect,
                         Locale = "nl_NL",
                         CustomerId = invoice.User.MollieID,
