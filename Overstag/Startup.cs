@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.FileProviders;
 using Overstag.Services;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
 using Microsoft.AspNetCore.StaticFiles;
@@ -23,7 +24,7 @@ namespace Overstag
         public void ConfigureServices(IServiceCollection services)
         {
             var loader = new Classes.AssemblyLoader();
-            loader.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
+            loader.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) ? "libwkhtmltox.dll" : "libwkhtmltox.so"));
             services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Uploads")));
