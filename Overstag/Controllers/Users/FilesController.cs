@@ -32,17 +32,31 @@ namespace Overstag.Controllers.Users
             }
             else
             {
-                string[] error = { "Bestand niet gevonden", "Voor deze factuur is geen bestand gegenereerd" };
+                string[] error = { "Bestand niet gevonden", "Voor deze factuur is geen PDF-bestand gegenereerd" };
                 return View("~/Views/Error/Custom.cshtml", error);
             }
         }
 
-        [OverstagAuthorize]
-        public IActionResult GenerateInvoicePdf([FromQuery]int id)
+        [OverstagAuthorize(-1)]
+        public IActionResult CheckOrCreatePDF([FromQuery]string token)
         {
+            if(token == null)
+                return Json(new { status = "error", error = "Geen token meegegeven" });
+
+            token = Uri.UnescapeDataString(token);
+            using var context = new OverstagContext();
+            var i = context.Invoices.FirstOrDefault(x => x.InvoiceID == token);
+
+            if(i == null)
+                return Json(new { status = "error", error = "Factuur niet gevonden" });
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", i.InvoiceID);
+            if (System.IO.File.Exists(path))
+                return Json(new { status = "success", type = "exist" });
+
             try
             {
-                var invoice = Invoices.GetXInvoice(id);
+                var invoice = Invoices.GetXInvoice(i.Id);
 
                 var globalSettings = new GlobalSettings
                 {
@@ -69,13 +83,12 @@ namespace Overstag.Controllers.Users
                 };
 
                 var file = _converter.Convert(pdf);
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", invoice.InvoiceID);
                 System.IO.File.WriteAllBytes(path, file);
-                return Json(new { status = "success" });
+                return Json(new { status = "success", type = "generated" });
             }
             catch (Exception e)
             {
-                return Json(new { status = "error", error = "Factuur maken mislukt", debuginfo = e.ToString() });
+                return Json(new { status = "error", error = "Printbare PDF genereren mislukt", debuginfo = e.ToString() });
             }
         }
 

@@ -76,6 +76,7 @@ namespace Overstag.Models
             mb.Entity<Account>()
                 .HasMany(f => f.Invoices)
                 .WithOne(g => g.User)
+                .HasForeignKey(x => x.UserID)
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
             //One to many (account aan payments)

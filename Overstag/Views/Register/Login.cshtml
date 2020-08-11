@@ -1,5 +1,4 @@
-﻿@page
-@{
+﻿@{
     ViewBag.Title = "Overstag - Inloggen";
     ViewBag.Description = "Log in met jouw Overstag Account om je in te schrijven voor onze avonden en om te kunnen stemmen.";
     ViewBag.Keywords = "stichting overstag, overstag rilland, overstag reimerswaal, overstag inloggen, meedoen";
@@ -35,16 +34,13 @@
                         <div class="row">
                             <a class="overstagbtn col s12 waves-effect rounded" v-on:click="signIn" v-bind:class="{disabled: (disabled || !clickable)}">Inloggen</a>
                         </div>
+                        <div class="row hide-on-med-and-down"></div>
                         <div class="row">
-                            <div class="input-field col s6">
-                                <p class="margin left-align">
-                                    <a href="/Register/Register"><b>Geen account?</b></a>
-                                </p>
+                            <div class="col s6 left-align">
+                                <a href="/Register/Register" id="noaccount"><b>Geen account?</b></a>
                             </div>
-                            <div class="input-field col s6">
-                                <p class="margin right-align">
-                                    <a class="modal-trigger" href="/Register/Passreset"><b>Wachtwoord vergeten?</b></a>
-                                </p>
+                            <div class="col s6 right-align">
+                                <a href="/Register/Passreset"><b>Wachtwoord vergeten?</b></a>
                             </div>
                         </div>
                     </div>

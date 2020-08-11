@@ -16,8 +16,8 @@ namespace Overstag.Accountancy
         public bool Paid { get; set; }
         public string Metadata { get; set; } //JSON data
 
-        public int UserId { get; set; }
-        public Account User { get; set; }
+        public int? UserId { get; set; }
+        public Account? User { get; set; }
     }
 
     public static class Transactions

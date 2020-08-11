@@ -197,8 +197,8 @@
 
     <div class="row" id="buttons">
         <div class="col s12 center-align">
-            <a class="btn btn-large o-blue waves-effect" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)" id="btnprint">Printen</a>
-            <a class="btn btn-large o-orange waves-effect" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)&download=true&name=@Uri.EscapeDataString($"Overstag factuur {Model.GetInvoiceNumber()}")" id="btnprint">Downloaden</a>
+            <a class="btn btn-large o-blue waves-effect disabled" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)" id="btnprint">Printen</a>
+            <a class="btn btn-large o-orange waves-effect disabled" href="/Files/InvoicePdf?token=@Uri.EscapeDataString(Model.InvoiceID)&download=true&name=@Uri.EscapeDataString($"Overstag factuur {Model.GetInvoiceNumber()}")" id="btndownload">Downloaden</a>
             @if (!Model.Paid && (ViewBag.Payment == null || !((Overstag.Models.Payment)ViewBag.Payment).IsPaid()))
             {
                 <a class="btn btn-large green btnckt waves-effect modal-trigger" id="btnPay" href="#mdPay">Betalen &rarr;</a>
@@ -318,6 +318,23 @@
                 M.Collapsible.getInstance($('#info')).open(2);
             else
                 Payment.init();
+
+            Invoice.checkPDF();
+        },
+        checkPDF: function () {
+            $('#_progbar').show();
+            $.get('/Files/CheckOrCreatePDF?token=@Uri.EscapeDataString(Model.InvoiceID)', (r) => {
+                $('#_progbar').hide();
+                if (r.status === 'success') {
+                    if (r.type === 'generated') {
+                        M.toast({ html: 'Factuur-pdf gegenereerd', classes: 'blue' });
+                    }
+                    $('#btnprint, #btndownload').removeClass('disabled');
+                } else {
+                    M.toast({ html: r.error, classes: 'red' });
+                    console.log(r);
+                }
+            });
         },
         checkout: function (type) {
             $('#checkout_type').val(type);
