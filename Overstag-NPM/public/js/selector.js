@@ -17,11 +17,21 @@ let H = function() {
         
         this.length = (s instanceof _c) ? s.length : nodes.length;
 
-        //Store query in prototype.Q
+        /* Store query in prototype.Q */
         _c.prototype.Q = s; 
 
-        //Store objects in this
+        /* Store objects in "this" */
         for (let i = 0; i < this.length; i++) this[i] = nodes[i];
+
+        if (HQuery) {
+            /**
+             * Load extensions.
+             * For the usage of extensions: see animations.js
+             */
+            for (const [k, v] of Object.entries(HQuery.extensions)) {
+                _c.prototype[k] = (...p) => v(this, ...p);
+            }
+        }
     }
 
     /* Shorthand */
@@ -97,57 +107,71 @@ let H = function() {
     }
     
     /**
-     * Non-chaining functions (getters/setters)
+     * Semi-chaining functions (getters/setters), only setters are chainable
      */
 
-    fn.toArray = function() {
-        return Array.prototype.slice.call(this);
-    }
-
     fn.html = function(h) {
-        if(h || h === '') this.each((e) => e.innerHTML = h);
-        else return this[0].innerHTML;
+        if(!(h || h === '')) return this[0].innerHTML
+        this.each((e) => e.innerHTML = h);
+        return this;
     }
     
     fn.text = function(t) {
-        if(t || t === '') this.each((e) => e.textContent = t);
-        else return this[0].innerText;
+        if(!(t || t === '')) return this[0].innerText;
+        this.each((e) => e.textContent = t);
+        return this;
     }
 
     fn.css = function(n, v) {
         if(!n) return;
-        if(v) this.each((e) => e.style[n] = v);
-        else return this[0].style[n];
+        if(!(v || v === '')) return this[0].style[n];
+        this.each((e) => e.style[n] = v);
+        return this;
+    }
+
+    fn.rmCss = function(n) {
+        if(!n) return;
+        this.each((e) => e.style.removeProperty(n));
+        return this;
     }
 
     fn.attr = function(n, v) {
         if(!n) return;
-        if(v) this.each((e) => e.setAttribute(n, v));
-        else return this[0].getAttribute(n);
+        if(!(v || v === '')) return this[0].getAttribute(n);
+        this.each((e) => e.setAttribute(n, v));
+        return this;
     }
 
     fn.rmAttr = function(n) {
         if(!n) return;
-        else this.each((e) => e.removeAttribute(n));
+        this.each((e) => e.removeAttribute(n));
+        return this;
     }
 
     fn.data = function(n, v) {
-        if(!n) return;
         return this.attr('data-'+n, v);
     }
 
     fn.rmData = function(n) {
-        if(!n) return;
         return this.rmAttr('data-'+n);
     }
+
+    fn.val = function(v) {
+        if(!(v || v === '')) return this[0].value;
+        this.each((e) => e.value = v);
+        return this; 
+    }
+
+    /***
+     * Non-chaining functions
+     */
 
     fn.destroy = function() {
         this.each((e) => e.parentNode.removeChild(e));
     }
 
-    fn.val = function(v) {
-        if(v || v === '') this.each((e) => e.value = v);
-        else return this[0].value;
+    fn.toArray = function() {
+        return Array.prototype.slice.call(this);
     }
 
     fn.clone = function() {
@@ -173,6 +197,7 @@ let H = function() {
         return (json) ? d : $.serializeJSON(d);
     }
 
+    
     /* Return initalized constructor */
     return (s) => new _c(s);
 }();

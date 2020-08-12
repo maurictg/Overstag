@@ -3,18 +3,26 @@ const fs = require('fs');
 const terser = require('terser');
 
 
-let files = ['main.js', 'selector.js', 'helpers.js'];
+let files = ['main.js', 'selector.js', 'animations.js', 'helpers.js'];
 
 let code = '';
 files.forEach((f) => code += `${fs.readFileSync(`./public/js/${f}`, 'utf-8')}\n\n`);
 
-let t = terser.minify({'hquery.js':code});
+let t = terser.minify({'hquery.js':code}, {
+  //toplevel: true,
+  //keep_classnames: true,
+  //keep_fnames: true
+});
 
 if(!t.error) {
+  if(!t.code) {
+    console.error('Failed to compile hQuery');
+    return;
+  } 
   fs.writeFileSync('../Overstag/wwwroot/js/hquery.min.js', t.code);
   console.log('Done! file: hquery.min.js');
 } else {
-  console.log(t.error);
+  console.error(t.error);
 }
 
 //Minify CSS
@@ -39,8 +47,11 @@ let overstagjs = fs.readFileSync('../Overstag/wwwroot/js/overstag.js', 'utf-8');
 let o = terser.minify({'overstag.js':overstagjs});
 
 if(!o.error) {
+  if(!o.code) {
+    console.error('Failed to minify overstag.js');
+  }
   fs.writeFileSync('../Overstag/wwwroot/js/overstag.min.js', o.code);
   console.log('Done! file: overstag.min.js');
 } else {
-  console.log(t.error);
+  console.error(t.error);
 }
