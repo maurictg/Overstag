@@ -1,21 +1,20 @@
-﻿@{ 
-    var user = Overstag.Controllers.OverstagController.GetCurrentUser(Context);
-    var loggedin = user != null;
+﻿@{
+    var userAgent = Context.Request.Headers["User-Agent"].ToString();
+    bool iexplorer = (userAgent.Contains("MSIE") || userAgent.Contains("Trident"));
 }
 <!DOCTYPE html>
 <!-- OVERSTAG (C) @DateTime.Now.Year MaurICT (github.com/maurictg/Overstag) -->
 <html lang="nl-nl">
 <head>
-    <title>@ViewBag.Title</title>
+    <title>@ViewData["Title"]</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="@ViewBag.Description" />
     <meta name="keywords" content="@ViewBag.Keywords" />
     <meta name="google-site-verification" content="sYX4bBfxEv4Mg3974SRhXeQ6-JRTfaUTOyKNw_tqT5A" />
 
-    @if (Overstag.Core.General.isDebug)
+    @if (Overstag.Core.General.isDebug && !iexplorer)
     {
         <link rel="stylesheet/less" type="text/css" href="~/less/overstag.less" />
-        <script src="~/js/less.min.js"></script>
     }
     else
     {
@@ -60,96 +59,49 @@
 
     @RenderSection("Scripts", required: false)
 
-
+    @if (Overstag.Core.General.isDebug && !iexplorer)
+    {
+        <script src="~/js/less.min.js"></script>
+        <script>
+            less.pageLoadFinished.then(() => M.AutoInit());
+        </script>
+    }
+    else 
+    {
+        <script>
+            (() => { M.AutoInit(); });
+        </script>
+    }
+    
 
     <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
     <link rel="canonical" href="@ViewBag.Canonical" />
-    <script>
-        let loggedin = ('@loggedin' == 'True');
-        let usertype = @Html.Raw(loggedin ? user.Type : -1);
-
-        $(function () {
-            if (loggedin) {
-                $('#_reg a').attr('href', '#');
-                $('#_reg a').text('Uitloggen');
-                $('#_mreg a').attr('href', '#');
-                $('#_mreg a').text('Uitloggen');
-                $('#_reg a').attr('onclick', 'Overstag.General.logout();');
-                $('#_mreg a').attr('onclick', 'Overstag.General.logout();');
-
-                $('.hidden').show();
-
-                if (usertype != 1) {
-                    $('#_events a').attr('href', '/User/Events');
-                    $('#_mevents a').attr('href', '/User/Events');
-                    $('#_events a').text('Mijn agenda');
-                    $('#_mevents a').text('Mijn agenda');
-                }
-            }
-        });
-    </script>
 
     @RenderSection("Styles", required: false)
 </head>
-<body class="o-blue darken">
-    <nav>
-        <div class="nav-wrapper o-blue">
-            <a href="#" id="_title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
-            <a href="#" data-target="_mnav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
-                <li id="_home"><a href="/Home">Home</a></li>
-                <li id="_about"><a href="/Home/About">Over ons</a></li>
-                <li id="_contact"><a href="/Home/Contact">Contact</a></li>
-                <li id="_events"><a href="/Home/Events">Agenda</a></li>
-                <li id="_ainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
-                <li id="_reg"><a href="/Register">Aanmelden</a></li>
-            </ul>
-            <div class="progress" id="_progbar" style="display: none;">
-                <div class="indeterminate"></div>
-            </div>
-        </div>
-    </nav>
-    <ul class="sidenav" id="_mnav">
-        <li id="_mhome"><a href="/Home">Home</a></li>
-        <li id="_mabout"><a href="/Home/About">Over ons</a></li>
-        <li id="_mcontact"><a href="/Home/Contact">Contact</a></li>
-        <li id="_mevents"><a href="/Home/Events">Agenda</a></li>
-        <li id="_mainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
-        <li id="_mreg"><a href="/Register">Aanmelden</a></li>
-    </ul>
+<body>
 
-    @{
-        var userAgent = Context.Request.Headers["User-Agent"].ToString();
-        bool iexplorer = (userAgent.Contains("MSIE") || userAgent.Contains("Trident"));
+    @* Use ?no-nav=true to hide the nav bar *@
+    @if (Context.Request.Query["no-nav"] != "true")
+    {
+        @RenderSection("Navigation", required: false)
+    }
+    else
+    {
+        IgnoreSection("Navigation");
     }
 
     @if (iexplorer)
     {
-        <br/>
+        <br />
         <div class="material-alert error">
-            Internet explorer wordt niet ondersteund
+            Internet explorer wordt niet ondersteund. Gebruik Firefox, Chrome of Edge
             <button type="button" class="close-alert" onclick="$(this).parent().fadeOut();">×</button>
         </div>
     }
 
     @RenderBody()
 
-    <script>
-        (function () {
-            M.AutoInit();
-        }());
-    </script>
-
     <div id="_data"></div>
 </body>
 </html>
-
-<!-- COLOR SCHEME:
-licht:  #3096D3
-middel: #0B86CF
-donker: #04507D-->
-<!--
-    Website info: (according to backend controller)
-    URL:@string.Format("{0}://{1}", Context.Request.Scheme, Context.Request.Host)
-    Full URL: @string.Format("{0}://{1}{2}{3}", Context.Request.Scheme, Context.Request.Host, Context.Request.Path, Context.Request.QueryString)
--->

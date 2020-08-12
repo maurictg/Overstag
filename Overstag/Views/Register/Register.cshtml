@@ -150,6 +150,7 @@
         el: '#app',
         mounted() {
             this.visible = true;
+            $('#_reg, #_mreg').addClass('active');
             $('.checki').each((e) => {
                 $(e).attr('id', $(e).attr('name'));
             })

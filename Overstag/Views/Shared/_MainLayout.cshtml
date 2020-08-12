@@ -1,0 +1,88 @@
+﻿@{
+    var user = Overstag.Controllers.OverstagController.GetCurrentUser(Context);
+    var loggedin = user != null;
+    Layout = "_Layout";
+}
+
+@section Navigation {
+    <nav>
+        <div class="nav-wrapper o-blue">
+            <a href="#" id="_title" class="brand-logo">&nbsp;&nbsp;Overstag</a>
+            <a href="#" data-target="_mnav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li id="_home"><a href="/Home">Home</a></li>
+                <li id="_about"><a href="/Home/About">Over ons</a></li>
+                <li id="_contact"><a href="/Home/Contact">Contact</a></li>
+                <li id="_events"><a href="/Home/Events">Agenda</a></li>
+                <li id="_ainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
+                <li id="_reg"><a href="/Register">Aanmelden</a></li>
+            </ul>
+            <div class="progress" id="_progbar" style="display: none;">
+                <div class="indeterminate"></div>
+            </div>
+        </div>
+    </nav>
+    <ul class="sidenav" id="_mnav">
+        <li id="_mhome"><a href="/Home">Home</a></li>
+        <li id="_mabout"><a href="/Home/About">Over ons</a></li>
+        <li id="_mcontact"><a href="/Home/Contact">Contact</a></li>
+        <li id="_mevents"><a href="/Home/Events">Agenda</a></li>
+        <li id="_mainfo"><a href="/User" style="display: none;" class="hidden">Mijn account</a></li>
+        <li id="_mreg"><a href="/Register">Aanmelden</a></li>
+    </ul>
+}
+
+@section Scripts {
+    <script>
+        let loggedin = ('@loggedin' == 'True');
+        let usertype = @Html.Raw(loggedin ? user.Type : -1);
+
+        $(function () {
+            if (loggedin) {
+                $('#_reg a').attr('href', '#');
+                $('#_reg a').text('Uitloggen');
+                $('#_mreg a').attr('href', '#');
+                $('#_mreg a').text('Uitloggen');
+                $('#_reg a').attr('onclick', 'Overstag.General.logout();');
+                $('#_mreg a').attr('onclick', 'Overstag.General.logout();');
+
+                $('.hidden').show();
+
+                if (usertype != 1) {
+                    $('#_events a').attr('href', '/User/Events');
+                    $('#_mevents a').attr('href', '/User/Events');
+                    $('#_events a').text('Mijn agenda');
+                    $('#_mevents a').text('Mijn agenda');
+                }
+            }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+}
+
+@section Stylesheets { @RenderSection("Stylesheets", required: false) }
+@section Styles {
+    <style>
+        body {
+            background-color: #04507d !important;
+        }
+
+        body.overstag-dark {
+            background-color: #222222 !important;
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+}
+
+@RenderBody()
+<!-- COLOR SCHEME:
+licht:  #3096D3
+middel: #0B86CF
+donker: #04507D-->
+<!--
+    Website info: (according to backend controller)
+    URL:@string.Format("{0}://{1}", Context.Request.Scheme, Context.Request.Host)
+    Full URL: @string.Format("{0}://{1}{2}{3}", Context.Request.Scheme, Context.Request.Host, Context.Request.Path, Context.Request.QueryString)
+-->

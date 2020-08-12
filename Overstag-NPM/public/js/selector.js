@@ -97,6 +97,10 @@ let H = function() {
         return new _c(Array.prototype.slice.call(this, 0, Math.min(this.length, n)));
     } 
 
+    fn.parent = function() {
+        return new _c(this[0].parentNode);
+    }
+
     fn.children = function() {
         return new _c(this[0].children);
     }

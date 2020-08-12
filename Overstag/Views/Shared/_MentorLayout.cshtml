@@ -1,28 +1,8 @@
-﻿@using Microsoft.AspNetCore.Http
-<!DOCTYPE html>
-<!-- OVERSTAG (C) @DateTime.Now.Year MaurICT (github.com/maurictg/Overstag) -->
-<html lang="nl-nl">
-<head>
-    <title>@ViewBag.Title</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
-    <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/overstag.min.js"></script>
-    <script type="text/javascript" src="~/js/moment.min.js"></script>
-    <script type="text/javascript" src="~/js/chart.min.js"></script>
-    @RenderSection("Scripts", required: false)
+﻿@{
+    Layout = "_Layout";
+}
 
-    <link rel="stylesheet" type="text/css" href="~/css/overstag-materialize.min.css" />
-    <link rel="stylesheet" type="text/css" href="~/css/chart.min.css" />
-    <link rel="stylesheet" type="text/css" href="~/icons/material-icons.css" />
-    @RenderSection("Stylesheets", required: false)
-
-    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="~/css/overstag.min.css" />
-
-    @RenderSection("Styles", required: false)
-</head>
-<body>
+@section Navigation {
     <nav>
         <div class="nav-wrapper o-orange lighten">
             <a href="#" id="_title" class="brand-logo">&nbsp;Stichtingsbestuur</a>
@@ -56,22 +36,13 @@
         <li><a href="/User">Mijn account</a></li>
         <li id="_mreg"><a href="#" onclick="Overstag.General.logout();"><b>Uitloggen</b></a></li>
     </ul>
+}
 
-    @RenderBody()
+@RenderBody()
 
-    <script>
-        $(document).ready(function () {
-            $('.sidenav').sidenav();
-            $('.collapsible').collapsible();
-            $('.modal').modal();
-        });
-    </script>
-
-    <div id="_data"></div>
-</body>
-</html>
-
-<!-- COLOR SCHEME LOGO:
-licht:  #3096D3
-middel: #0B86CF
-donker: #04507D-->
+@section Scripts { 
+    <script type="text/javascript" src="~/js/chart.min.js"></script>
+    @RenderSection("Scripts", required: false) 
+}
+@section Stylesheets { @RenderSection("Stylesheets", required: false) }
+@section Styles { @RenderSection("Styles", required: false) }

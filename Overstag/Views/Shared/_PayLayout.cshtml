@@ -1,23 +1,17 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <title>@ViewData["Title"]</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="~/js/jquery-3.5.1.min.js"></script>
-    <script type="text/javascript" src="~/js/materialize.min.js"></script>
-    <script type="text/javascript" src="~/js/overstag.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="~/css/overstag-materialize.min.css" />
-    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="~/icons/material-icons.css" />
-    <link rel="stylesheet" href="~/css/overstag.min.css" />
-</head>
-<body>
+﻿@{
+    Layout = "_Layout";
+}
+
+@section Styles {
     <style>
         .bigbtn {
             margin-top: 1em;
         }
     </style>
+    @RenderSection("Styles", false)
+}
 
+@section Navigation {
     <nav>
         <div class="nav-wrapper green">
             <a href="#" class="brand-logo center">Overstag Pay</a>
@@ -35,18 +29,15 @@
             </div>
         </div>
     </nav>
+}
 
-    <div>
-        @RenderBody()
-    </div>
+@RenderBody()
 
+@section Scripts {
     <script>
-        $(document).ready(function () {
-            $('.sidenav').sidenav();
-            $('.modal').modal();
-        });
-
         Overstag.init();
     </script>
-</body>
-</html>
+    @RenderSection("Scripts", false)
+}
+
+@section Stylesheets { @RenderSection("Stylesheets", false) } 
