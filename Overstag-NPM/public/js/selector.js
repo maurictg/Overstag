@@ -6,7 +6,15 @@ let H = function() {
         if(!s) return;
 
         let nodes = [];
-        if(typeof s === 'string') nodes = document.querySelectorAll(s);
+        if(typeof s === 'string')  {
+            /* Check if it is HTML or not */
+            let arr = Array.from(new DOMParser().parseFromString(s, 'text/html').body.childNodes);
+            if(arr.some(n => n.nodeType === 1)) {
+                nodes = arr;
+            } else {
+                nodes = document.querySelectorAll(s);
+            }
+        }
         else if(s instanceof NodeList || s instanceof HTMLCollection || s instanceof _c || (s instanceof Array && s.length > 0 && s[0] instanceof HTMLElement)) nodes = s;
         else if(s instanceof HTMLElement) nodes[0] = s;
         else if(s instanceof Function) {
@@ -119,6 +127,19 @@ let H = function() {
         this.each((e) => e.innerHTML = h);
         return this;
     }
+
+    fn.append = function(e) {
+        if(!e) return;
+        this[0].appendChild(e);
+        return this;
+    }
+
+    fn.appendTo = function(e) {
+        if (!(e || typeof e === 'string' || e instanceof _c)) return;
+        if(typeof e === 'string') e = new _c(e);
+        this.each((el) => e.append(el));
+        return this;
+    }
     
     fn.text = function(t) {
         if(!(t || t === '')) return this[0].innerText;
@@ -180,6 +201,10 @@ let H = function() {
 
     fn.clone = function() {
         return this[0].cloneNode(true);
+    }
+
+    fn.any = function() {
+        return (this.length > 0)
     }
 
     //Serialize form to url-encoded formdata or JSON

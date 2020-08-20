@@ -6,7 +6,14 @@
 
 /**
  * 
- * @param {Object} o: Options {method: string, url: string, data: object, responseType: string, requestType: string, [optional:] onComplete, onError, onProgress(loaded, total, percentage)}
+ * @param {Object} o: Options {
+ *  method: string, 
+ *  url: string, 
+ *  data: object, 
+ *  responseType: string, 
+ *  requestType: string, 
+ *  [optional:] headers: object { key: value }
+ *  [optional:] onComplete, onError, onProgress(loaded, total, percentage)}
  * @param {Function} cb: Callback function(data, statusCode, statusText)
  */
 H.ajax = function(o, cb) {
@@ -20,8 +27,19 @@ H.ajax = function(o, cb) {
     x.onerror = o.onError;
     x.responseType = o.responseType;
     o.method = o.method.toLowerCase();
+    if(!o.headers) o.headers = {};
 
+    //Check for XSRF token
+    if(H('meta[name="csrf-token"]').any())
+        o.headers['X-CSRF-TOKEN'] = H('meta[name="csrf-token"]').attr('content');
+
+    //Open connection
     x.open(o.method, o.url, true);
+   
+    for(const[k,v] of Object.entries(o.headers)) {
+        if(v) x.setRequestHeader(k,v);
+    }
+         
     if((o.method === 'post' || o.method === 'put') && o.data && o.requestType) {
         let sendString;
         switch (o.requestType) {
