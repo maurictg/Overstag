@@ -76,3 +76,23 @@ H.serializeJSON = (json) => {
     for (n in json) d.push(encodeURIComponent(n) + '=' + encodeURIComponent(json[n]));
     return d.join('&').replace(/%20/g, '+');
 }
+
+//Serialize extension
+HQuery.extensions.serialize = (q, json = false) => {
+    //Serialize form to url-encoded formdata or JSON
+    let d = {};
+    let form = q[0];
+    Array.prototype.slice.call(form.elements).forEach((f) => {
+        if (!f.name || f.disabled || ['file', 'reset', 'submit', 'button'].indexOf(f.type) > -1) return;
+        if (f.type === 'select-multiple') {
+            Array.prototype.slice.call(f.options).forEach((o) => {
+                if (!o.selected) return;
+                d[f.name] = o.value;
+            });
+            return;
+        }
+        if (['checkbox', 'radio'].indexOf(f.type) > -1 && !f.checked) return;
+        d[f.name] = f.value;
+    });
+    return (json) ? d : $.serializeJSON(d);
+}

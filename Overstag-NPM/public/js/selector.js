@@ -9,11 +9,7 @@ let H = function() {
         if(typeof s === 'string')  {
             /* Check if it is HTML or not */
             let arr = Array.from(new DOMParser().parseFromString(s, 'text/html').body.childNodes);
-            if(arr.some(n => n.nodeType === 1)) {
-                nodes = arr;
-            } else {
-                nodes = document.querySelectorAll(s);
-            }
+            nodes = (arr.some(n => n.nodeType === 1)) ? arr : document.querySelectorAll(s);
         }
         else if(s instanceof NodeList || s instanceof HTMLCollection || s instanceof _c || (s instanceof Array && s.length > 0 && s[0] instanceof HTMLElement)) nodes = s;
         else if(s instanceof HTMLElement) nodes[0] = s;
@@ -130,7 +126,7 @@ let H = function() {
 
     fn.append = function(e) {
         if(!e) return;
-        this[0].appendChild(e);
+        this[0].appendChild($(e)[0]);
         return this;
     }
 
@@ -206,26 +202,6 @@ let H = function() {
     fn.any = function() {
         return (this.length > 0)
     }
-
-    //Serialize form to url-encoded formdata or JSON
-    fn.serialize = function(json = false) {
-        let d = {};
-        let form = this[0];
-        Array.prototype.slice.call(form.elements).forEach((f) => {
-            if (!f.name || f.disabled || ['file', 'reset', 'submit', 'button'].indexOf(f.type) > -1) return;
-            if (f.type === 'select-multiple') {
-                Array.prototype.slice.call(f.options).forEach((o) => {
-                    if (!o.selected) return;
-                    d[f.name] = o.value;
-                });
-                return;
-            }
-            if (['checkbox', 'radio'].indexOf(f.type) > -1 && !f.checked) return;
-            d[f.name] = f.value;
-        });
-        return (json) ? d : $.serializeJSON(d);
-    }
-
     
     /* Return initalized constructor */
     return (s) => new _c(s);

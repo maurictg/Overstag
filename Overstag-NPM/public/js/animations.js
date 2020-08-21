@@ -1,6 +1,6 @@
 //HQuery animation: HFade
 const hFade = {
-    fade: (t, q, dur) => {
+    fade: (t, q, dur, cb) => {
         let o = (t) ? 0 : 1;
         let c = hFade.calc(dur);
         q.css('opacity', `${o}`).show();
@@ -10,11 +10,15 @@ const hFade = {
                 clearInterval(i);
                 q.rmCss('opacity');
                 if(!t) q.hide();
+                if(cb) cb(); //Call callback
             } else {
                 o += (t) ? c.i : c.i * -1;
                 q.css('opacity', o);
             }
         }, (c.d / c.s));
+
+        //Chainable, but be carefull
+        return q;
     },
     calc: (dur) => {
         let s;
@@ -37,3 +41,4 @@ const hFade = {
 /* Register extension to HQuery */
 HQuery.extensions.fadeOut = (...p) => hFade.fade(false, ...p);
 HQuery.extensions.fadeIn = (...p) => hFade.fade(true, ...p);
+
