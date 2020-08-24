@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Overstag.Models.Database.Relations
 {
     //User - Activity
+    [Table("user_activity")]
     public class Subscription
     {
         [JsonIgnore]

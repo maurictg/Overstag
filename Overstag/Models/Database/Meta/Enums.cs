@@ -1,26 +1,26 @@
 ﻿namespace Overstag.Models.Database.Meta
 {
-    public enum AccountType
+    public enum AccountType : byte
     {
         USER, PARENT, MENTOR, ADMIN
     }
 
-    public enum AuthType
+    public enum AuthType : byte
     {
         LOGIN, API, PASSRESET
     }
 
-    public enum ActivityType
+    public enum ActivityType : byte
     {
         HOME, ELSE
     }
 
-    public enum PaymentType
+    public enum PaymentType : byte
     {
         IDEAL, BANK, CRYPTO
     }
 
-    public enum PaymentStatus
+    public enum PaymentStatus : byte
     {
         OPEN, CANCELED, PENDING, AUTHORIZED, EXPIRED, FAILED, PAID 
     }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Overstag.Models.Database
 {
+    [Table("suggestion")]
     public class Suggestion
     {
         public int Id { get; set; }
@@ -16,5 +18,8 @@ namespace Overstag.Models.Database
         [JsonIgnore]
         public User User { get; set; }
         public int UserId { get; set; }
+
+        [JsonIgnore]
+        public List<Relations.Vote> Votes { get; set; }
     }
 }

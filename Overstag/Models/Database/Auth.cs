@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using Overstag.Models.Database.Meta;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Overstag.Models.Database
 {
+    [Table("auth")]
     public class Auth
     {
         [Key]
