@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Overstag.Models.Database.Relations;
 
 namespace Overstag.Models.Database
 {
@@ -38,7 +35,13 @@ namespace Overstag.Models.Database
         [JsonIgnore]
         public List<Invoice> Invoices { get; set; }
 
+        [JsonIgnore]
+        public int? GroupId { get; set; }
+        public Group Group { get; set; }
+
         //Getters
+        [NotMapped]
+        [JsonIgnore]
         public int Age { get { return new DateTime(DateTime.Now.Year, BirthDate.Month, BirthDate.Day) > DateTime.Now ? (DateTime.Now.Year - BirthDate.Year) - 1 : (DateTime.Now.Year - BirthDate.Year);  } }
     }
 }

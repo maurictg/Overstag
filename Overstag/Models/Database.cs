@@ -7,6 +7,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Overstag.Models.Database;
 using Overstag.Models.Database.Relations;
 using Overstag.Models.Database.Meta;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Overstag.Models.Database
 {
@@ -16,6 +18,8 @@ namespace Overstag.Models.Database
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Auth> Auths { get; set; }
+        public DbSet<File> Files { get; set; }
+        public DbSet<Group> Groups { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; } // * user_activity
@@ -38,21 +42,40 @@ namespace Overstag.Models.Database
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
+            //Conversions for JSON objects
+            mb.Entity<Invoice>()
+                .Property(x => x.Subscriptions)
+                .HasConversion(y => JsonSerializer.Serialize(y, null), z => JsonSerializer.Deserialize<List<SubscriptionData>>(z, null));
+
+            mb.Entity<Invoice>()
+                .Property(x => x.UserData)
+                .HasConversion(y => JsonSerializer.Serialize(y, null), z => JsonSerializer.Deserialize<UserData>(z, null));
+
+            //Relations
             mb.Entity<User>()
                 .HasMany(x => x.Subscriptions)
-                .WithOne(y => y.User);
+                .WithOne(y => y.User)
+                .HasForeignKey(z => z.UserId);
 
             mb.Entity<User>()
                 .HasMany(x => x.Votes)
-                .WithOne(y => y.User);
+                .WithOne(y => y.User)
+                .HasForeignKey(z => z.UserId);
 
             mb.Entity<User>()
                 .HasMany(x => x.Invoices)
-                .WithOne(y => y.User);
+                .WithOne(y => y.User)
+                .HasForeignKey(z => z.UserId);
+
+            mb.Entity<User>()
+                .HasOne(x => x.Group)
+                .WithMany(y => y.Participants)
+                .HasForeignKey(z => z.GroupId);
 
             mb.Entity<Account>()
                 .HasMany(x => x.Auths)
-                .WithOne(y => y.Account);
+                .WithOne(y => y.Account)
+                .HasForeignKey(z => z.AccountId);
 
             mb.Entity<Account>()
                 .HasOne(x => x.User)
@@ -60,11 +83,13 @@ namespace Overstag.Models.Database
 
             mb.Entity<Activity>()
                 .HasMany(x => x.Subscriptions)
-                .WithOne(y => y.Activity);
+                .WithOne(y => y.Activity)
+                .HasForeignKey(z => z.ActivityId);
 
             mb.Entity<Suggestion>()
                 .HasMany(x => x.Votes)
-                .WithOne(y => y.Suggestion);
+                .WithOne(y => y.Suggestion)
+                .HasForeignKey(z => z.SuggestionId);
 
             mb.Entity<Invoice>()
                 .HasOne(x => x.Payment)

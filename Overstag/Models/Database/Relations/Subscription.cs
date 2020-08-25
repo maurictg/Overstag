@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Overstag.Models.Database.Relations
@@ -24,6 +20,8 @@ namespace Overstag.Models.Database.Relations
         public int FriendCount { get; set; }
 
         //Getters
+        [NotMapped]
+        [JsonIgnore]
         public bool HasFriends { get { return FriendCount > 0; } }
     }
 }

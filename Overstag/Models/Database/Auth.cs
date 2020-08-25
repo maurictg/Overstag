@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using Overstag.Models.Database.Meta;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Overstag.Models.Database
 {
@@ -22,6 +20,8 @@ namespace Overstag.Models.Database
         public DateTime ExpiresAt { get; set; }
 
         //Getters
+        [NotMapped]
+        [JsonIgnore]
         public bool IsValid { get { return ExpiresAt < DateTime.Now; } }
     }
 }

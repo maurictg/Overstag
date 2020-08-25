@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Overstag.Models.Database.Meta;
 
 namespace Overstag.Models.Database
@@ -17,8 +15,8 @@ namespace Overstag.Models.Database
         public int Number { get; set; } //Invoice number
         public DateTime Timestamp { get; set; }
 
-        public string UserData { get; set; } //JSON
-        public string SubscriptionData { get; set; } //JSON
+        public UserData UserData { get; set; } //JSON
+        public List<SubscriptionData> Subscriptions { get; set; } //JSON
 
         [JsonIgnore]
         public User User { get; set; }
@@ -28,11 +26,11 @@ namespace Overstag.Models.Database
         public Payment Payment { get; set; }
         public int PaymentId { get; set; }
 
-        //Getters (userdata, eventdata)
-
         /// <summary>
         /// Indicates if an invoice is paid. Make sure that the payment is included, else it will always return false.
         /// </summary>
-        public bool Paid { get { return (Payment != null && Payment.Paid); } }
+        [NotMapped]
+        [JsonIgnore]
+        public bool Paid { get { return Payment != null && Payment.Paid; } }
     }
 }
