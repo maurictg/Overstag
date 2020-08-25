@@ -15,7 +15,7 @@ namespace Overstag.Authorization
         /// <param name="filterContext"></param>
         public void OnAuthorization(AuthorizationFilterContext filterContext)
         {
-            var token = filterContext.HttpContext.Request.Headers["Token"].ToString();
+            /*var token = filterContext.HttpContext.Request.Headers["Token"].ToString();
             if (token == null) filterContext.Result = new JsonResult(new {status = "error", error = "No token provided"});
             else
             {
@@ -29,7 +29,7 @@ namespace Overstag.Authorization
                     filterContext.HttpContext.Items.Add("User", auth.User);
                     filterContext.HttpContext.Items.Add("Auth", auth);
                 }
-            }
+            }*/
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System.Text.Json;
 using Overstag.Models;
+using Overstag.Models.Database;
 
 namespace Overstag.Controllers
 {

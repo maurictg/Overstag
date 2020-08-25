@@ -9,6 +9,7 @@ namespace Overstag.Services
 {
     public class Invoices
     {
+        /*
         public static Exception error;
         public static string invoiceId;
         public static async Task<bool> Create(int userId)
@@ -205,6 +206,6 @@ namespace Overstag.Services
                 return true;
             }
         }
-
+        */
     }
 }

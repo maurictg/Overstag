@@ -8,8 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Overstag.Models;
-using Overstag.Models.NoDB;
-using Overstag.Accountancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Overstag.Authorization;
@@ -19,6 +17,11 @@ namespace Overstag.Controllers
     [OverstagAuthorize(3)]
     public class AccountancyController : OverstagController
     {
+
+        [Route("Accountancy/{*action}")]
+        public IActionResult All() => Content("Pagina is in onderhoud.");
+
+        /*
         /// <summary>
         /// Get a range of transactions
         /// </summary>
@@ -304,6 +307,6 @@ namespace Overstag.Controllers
             }
 
             return Json(new { status = "success", count, succeed, failed, exceptions });
-        }
+        }*/
     }
 }

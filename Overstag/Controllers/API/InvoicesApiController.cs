@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
-using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
+    /*
     [Route("api/invoices")]
     public class InvoicesApiController : OverstagApiController
     {
@@ -35,5 +35,5 @@ namespace Overstag.Controllers.API
             if (invoice == null) return Json(new { status = "error", error = "Invoice not found" });
             else return Json(new { status = "success", invoice = invoice.toInvoiceInfo($"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}/Pay/Invoice/") });
         }
-    }
+    }*/
 }

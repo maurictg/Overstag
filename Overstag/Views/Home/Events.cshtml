@@ -1,10 +1,10 @@
-﻿@model Overstag.Models.Event[]
+﻿@model Overstag.Models.Database.Activity[]
 @{
     ViewBag.Title = "Overstag - Activiteiten";
     System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo("nl-NL");
     ViewBag.Description = "Stichting Overstag's activiteiten. Bekijk onze agenda en schrijf je in voor een van onze activiteiten!";
     ViewBag.Keywords = "Overstag, stichting overstag, Rilland, Reimerswaal, jongerenavonden rilland, jongerenavonden reimerswaal, overstag inschrijven, overstag meedoen";
-    Overstag.Models.Event[] Passed = ViewBag.Passed;
+    Overstag.Models.Database.Activity[] Passed = ViewBag.Passed;
     ViewBag.Canonical = "https://stoverstag.nl/agenda";
 }
 

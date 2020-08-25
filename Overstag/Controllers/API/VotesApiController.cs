@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Authorization;
 using Overstag.Models;
-using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
+    /*
     [Route("api/votes")]
     public class VotesApiController : OverstagApiController
     {
@@ -86,5 +86,5 @@ namespace Overstag.Controllers.API
                 return e.ToString();
             }
         }
-    }
+    }*/
 }

@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
-using Overstag.Models.API;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Overstag.Controllers.API
 {
+    /*
     [Route("api/ideas")]
     public class IdeaApiController : OverstagApiController
     {
@@ -56,5 +56,5 @@ namespace Overstag.Controllers.API
             else
                 return Json(new { status = "success", idea = a.ToIdeaInfo() });
         }
-    }
+    }*/
 }

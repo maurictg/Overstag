@@ -10,7 +10,7 @@ namespace Overstag.Services
 {
     public class Pdf
     {
-        public static string GenerateInvoiceHtml(XInvoice i, HttpContext context)
+        /*public static string GenerateInvoiceHtml(XInvoice i, HttpContext context)
         {
             const string overstagAdres = 
                 "Stichting Overstag<br/>" +
@@ -57,6 +57,6 @@ namespace Overstag.Services
             c.Append("</div></div></body></html>");
 
             return c.ToString();
-        }
+        }*/
     }
 }

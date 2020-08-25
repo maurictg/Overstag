@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Overstag.Models.Database.Meta;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,14 +20,14 @@ namespace Overstag.Services
         public static string Euro(int cents, bool withSpace = false) 
             => $"&euro;{(withSpace? "&nbsp;":"")}{Math.Round((double)cents / 100, 2):F}";
 
-        public static string PayStatus(Mollie.Api.Models.Payment.PaymentStatus? status)
+        public static string PayStatus(PaymentStatus status)
         {
             string title = "Onbekend";
             string color = "grey";
 
             switch (status)
             {
-                case Mollie.Api.Models.Payment.PaymentStatus.Open:
+                /*case Mollie.Api.Models.Payment.PaymentStatus.Open:
                     title = "Open";
                     color = "blue";
                     break;
@@ -53,7 +54,7 @@ namespace Overstag.Services
                 case Mollie.Api.Models.Payment.PaymentStatus.Paid:
                     title = "Betaald";
                     color = "green";
-                    break;
+                    break;*/
                 default:
                     break;
             }   

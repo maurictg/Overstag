@@ -34,7 +34,7 @@
 
 @section Scripts {
     <script>
-        let usertype = @Html.Raw(loggedin ? user.Type : -1);
+        let usertype = @Html.Raw(loggedin ? (int)user.Type : -1);
 
         $(function () {
             if (usertype == 1) {

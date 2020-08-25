@@ -21,6 +21,7 @@ namespace Overstag.Controllers.Users
         public FilesController(IConverter converter)
             => _converter = converter;
 
+        /*
         [OverstagAuthorize(-1)]
         public async Task<IActionResult> InvoicePdf([FromQuery]string token, [FromQuery]bool download, [FromQuery]string name)
         {
@@ -169,11 +170,11 @@ namespace Overstag.Controllers.Users
 
             return Json(new { status = "success", fileIDS });
 
-            /*
-                    string contentType;
-                    new FileExtensionContentTypeProvider().TryGetContentType(FileName, out contentType);
-                    return contentType ?? "application/octet-stream";
-                 */
-        }
+            
+                    //string contentType;
+                    //new FileExtensionContentTypeProvider().TryGetContentType(FileName, out contentType);
+                    //return contentType ?? "application/octet-stream";
+                 
+        }*/
     }
 }

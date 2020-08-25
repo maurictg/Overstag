@@ -1,4 +1,4 @@
-﻿@model Overstag.Models.Account
+﻿@model Overstag.Models.Database.User
 @{
     ViewBag.Title = "Wachtwoord resetten";
 }
@@ -6,7 +6,7 @@
 <div>
     <div class="row">
         <div class="col s12 m6 offset-m3">
-            <h3 class="o-blue-text text-lighten center-align"><b>Hallo @Model.Firstname</b></h3><br />
+            <h3 class="o-blue-text text-lighten center-align"><b>Hallo @Model.FirstName</b></h3><br />
             <div class="card-panel rounded" style="display: block; margin-left: auto; margin-right: auto">
                 <h6 class="center-align grey-text">Verzin een nieuw wachtwoord voor je account.</h6><br />
                 <div class="input-field">
@@ -59,7 +59,7 @@
                 $('#_progbar').show();
                 $('#btnsubmit').addClass('disabled');
                 $('.checki').prop('disabled', true);
-                $.post("/Register/postPassreset", { Token: '@Uri.EscapeDataString(Model.Token)', Password: $('#Password1').val() }, function (response) {
+                $.post("/Register/postPassreset", { Token: '@* TO DO *@', Password: $('#Password1').val() }, function (response) {
                     if (response.status == 'success') {
                         $('.checki').val('');
                         M.toast({ html: 'Wachtwoord successvol opgeslagen.<br> U kunt nu opnieuw inloggen via het tabje &quot;Aanmelden&quot;', classes: 'green' });

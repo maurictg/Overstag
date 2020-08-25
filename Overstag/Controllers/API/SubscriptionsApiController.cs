@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
-using Overstag.Models.API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Overstag.Controllers.API
 {
+    /*
     [Route("api/subscriptions")]
     public class SubscriptionsApiController : OverstagApiController
     {
@@ -83,5 +83,5 @@ namespace Overstag.Controllers.API
             await context.SaveChangesAsync();
             return Json(new { status = "success" });
         }
-    }
+    }*/
 }

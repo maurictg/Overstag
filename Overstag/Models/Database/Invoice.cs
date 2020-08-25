@@ -32,5 +32,7 @@ namespace Overstag.Models.Database
         [NotMapped]
         [JsonIgnore]
         public bool Paid { get { return Payment != null && Payment.Paid; } }
+
+        public string GetInvoiceNumber() => $"{this.Timestamp.Year}-{this.Number.ToString().PadLeft(2, '0')}";
     }
 }

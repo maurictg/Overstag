@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
-using Overstag.Models.API;
 
 namespace Overstag.Controllers.API
 {
+    /*
     [Route("api/activities")]
     public class ActivitiesApiController : OverstagApiController
     {
@@ -80,5 +80,5 @@ namespace Overstag.Controllers.API
 
             return Json(new { status = "success", count = activities.Count(), activities });
         }
-    }
+    }*/
 }

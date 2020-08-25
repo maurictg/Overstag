@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Overstag.Models;
+using Overstag.Models.Database;
 using System.Globalization;
 
 using Mollie.Api;
@@ -18,6 +18,7 @@ using Mollie.Api.Client;
 using System.Text;
 using System.Text.Json;
 using Overstag.Authorization;
+using Overstag.Models.Forms;
 
 namespace Overstag.Controllers
 {
@@ -88,18 +89,8 @@ namespace Overstag.Controllers
         [Route("Register/Passreset/{token}")]
         public IActionResult Passreset(string token)
         {
-            using (var context = new OverstagContext())
-            {
-                try
-                {
-                    return View(context.Accounts.First(w => w.Token == Uri.UnescapeDataString(token)));
-                }
-                catch
-                {
-                    string[] error = { "Account niet gevonden. Is de link onjuist?", "Controleer de link die we je hebben gestuurd via de mail en plak deze in de adresbalk." };
-                    return View("~/Views/Error/Custom.cshtml", error);
-                }
-            }
+            string[] error = { "Account niet gevonden. Is de link onjuist?", "Controleer de link die we je hebben gestuurd via de mail en plak deze in de adresbalk." };
+            return View("~/Views/Error/Custom.cshtml", error);
         }
 
         /// <summary>
@@ -116,7 +107,7 @@ namespace Overstag.Controllers
             {
                 try
                 {
-                    using (var context = new OverstagContext())
+                    using (var context = new Database())
                     {
                         token = Uri.UnescapeDataString(token);
                         if (await context.Auths.AnyAsync(f => f.Token == token))
@@ -149,81 +140,58 @@ namespace Overstag.Controllers
         /// <param name="account">The account information about the new user</param>
         /// <returns>JSON result, status = "error" or status = "success"</returns>
         [HttpPost]
-        public async Task<IActionResult> postRegister(Account account)
+        public async Task<IActionResult> postRegister(Register form)
         {
             if (ModelState.IsValid)
             {
-                using (var context = new OverstagContext())
+                using (var context = new Database())
                 {
-                    //Check if user already exists
-                    string testun = string.Empty;
-                    string testem = "";
-                    try { testun = context.Accounts.Where(a => a.Username.ToLower() == account.Username.ToLower()).FirstOrDefault().Username; } catch { testun = ""; }
-                    try { testem = context.Accounts.Where(a => a.Email == account.Email).FirstOrDefault().Email; } catch { testem = ""; }
-                    
-                    if (!string.IsNullOrEmpty(testun))
-                        return Json(new { status = "error", error = "Gebruikersnaam bestaat al!", code = 0 });
-                    else if (!string.IsNullOrEmpty(testem))
-                        return Json(new { status = "error", error = "Emailadres is al in gebruik!", code = 1 });
-                    else
+                    if (context.Accounts.Any(x => x.Username.ToLower() == form.Username.ToLower()))
+                        return Json(new { status = "error", error = "Gebruikersnaam is al in gebruik!", code = 0x0 });
+                    if (context.Accounts.Any(x => x.Email == form.Email))
+                        return Json(new { status = "error", error = "Emailadres is al in gebruik!", code = 0x1 });
+
+                    var account = form.GetAccount();
+                    if ((int)account.Type < 2)
                     {
+                        var user = form.GetUser();
+#if MOLLIE_ENABLED && !DEBUG
+                        CustomerRequest cr = new CustomerRequest()
+                        {
+                            Name = $"{user.FirstName} {user.LastName}",
+                            Email = account.Email,
+                            Locale = "nl-NL",
+                            Metadata = $"uid: {user.Id}, aid: {account.Id}"
+                        };
+
                         try
                         {
-                            //Make name uppercase
-                            account.Firstname = account.Firstname[0].ToString().ToUpper() + account.Firstname.Substring(1);
-
-                            char[] l = account.Lastname.ToCharArray();
-                            int i = (account.Lastname.Contains(' ')) ? account.Lastname.TrimEnd(' ').LastIndexOf(' ') + 1 : 0;
-                            l[i] = char.ToUpper(l[i]);
-                            account.Lastname = new string(l);
-
-                            //Set password hashes, create token and set type
-                            account.Password = Encryption.PBKDF2.Hash(account.Password);
-                            account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                            account.Type = (byte)(account.Username.Equals("admin") ? 3 : (account.Type < 2) ? account.Type : 0);
-                            account.RegisterDate = DateTime.Now;
-
-                            try
-                            {
-                                if (account.Type < 2)
-                                {
-#if MOLLIE_ENABLED
-                                    CustomerRequest cr = new CustomerRequest()
-                                    {
-                                        Name = $"{account.Firstname} {account.Lastname}",
-                                        Email = account.Email,
-                                        Locale = "nl-NL",
-                                        Metadata = account.Token
-                                    };
-
-                                    CustomerClient client = new CustomerClient(Core.General.Credentials.mollieApiToken);
-                                    CustomerResponse cs = await client.CreateCustomerAsync(cr);
-
-                                    account.MollieID = cs.Id;
+                            CustomerClient client = new CustomerClient(Core.General.Credentials.mollieApiToken);
+                            CustomerResponse cs = await client.CreateCustomerAsync(cr);
+                            user.MollieToken = cs.Id;
+                        }
+                        catch { 
+                            Console.WriteLine("[ERR] Failed to request mollie token");
+                        }
 #endif
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                return Json(new { status = "error", error = "Mollie integratie voor het verwerken van betalingen mislukt, neem contact op met ons.", debuginfo = e.ToString() });
-                            }
-
-                            context.Accounts.Add(account);
-                            await context.SaveChangesAsync();
-
-                            //Set important session variables
-                            base.setUser(account);
-
-                            string remember = await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString());
-
-                            return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
-                        }
-                        catch (Exception e)
-                        {
-                            return Json(new { status = "error", error = "Registratie is mislukt door interne fout.\nNeem a.u.b contact met ons op.", debuginfo = e.ToString(), code = 2 });
-                        }
-
+                        account.User = user;
                     }
+
+                    try
+                    {
+                        context.Accounts.Add(account);
+                        await context.SaveChangesAsync();
+                    }
+                    catch(Exception e)
+                    {
+                        return Json(new { status = "error", error = "Er is iets fout gegaan", debug = e.ToString() });
+                    }
+                    
+                    //Set important session variables
+                    base.setUser(account);
+                    string remember = Services.Auth.CreateToken(Models.Database.Meta.AuthType.LOGIN, account.Id);
+
+                    return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
                 }
 
             }
@@ -239,38 +207,38 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<JsonResult> postLogin([FromForm]string Username, [FromForm]string Password)
         {
-            return await Task.Run(async () =>
+            using(var context = new Database())
             {
-                using (var context = new OverstagContext())
+                try
                 {
-                    string ip = HttpContext.Connection.RemoteIpAddress.ToString();
-                    try
+                    var account = await context.Accounts.FirstOrDefaultAsync(e => e.Username.ToLower().Equals(Username.ToLower()) || e.Email.ToLower().Equals(Username.ToLower()));
+                    if (account == null)
+                        return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist", debug = "Account not found" });
+
+                    if (Encryption.PBKDF2.Verify(account.Password, Password))
                     {
-                        var account = context.Accounts.FirstOrDefault(e => e.Username.ToLower().Equals(Username.ToLower()) || e.Email.ToLower().Equals(Username.ToLower()));
-                        if (account == null)
-                            return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist", debuginfo = "Account is NULL" });
+                        bool no2fa = (string.IsNullOrEmpty(account.Secret));
+                        if (no2fa)
+                        {
+                            if ((int)account.Type < 2)
+                                account.User = context.Users.Find(account.UserId);
 
-                            if (Encryption.PBKDF2.Verify(account.Password, Password))
-                            {
-                                bool no2fa = (string.IsNullOrEmpty(account.TwoFactor));
-                                if (no2fa)
-                                {
-                                    base.setUser(account);
-                                }
+                            base.setUser(account);
+                        }
 
-                                string remember = (no2fa) ? await Security.Auth.Register(account.Token, HttpContext.Connection.RemoteIpAddress.ToString()) : "";
-
-                                return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(account.Token), type = account.Type });
-                            }
-                            else
-                            {
-                                return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
-                            }
+                        string remember = (no2fa) ? Services.Auth.CreateToken(Models.Database.Meta.AuthType.LOGIN, account.Id) : Services.Auth.CreateToken(Models.Database.Meta.AuthType.TWOFACTORLOGIN, account.Id);
+                        return Json(new { status = "success", twofactor = (no2fa) ? "no" : "yes", remember = Uri.EscapeDataString(remember), token = (no2fa) ? "" : Uri.EscapeDataString(remember), type = (int)account.Type });
                     }
-                    catch (Exception e) { return Json(new { status = "error", error = "Interne fout", innerexception = e.ToString() }); }
+                    else
+                    {
+                        return Json(new { status = "error", error = "Gebruikersnaam of wachtwoord onjuist" });
+                    }
                 }
-
-            });
+                catch(Exception e)
+                {
+                    return Json(new { status = "error", error = "Er is iets fout gegaan", debug = e.ToString() });
+                }
+            }
         }
 
         /// <summary>
@@ -281,14 +249,14 @@ namespace Overstag.Controllers
         [HttpPost]
         public JsonResult postMailreset([FromForm]string Email)
         {
-            using (var context = new OverstagContext())
+            using (var context = new Database())
             {
                 try
                 {
-                    var account = context.Accounts.Where(e => e.Email == Email).FirstOrDefault();
+                    var account = context.Accounts.Include(f => f.User).Where(e => e.Email == Email).FirstOrDefault();
                     if (account != null)
                     {
-                        var mail = new Services.PassresetMail(account);
+                        var mail = new Services.PassresetMail(account, Services.Auth.CreateToken(Models.Database.Meta.AuthType.PASSRESET, account.Id, 25, 1));
 
                         if (mail.SendAsync().Result)
                             return Json(new { status = "success" });
@@ -314,25 +282,7 @@ namespace Overstag.Controllers
         [HttpPost]
         public async Task<JsonResult> postPassreset([FromForm]string Token, [FromForm]string Password)
         {
-            using (var context = new OverstagContext())
-            {
-                try
-                {
-                    Token = Uri.UnescapeDataString(Token);
-                    var account = await context.Accounts.FirstOrDefaultAsync(e => e.Token == Token);
-
-                    if (account == null)
-                        return Json(new { status = "error", error = "Token bestaat niet in ons systeem" });
-
-                    account.Password = Encryption.PBKDF2.Hash(Password);
-                    account.Token = Encryption.Random.rHash(Encryption.SHA.S256(account.Firstname) + account.Username);
-                    context.Accounts.Update(account);
-                    await context.SaveChangesAsync();
-
-                    return Json(new { status = "success" });
-                }
-                catch (Exception e) { return Json(new { status = "error", error = "Er is een interne fout opgetreden", debuginfo = e.ToString() }); }
-            }
+            return null;
         }
 
         /// <summary>
@@ -353,22 +303,10 @@ namespace Overstag.Controllers
                 return Json(new { status = "timeout" });
 
             token = Uri.UnescapeDataString(token);
-            if (Security.TFA.Validate(code, token, dt))
-            {
-                using(var context = new OverstagContext())
-                {
-                    var a = context.Accounts.First(e => e.Token == token);
 
-                    //Set important session variables
-                    base.setUser(a);
-
-                    string remember = Security.Auth.Register(a.Token,HttpContext.Connection.RemoteIpAddress.ToString()).Result;
-                    HttpContext.Session.SetString("Remember", remember);
-                    return Json(new { status = "success", remember = Uri.EscapeDataString(remember) });
-                }
-            }                
-            else
-                return Json(new { status = "wrong" });
+            //base.setuser etc
+           
+            return Json(new { status = "wrong" });
         }
 
         /// <summary>
@@ -381,10 +319,7 @@ namespace Overstag.Controllers
         [Route("Register/Restore2FA/{token}/{code}")]
         public JsonResult Restore2FA(string token, string code)
         {
-            if (Security.TFA.RestoreBackupCode(Uri.UnescapeDataString(code), Uri.UnescapeDataString(token)))
-                return Json(new { status = "success"});
-            else
-                return Json(new { status = "error" });
+            return Json(new { status = "error", error = "Deze pagina werkt momenteel niet" });
         }
 
         /// <summary>
@@ -396,7 +331,7 @@ namespace Overstag.Controllers
         [HttpGet("Register/joinFamily/{token}")]
         public async Task<IActionResult> JoinFamily(string token)
         {
-            if(!isLoggedIn)
+            /*if(!isLoggedIn)
             {
                 HttpContext.Session.SetString("JoinFamily",token);
                 ViewBag.RedirectURL = "/Register/joinFamily/" + token;
@@ -438,7 +373,8 @@ namespace Overstag.Controllers
                     }
 
                 }
-            }
+            }*/
+            return Content("Pagina is in onderhoud.");
         }
 
         /// <summary>
@@ -454,9 +390,11 @@ namespace Overstag.Controllers
                 return View("Login");
             }
 
-            var account = new OverstagContext().Accounts.Include(g => g.Invoices).Include(i => i.Subscriptions).First(k => k.Id == currentUser.Id);
+            using var db = new Database();
+
+            var account = db.Users.Include(g => g.Invoices).Include(i => i.Subscriptions).First(k => k.Id == currentUser.UserId);
             ViewBag.AllowtoDelete = true;
-            ViewBag.Name = account.Firstname;
+            ViewBag.Name = account.FirstName;
 
             if (account.Invoices.Count(f => !f.Paid) > 0)
             {
@@ -464,7 +402,7 @@ namespace Overstag.Controllers
                 ViewBag.Message = "Er staan nog onbetaalde facturen open. Zorg er eerst voor dat deze afgerond zijn en kom dan hier terug.";
             }
 
-            if (account.Subscriptions.Count(f => !f.Paid) > 0)
+            if (account.Subscriptions.Count(f => !f.Billed) > 0)
             {
                 ViewBag.AllowtoDelete = false;
                 ViewBag.Message = "Er zijn nog ongefactureerde activiteiten of activiteiten waarvoor je nog ingeschreven staat. Zorg er eerst voor dat deze verwijderd/betaald zijn.";
@@ -487,23 +425,20 @@ namespace Overstag.Controllers
                 return Json(new { status = "error", error = "Je bent niet ingelogd. Log opnieuw in a.u.b." });
             }
 
-            await using var context = new OverstagContext();
-            var account = await context.Accounts
-                .Include(f => f.Auths)
-                .Include(g => g.Invoices)
-                .Include(h => h.Payments)
+            await using var context = new Database();
+            var account = await context.Users
+                .Include(f => f.Account).ThenInclude(x => x.Auths)
                 .Include(i => i.Subscriptions)
                 .Include(j => j.Votes)
-                .Include(x => x.Transactions)
-                .FirstAsync(k => k.Id == currentUser.Id);
+                .FirstAsync(k => k.AccountId == currentUser.Id);
 
-            if (!Encryption.PBKDF2.Verify(account.Password, password))
+            if (!Encryption.PBKDF2.Verify(account.Account.Password, password))
                 return Json(new { status = "error", error = "Wachtwoord is onjuist" });
 
             if (account.Invoices.Count(f => !f.Paid) > 0)
                 return Json(new { status = "error", error = "Er staan nog onbetaalde facturen open." });
 
-            if (account.Subscriptions.Count(f => !f.Paid) > 0)
+            if (account.Subscriptions.Count(f => !f.Billed) > 0)
                 return Json(new { status = "error", error = "Er staan nog activiteiten open." });
 
             try
@@ -512,10 +447,10 @@ namespace Overstag.Controllers
                 //Remove mollie integration
                 try
                 {
-                    if (!string.IsNullOrEmpty(account.MollieID))
+                    if (!string.IsNullOrEmpty(account.MollieToken))
                     {
                         CustomerClient customerClient = new CustomerClient(Core.General.Credentials.mollieApiToken);
-                        await customerClient.DeleteCustomerAsync(account.MollieID);
+                        await customerClient.DeleteCustomerAsync(account.MollieToken);
                     }
                 }
                 catch(Exception e)
@@ -524,7 +459,7 @@ namespace Overstag.Controllers
                 }
 
                 //Remove account
-                context.Accounts.Remove(account);
+                context.Users.Remove(account);
                 await context.SaveChangesAsync();
 
                 return Json(new { status = "success" });

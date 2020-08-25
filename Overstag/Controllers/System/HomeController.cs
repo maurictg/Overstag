@@ -4,6 +4,7 @@ using Overstag.Models;
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Overstag.Models.Database;
 
 namespace Overstag.Controllers
 {
@@ -33,8 +34,8 @@ namespace Overstag.Controllers
         [Route("agenda")]
         public async Task<IActionResult> Events()
         {
-            await using var context = new OverstagContext();
-            var events = await context.Events.ToListAsync();
+            await using var context = new Database();
+            var events = await context.Activities.ToListAsync();
             ViewBag.Passed = events.Where(e => Core.General.DateIsPassed(e.When)).OrderByDescending(e => e.When).ToArray();
             return View(events.Where(e => !Core.General.DateIsPassed(e.When)).OrderBy(e => e.When).ToArray());
         }

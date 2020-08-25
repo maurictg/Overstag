@@ -4,6 +4,7 @@ using Overstag.Models;
 
 namespace Overstag.Controllers.API
 {
+    /*
     [Route("api/user")]
     public class UserApiController : OverstagApiController
     {
@@ -26,5 +27,5 @@ namespace Overstag.Controllers.API
             await context.SaveChangesAsync();
             return Json(new { status = "success" });
         }
-    }
+    }*/
 }

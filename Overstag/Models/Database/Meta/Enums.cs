@@ -7,7 +7,7 @@
 
     public enum AuthType : byte
     {
-        LOGIN, API, PASSRESET
+        LOGIN, API, PASSRESET, TWOFACTORLOGIN
     }
 
     public enum ActivityType : byte

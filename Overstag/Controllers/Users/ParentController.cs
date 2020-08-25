@@ -14,6 +14,10 @@ namespace Overstag.Controllers
     [OverstagAuthorize(1,2,3)]
     public class ParentController : OverstagController
     {
+        [Route("Parent/{*action}")]
+        public IActionResult All() => Content("Pagina is in onderhoud.");
+
+        /*
         /// <summary>
         /// Get parent index page with family info or create new family if not exist
         /// </summary>
@@ -103,7 +107,7 @@ namespace Overstag.Controllers
                 return Json(new { status = "error", error = "Voor " + exceptions.Count() + " leden van de familie facturen mislukt te maken.", debuginfo = string.Join(',',exceptions.Select(x => x.Message)) });
             else
                 return Json(new { status = "success" });
-        }
+        }*/
 
         /*
          * 1. Get all participations
@@ -112,6 +116,8 @@ namespace Overstag.Controllers
          * 4. Create new invoice with events
          * 
          */
+
+        /*
         public async Task<IActionResult> MergeInvoices()
         {
             try
@@ -123,6 +129,6 @@ namespace Overstag.Controllers
             {
                 return Json(new { status = "error", error = "Het samenvoegen van de facturen is mislukt. Neem even contact met ons op", debuginfo = e.ToString() });
             }
-        }
+        }*/
     }
 }

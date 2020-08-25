@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Overstag.Models;
-using Overstag.Models.NoDB;
 using System.Net;
 using System.Text;
 using System.IO;
@@ -25,6 +24,10 @@ namespace Overstag.Controllers
         public IActionResult Index() => View(currentUser);
 
 
+        [Route("User/{*action}")]
+        public IActionResult All() => Content("Pagina is in onderhoud.");
+
+        /*
        /// <summary>
        /// Get settings with user info
        /// </summary>
@@ -648,6 +651,6 @@ namespace Overstag.Controllers
             {
                 return Json(new { status = "error", debuginfo = e });
             }
-        }
+        }*/
     }
 }

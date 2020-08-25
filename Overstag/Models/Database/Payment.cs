@@ -24,5 +24,9 @@ namespace Overstag.Models.Database
         [NotMapped]
         [JsonIgnore]
         public bool Paid { get { return Status == PaymentStatus.PAID && PaidAt != null;  } }
+
+        [NotMapped]
+        [JsonIgnore]
+        public bool Failed { get { return (Status == PaymentStatus.CANCELED || Status == PaymentStatus.EXPIRED || Status == PaymentStatus.FAILED); } }
     }
 }

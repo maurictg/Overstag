@@ -5,25 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Overstag.Models;
 using System.Threading.Tasks;
+using Overstag.Models.Database;
 
 namespace Overstag.Controllers
 {
     public class AuthController : OverstagController
     {
-        /// <summary>
-        /// Register new loginToken
-        /// </summary>
-        /// <param name="token">The user's token</param>
-        /// <returns>JSON {status, token} -> new token to login</returns>
-        [HttpPost]
-        public async Task<JsonResult> Register([FromForm] string token)
-        {
-            token = Uri.UnescapeDataString(token);
-
-            string ttoken = await Security.Auth.Register(token, HttpContext.Connection.RemoteIpAddress.ToString());
-            return Json(new {status = "success", token = Uri.EscapeDataString(ttoken)});
-        }
-
         /// <summary>
         /// Login into system using Auth token
         /// </summary>
@@ -33,13 +20,13 @@ namespace Overstag.Controllers
         public async Task<JsonResult> Login([FromForm] string token)
         {
             token = Uri.UnescapeDataString(token);
-            await using var context = new OverstagContext();
-            if (context.Auths.Any(f => f.Token == token))
+            await using var context = new Database();
+            if (context.Auths.Any(f => f.Token == token && f.Type == Models.Database.Meta.AuthType.LOGIN))
             {
-                var auth = await context.Auths.Include(f => f.User).FirstAsync(f => f.Token == token);
-                if (auth.Registered > DateTime.Now.AddMonths(-2))
+                var auth = await context.Auths.FirstAsync(f => f.Token == token);
+                if (auth.IsValid)
                 {
-                    var user = await context.Accounts.FirstAsync(f => f.Id == auth.User.Id);
+                    var user = await context.Accounts.Include(x => x.User).FirstAsync(f => f.Id == auth.AccountId);
 
                     //Important session variables
                     base.setUser(user);

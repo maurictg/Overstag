@@ -45,13 +45,23 @@ namespace Overstag.Models.Database
             //Conversions for JSON objects
             mb.Entity<Invoice>()
                 .Property(x => x.Subscriptions)
-                .HasConversion(y => JsonSerializer.Serialize(y, null), z => JsonSerializer.Deserialize<List<SubscriptionData>>(z, null));
+                .HasConversion(y => JsonSerializer.SerializeToUtf8Bytes(y, null), z => JsonSerializer.Deserialize<List<SubscriptionData>>(z, null));
 
             mb.Entity<Invoice>()
                 .Property(x => x.UserData)
-                .HasConversion(y => JsonSerializer.Serialize(y, null), z => JsonSerializer.Deserialize<UserData>(z, null));
+                .HasConversion(y => JsonSerializer.SerializeToUtf8Bytes(y, null), z => JsonSerializer.Deserialize<UserData>(z, null));
 
             //Relations
+            mb.Entity<User>()
+                .HasOne(x => x.Account)
+                .WithOne(y => y.User)
+                .HasForeignKey<User>(z => z.AccountId);
+
+            mb.Entity<Account>()
+                .HasOne(x => x.User)
+                .WithOne(y => y.Account)
+                .HasForeignKey<Account>(z => z.UserId);
+
             mb.Entity<User>()
                 .HasMany(x => x.Subscriptions)
                 .WithOne(y => y.User)
@@ -77,10 +87,6 @@ namespace Overstag.Models.Database
                 .WithOne(y => y.Account)
                 .HasForeignKey(z => z.AccountId);
 
-            mb.Entity<Account>()
-                .HasOne(x => x.User)
-                .WithOne(y => y.Account);
-
             mb.Entity<Activity>()
                 .HasMany(x => x.Subscriptions)
                 .WithOne(y => y.Activity)
@@ -93,7 +99,20 @@ namespace Overstag.Models.Database
 
             mb.Entity<Invoice>()
                 .HasOne(x => x.Payment)
-                .WithOne(y => y.Invoice);
+                .WithOne(y => y.Invoice)
+                .HasForeignKey<Invoice>(z => z.PaymentId);
+
+            mb.Entity<Payment>()
+                .HasOne(x => x.Invoice)
+                .WithOne(y => y.Payment)
+                .HasForeignKey<Payment>(z => z.InvoiceId);
+
+            //Many to many
+            mb.Entity<Subscription>()
+                .HasKey(x => new { x.ActivityId, x.UserId });
+
+            mb.Entity<Vote>()
+                .HasKey(x => new { x.SuggestionId, x.UserId });
         }
     }
 }

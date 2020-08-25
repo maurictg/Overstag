@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.Http;
 using Overstag.Models;
 using System.Text.Json;
 using Overstag.Authorization;
+using Overstag.Models.Database;
 
 namespace Overstag.Controllers
 {
     public class AdminController : Controller
     {
+        /*
         [OverstagAuthorize(3)]
         public IActionResult Index()
             => View();
@@ -62,6 +64,8 @@ namespace Overstag.Controllers
             return Json(new { status = "success" });
         }
 
+        */
+
         /// <summary>
         /// Auto generate database
         /// </summary>
@@ -71,10 +75,11 @@ namespace Overstag.Controllers
         {
             try
             {
-                await using var context = new OverstagContext();
+                await using var context = new Database();
                 await context.Database.EnsureCreatedAsync();
                 return Content("Database created!");
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 return Content(e.ToString());
             }

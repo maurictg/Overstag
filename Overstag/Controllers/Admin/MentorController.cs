@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text.Json;
 using Overstag.Models;
-using Overstag.Models.NoDB;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +16,10 @@ namespace Overstag.Controllers
     [OverstagAuthorize(2, 3)]
     public class MentorController : OverstagController
     {
+        [Route("Mentor/{*action}")]
+        public IActionResult All() => Content("Pagina is in onderhoud.");
+
+        /*
         /// <summary>
         /// Get Mentor homepage
         /// </summary>
@@ -339,7 +342,7 @@ namespace Overstag.Controllers
             {
                 return Json(new { status = "error", error = e.ToString() });
             }
-        }
+        }*/
 
     }
 }
